@@ -1,50 +1,107 @@
-# Welcome to your Expo app 👋
+# Point Tils
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento por arquivos (expo-router) e estilização com NativeWind/Tailwind.
 
-## Get started
+- Plataforma: Android
+- Linguagem: TypeScript
+- Navegação: React Navigation + Expo Router
+- UI: NativeWind + Gluestack UI overlay/toast + Lucid icons
 
-1. Install dependencies
+### Requisitos
 
-   ```bash
-   npm install
-   ```
+- Node.js LTS ≥ 22.17.0
+- npm ≥ 10
+- dispositivo Android/iOS
+- Conta no Expo: https://expo.dev
 
-2. Start the app
+> Observação: A CI usa Node 20, mas o desenvolvimento local recomenda Node 22 LTS.
 
-   ```bash
-   npx expo start
-   ```
+## Primeiros passos
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Instalar EAS CLI
 
 ```bash
-npm run reset-project
+npm install --global eas-cli
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Autenticar no Expo/EAS
 
-## Learn more
+```bash
+eas login
+eas whoami
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Iniciar o app (modo desenvolvimento)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start
+```
 
-## Join the community
+- Pressione “a” para Android (emulador) ou escanei o QR Code no Expo Go.
+- iOS só em macOS (Xcode).
 
-Join our community of developers creating universal apps.
+### Builds com EAS (local)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Inicialize o build
+
+```bash
+eas build --platform android --profile development
+```
+
+2. Executando servidor
+   Após o download do APK gerado, no seu desktop execute o servidor
+
+```bash
+npm run start
+```
+
+## Scripts úteis
+
+- Lint: `npm run lint`
+- Formatação (checar): `npm run format:check`
+- Formatação (corrigir): `npm run format:write`
+- Verificação de dependencias: `depcheck`
+- Diagnóstico: `npx expo-doctor`
+- Type-check: `npx tsc --noEmit`
+
+## Estrutura de Pastas
+
+- **app**: Telas e layouts principais.
+- **assets**: Recursos estáticos como imagens e fontes.
+- **components**: Componentes reutilizáveis, incluindo:
+  - **ui**: Componentes específicos do GlueStack.
+- **constants**: Constantes globais, como cores e strings.
+- **contexts**: Providers e contextos globais.
+- **hooks**: Hooks compartilhados para lógica reutilizável.
+- **types**: Definições de tipos TypeScript.
+- **+**: Arquivos de configuração do projeto, como `tailwind.config.js`, `eslint.config.js`, e `tsconfig.json`.
+
+## UI e Theming
+
+- Tema global via [contexts/ThemeProvider.tsx](contexts/ThemeProvider.tsx) que integra:
+  - React Navigation ThemeProvider
+  - GluestackUIProvider (NativeWind vars)
+- Cores centralizadas em [constants/Colors.ts](constants/Colors.ts)
+- Tailwind estendido com variáveis (CSS vars) em
+  - [components/ui/gluestack-ui-provider/config.ts](components/ui/gluestack-ui-provider/config.ts)
+  - [tailwind.config.js](tailwind.config.js)
+
+## Navegação
+
+O roteamento é baseado em arquivos (expo-router), mais informações sobre o funcionamento em https://docs.expo.dev/router/basics/core-concepts/#4-root-_layouttsx-replaces-appjsxtsx
+
+## Padrões de código
+
+- TypeScript strict ([tsconfig.json](tsconfig.json))
+- ESLint + Prettier ([eslint.config.js](eslint.config.js), [.prettierrc](.prettierrc))
+- Strings com aspas simples
+- Componentes funcionais e hooks idiomáticos
+- Evitar estilos inline (usar Tailwind/NativeWind)
+
+## CI/CD
+
+- PR Checks: lint, type-check, prebuild Android/iOS, depcheck, audit, expo-doctor
+  - Workflow: [.github/workflows/pr_checks.yml](.github/workflows/pr_checks.yml)
+- Nightly Build Android com EAS:
+  - Workflow: [.github/workflows/nightly_build.yml](.github/workflows/nightly_build.yml)
+  - Publica release no GitHub e anexa APK quando disponível

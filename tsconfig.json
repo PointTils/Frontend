@@ -2,16 +2,20 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "tailwind.config": ["./tailwind.config.js"],
+      "tailwind-variants/dist/config": ["./types/empty-module.ts"],
+      "@gluestack-ui/nativewind-utils/tva/index": ["./types/empty-module.ts"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "types/**/*.d.ts",
+    "nativewind-env.d.ts"
   ]
 }

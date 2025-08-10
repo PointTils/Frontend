@@ -1,6 +1,8 @@
 /**
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ *
+ * When adding new colors, make sure to define them in both light and dark mode.
+ * Also, ensure that the colors are declared at components/ui/gluestack-ui-provider/config.ts
  */
 
 const tintColorLight = '#0a7ea4';
