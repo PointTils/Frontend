@@ -1,0 +1,19 @@
+# Labels based on file changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ['*.md', '*.rst', 'docs/**']
+
+ci/cd:
+  - changed-files:
+      - any-glob-to-any-file: ['.github/**']
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: ['package.json', 'package-lock.json']
+
+# Labels based on branch names
+feature:
+  - head-branch: ['^feat/', 'feat']
+
+bugfix:
+  - head-branch: ['^fix/', 'fix']

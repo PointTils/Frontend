@@ -1,0 +1,183 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5.0.0
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  lint-and-typecheck:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Expo CLI
+        run: npm install -g @expo/cli
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prebuild (Android)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Prebuild (iOS)
+        run: npx expo prebuild --platform ios --no-install
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level moderate
+
+      - name: Check for known vulnerabilities
+        run: npx audit-ci --moderate
+
+  expo-doctor:
+    name: Expo Doctor
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Expo CLI
+        run: npm install -g @expo/cli
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
+  dependency-analysis:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for unused dependencies
+        run: |
+          echo "Running depcheck..."
+          npx depcheck --json --config depcheck.config.js > depcheck-output.json || echo "Depcheck exited with error (expected if unused dependencies found)"
+
+          # Lista de dependências a ignorar
+          IGNORE_LIST='["expo-splash-screen","expo-dev-client","eslint-plugin-import","tailwind-variants","typescript"]'
+
+          # Filtra dependencies e devDependencies removendo as que estão na lista de ignore
+          unused=$(jq --argjson ignore "$IGNORE_LIST" '
+          {
+            dependencies: (.dependencies // [] | map(select(. as $dep | $ignore | index($dep) | not))),
+            devDependencies: (.devDependencies // [] | map(select(. as $dep | $ignore | index($dep) | not)))
+          }
+          ' depcheck-output.json)
+
+          unused_count=$(echo "$unused" | jq '[.dependencies[], .devDependencies[]] | length')
+
+             if [ "$unused_count" -gt 0 ]; then
+              echo "❌ Unused dependencies found:"
+              echo "$unused" | jq
+              exit 1
+            else
+              echo "✅ No unused dependencies found"
+            fi
+
+      - name: Bundle size analysis
+        run: |
+          npx expo export --platform web
+          du -sh dist/ | awk '{print "Bundle size: " $1}'
+        continue-on-error: true
+
+  format-check:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check code formatting
+        run: npm run format:check
