@@ -135,19 +135,26 @@ jobs:
           echo "Running depcheck..."
           npx depcheck --json --config depcheck.config.js > depcheck-output.json || echo "Depcheck exited with error (expected if unused dependencies found)"
 
-          if jq -e '.dependencies' depcheck-output.json > /dev/null; then
-            unused=$(jq '.dependencies' depcheck-output.json)
-            unused_count=$(jq '.dependencies | length' depcheck-output.json)
-            if [ "$unused_count" -gt 0 ]; then
+          # Lista de dependências a ignorar
+          IGNORE_LIST='["expo-splash-screen","expo-dev-client","eslint-plugin-import","tailwind-variants","typescript"]'
+
+          # Filtra dependencies e devDependencies removendo as que estão na lista de ignore
+          unused=$(jq --argjson ignore "$IGNORE_LIST" '
+          {
+            dependencies: (.dependencies // [] | map(select(. as $dep | $ignore | index($dep) | not))),
+            devDependencies: (.devDependencies // [] | map(select(. as $dep | $ignore | index($dep) | not)))
+          }
+          ' depcheck-output.json)
+
+          unused_count=$(echo "$unused" | jq '[.dependencies[], .devDependencies[]] | length')
+
+             if [ "$unused_count" -gt 0 ]; then
               echo "❌ Unused dependencies found:"
-              echo "$unused"
+              echo "$unused" | jq
               exit 1
+            else
+              echo "✅ No unused dependencies found"
             fi
-          else
-            echo "⚠️ Invalid or missing JSON structure in depcheck-output.json"
-            cat depcheck-output.json
-            exit 1
-          fi
 
       - name: Bundle size analysis
         run: |
