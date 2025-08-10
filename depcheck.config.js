@@ -23,6 +23,8 @@ module.exports = {
     'app.config.ts',
   ],
 
+  ignoreMatches: ['expo-splash-screen', 'expo-dev-client'],
+
   specials: [
     require('depcheck/special/eslint'),
     require('depcheck/special/jest'),
