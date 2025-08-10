@@ -22,20 +22,25 @@ Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento po
 
 ## Primeiros passos
 
-1. Instalar EAS CLI
+1. Instalar dependencias
+```bash
+npm install
+```
+
+2. Instalar EAS CLI
 
 ```bash
 npm install --global eas-cli
 ```
 
-2. Autenticar no Expo/EAS
+3. Autenticar no Expo/EAS
 
 ```bash
 eas login
 eas whoami
 ```
 
-3. Iniciar o app (modo desenvolvimento)
+4. Iniciar o app (modo desenvolvimento)
 
 ```bash
 npx expo start
@@ -53,7 +58,7 @@ eas build --platform android --profile development
 ```
 
 2. Executando servidor
-   Após o download do APK gerado, no seu desktop execute o servidor
+  Após o download do APK gerado, no seu desktop execute o servidor
 
 ```bash
 npm run start
