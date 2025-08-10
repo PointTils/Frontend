@@ -23,6 +23,7 @@ Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento po
 ## Primeiros passos
 
 1. Instalar dependencias
+
 ```bash
 npm install
 ```
@@ -58,7 +59,7 @@ eas build --platform android --profile development
 ```
 
 2. Executando servidor
-  Após o download do APK gerado, no seu desktop execute o servidor
+   Após o download do APK gerado, no seu desktop execute o servidor
 
 ```bash
 npm run start
