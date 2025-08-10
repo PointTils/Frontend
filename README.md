@@ -1,6 +1,7 @@
 # Frontend
 Repositório de Frontend do projeto Point Tils desenvolvido no semestre 2025/2 na Agência Experimental de Engenharia de Software da PUCRS
-# Point Tils
+
+## Point Tils
 
 Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento por arquivos (expo-router) e estilização com NativeWind/Tailwind.
 
