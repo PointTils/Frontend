@@ -1,6 +1,6 @@
-import { Text } from '@/components/ui/text';
-import { View } from '@/components/ui/view';
-import { Strings } from '@/constants/Strings';
+import { Text } from '@/src/components/ui/text';
+import { View } from '@/src/components/ui/view';
+import { Strings } from '@/src/constants/Strings';
 
 export default function MyAppointmentsScreen() {
   return (

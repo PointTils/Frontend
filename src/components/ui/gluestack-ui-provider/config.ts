@@ -1,5 +1,5 @@
 'use client';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/src/constants/Colors';
 import { vars } from 'nativewind';
 
 const hexToRgb = (hex: string) => {

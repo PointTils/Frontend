@@ -6,16 +6,21 @@
     "paths": {
       "@/*": ["./*"],
       "tailwind.config": ["./tailwind.config.js"],
-      "tailwind-variants/dist/config": ["./types/empty-module.ts"],
-      "@gluestack-ui/nativewind-utils/tva/index": ["./types/empty-module.ts"]
+      "tailwind-variants/dist/config": ["./src/types/empty-module.ts"],
+      "@gluestack-ui/nativewind-utils/tva/index": [
+        "./src/types/empty-module.ts"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "types/**/*.d.ts",
+    "src/types/**/*.d.ts",
+    "src/types/**/*.ts",
     "nativewind-env.d.ts"
   ]
 }
