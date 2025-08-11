@@ -1,8 +1,13 @@
-import api from '@/api';
-import { ApiState } from '@/types/api';
+import api from '@/src/api';
+import type { ApiState } from '@/src/types/api';
 import type { AxiosError, AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 
+/**
+ * Usage example:
+ *
+ *   const { data, loading, error } = useApiGet<User[]>('/users', { active: true });
+ */
 export const useApiGet = <T>(endpoint: string, params?: object) => {
   const [state, setState] = useState<ApiState<T>>({
     data: null,
@@ -28,11 +33,17 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
     return () => {
       isMounted = false;
     };
-  }, [endpoint, JSON.stringify(params)]);
+  }, [endpoint, params]);
 
   return state;
 };
 
+/**
+ * Usage example:
+ *
+ *   const { data, loading, error, post } = useApiPost<User, NewUser>('/users');
+ *   await post({ name: 'John' });
+ */
 export const useApiPost = <T, U>(endpoint: string, body?: U) => {
   const [state, setState] = useState<ApiState<T>>({
     data: null,
@@ -58,6 +69,12 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
   return { ...state, post };
 };
 
+/**
+ * Usage example:
+ *
+ *   const { data, loading, error, put } = useApiPut<User, UpdateUser>('/users/1');
+ *   await put({ name: 'Jane' });
+ */
 export const useApiPut = <T, U>(endpoint: string, body?: U) => {
   const [state, setState] = useState<ApiState<T>>({
     data: null,

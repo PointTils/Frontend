@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@/contexts/ThemeProvider';
 import '@/global.css';
+import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require('../src/assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   if (!loaded) {

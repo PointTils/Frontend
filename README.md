@@ -77,23 +77,23 @@ npm run start
 ## Estrutura de Pastas
 
 - **app**: Telas e layouts principais.
-- **assets**: Recursos estáticos como imagens e fontes.
-- **components**: Componentes reutilizáveis, incluindo:
+- **src/assets**: Recursos estáticos como imagens e fontes.
+- **src/components**: Componentes reutilizáveis, incluindo:
   - **ui**: Componentes específicos do GlueStack.
-- **constants**: Constantes globais, como cores e strings.
-- **contexts**: Providers e contextos globais.
-- **hooks**: Hooks compartilhados para lógica reutilizável.
-- **types**: Definições de tipos TypeScript.
+- **src/constants**: Constantes globais, como cores e strings.
+- **src/contexts**: Providers e contextos globais.
+- **src/hooks**: Hooks compartilhados para lógica reutilizável.
+- **src/types**: Definições de tipos TypeScript.
 - **+**: Arquivos de configuração do projeto, como `tailwind.config.js`, `eslint.config.js`, e `tsconfig.json`.
 
 ## UI e Theming
 
-- Tema global via [contexts/ThemeProvider.tsx](contexts/ThemeProvider.tsx) que integra:
+- Tema global via [contexts/ThemeProvider.tsx](src/contexts/ThemeProvider.tsx) que integra:
   - React Navigation ThemeProvider
   - GluestackUIProvider (NativeWind vars)
-- Cores centralizadas em [constants/Colors.ts](constants/Colors.ts)
+- Cores centralizadas em [constants/Colors.ts](src/constants/Colors.ts)
 - Tailwind estendido com variáveis (CSS vars) em
-  - [components/ui/gluestack-ui-provider/config.ts](components/ui/gluestack-ui-provider/config.ts)
+  - [components/ui/gluestack-ui-provider/config.ts](src/components/ui/gluestack-ui-provider/config.ts)
   - [tailwind.config.js](tailwind.config.js)
 
 ## Navegação

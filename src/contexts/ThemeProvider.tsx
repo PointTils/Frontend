@@ -1,5 +1,5 @@
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { Colors } from '@/constants/Colors';
+import { GluestackUIProvider } from '@/src/components/ui/gluestack-ui-provider';
+import { Colors } from '@/src/constants/Colors';
 import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,

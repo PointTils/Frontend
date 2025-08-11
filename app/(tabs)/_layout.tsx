@@ -1,6 +1,6 @@
-import HapticTab from '@/components/HapticTab';
-import { Strings } from '@/constants/Strings';
-import { useColors } from '@/hooks/useColors';
+import HapticTab from '@/src/components/HapticTab';
+import { Strings } from '@/src/constants/Strings';
+import { useColors } from '@/src/hooks/useColors';
 import { Tabs } from 'expo-router';
 import { CalendarFold, PlusCircleIcon, User } from 'lucide-react-native';
 import React from 'react';
