@@ -15,6 +15,8 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
     error: null,
   });
 
+  const serializedParams = JSON.stringify(params ?? {});
+
   useEffect(() => {
     let isMounted = true;
     setState((prev) => ({ ...prev, loading: true }));
@@ -33,7 +35,8 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
     return () => {
       isMounted = false;
     };
-  }, [endpoint, params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endpoint, serializedParams]);
 
   return state;
 };
