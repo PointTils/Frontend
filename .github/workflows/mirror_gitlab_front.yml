@@ -2,7 +2,7 @@ name: Mirror to AGES GitLab (HTTPS)
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   workflow_dispatch:
 
 jobs:
@@ -27,10 +27,10 @@ jobs:
           echo "=== Network Diagnostics ==="
           echo "Testing basic connectivity..."
           ping -c 3 tools.ages.pucrs.br || echo "Ping failed"
-          
+
           echo "Testing DNS resolution..."
           nslookup tools.ages.pucrs.br || echo "DNS lookup failed"
-          
+
           echo "Testing HTTPS connectivity..."
           curl -I https://tools.ages.pucrs.br || echo "HTTPS connection failed"
 
