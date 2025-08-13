@@ -5,15 +5,16 @@ This project, **Point Tils**, is a mobile application built with React Native an
 ## Folder Structure
 
 - `/app`: Contains the main application code, including screens and layouts.
-- `/components`: Reusable UI components, including:
-  - **ui**: Components specific to GlueStack.
-- `/hooks`: Custom React hooks for shared logic, including utilities for theming and color schemes.
-- `/constants`: Shared constants such as colors and strings.
-- `/contexts`: Providers and global contexts.
-- `/assets`: Static assets like images and fonts.
-- `/types`: TypeScript type definitions.
-- `/app.json`: Expo configuration file.
-- `/eas.json`: Configuration for Expo Application Services (EAS).
+- `/src/api`: API client.
+- `/src/assets`: Static assets like images and fonts.
+- `/src/components`: Reusable UI components, including:
+  - `/ui`: Components specific to GlueStack.
+- `/src/constants`: Shared constants such as colors and strings.
+- `/src/contexts`: Providers and global contexts.
+- `/src/hooks`: Custom React hooks for shared logic, including utilities for theming, color schemes and API calls.
+- `/src/types`: TypeScript type definitions.
+- `app.json`: Expo configuration file.
+- `eas.json`: Configuration for Expo Application Services (EAS).
 
 ## Libraries and Frameworks
 
@@ -27,6 +28,7 @@ This project, **Point Tils**, is a mobile application built with React Native an
 - **Gluestack UI**: For UI components and theming.
 - **ESLint**: For linting and code quality.
 - **Prettier**: For consistent code formatting.
+- **Lucid icons**: For a set of high-quality icons.
 
 ## Coding Standards
 
@@ -44,7 +46,8 @@ This project, **Point Tils**, is a mobile application built with React Native an
 - Follow light and dark mode theming using the `useColors` hook.
 - Ensure components are reusable and follow a modular design.
 - Use animations sparingly and only when they enhance the user experience.
-- Centralize colors in [constants/Colors.ts](../constants/Colors.ts).
+- Centralize colors in [constants/Colors.ts](../src/constants/Colors.ts).
+- Centralize texts/copies in [constants/Strings.ts](../src/constants/Strings.ts).
 - Extend Tailwind with CSS variables in [tailwind.config.js](../tailwind.config.js).
 
 ## CI/CD
@@ -58,5 +61,6 @@ This project, **Point Tils**, is a mobile application built with React Native an
 
 - Follow the folder structure and naming conventions for new files and components.
 - Use the `Colors` constant for consistent theming.
+- Use the `Strings` constant for consistent texts/copies.
 - Use Expo's `expo-router` for navigation and routing.
 - For troubleshooting, refer to the [CI/CD Pipeline Documentation](../.github/workflows/CI_CD_PIPELINE.md).

@@ -18,12 +18,12 @@ export const Strings = {
     forgotPassword: 'Esqueceu a senha?',
   },
 
-  myAppointments: {
-    title: 'Meus Agendamentos',
+  home: {
+    title: 'Início',
   },
 
-  newAppointment: {
-    title: 'Novo Agendamento',
+  history: {
+    title: 'Histórico',
   },
 
   profile: {
