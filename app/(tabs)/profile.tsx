@@ -8,7 +8,7 @@ export default function ProfileScreen() {
       className="flex-1 items-center justify-center"
       accessibilityLabel={Strings.profile.title}
     >
-      <Text>{Strings.profile.title}</Text>
+      <Text className='font-ifood-regular'>{Strings.profile.title}</Text>
     </View>
   );
 }

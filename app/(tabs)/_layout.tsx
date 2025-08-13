@@ -1,8 +1,9 @@
 import HapticTab from '@/src/components/HapticTab';
+import { Text } from '@/src/components/ui/text';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { Tabs } from 'expo-router';
-import { CalendarFold, PlusCircleIcon, User } from 'lucide-react-native';
+import { FileClock, House, User } from 'lucide-react-native';
 import React from 'react';
 
 export default function TabLayout() {
@@ -19,27 +20,39 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: Strings.myAppointments.title,
+          tabBarLabel: ({ color, focused }) => (
+            <Text className="font-ifood-regular text-xs" style={{ color }}>
+              {Strings.home.title}
+            </Text>
+          ),
           tabBarIcon: ({ color }) => (
-            <CalendarFold width={28} height={28} stroke={color} />
+            <House width={24} height={24} stroke={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="new-appointment"
+        name="history"
         options={{
-          title: Strings.newAppointment.title,
+          tabBarLabel: ({ color, focused }) => (
+            <Text className="font-ifood-regular text-xs" style={{ color }}>
+              {Strings.history.title}
+            </Text>
+          ),
           tabBarIcon: ({ color }) => (
-            <PlusCircleIcon width={28} height={28} stroke={color} />
+            <FileClock width={24} height={24} stroke={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: Strings.profile.title,
+          tabBarLabel: ({ color, focused }) => (
+            <Text className="font-ifood-regular text-xs" style={{ color }}>
+              {Strings.profile.title}
+            </Text>
+          ),
           tabBarIcon: ({ color }) => (
-            <User width={28} height={28} stroke={color} />
+            <User width={24} height={24} stroke={color} />
           ),
         }}
       />
