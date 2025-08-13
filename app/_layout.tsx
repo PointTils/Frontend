@@ -7,7 +7,12 @@ import 'react-native-reanimated';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SpaceMono: require('../src/assets/fonts/SpaceMono-Regular.ttf'),
+    'iFoodRC-Thin': require('../src/assets/fonts/iFoodRCTextos-Thin.ttf'),
+    'iFoodRC-Light': require('../src/assets/fonts/iFoodRCTextos-Light.ttf'),
+    'iFoodRC-Regular': require('../src/assets/fonts/iFoodRCTextos-Regular.ttf'),
+    'iFoodRC-Medium': require('../src/assets/fonts/iFoodRCTextos-Medium.ttf'),
+    'iFoodRC-Bold': require('../src/assets/fonts/iFoodRCTextos-Bold.ttf'),
+    'iFoodRC-ExtraBold': require('../src/assets/fonts/iFoodRCTextos-ExtraBold.ttf'),
   });
 
   if (!loaded) {

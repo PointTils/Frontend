@@ -170,11 +170,17 @@ module.exports = {
         },
       },
       fontFamily: {
+        'ifood-thin': ['iFoodRC-Thin'],
+        'ifood-light': ['iFoodRC-Light'],
+        'ifood-regular': ['iFoodRC-Regular'],
+        'ifood-medium': ['iFoodRC-Medium'],
+        'ifood-bold': ['iFoodRC-Bold'],
+        'ifood-extrabold': ['iFoodRC-ExtraBold'],
         heading: undefined,
         body: undefined,
         mono: undefined,
-        roboto: ['Roboto', 'sans-serif'],
       },
+
       fontWeight: {
         extrablack: '950',
       },
