@@ -8,7 +8,7 @@ export default function HistoryScreen() {
       className="flex-1 items-center justify-center"
       accessibilityLabel={Strings.history.title}
     >
-      <Text className='font-ifood-regular'>{Strings.history.title}</Text>
+      <Text className="font-ifood-regular">{Strings.history.title}</Text>
     </View>
   );
 }
