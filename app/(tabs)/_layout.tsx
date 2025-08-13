@@ -20,7 +20,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          tabBarLabel: ({ color, focused }) => (
+          tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
               {Strings.home.title}
             </Text>
@@ -33,7 +33,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          tabBarLabel: ({ color, focused }) => (
+          tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
               {Strings.history.title}
             </Text>
@@ -46,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarLabel: ({ color, focused }) => (
+          tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
               {Strings.profile.title}
             </Text>
