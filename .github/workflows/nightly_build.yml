@@ -250,7 +250,7 @@ jobs:
             ### What's new
             ${{ env.CHANGELOG }}
           draft: false
-          prerelease: ${{ (github.event.inputs.branch || 'dev') == 'dev' }}
+          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
 
