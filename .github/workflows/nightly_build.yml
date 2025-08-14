@@ -34,7 +34,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.event.inputs.branch || 'dev' }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -100,7 +100,7 @@ jobs:
           echo "🚀 Starting build for version: ${NIGHTLY_VERSION}"
 
           # Capture build ID and URL from JSON output
-          BUILD_JSON=$(eas build --platform android --profile ${{ github.event.inputs.profile }} --non-interactive --no-wait --json)
+          BUILD_JSON=$(eas build --platform android --profile ${{ github.event.inputs.profile || 'preview' }} --non-interactive --no-wait --json)
           if [ -z "$BUILD_JSON" ]; then
             echo "❌ Failed to start build. Please check your configuration."
             exit 1
@@ -240,7 +240,7 @@ jobs:
         uses: actions/create-release@v1
         with:
           tag_name: v${{ needs.build.outputs.nightly_version }}
-          release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile }}]
+          release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
           body: |
             ## 🌙 Nightly Build Report
             - **Date:** ${{ env.CURRENT_DATE }}
@@ -250,7 +250,7 @@ jobs:
             ### What's new
             ${{ env.CHANGELOG }}
           draft: false
-          prerelease: ${{ github.event.inputs.profile == 'preview' }}
+          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
 
@@ -281,7 +281,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || 'main' }}
+          ref: ${{ github.event.inputs.branch || 'dev' }}
 
       - name: Send Discord notification
         run: |
