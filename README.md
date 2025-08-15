@@ -44,26 +44,10 @@ eas whoami
 4. Iniciar o app (modo desenvolvimento)
 
 ```bash
-npx expo start
+npm run start
 ```
 
 - Pressione “a” para Android (emulador) ou escanei o QR Code no Expo Go.
-- iOS só em macOS (Xcode).
-
-### Builds com EAS (local)
-
-1. Inicialize o build
-
-```bash
-eas build --platform android --profile development
-```
-
-2. Executando servidor
-   Após o download do APK gerado, no seu desktop execute o servidor
-
-```bash
-npm run start
-```
 
 ## Scripts úteis
 
