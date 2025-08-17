@@ -19,4 +19,4 @@ jobs:
           BRANCH="${{ github.event.pull_request.head.ref }}"
           curl -H "Content-Type: application/json" -X POST -d "{
             \"content\": \"🚀 **Novo Pull Request aberto!**\n\n🔗 [${PR_TITLE}](${PR_URL})\n👤 Autor: ${AUTHOR}\n🌿 Branch: ${BRANCH}\"
-          }"
+          }" "$DISCORD_WEBHOOK"
