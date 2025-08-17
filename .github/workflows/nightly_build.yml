@@ -298,4 +298,4 @@ jobs:
 
           curl -H "Content-Type: application/json" -X POST -d "{
             \"content\": \"$ICON **Nightly Build $RESULT**\n\n📱 **Projeto:** Point Tils\n📊 **Status:** ${{ needs.build.result }}\n⚙️ **GitHub Release:** $RELEASE_URL\n📝 **Logs:** ${LOGS_URL:-None}\"
-          }" "${{ secrets.DISCORD_WEBHOOK }}"
+          }" "${{ secrets.DISCORD_RELEASE_WEBHOOK }}"
