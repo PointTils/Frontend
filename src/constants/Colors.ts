@@ -5,24 +5,19 @@
  * Also, ensure that the colors are declared at components/ui/gluestack-ui-provider/config.ts
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
   light: {
-    text: '#11181C',
+    text: '#0D0D0D', // primary800
     background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    primaryOrange: '#F28D22',
+    primaryBlue: '#43A2DB',
+    disabled: '#999999', // primary50
   },
   dark: {
-    text: '#ECEDEE',
+    text: '#fff',
     background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    primaryOrange: '#FF9F3A',
+    primaryBlue: '#5CB3E8',
+    disabled: '#9BA1A6',
   },
 };
