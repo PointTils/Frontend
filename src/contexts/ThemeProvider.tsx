@@ -1,5 +1,6 @@
 import { GluestackUIProvider } from '@/src/components/ui/gluestack-ui-provider';
 import { Colors } from '@/src/constants/Colors';
+import { FORCE_LIGHT_MODE } from '@/src/constants/Theme';
 import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,
@@ -27,7 +28,7 @@ type Ctx = {
 const ThemeCtx = createContext<Ctx | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<Mode>('system');
+  const [mode, setMode] = useState<Mode>(FORCE_LIGHT_MODE ? 'light' : 'system');
   const [system, setSystem] = useState<Resolved>(
     (Appearance.getColorScheme() ?? 'light') as Resolved,
   );
@@ -40,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const colorScheme: Resolved = useMemo(
-    () => (mode === 'system' ? system : mode),
+    () => (FORCE_LIGHT_MODE ? 'light' : mode === 'system' ? system : mode),
     [mode, system],
   );
 
@@ -59,12 +60,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       ...NavLight,
       colors: {
         ...NavLight.colors,
-        primary: Colors.light.tint,
+        primary: Colors.light.primaryOrange,
         background: Colors.light.background,
         card: Colors.light.background,
         text: Colors.light.text,
-        border: Colors.light.icon,
-        notification: Colors.light.tint,
+        border: Colors.light.disabled,
+        notification: Colors.light.text,
       },
     }),
     [],
@@ -75,12 +76,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       ...NavDark,
       colors: {
         ...NavDark.colors,
-        primary: Colors.dark.tint,
+        primary: Colors.dark.primaryOrange,
         background: Colors.dark.background,
         card: Colors.dark.background,
         text: Colors.dark.text,
-        border: Colors.dark.icon,
-        notification: Colors.dark.tint,
+        border: Colors.dark.disabled,
+        notification: Colors.dark.text,
       },
     }),
     [],
