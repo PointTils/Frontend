@@ -37,9 +37,10 @@ npm install --global eas-cli
 3. Autenticar no Expo/EAS
 
 ```bash
-eas login
-eas whoami
+npx expo login
 ```
+
+> Usar mesmas credenciais da conta criada no site do Expo Go
 
 4. Iniciar o app (modo desenvolvimento)
 
@@ -47,7 +48,7 @@ eas whoami
 npm run start
 ```
 
-- Pressione “a” para Android (emulador) ou escanei o QR Code no Expo Go.
+> Pressione “s” para Expo Go emulador e escanei o QR Code (Android: escanei usando o app do Expo Go, iPhone: escanei usando a câmera do celular).
 
 ## Scripts úteis
 
@@ -60,7 +61,7 @@ npm run start
 
 ## Estrutura de Pastas
 
-- **app**: Telas e layouts principais.
+- **app/**: Telas e layouts principais.
 - **src/assets**: Recursos estáticos como imagens e fontes.
 - **src/components**: Componentes reutilizáveis, incluindo:
   - **ui**: Componentes específicos do GlueStack.
