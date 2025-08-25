@@ -2,7 +2,6 @@
 
 🔗 **Issue relacionada:** [issue_number](issue link)
 
-
 Descreva brevemente as mudanças implementadas neste PR.
 
 ## 📱 Screenshots/Videos
