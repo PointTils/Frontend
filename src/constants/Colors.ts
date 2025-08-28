@@ -7,11 +7,13 @@
 
 export const Colors = {
   light: {
-    text: '#0D0D0D', // primary800
+    text: '#0D0D0D', // primary800 - Gluestack
     background: '#fff',
     primaryOrange: '#F28D22',
     primaryBlue: '#43A2DB',
-    disabled: '#999999', // primary50
+    disabled: '#999999', // primary50 - Gluestack
+    onPressBlue: '#5CB3E8',
+    onPressOrange: '#FF9F3A',
   },
   dark: {
     text: '#fff',
@@ -20,4 +22,4 @@ export const Colors = {
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
   },
-};
+} as const;
