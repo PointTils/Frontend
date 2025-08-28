@@ -14,6 +14,7 @@ Se aplicável, adicione screenshots ou videos demonstrando as mudanças:
 
 ## ✅ Checklist
 
+- [ ] Revisei a doc [Pull Request](https://github.com/PointTils/Frontend/wiki/Pull-Requests) e abri meu PR de acordo
 - [ ] Meu código segue os padrões de estilo do projeto
 - [ ] Realizei uma auto-revisão do meu código
 - [ ] Comentei meu código, especialmente em áreas difíceis de entender
