@@ -1,9 +1,9 @@
 import '@/global.css';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import RegisterScreen from './(auth)/register';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -22,9 +22,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <Stack>
+      {/* <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      </Stack> */}
+      <RegisterScreen></RegisterScreen>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
