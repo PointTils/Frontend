@@ -48,8 +48,7 @@ module.exports = {
           900: 'rgb(var(--color-secondary-900)/<alpha-value>)',
           950: 'rgb(var(--color-secondary-950)/<alpha-value>)',
         },
-        // demais cores (tertiary, error, success, warning, info, typography, outline, background, indicator) 
-        // continuam iguais ao teu arquivo anterior
+        
       },
       fontFamily: {
         'ifood-thin': ['iFoodRC-Thin'],

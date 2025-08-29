@@ -1,14 +1,13 @@
 import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 import React from 'react';
 import { Text as RNText } from 'react-native';
-
 import { textStyle } from './styles';
 
 type ITextProps = React.ComponentProps<typeof RNText> &
   VariantProps<typeof textStyle>;
 
 const Text = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
-  function Text(
+  (
     {
       className,
       isTruncated,
@@ -21,10 +20,11 @@ const Text = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
       highlight,
       ...props
     },
-    ref,
-  ) {
+    ref
+  ) => {
     return (
       <RNText
+        ref={ref}
         className={textStyle({
           isTruncated,
           bold,
@@ -37,12 +37,11 @@ const Text = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
           class: className,
         })}
         {...props}
-        ref={ref}
       />
     );
-  },
+  }
 );
 
 Text.displayName = 'Text';
-
 export { Text };
+
