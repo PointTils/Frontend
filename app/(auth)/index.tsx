@@ -15,21 +15,17 @@ import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 export default function LoginScreen() {
   return (
-    <KeyboardAwareScrollView
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      extraScrollHeight={-300}
-      contentContainerClassName="flex-grow"
-      keyboardOpeningTime={0}
-      enableOnAndroid={true}
+    <View
+      className="flex-1 items-center justify-center"
+      accessibilityLabel={Strings.auth.login}
     >
-      <View
-        className="flex-1 items-center justify-center"
-        accessibilityLabel={Strings.auth.login}
+      <KeyboardAvoidingView
+        className="items-center justify-center"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Logo */}
         <View className=" mb-12 items-center justify-center">
@@ -114,7 +110,7 @@ export default function LoginScreen() {
             {Strings.auth.forgotPassword}
           </Text>
         </HapticTab>
-      </View>
-    </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
