@@ -20,7 +20,7 @@ export default function RegisterScreen() {
             </Text>
 
             <Text className="font-ifood-medium mb-2">Quem é você?</Text>
-            <View className="flex-row mb-6">
+            <View className="flex-row mb-2">
                 <View className="flex-row items-center">
                     <RadioButton
                         value="client"
@@ -54,7 +54,10 @@ export default function RegisterScreen() {
             </View>
             <View className="flex-1 px-4 pt-2 justify-between">
                 <View>
-                    <Text className="font-ifood-medium mb-2">Razão Social *</Text>
+                    <Text className="font-ifood-medium mb-2">
+                        Razão Social
+                        <Text style={{color:"#B91C1C"}}>*</Text>
+                    </Text>
                     <TextInput
                         placeholder="Empresa X"
                         value={reason}
@@ -62,7 +65,10 @@ export default function RegisterScreen() {
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
                     />
                     
-                    <Text className="font-ifood-medium mb-2">CNPJ</Text>
+                    <Text className="font-ifood-medium mb-2">
+                        CNPJ
+                        <Text style={{color:"#B91C1C"}}>*</Text>
+                    </Text>
                     <TextInput
                         placeholder="XX.XXX.XXX/0001-XX"
                         value={cnpj}
@@ -70,7 +76,10 @@ export default function RegisterScreen() {
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
                     />
                     
-                    <Text className="font-ifood-medium mb-2">Telefone</Text>
+                    <Text className="font-ifood-medium mb-2">
+                        Telefone
+                        <Text style={{color:"#B91C1C"}}>*</Text>
+                    </Text>
                     <TextInput
                         placeholder="(00) 00000-0000"
                         value={phone}
@@ -79,7 +88,10 @@ export default function RegisterScreen() {
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
                     />
                     
-                    <Text className="font-ifood-medium mb-2">Email</Text>
+                    <Text className="font-ifood-medium mb-2">
+                        Email
+                        <Text style={{color:"#B91C1C"}}>*</Text>
+                    </Text>
                     <TextInput
                         placeholder="example@gmail.com"
                         value={email}
@@ -88,7 +100,10 @@ export default function RegisterScreen() {
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
                     />
                     
-                    <Text className="font-ifood-medium mb-2">Senha</Text>
+                    <Text className="font-ifood-medium mb-2">
+                        Senha
+                        <Text style={{color:"#B91C1C"}}>*</Text>
+                    </Text>
                     <TextInput
                         placeholder="*******"
                         value={password}
@@ -97,7 +112,7 @@ export default function RegisterScreen() {
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-6"
                     />
                 </View>
-                <View className="mt-10 pb-40">
+                <View className="mt-5 pb-40">
                     <TouchableOpacity style={{ backgroundColor: colors.primaryOrange }} className="py-4 rounded-lg mb-3">
                         <Text className="text-center text-white font-semibold text-lg">+ Criar conta</Text>
                     </TouchableOpacity>
