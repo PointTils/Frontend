@@ -1,9 +1,12 @@
 import '@/global.css';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+
 import 'react-native-reanimated';
+import { config } from '../gluestack-ui.config';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -15,17 +18,17 @@ export default function RootLayout() {
     'iFoodRC-ExtraBold': require('../src/assets/fonts/iFoodRCTextos-ExtraBold.ttf'),
   });
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
-    <ThemeProvider>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GluestackUIProvider config={config}>
+      <ThemeProvider>
+        <Stack initialRouteName="onboarding" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </GluestackUIProvider>
   );
 }

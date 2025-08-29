@@ -1,9 +1,9 @@
 ﻿import { View, Text } from 'react-native';
 
-export default function HomeScreen() {
+export default function SearchScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-bold">Início</Text>
+      <Text className="text-lg font-bold">Tela de Busca</Text>
     </View>
   );
 }

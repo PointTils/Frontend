@@ -1,7 +1,6 @@
-// path: app/(onboarding)/index.tsx
+﻿// app/onboarding.tsx
 import OnboardingUserScreen from '@/src/screens/Onboarding/OnboardingUserScreen';
-import React from 'react';
 
-export default function OnboardingRoute() {
+export default function Onboarding() {
   return <OnboardingUserScreen />;
 }

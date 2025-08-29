@@ -29,4 +29,13 @@ export const Strings = {
   profile: {
     title: 'Perfil',
   },
+
+  onboarding: {
+    title: 'Conecte-se a intérpretes de forma rápida e simples',
+    subtitle:
+      'Encontre intérpretes próximos, verifique\n' +
+      'disponibilidade e agende atendimentos para\n' +
+      'situações urgentes ou momentos importantes.',
+    cta: 'Encontrar intérprete agora',
+  },
 };
