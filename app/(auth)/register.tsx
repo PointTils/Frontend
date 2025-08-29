@@ -12,6 +12,33 @@ export default function RegisterScreen() {
     const [password, setPassword] = useState("");
     const colors = useColors();
 
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handlePhoneChange = (text: string) => {
+        const cleaned = text.replace(/\D/g, '').slice(0, 11);
+
+        const formatted = cleaned
+            .replace(/^(\d{2})(\d)/, '($1) $2')      
+            .replace(/(\d{5})(\d{1,4})$/, '$1-$2');  
+        setPhone(formatted);
+    };
+
+    const handleCnpjChange = (text: string) => {
+        const cleaned = text.replace(/\D/g, '').slice(0, 14);
+
+        const formatted = cleaned
+            .replace(/^(\d{2})(\d)/, '$1.$2')
+            .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/, '.$1/$2')
+            .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+
+        setCnpj(formatted);
+    };
+
+
     return (
         <ScrollView className="flex-1 bg-white p-10 mt-10">
             <Text className="font-ifood-medium text-lg mb-3 text-[18px]">Boas-vindas!</Text>
@@ -29,7 +56,7 @@ export default function RegisterScreen() {
                         color={colors.primaryBlue}
                         uncheckedColor={colors.disabled}
                     />
-                    <Text style={{color: colors.primaryBlue}} className="font-ifood-regular"> Solicitante</Text>
+                    <Text style={{color: type === "client" ? colors.primaryBlue : colors.disabled}} className="font-ifood-regular"> Solicitante</Text>
                 </View>
                 <View className="flex-row items-center">
                     <RadioButton
@@ -39,7 +66,7 @@ export default function RegisterScreen() {
                         color={colors.primaryBlue}
                         uncheckedColor={colors.disabled}
                     />
-                    <Text style={{color: colors.primaryBlue}} className="font-ifood-regular">Empresa</Text>
+                    <Text style={{color: type === "enterprise" ? colors.primaryBlue : colors.disabled}} className="font-ifood-regular">Empresa</Text>
                 </View>
                 <View className="flex-row items-center">
                     <RadioButton
@@ -49,7 +76,7 @@ export default function RegisterScreen() {
                         color={colors.primaryBlue}
                         uncheckedColor={colors.disabled}
                     />
-                    <Text style={{color: colors.disabled}} className="font-ifood-regular">Intérprete</Text>
+                    <Text style={{color: type === "interpreter" ? colors.primaryBlue : colors.disabled}} className="font-ifood-regular">Intérprete</Text>
                 </View>
             </View>
             <View className="flex-1 px-4 pt-2 justify-between">
@@ -70,10 +97,11 @@ export default function RegisterScreen() {
                         <Text style={{color:"#B91C1C"}}>*</Text>
                     </Text>
                     <TextInput
-                        placeholder="XX.XXX.XXX/0001-XX"
+                        placeholder="00.000.000/0001-00"
                         value={cnpj}
-                        onChangeText={setCnpj}
+                        onChangeText={handleCnpjChange}
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        maxLength={18}
                     />
                     
                     <Text className="font-ifood-medium mb-2">
@@ -83,9 +111,10 @@ export default function RegisterScreen() {
                     <TextInput
                         placeholder="(00) 00000-0000"
                         value={phone}
-                        onChangeText={setPhone}
+                        onChangeText={handlePhoneChange}
                         keyboardType="phone-pad"
                         className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        maxLength={15}
                     />
                     
                     <Text className="font-ifood-medium mb-2">
