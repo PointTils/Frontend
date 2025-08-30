@@ -96,19 +96,42 @@ export default function ProfileScreen() {
           Mostrar mais
         </Text>
         <ChevronDown className="mb-2" width={20} height={20} stroke={colors.disabled} />
-        <View className="w-full flex-row justify-left items-center mb-2" >
-          <SquarePen width={20} height={20} stroke={colors.disabled} />
-          <Text className="pl-2 text-base font-ifood-regular text-center mb-1 text-primary-50" >
-            Editar perfil
-          </Text>
-          <ChevronRight width={16} height={16} stroke={colors.disabled}/>
+
+
+        <View className="w-full">
+          <TouchableOpacity
+            className="flex-1"
+            onPress={() => {
+              console.log('botao editar perfil');
+            }}
+          >
+            <View className="w-full flex-row justify-left items-center mb-2" >
+              <SquarePen width={20} height={20} stroke={colors.disabled} />
+              <Text className="pl-2 text-base font-ifood-regular text-center mb-1 text-primary-50" >
+                Editar perfil
+              </Text>
+              <ChevronRight width={16} height={16} stroke={colors.disabled} />
+            </View>
+
+          </TouchableOpacity>
         </View>
-        <View className="w-full flex-row justify-left items-center" >
-          <BadgeQuestionMark width={20} height={20} stroke={colors.disabled}/>
-          <Text className="pl-2 text-base font-ifood-regular text-center mb-1 text-primary-50" >
-            Ajuda 
-          </Text>
-          <ChevronRight width={16} height={16} stroke={colors.disabled}/>
+
+        <View className="w-full">
+          <TouchableOpacity
+            className="flex-1"
+            onPress={() => {
+              console.log('botao editar perfil');
+            }}
+          >
+            <View className="w-full flex-row justify-left items-center" >
+              <BadgeQuestionMark width={20} height={20} stroke={colors.disabled} />
+              <Text className="pl-2 text-base font-ifood-regular text-center mb-1 text-primary-50" >
+                Ajuda
+              </Text>
+              <ChevronRight width={16} height={16} stroke={colors.disabled} />
+            </View>
+
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
