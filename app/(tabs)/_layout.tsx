@@ -1,13 +1,25 @@
 import HapticTab from '@/src/components/HapticTab';
 import { Text } from '@/src/components/ui/text';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { FileClock, House, User } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export default function TabLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const colors = useColors();
+
+  useEffect(() => {
+    // If not loading and not authenticated, redirect to login
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/(auth)');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || !isAuthenticated) return null;
 
   return (
     <Tabs
