@@ -22,7 +22,7 @@ export default function RootLayout() {
       <Stack initialRouteName="(tabs)">
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="Onboarding" options={{ headerShown: false }} />
-        { }
+        {}
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

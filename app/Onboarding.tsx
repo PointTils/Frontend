@@ -20,11 +20,13 @@ export default function Onboarding() {
   const { type } = useLocalSearchParams<{ type?: string }>();
 
   // fallback: enquanto não tem backend para user-type, usamos 'til' (usuário surdo)
-  const userType: OnboardingKey =
-    (type === 'company' ? 'company' : 'til') as OnboardingKey;
+  const userType: OnboardingKey = (
+    type === 'company' ? 'company' : 'til'
+  ) as OnboardingKey;
 
   const t = Strings.onboarding[userType];
-  const Illustration = userType === 'company' ? OnboardingCompany : OnboardingTil;
+  const Illustration =
+    userType === 'company' ? OnboardingCompany : OnboardingTil;
 
   function handlePress() {
     router.replace(NEXT_ROUTE);
@@ -52,7 +54,11 @@ export default function Onboarding() {
             </Text>
           </View>
 
-          <Illustration width={320} height={260} accessibilityLabel={t.illoAlt} />
+          <Illustration
+            width={320}
+            height={260}
+            accessibilityLabel={t.illoAlt}
+          />
 
           <Text
             className="text-lg font-normal text-center mt-4 px-4 self-center max-w-[360px]"
