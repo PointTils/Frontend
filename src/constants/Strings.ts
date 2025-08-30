@@ -38,4 +38,13 @@ export const Strings = {
       'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes.',
     cta: 'Encontrar intérprete agora',
   },
+    onboardingCompany: {
+    logoAlt: 'Logotipo do Point Tils',
+    illoAlt: 'Ilustração da tela de busca de intérpretes',
+    title: 'Intérpretes certos para a sua necessidade',
+    subtitle:
+      'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
+    cta: 'Buscar intérprete',
+  },
+
 } as const;

@@ -1,13 +1,14 @@
+// src/assets/svg/logo.tsx
 import { Colors } from '@/src/constants/Colors';
-import { useColorScheme } from 'react-native';
+import { useColors } from '@/src/hooks/useColors';
 import Svg, { Path } from 'react-native-svg';
 
 export type LogoProps = {
   width?: number;
   height?: number;
   mode?: 'light' | 'dark';
-  fillPrimary?: string; // wordmark (white no mock)
-  fillAccent?: string; // accent dot/hand (laranja)
+  fillPrimary?: string; // wordmark
+  fillAccent?: string;  // accent dot/hand (laranja)
   accessibilityLabel?: string;
 };
 
@@ -19,10 +20,12 @@ export default function Logo({
   fillAccent,
   accessibilityLabel = 'Logotipo',
 }: LogoProps) {
-  const scheme = useColorScheme();
-  const palette = (mode ?? scheme) === 'dark' ? Colors.dark : Colors.light;
-  const primary = fillPrimary ?? Colors.dark.text; // '#fff' do design
+  const theme = useColors();
+  const palette = mode ? Colors[mode] : theme;
+
+  const primary = fillPrimary ?? (palette.onPrimary ?? Colors.dark.text);
   const accent = fillAccent ?? palette.primaryOrange;
+
   return (
     <Svg
       width={width}
