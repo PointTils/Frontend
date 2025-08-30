@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import '@/global.css';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import { useFonts } from 'expo-font';
@@ -14,25 +15,14 @@ export default function RootLayout() {
     'iFoodRC-Bold': require('../src/assets/fonts/iFoodRCTextos-Bold.ttf'),
     'iFoodRC-ExtraBold': require('../src/assets/fonts/iFoodRCTextos-ExtraBold.ttf'),
   });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <ThemeProvider>
-      <Stack>
+      <Stack initialRouteName="(tabs)">
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="OnboardingUserScreen"
-          options={{ headerShown: false }}
-        />
-        {/* ADICIONADO: registra a nova tela */}
-        <Stack.Screen
-          name="OnboardingCompanyScreen"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="Onboarding" options={{ headerShown: false }} />
+        { }
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

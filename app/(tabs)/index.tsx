@@ -1,13 +1,17 @@
+// app/(tabs)/index.tsx
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { Redirect } from 'expo-router';
 
 export default function HomeScreen() {
-  const hasSeenOnboarding = false; // Pelo que entendi, isso no futuro pode ser útil pra não ficar aparecendo pro usuário (perguntar depois pro Augusto ou Bianca)
+  const hasSeenOnboarding = false; // mude para true depois que concluir o onboarding
 
   if (!hasSeenOnboarding) {
-    return <Redirect href="/OnboardingUserScreen" />;
+    // antes: "/OnboardingUserScreen"  (não existe mais)
+    return <Redirect href="/Onboarding" />;
+    // para testar empresa:
+    // return <Redirect href={{ pathname: '/Onboarding', params: { type: 'company' } }} />;
   }
 
   return (
