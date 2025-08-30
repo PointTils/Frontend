@@ -12,6 +12,7 @@ export const Colors = {
     primaryOrange: '#F28D22',
     primaryBlue: '#43A2DB',
     disabled: '#999999', // primary50
+    onPrimary: '#fff',         // teste do Joao Rangel para colocar cor branca no modo normal   - 30/08
   },
   dark: {
     text: '#fff',
@@ -19,5 +20,6 @@ export const Colors = {
     primaryOrange: '#FF9F3A',
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
+    onPrimary: '#fff',         // teste do Joao Rangel para colocar cor branca no modo normal -  30/08
   },
 };

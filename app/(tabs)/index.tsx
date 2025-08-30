@@ -1,8 +1,15 @@
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
+import { Redirect } from 'expo-router';
 
 export default function HomeScreen() {
+  const hasSeenOnboarding = false; // Pelo que entendi, isso no futuro pode ser útil pra não ficar aparecendo pro usuário (perguntar depois pro Augusto ou Bianca)
+
+  if (!hasSeenOnboarding) {
+    return <Redirect href="/OnboardingUserScreen" />;
+  }
+
   return (
     <View
       className="flex-1 items-center justify-center"

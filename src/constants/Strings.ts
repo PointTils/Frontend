@@ -29,4 +29,13 @@ export const Strings = {
   profile: {
     title: 'Perfil',
   },
-};
+
+  onboarding: {
+    logoAlt: 'Logotipo do Point Tils',
+    illoAlt: 'Ilustração da tela de boas-vindas',
+    title: 'Conecte-se a intérpretes de forma rápida e simples',
+    subtitle:
+      'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes.',
+    cta: 'Encontrar intérprete agora',
+  },
+} as const;
