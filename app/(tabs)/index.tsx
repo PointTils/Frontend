@@ -23,20 +23,7 @@ export default function HomeScreen() {
          placeholder="Selecione uma ou mais opções"
          onChange={handleChange}
       />
-      <Text className="font-ifood-regular">{Strings.home.title}</Text>
-      <MultiSelect
-         label="Teste Componente 2"
-         options={options}
-         placeholder="Selecione uma ou mais opções"
-         onChange={handleChange}
-      />
-      <Text className="font-ifood-regular">{Strings.home.title}</Text>
-      <MultiSelect
-         label="Teste Componente 3"
-         options={options}
-         placeholder="Selecione uma ou mais opções"
-         onChange={handleChange}
-      />
+  
 
     </View>
   );

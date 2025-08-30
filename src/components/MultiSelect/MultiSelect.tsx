@@ -10,6 +10,13 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
+interface MultiSelectProps {
+    label: string,
+    options: string[],
+    placeholder: string,
+    onChange: (selected: string[]) => {}
+}
+
 /**
   Componente cria um seletor que possibilita a escolha de
   múltiplos elementos
@@ -25,7 +32,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
                onChange={handleChange}
            />
  */
-export default function MultiSelect({ label, options, placeholder, onChange }) {
+export default function MultiSelect({ label, options, placeholder, onChange }: MultiSelectProps) {
     const [selected, setSelected] = useState<string[]>([]);
     const [open, setOpen] = useState(false);
     const [anchor, setAnchor] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
@@ -52,14 +59,14 @@ export default function MultiSelect({ label, options, placeholder, onChange }) {
         const isSelected = selected.includes(item);
         return (
             <TouchableOpacity className='px-3 py-2' onPress={() => toggleSelection(item)}>
-                <Text className={`text-base ${isSelected ? 'font-bold text-success-950 bg-background-50' : ''}`}>
+                <Text className={`text-base ${isSelected ? 'font-bold text-success-950 bg-background-300 rounded' : ''}`}>
                     {item}
                 </Text>
             </TouchableOpacity>
         );
     };
 
-    // Solução que o GPT deu para ancorar o Modal na caixa do selector
+    // Ancorar o Modal do dropdown no bottom do campo
     const openDropdown = () => {
         fieldRef.current?.measureInWindow?.((x, y, width, height) => {
             setAnchor({ x, y, width, height });
@@ -98,11 +105,11 @@ export default function MultiSelect({ label, options, placeholder, onChange }) {
     */
     const renderSelectedTags = () => {
         if (selected.length === 0) {
-            return <Text className='w-fit flex-nowrap text-gray-400'>{placeholder}</Text>;
+            return <Text className='w-fit flex-nowrap text-typography-400'>{placeholder}</Text>;
         } else if (selected.length === 1) {
             return (
                 <View className='flex-row flex-wrap'>
-                    <View className='bg-gray-200 px-2 rounded-full mr-2'>
+                    <View className='bg-background-200 px-2 rounded-full mr-2'>
                         <Text className='text-sm'>{selected[0]}</Text>
                     </View>
                 </View>
@@ -110,10 +117,10 @@ export default function MultiSelect({ label, options, placeholder, onChange }) {
         } else {
             return (
                 <View className='flex-row flex-wrap'>
-                    <View className='bg-gray-200 px-2 rounded-full mr-2'>
+                    <View className='bg-background-200 px-2 rounded-full mr-2'>
                         <Text className='text-sm'>{selected[0]}</Text>
                     </View>
-                    <View className='bg-gray-300 px-2 rounded-full mr-2'>
+                    <View className='bg-background-300 px-2 rounded-full mr-2'>
                         <Text className='text-sm'>+{selected.length - 1}...</Text>
                     </View>
                 </View>
@@ -122,12 +129,12 @@ export default function MultiSelect({ label, options, placeholder, onChange }) {
     };
 
     return (
-        <View className={'relative w-full'}>
+        <View className={'relative w-80'}>
             <Text className='font-bold text-lg mb-2'>{label}</Text>
 
             <TouchableOpacity
                 ref={fieldRef}
-                className='border border-gray-300 rounded-lg p-3 justify-center bg-white flex-row items-center'
+                className='border border-outline-300 rounded-lg p-3 justify-center bg-background-0 flex-row items-center'
                 onPress={open ? () => setOpen(false) : openDropdown}
                 activeOpacity={0.8}
             >
@@ -148,7 +155,7 @@ export default function MultiSelect({ label, options, placeholder, onChange }) {
 
                 {anchor && (
                     <Animated.View
-                        className='bg-white border border-gray-300 rounded-lg max-h-52 shadow-hard-2'
+                        className='bg-white border border-outline-300 rounded-lg max-h-40 shadow-hard-2'
                         style={[
                             {
                                 position: 'absolute',
