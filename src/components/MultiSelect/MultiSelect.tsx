@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
@@ -7,15 +8,13 @@ import {
     Animated,
     Modal,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
 
 interface MultiSelectProps {
     label: string,
     options: string[],
     placeholder: string,
     width?: string,
-    onChange: (selected: string[]) => {}
+    onChange: (selected: string[]) =>  void
 }
 
 /**
@@ -85,7 +84,7 @@ export default function MultiSelect({ label, options, placeholder, width, onChan
             duration: 180,
             useNativeDriver: true,
         }).start();
-    }, [open]);
+    }, [open, slideAnim]);
 
     const slideStyle = {
         transform: [
@@ -141,11 +140,10 @@ export default function MultiSelect({ label, options, placeholder, width, onChan
                 activeOpacity={0.8}
             >
                 <View className='flex-1'>{renderSelectedTags()}</View>
-                <Ionicons
-                    name={open ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color='#333'
-                />
+                 <Ionicons
+                        name={open ? 'chevron-up' : 'chevron-down'}
+                        className = {'text-typography-400'}
+                 />
             </TouchableOpacity>
 
             <Modal visible={open} transparent animationType='fade' onRequestClose={handleOutsidePress}>
@@ -157,14 +155,12 @@ export default function MultiSelect({ label, options, placeholder, width, onChan
 
                 {anchor && (
                     <Animated.View
-                        className='bg-white border border-outline-300 rounded-lg max-h-40 shadow-hard-2'
+                        className='absolute z-index-9999 bg-white border border-outline-300 rounded-lg max-h-40 shadow-hard-2'
                         style={[
                             {
-                                position: 'absolute',
                                 left: anchor.x,
                                 top: anchor.y + anchor.height,
                                 width: anchor.width,
-                                zIndex: 9999,
                             },
                             slideStyle,
                         ]}
