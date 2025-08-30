@@ -1,31 +1,31 @@
-import Logo from '@/src/assets/svg/logo'
-import OnboardingUser from '@/src/assets/svg/OnboardingUser'
-import { Colors } from '@/src/constants/Colors'
-import { Strings } from '@/src/constants/Strings'
-import { Button, ButtonText } from '@gluestack-ui/themed'
-import { router, type Href } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useMemo } from 'react'
-import { StyleSheet, Text, View, useColorScheme } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Logo from '@/src/assets/svg/logo';
+import OnboardingUser from '@/src/assets/svg/OnboardingUser';
+import { Colors } from '@/src/constants/Colors';
+import { Strings } from '@/src/constants/Strings';
+import { Button, ButtonText } from '@gluestack-ui/themed';
+import { router, type Href } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React, { useMemo } from 'react';
+import { StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const NEXT_ROUTE = '/(tabs)' satisfies Href
+const NEXT_ROUTE = '/(tabs)' satisfies Href;
 
 export default function OnboardingUserScreen() {
-  const scheme = useColorScheme()
-  const palette = scheme === 'dark' ? Colors.dark : Colors.light
-  const textColor = palette.onPrimary
+  const scheme = useColorScheme();
+  const palette = scheme === 'dark' ? Colors.dark : Colors.light;
+  const textColor = palette.onPrimary;
 
   const containerStyle = useMemo(
     () => [styles.container, { backgroundColor: palette.primaryBlue }],
-    [palette.primaryBlue]
-  )
+    [palette.primaryBlue],
+  );
 
   function handlePress() {
-    router.replace(NEXT_ROUTE)
+    router.replace(NEXT_ROUTE);
   }
 
-  const t = Strings.onboarding
+  const t = Strings.onboarding;
 
   return (
     <View style={containerStyle}>
@@ -47,8 +47,8 @@ export default function OnboardingUserScreen() {
 
             {/* Ilustração */}
             <OnboardingUser
-              width={320}   // ~ w-80
-              height={288}  // ~ h-72
+              width={320} // ~ w-80
+              height={288} // ~ h-72
               accessibilityLabel={t.illoAlt}
             />
 
@@ -78,7 +78,7 @@ export default function OnboardingUserScreen() {
         </View>
       </SafeAreaView>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -108,4 +108,4 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     maxWidth: 360,
   },
-})
+});
