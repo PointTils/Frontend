@@ -20,6 +20,7 @@ export default function HomeScreen() {
       <MultiSelect
          label="Teste Componente 1"
          options={options}
+         width = 'w-80'
          placeholder="Selecione uma ou mais opções"
          onChange={handleChange}
       />

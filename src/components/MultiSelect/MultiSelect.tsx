@@ -14,6 +14,7 @@ interface MultiSelectProps {
     label: string,
     options: string[],
     placeholder: string,
+    width?: string,
     onChange: (selected: string[]) => {}
 }
 
@@ -25,14 +26,16 @@ interface MultiSelectProps {
   @param options Uma lista com opções para escolha
   @param placeholder Placeholder para informações do componente
   @param onChange Função que o componente pai envia para a seleção de elementos
+  @param width Largura do selector, assume valor padrão: w-full
   @example <MultiSelect
                label="Especialidades"
                options={options}
+               width='w-80'
                placeholder="Selecione uma ou mais opções"
                onChange={handleChange}
            />
  */
-export default function MultiSelect({ label, options, placeholder, onChange }: MultiSelectProps) {
+export default function MultiSelect({ label, options, placeholder, width, onChange }: MultiSelectProps) {
     const [selected, setSelected] = useState<string[]>([]);
     const [open, setOpen] = useState(false);
     const [anchor, setAnchor] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
@@ -59,7 +62,7 @@ export default function MultiSelect({ label, options, placeholder, onChange }: M
         const isSelected = selected.includes(item);
         return (
             <TouchableOpacity className='px-3 py-2' onPress={() => toggleSelection(item)}>
-                <Text className={`text-base ${isSelected ? 'font-bold text-success-950 bg-background-300 rounded' : ''}`}>
+                <Text className={`font-ifood-regular ${isSelected ? 'font-bold text-success-950 bg-primary-blue-light dark:bg-primary-blue-dark rounded' : ''}`}>
                     {item}
                 </Text>
             </TouchableOpacity>
@@ -96,7 +99,6 @@ export default function MultiSelect({ label, options, placeholder, onChange }: M
         opacity: slideAnim,
     };
 
-
     /*
         Renderer para a lista de opções.
         Quando não houver nada selecionado mostra o placeholder;
@@ -105,23 +107,23 @@ export default function MultiSelect({ label, options, placeholder, onChange }: M
     */
     const renderSelectedTags = () => {
         if (selected.length === 0) {
-            return <Text className='w-fit flex-nowrap text-typography-400'>{placeholder}</Text>;
+            return <Text className='font-ifood-regular w-fit flex-nowrap text-typography-400'>{placeholder}</Text>;
         } else if (selected.length === 1) {
             return (
                 <View className='flex-row flex-wrap'>
-                    <View className='bg-background-200 px-2 rounded-full mr-2'>
-                        <Text className='text-sm'>{selected[0]}</Text>
+                    <View className='bg-background-100 px-2 rounded-full mr-2'>
+                        <Text className='font-ifood-regular text-sm'>{selected[0]}</Text>
                     </View>
                 </View>
             );
         } else {
             return (
                 <View className='flex-row flex-wrap'>
-                    <View className='bg-background-200 px-2 rounded-full mr-2'>
-                        <Text className='text-sm'>{selected[0]}</Text>
+                    <View className='bg-background-100 px-2 rounded-full mr-2'>
+                        <Text className='font-ifood-regular text-sm'>{selected[0]}</Text>
                     </View>
-                    <View className='bg-background-300 px-2 rounded-full mr-2'>
-                        <Text className='text-sm'>+{selected.length - 1}...</Text>
+                    <View className='bg-primary-blue-light dark:bg-primary-blue-dark px-2 rounded-full mr-2'>
+                        <Text className='font-ifood-regular text-typography-white  text-sm'>+{selected.length - 1}</Text>
                     </View>
                 </View>
             );
@@ -129,8 +131,8 @@ export default function MultiSelect({ label, options, placeholder, onChange }: M
     };
 
     return (
-        <View className={'relative w-80'}>
-            <Text className='font-bold text-lg mb-2'>{label}</Text>
+        <View className={`relative ${ width || 'w-full'}`}>
+            <Text className='font-ifood-regular font-bold text-lg mb-2'>{label}</Text>
 
             <TouchableOpacity
                 ref={fieldRef}
