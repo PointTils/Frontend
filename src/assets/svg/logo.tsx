@@ -8,7 +8,7 @@ export type LogoProps = {
   height?: number;
   mode?: 'light' | 'dark';
   fillPrimary?: string; // wordmark
-  fillAccent?: string;  // accent dot/hand (laranja)
+  fillAccent?: string; // accent dot/hand (laranja)
   accessibilityLabel?: string;
 };
 
@@ -23,7 +23,7 @@ export default function Logo({
   const theme = useColors();
   const palette = mode ? Colors[mode] : theme;
 
-  const primary = fillPrimary ?? (palette.onPrimary ?? Colors.dark.text);
+  const primary = fillPrimary ?? palette.onPrimary ?? Colors.dark.text;
   const accent = fillAccent ?? palette.primaryOrange;
 
   return (

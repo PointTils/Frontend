@@ -32,7 +32,11 @@ export default function OnboardingCompanyScreen() {
             </Text>
           </View>
 
-          <OnboardingCompany width={320} height={260} accessibilityLabel={t.illoAlt} />
+          <OnboardingCompany
+            width={320}
+            height={260}
+            accessibilityLabel={t.illoAlt}
+          />
 
           <Text
             className="text-lg font-normal text-center mt-4 px-4 self-center max-w-[360px]"
