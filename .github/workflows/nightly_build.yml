@@ -69,19 +69,28 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Generate nightly build
+      - name: Generate build
         id: build-step
         run: |
-          echo "🌙 Generating nightly build..."
+          echo "Generating build..."
           ORIGINAL_VERSION=$(node -p "require('./package.json').version")
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
 
-          LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}-nightly.*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'-nightly\.([0-9]+)$/\1/' | sort -n | tail -n1)
-          if [ -z "$LAST_SEQ" ]; then
-            SEQ=1
+          if [ "$PROFILE" = "production" ]; then
+            # Production builds use the original version
+            NIGHTLY_VERSION="${ORIGINAL_VERSION}"
+            echo "🚀 Production build - using version: ${NIGHTLY_VERSION}"
           else
-            SEQ=$((LAST_SEQ + 1))
+            # Preview builds use nightly versioning
+            LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}-nightly.*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'-nightly\.([0-9]+)$/\1/' | sort -n | tail -n1)
+            if [ -z "$LAST_SEQ" ]; then
+              SEQ=1
+            else
+              SEQ=$((LAST_SEQ + 1))
+            fi
+            NIGHTLY_VERSION="${ORIGINAL_VERSION}-nightly.${SEQ}"
+            echo "🌙 Preview build - using nightly version: ${NIGHTLY_VERSION}"
           fi
-          NIGHTLY_VERSION="${ORIGINAL_VERSION}-nightly.${SEQ}"
 
           echo "original_version=${ORIGINAL_VERSION}" >> $GITHUB_OUTPUT
           echo "nightly_version=${NIGHTLY_VERSION}" >> $GITHUB_OUTPUT
@@ -97,10 +106,10 @@ jobs:
             fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2));
           "
 
-          echo "🚀 Starting build for version: ${NIGHTLY_VERSION}"
+          echo "Starting build for version: ${NIGHTLY_VERSION} (${PROFILE} profile)"
 
           # Capture build ID and URL from JSON output
-          BUILD_JSON=$(eas build --platform android --profile ${{ github.event.inputs.profile || 'preview' }} --non-interactive --no-wait --json)
+          BUILD_JSON=$(eas build --platform android --profile $PROFILE --non-interactive --no-wait --json)
           if [ -z "$BUILD_JSON" ]; then
             echo "❌ Failed to start build. Please check your configuration."
             exit 1
@@ -210,15 +219,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'dev' }}
+          fetch-depth: 0
 
       - name: Capture current date and time
-        run: echo "CURRENT_DATE=$(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M:%S %Z')" >> $GITHUB_ENV
+        run: echo "CURRENT_DATE=$(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M:%S')" >> $GITHUB_ENV
 
       - name: Generate changelog
         id: generate_changelog
         run: |
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
           git fetch --tags --force
-          LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | head -n 1)
+
+          if [ "$PROFILE" = "production" ]; then
+            # For production builds, compare with the latest production tag (v*.*.*)
+            LATEST_TAG=$(git tag -l "v*.*.*" --sort=-version:refname | grep -v "nightly" | head -n 1)
+            echo "📦 Production build - comparing with latest production tag: ${LATEST_TAG:-none}"
+          else
+            # For preview builds, compare with the latest nightly tag
+            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | head -n 1)
+            echo "🌙 Preview build - comparing with latest nightly tag: ${LATEST_TAG:-none}"
+          fi
 
           COMMIT_COUNT=10
           if [ -z "$LATEST_TAG" ]; then
@@ -242,7 +264,7 @@ jobs:
           tag_name: v${{ needs.build.outputs.nightly_version }}
           release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
           body: |
-            ## 🌙 Nightly Build Report
+            ${{ (github.event.inputs.profile || 'preview') == 'production' && '🚀 Production Build' || '🌙 Nightly Build' }} Report
             - **Date:** ${{ env.CURRENT_DATE }}
             - **Base Version:** ${{ needs.build.outputs.original_version }}
             - **Build ID:** ${{ needs.build.outputs.build_id || 'Not available' }}
@@ -278,11 +300,6 @@ jobs:
       - publish-release
     if: always()
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch || 'dev' }}
-
       - name: Send Discord notification
         run: |
           if [ "${{ needs.build.result }}" = "success" ]; then
@@ -293,9 +310,11 @@ jobs:
             RESULT="FAILED"
           fi
 
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
+          BUILD_TYPE=$( [ "$PROFILE" = "production" ] && echo "🚀 Production Build" || echo "🌙 Nightly Build" )
           LOGS_URL="${{ needs.build.result != 'success' && format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) || '' }}"
           RELEASE_URL=${{ needs.publish-release.outputs.release_url || 'N/A' }}
 
           curl -H "Content-Type: application/json" -X POST -d "{
-            \"content\": \"$ICON **Nightly Build $RESULT**\n\n📱 **Projeto:** Point Tils\n📊 **Status:** ${{ needs.build.result }}\n⚙️ **GitHub Release:** $RELEASE_URL\n📝 **Logs:** ${LOGS_URL:-None}\"
+            \"content\": \"$ICON **$BUILD_TYPE $RESULT**\n\n📊 **Status:** ${{ needs.build.result }}\n⚙️ **GitHub Release:** $RELEASE_URL\n📝 **Logs:** ${LOGS_URL:-None}\"
           }" "${{ secrets.DISCORD_RELEASE_WEBHOOK }}"
