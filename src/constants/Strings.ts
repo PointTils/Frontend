@@ -13,6 +13,12 @@ export const Strings = {
     login: 'Entrar',
     register: 'Cadastrar',
     forgotPassword: 'Esqueceu a senha?',
+
+    email: 'E-mail',
+    password: 'Senha',
+    signIn: 'Entrar',
+    signUpPrefix: 'Ainda não tem conta?',
+    signUpAction: 'Cadastre-se',
   },
 
   home: {
