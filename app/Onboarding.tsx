@@ -1,7 +1,7 @@
-// app/Onboarding.tsx
-import Logo from '@/src/assets/svg/logo';
+// app/onboarding.tsx
+import Logo from '@/src/assets/svg/LightOrangeLogo';
 import OnboardingCompany from '@/src/assets/svg/OnBoardingCompany';
-import OnboardingTil from '@/src/assets/svg/OnboardingUser';
+import OnboardingUser from '@/src/assets/svg/OnboardingUser'; // usado para default e til por enquanto
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { Button, ButtonText } from '@gluestack-ui/themed';
@@ -19,14 +19,29 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   const { type } = useLocalSearchParams<{ type?: string }>();
 
-  // fallback: enquanto não tem backend para user-type, usamos 'til' (usuário surdo)
-  const userType: OnboardingKey = (
-    type === 'company' ? 'company' : 'til'
-  ) as OnboardingKey;
+  // mapeia explicitamente os 3 tipos de usuário (company, til, default)
+  const userType: OnboardingKey =
+    type === 'company'
+      ? 'company'
+      : type === 'til'
+      ? 'til'
+      : 'default';
 
   const t = Strings.onboarding[userType];
-  const Illustration =
-    userType === 'company' ? OnboardingCompany : OnboardingTil;
+
+  // define a ilustração conforme o tipo
+  let Illustration: React.ComponentType<any>;
+  switch (userType) {
+    case 'company':
+      Illustration = OnboardingCompany;
+      break;
+    case 'til':
+      Illustration = OnboardingUser; 
+      // TODO: quando existir OnboardingInterpreter, trocar aqui
+      break;
+    default:
+      Illustration = OnboardingUser;
+  }
 
   function handlePress() {
     router.replace(NEXT_ROUTE);
