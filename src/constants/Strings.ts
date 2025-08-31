@@ -1,8 +1,4 @@
-/**
- * UI text constants for the Point Tils app
- * Organized by feature for easier maintenance
- */
-
+// src/constants/Strings.ts
 export const Strings = {
   common: {
     cancel: 'Cancelar',
@@ -10,23 +6,13 @@ export const Strings = {
     delete: 'Excluir',
     back: 'Voltar',
     error: 'Ocorreu um erro. Tente novamente.',
-    understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
   },
 
   auth: {
-    login: 'Login',
-    signIn: 'Entrar',
-    password: 'Senha',
+    login: 'Entrar',
     register: 'Cadastrar',
-    forgotPassword: 'Esqueci a senha',
-    email: 'Email',
-    signUp: 'Ainda não possui conta? Criar conta',
-    signUpPrefix: 'Ainda não possui conta?',
-    signUpAction: 'Criar conta',
-    sessionExpired: 'Sessão Expirada',
-    sessionExpiredMessage:
-      'Sua sessão expirou. Você será redirecionado para o login.',
+    forgotPassword: 'Esqueceu a senha?',
   },
 
   home: {
@@ -40,4 +26,22 @@ export const Strings = {
   profile: {
     title: 'Perfil',
   },
+
+  onboarding: {
+    til: {
+      title: 'Conecte-se a intérpretes de forma rápida e simples',
+      description:
+        'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes.',
+    },
+    company: {
+      title: 'Encontre intérpretes para sua empresa',
+      description:
+        'Conecte sua organização à rede de intérpretes e simplifique o agendamento de atendimentos.',
+    },
+    default: {
+      title: 'Bem-vindo ao Point Tils',
+      description:
+        'Uma plataforma para aproximar pessoas por meio de interpretação em tempo real.',
+    },
+  } as const,
 } as const;

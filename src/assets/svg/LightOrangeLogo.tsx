@@ -1,3 +1,4 @@
+// src/assets/svg/LightOrangeLogo.tsx
 import { Colors } from '@/src/constants/Colors';
 import { useColors } from '@/src/hooks/useColors';
 import Svg, { Path } from 'react-native-svg';
@@ -6,8 +7,8 @@ export type LogoProps = {
   width?: number;
   height?: number;
   mode?: 'light' | 'dark';
-  fillPrimary?: string; // wordmark
-  fillAccent?: string; // accent dot/hand (laranja)
+  fillPrimary?: string; // wordmark (geralmente branco no fundo primary)
+  fillAccent?: string; // detalhe laranja
   accessibilityLabel?: string;
 };
 
@@ -22,8 +23,10 @@ export default function Logo({
   const theme = useColors();
   const palette = mode ? Colors[mode] : theme;
 
-  const primary = fillPrimary ?? palette.onPrimary ?? Colors.dark.text;
-  const accent = fillAccent ?? palette.primaryOrange;
+  // Evita depender de palette.onPrimary (que não existe no tema atual)
+  const primary = fillPrimary ?? '#fff';
+  const accent =
+    fillAccent ?? palette.primaryOrange ?? Colors.light.primaryOrange;
 
   return (
     <Svg
