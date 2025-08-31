@@ -21,11 +21,7 @@ export default function Onboarding() {
 
   // mapeia explicitamente os 3 tipos de usuário (company, til, default)
   const userType: OnboardingKey =
-    type === 'company'
-      ? 'company'
-      : type === 'til'
-      ? 'til'
-      : 'default';
+    type === 'company' ? 'company' : type === 'til' ? 'til' : 'default';
 
   const t = Strings.onboarding[userType];
 
@@ -36,7 +32,7 @@ export default function Onboarding() {
       Illustration = OnboardingCompany;
       break;
     case 'til':
-      Illustration = OnboardingUser; 
+      Illustration = OnboardingUser;
       // TODO: quando existir OnboardingInterpreter, trocar aqui
       break;
     default:
