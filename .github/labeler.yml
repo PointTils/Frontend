@@ -17,3 +17,6 @@ feature:
 
 bugfix:
   - head-branch: ['^fix/', 'fix']
+
+hotfix:
+  - head-branch: ['^hotfix/', 'hotfix']
