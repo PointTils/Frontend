@@ -16,8 +16,7 @@ export default function RegisterScreen() {
     const [phoneError, setPhoneError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
-
-    
+   
     const colors = useColors();
 
     const validateEmail = (email: string) => {
@@ -77,7 +76,7 @@ export default function RegisterScreen() {
             setEmail("")
             setEmailError(true);
         }
-        if (password.length < 6) {
+        if (password.length < 8) {
             hasError = true;
             setPassword("")
             setPasswordError(true);
@@ -159,6 +158,7 @@ export default function RegisterScreen() {
                         placeholder="Empresa X"
                         value={reason}
                         onChangeText={setReason}
+                        maxLength={100}
                         className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
                     />
                     
@@ -196,6 +196,7 @@ export default function RegisterScreen() {
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
+                        maxLength={250}
                         className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
                     />
                     
@@ -208,6 +209,7 @@ export default function RegisterScreen() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        maxLength={25}
                         className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
                     />
                 </View>
