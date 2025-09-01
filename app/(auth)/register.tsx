@@ -184,7 +184,7 @@ export default function RegisterScreen() {
           <View>
             <Text className="font-ifood-medium mb-2">
               Razão Social
-              <Text style={{ color: '#B91C1C' }}>*</Text>
+              <Text style={{ color: colors.mandatory }}>*</Text>
             </Text>
             <TextInput
               placeholder="Empresa X"
@@ -196,7 +196,7 @@ export default function RegisterScreen() {
 
             <Text className="font-ifood-medium mb-2">
               CNPJ
-              <Text style={{ color: '#B91C1C' }}>*</Text>
+              <Text style={{ color: colors.mandatory }}>*</Text>
             </Text>
             <TextInput
               placeholder="00.000.000/0001-00"
@@ -208,7 +208,7 @@ export default function RegisterScreen() {
 
             <Text className="font-ifood-medium mb-2">
               Telefone
-              <Text style={{ color: '#B91C1C' }}>*</Text>
+              <Text style={{ color: colors.mandatory }}>*</Text>
             </Text>
             <TextInput
               placeholder="(00) 00000-0000"
@@ -221,7 +221,7 @@ export default function RegisterScreen() {
 
             <Text className="font-ifood-medium mb-2">
               Email
-              <Text style={{ color: '#B91C1C' }}>*</Text>
+              <Text style={{ color: colors.mandatory }}>*</Text>
             </Text>
             <TextInput
               placeholder="example@gmail.com"
@@ -234,7 +234,7 @@ export default function RegisterScreen() {
 
             <Text className="font-ifood-medium mb-2">
               Senha
-              <Text style={{ color: '#B91C1C' }}>*</Text>
+              <Text style={{ color: colors.mandatory }}>*</Text>
             </Text>
             <TextInput
               placeholder="*******"
