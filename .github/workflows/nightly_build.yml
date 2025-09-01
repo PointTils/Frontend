@@ -246,32 +246,28 @@ jobs:
 
           # Create temporary file for changelog
           if [ -z "$LATEST_TAG" ]; then
-            git log -${COMMIT_COUNT} --pretty=format:"- %s [%h]" > /tmp/changelog.txt
+            git log -${COMMIT_COUNT} --pretty=format:"- %s [%h]" > changelog.tmp
           else
             COMMITS_SINCE=$(git rev-list --count ${LATEST_TAG}..HEAD)
             if [ "$COMMITS_SINCE" -eq 0 ]; then
-              echo "No changes since last nightly build." > /tmp/changelog.txt
+              echo "No changes since last nightly build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --pretty=format:"- %s [%h]" > /tmp/changelog.txt
+              git log ${LATEST_TAG}..HEAD --pretty=format:"- %s [%h]" > changelog.tmp
             fi
           fi
 
-          # Use GitHub's heredoc syntax to safely set multiline variables
-          {
-            echo 'CHANGELOG<<EOF'
-            cat /tmp/changelog.txt
-            echo 'EOF'
-          } >> $GITHUB_ENV
+          # Set environment variable using heredoc
+          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
+          cat changelog.tmp >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
-          # Also set as step output using the same method
-          {
-            echo 'changelog<<EOF'
-            cat /tmp/changelog.txt
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
+          # Set output variable using heredoc
+          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
+          cat changelog.tmp >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
-          # Clean up
-          rm -f /tmp/changelog.txt
+          # Clean up temporary file
+          rm changelog.tmp
 
       - name: Create GitHub Release
         id: create_release
