@@ -256,15 +256,13 @@ jobs:
             fi
           fi
 
-          # Set environment variable using heredoc
-          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
-          cat changelog.tmp >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          CHANGELOG_CONTENT="$(cat changelog.tmp)"
 
-          # Set output variable using heredoc
-          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
-          cat changelog.tmp >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          # Set environment variable
+          printf "CHANGELOG<<EOF\n%s\nEOF\n" "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+
+          # Set output variable
+          printf "changelog<<EOF\n%s\nEOF\n" "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
 
           # Clean up temporary file
           rm changelog.tmp
