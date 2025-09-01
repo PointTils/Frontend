@@ -2,6 +2,7 @@ import { useColors } from "@/src/hooks/useColors";
 import React, { useState } from "react";
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { RadioButton } from "react-native-paper";
+import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen() {
     const [type, setType] = useState("enterprise");
@@ -10,6 +11,13 @@ export default function RegisterScreen() {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [reasonError, setReasonError] = useState(false);
+    const [cnpjError, setCNPJError] = useState(false);
+    const [phoneError, setPhoneError] = useState(false);
+    const [emailError, setEmailError] = useState(false);
+    const [passwordError, setPasswordError] = useState(false);
+
+    
     const colors = useColors();
 
     const validateEmail = (email: string) => {
@@ -34,13 +42,75 @@ export default function RegisterScreen() {
             .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
             .replace(/\.(\d{3})(\d)/, '.$1/$2')
             .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
-
         setCnpj(formatted);
     };
 
+    const validateCnpj = (cnpj: string) => {
+        return cnpj.replace(/\D/g, "").length === 14;
+    };
+
+    const handleSubmit = () => {
+        let hasError = false;
+        setReasonError(false);
+        setCNPJError(false);
+        setPhoneError(false);
+        setEmailError(false);
+        setPasswordError(false);
+
+        if (reason.length < 5) {
+            hasError = true;
+            setReason("")
+            setReasonError(true);
+        }
+        if (!validateCnpj(cnpj)) {
+            hasError = true;
+            setCnpj("")
+            setCNPJError(true);
+        }
+        if (phone.replace(/\D/g, "").length < 10) {
+            hasError = true;
+            setPhone("")
+            setPhoneError(true);
+        }
+        if (!validateEmail(email)) {
+            hasError = true;
+            setEmail("")
+            setEmailError(true);
+        }
+        if (password.length < 6) {
+            hasError = true;
+            setPassword("")
+            setPasswordError(true);
+        }
+        if(hasError){
+            Toast.show({
+                type: 'error',
+                text1: 'Formulario Invalido',
+                text2: 'Verifique os campos preenchidos',
+                position: 'top', 
+                visibilityTime: 3000, 
+            });
+            return
+        }
+        Toast.show({
+            type: 'success',
+            text1: 'Sucesso',
+            text2: 'Você criou o usuario com exito',
+            position: 'top', 
+            visibilityTime: 3000, 
+        });
+    };
+
+    const handlerError = (error: boolean) => {
+        return error ? 'border-red-300' : 'border-gray-300';
+    }
 
     return (
-        <ScrollView className="flex-1 bg-white p-10 mt-10">
+        <>
+        <View style={{zIndex:999}}>
+            <Toast />
+        </View>
+        <ScrollView className="flex-1 p-10 mt-10">
             <Text className="font-ifood-medium text-lg mb-3 text-[18px]">Boas-vindas!</Text>
             <Text className="font-ifood-regular mb-6">
                 Precisamos de algumas informações básicas para criar sua conta.
@@ -89,7 +159,7 @@ export default function RegisterScreen() {
                         placeholder="Empresa X"
                         value={reason}
                         onChangeText={setReason}
-                        className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
                     />
                     
                     <Text className="font-ifood-medium mb-2">
@@ -100,7 +170,7 @@ export default function RegisterScreen() {
                         placeholder="00.000.000/0001-00"
                         value={cnpj}
                         onChangeText={handleCnpjChange}
-                        className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
                         maxLength={18}
                     />
                     
@@ -113,7 +183,7 @@ export default function RegisterScreen() {
                         value={phone}
                         onChangeText={handlePhoneChange}
                         keyboardType="phone-pad"
-                        className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
                         maxLength={15}
                     />
                     
@@ -126,7 +196,7 @@ export default function RegisterScreen() {
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
-                        className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+                        className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
                     />
                     
                     <Text className="font-ifood-medium mb-2">
@@ -138,19 +208,19 @@ export default function RegisterScreen() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
-                        className="border border-gray-300 rounded-lg px-4 py-3 mb-6"
+                        className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
                     />
                 </View>
                 <View className="mt-5 pb-40">
-                    <TouchableOpacity style={{ backgroundColor: colors.primaryOrange }} className="py-4 rounded-lg mb-3">
-                        <Text className="text-center text-white font-semibold text-lg">+ Criar conta</Text>
+                    <TouchableOpacity style={{ backgroundColor: colors.primaryOrange }} className="py-4 rounded-lg mb-3" onPress={handleSubmit}>
+                        <Text className="font-ifood-bold text-center text-white text-lg">+ Criar conta</Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity>
-                        <Text style={{ color: colors.primaryOrange }} className="text-center font-semibold">✕ Cancelar</Text>
+                        <Text style={{ color: colors.primaryOrange }} className="font-ifood-medium text-center">✕ Cancelar</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </ScrollView>
-);
+        </>
+    );
 }
