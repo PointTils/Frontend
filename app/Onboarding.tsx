@@ -22,10 +22,13 @@ export default function Onboarding() {
 
   // chaves existentes no Strings: 'company' | 'til' | 'surdo'
   const userType: OnboardingKey =
-    type === 'company' ? 'company'
-    : type === 'til'   ? 'til'
-    : type === 'surdo' ? 'surdo'
-    : 'til'; // fallback seguro
+    type === 'company'
+      ? 'company'
+      : type === 'til'
+        ? 'til'
+        : type === 'surdo'
+          ? 'surdo'
+          : 'til'; // fallback seguro
 
   const t = Strings.onboarding[userType];
 
@@ -70,7 +73,11 @@ export default function Onboarding() {
             </Text>
           </View>
 
-          <Illustration width={320} height={260} accessibilityLabel={t.illoAlt} />
+          <Illustration
+            width={320}
+            height={260}
+            accessibilityLabel={t.illoAlt}
+          />
 
           <Text
             className="text-lg font-normal text-center mt-4 px-4 self-center max-w-[360px]"
@@ -86,7 +93,10 @@ export default function Onboarding() {
           className="w-full max-w-[360px] self-center mt-6 h-14 rounded-xl shadow-soft-2 justify-center items-center"
           style={{ backgroundColor: colors.primaryOrange }}
         >
-          <Text className="text-lg font-bold text-center" style={{ color: colors.text }}>
+          <Text
+            className="text-lg font-bold text-center"
+            style={{ color: colors.text }}
+          >
             {t.cta}
           </Text>
         </Pressable>

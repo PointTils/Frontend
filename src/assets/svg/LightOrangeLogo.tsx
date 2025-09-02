@@ -11,7 +11,7 @@ export type LightOrangeLogoProps = {
   accessibilityLabel?: string;
 };
 
-export default function LightOrangeLogo ({
+export default function LightOrangeLogo({
   width = 90,
   height = 58,
   mode,
