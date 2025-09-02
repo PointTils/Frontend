@@ -67,5 +67,4 @@ export const Strings = {
       cta: 'Começar agora',
     },
   },
-
 } as const;
