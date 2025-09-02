@@ -1,3 +1,4 @@
+import { FORCE_LIGHT_MODE } from '@/src/constants/Theme';
 import { OverlayProvider } from '@gluestack-ui/overlay';
 import { ToastProvider } from '@gluestack-ui/toast';
 import { useColorScheme } from 'nativewind';
@@ -18,10 +19,11 @@ export function GluestackUIProvider({
 }) {
   const { colorScheme, setColorScheme } = useColorScheme();
 
+  const effectiveMode = FORCE_LIGHT_MODE ? 'light' : mode;
   useEffect(() => {
-    setColorScheme(mode);
+    setColorScheme(effectiveMode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [effectiveMode]);
 
   return (
     <View

@@ -10,12 +10,23 @@ export const Strings = {
     delete: 'Excluir',
     back: 'Voltar',
     error: 'Ocorreu um erro. Tente novamente.',
+    understood: 'Entendi',
+    slogan: 'Interpretando o mundo, aproximando pessoas',
   },
 
   auth: {
-    login: 'Entrar',
+    login: 'Login',
+    signIn: 'Entrar',
+    password: 'Senha',
     register: 'Cadastrar',
-    forgotPassword: 'Esqueceu a senha?',
+    forgotPassword: 'Esqueci a senha',
+    email: 'Email',
+    signUp: 'Ainda não possui conta? Criar conta',
+    signUpPrefix: 'Ainda não possui conta?',
+    signUpAction: 'Criar conta',
+    sessionExpired: 'Sessão Expirada',
+    sessionExpiredMessage:
+      'Sua sessão expirou. Você será redirecionado para o login.',
   },
 
   home: {
@@ -56,4 +67,5 @@ export const Strings = {
       cta: 'Começar agora',
     },
   },
+
 } as const;
