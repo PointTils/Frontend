@@ -13,6 +13,22 @@ export const Strings = {
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
   },
+  register: {
+    title: "Boas-vindas!",
+    subtitle: "Precisamos de algumas informações básicas para criar sua conta.",
+    typeSelect: "Quem é você?",
+    client: "Solicitante",
+    enterprise: "Empresa",
+    interpreter: "Intérprete",
+    socialReason: "Razão Social",
+    cnpj: "CNPJ",
+    phone: "Telefone",
+    email: "Email",
+    password: "Senha",
+    create: "+ Criar conta",
+    cancel: "✕ Cancelar"
+    // demais textos
+  },
 
   auth: {
     login: 'Login',
