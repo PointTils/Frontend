@@ -234,11 +234,11 @@ jobs:
 
           if [ "$PROFILE" = "production" ]; then
             # For production builds, compare with the latest production tag (v*.*.*)
-            LATEST_TAG=$(git tag -l "v*.*.*" --sort=-version:refname | grep -v "nightly" | head -n 1)
+            LATEST_TAG=$(git tag -l "v*.*.*" --sort=-version:refname | grep -v "nightly" | sed -n 2p)
             echo "📦 Production build - comparing with latest production tag: ${LATEST_TAG:-none}"
           else
             # For preview builds, compare with the latest nightly tag
-            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | head -n 1)
+            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | sed -n 2p)
             echo "🌙 Preview build - comparing with latest nightly tag: ${LATEST_TAG:-none}"
           fi
 
@@ -246,13 +246,13 @@ jobs:
 
           # Create temporary file for changelog
           if [ -z "$LATEST_TAG" ]; then
-            git log -${COMMIT_COUNT} --pretty=format:"- %s [%h]" > changelog.tmp
+            echo "" > changelog.tmp
           else
             COMMITS_SINCE=$(git rev-list --count ${LATEST_TAG}..HEAD)
             if [ "$COMMITS_SINCE" -eq 0 ]; then
               echo "No changes since last nightly build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --pretty=format:"- %s [%h]" > changelog.tmp
+              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s [%h]" > changelog.tmp
             fi
           fi
 
@@ -274,12 +274,11 @@ jobs:
           tag_name: v${{ needs.build.outputs.nightly_version }}
           release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
           body: |
-            ${{ (github.event.inputs.profile || 'preview') == 'production' && '🚀 Production Build' || '🌙 Nightly Build' }} Report
             - **Date:** ${{ env.CURRENT_DATE }}
             - **Base Version:** ${{ needs.build.outputs.original_version }}
             - **Build ID:** ${{ needs.build.outputs.build_id || 'Not available' }}
-            ---
-            ### What's new
+
+            ## What's new
             ${{ env.CHANGELOG }}
           draft: false
           prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
