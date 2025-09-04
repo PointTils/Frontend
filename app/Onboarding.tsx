@@ -20,7 +20,7 @@ export default function Onboarding() {
   const { type } = useLocalSearchParams<{ type?: OnboardingKey }>();
 
   const userType: OnboardingKey =
-    type === 'company' ? 'company' : type === 'surdo' ? 'surdo' : 'til';
+    type === 'company' ? 'company' : type === 'user' ? 'user' : 'til';
   const data = Strings.onboarding[userType];
 
   const Illustration =
@@ -87,7 +87,6 @@ export default function Onboarding() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: {
@@ -109,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     lineHeight: 24,
-    fontWeight: '700',
+    fontFamily: 'iFoodRCTextos-Bold', 
     textAlign: 'left',
     flexShrink: 1,
   },
@@ -121,6 +120,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: 'iFoodRCTextos-Regular', 
     textAlign: 'center',
     maxWidth: 360,
     marginBottom: 24,
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'iFoodRCTextos-Bold', 
   },
 });
+

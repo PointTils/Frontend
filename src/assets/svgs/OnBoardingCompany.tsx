@@ -6,7 +6,6 @@ import Svg, { ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 export type OnboardingCompanyProps = {
   width?: number;
   height?: number;
-  accessibilityLabel?: string;
   /** Opcional: sobrescreve o laranja do tema */
   accentColor?: string;
 };
@@ -14,7 +13,6 @@ export type OnboardingCompanyProps = {
 function OnboardingCompany({
   width = 250,
   height = 203,
-  accessibilityLabel = 'Ilustração',
   accentColor,
 }: OnboardingCompanyProps) {
   const palette = useColors();
@@ -26,7 +24,6 @@ function OnboardingCompany({
       height={height}
       viewBox="0 0 250 203"
       accessible
-      accessibilityLabel={accessibilityLabel}
     >
       <G clipPath="url(#clip0_11764_3604)">
         <Path

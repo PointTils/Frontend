@@ -45,10 +45,10 @@ export const Strings = {
     til: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de boas-vindas',
-      title: 'Conecte-se a intérpretes de forma rápida e simples',
+      title: 'Mostre seu trabalho para quem precisa',
       subtitle:
-        'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes.',
-      cta: 'Encontrar intérprete agora',
+        'No Point Tils, você cadastra suas áreas de atuação, horários disponíveis e recebe solicitações de empresas e pessoas surdas. Gerencie sua agenda e amplie seu alcance profissional.',
+      cta: 'Começar agora',
     },
     company: {
       logoAlt: 'Logotipo do Point Tils',
@@ -58,13 +58,13 @@ export const Strings = {
         'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
       cta: 'Buscar intérprete',
     },
-    surdo: {
+    user: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de cadastro de intérprete',
-      title: 'Mostre seu trabalho para quem precisa',
+      title: 'Conecte-se a intérpretes de forma rápida e simples',
       subtitle:
-        'No Point Tils, você cadastra suas áreas de atuação, horários disponíveis e recebe solicitações de empresas e pessoas surdas. Gerencie sua agenda e amplie seu alcance profissional.',
-      cta: 'Começar agora',
+        'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes',
+      cta: 'Encontrar intérprete agora',
     },
   },
 } as const;
