@@ -28,8 +28,8 @@ export default function Onboarding() {
     userType === 'company'
       ? OnboardingCompany
       : userType === 'til'
-      ? OnboardingTil
-      : OnboardingUser;
+        ? OnboardingTil
+        : OnboardingUser;
 
   function handlePress() {
     router.replace(NEXT_ROUTE);
@@ -55,23 +55,34 @@ export default function Onboarding() {
             fillPrimary={colors.text}
             fillAccent={colors.primaryOrange}
           />
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={0}>
+          <Text
+            style={[styles.title, { color: colors.text }]}
+            numberOfLines={0}
+          >
             {data.title}
           </Text>
         </View>
 
         <View style={styles.illoWrap}>
-          <Illustration width={320} height={260} accessibilityLabel={data.illoAlt} />
+          <Illustration
+            width={320}
+            height={260}
+            accessibilityLabel={data.illoAlt}
+          />
         </View>
 
-        <Text style={[styles.subtitle, { color: colors.text }]}>{data.subtitle}</Text>
+        <Text style={[styles.subtitle, { color: colors.text }]}>
+          {data.subtitle}
+        </Text>
 
         <Pressable
           onPress={handlePress}
           accessibilityLabel={data.cta}
           style={[styles.cta, { backgroundColor: colors.primaryOrange }]}
         >
-          <Text style={[styles.ctaText, { color: colors.text }]}>{data.cta}</Text>
+          <Text style={[styles.ctaText, { color: colors.text }]}>
+            {data.cta}
+          </Text>
         </Pressable>
       </View>
     </View>
