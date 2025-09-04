@@ -233,12 +233,14 @@ jobs:
           git fetch --tags --force
 
           if [ "$PROFILE" = "production" ]; then
-            # For production builds, compare with the latest production tag (v*.*.*)
-            LATEST_TAG=$(git tag -l "v*.*.*" --sort=-version:refname | grep -v "nightly" | sed -n 2p)
+            # For production builds, compare with the latest production tag
+            CURRENT_TAG=$(git describe --tags --match "v*.*.*" --abbrev=0)
+            LATEST_TAG=$(git describe --tags --match "v*.*.*" --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || echo "")
             echo "📦 Production build - comparing with latest production tag: ${LATEST_TAG:-none}"
           else
             # For preview builds, compare with the latest nightly tag
-            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | sed -n 2p)
+            CURRENT_TAG=$(git describe --tags --match "v*-nightly.*" --abbrev=0)
+            LATEST_TAG=$(git describe --tags --match "v*-nightly.*" --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || echo "")
             echo "🌙 Preview build - comparing with latest nightly tag: ${LATEST_TAG:-none}"
           fi
 
