@@ -1,51 +1,35 @@
 // app/onboarding.tsx
-import Logo from '@/src/assets/svg/LightOrangeLogo';
-import OnboardingCompany from '@/src/assets/svg/OnBoardingCompany';
-import OnboardingTil from '@/src/assets/svg/OnboardingTil';
-import OnboardingUser from '@/src/assets/svg/OnboardingUser';
+import Logo from '@/src/assets/svgs/LightOrangeLogo';
+import OnboardingCompany from '@/src/assets/svgs/OnBoardingCompany';
+import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
+import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type OnboardingKey = keyof typeof Strings.onboarding;
+export const options = { headerShown: false };
 
-// rota pós-onboarding
+type OnboardingKey = keyof typeof Strings.onboarding;
 const NEXT_ROUTE: Href = '/(tabs)';
 
 export default function Onboarding() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { type } = useLocalSearchParams<{ type?: string }>();
+  const { type } = useLocalSearchParams<{ type?: OnboardingKey }>();
 
-  // chaves existentes no Strings: 'company' | 'til' | 'surdo'
   const userType: OnboardingKey =
-    type === 'company'
-      ? 'company'
-      : type === 'til'
-        ? 'til'
-        : type === 'surdo'
-          ? 'surdo'
-          : 'til'; // fallback seguro
+    type === 'company' ? 'company' : type === 'surdo' ? 'surdo' : 'til';
+  const data = Strings.onboarding[userType];
 
-  const t = Strings.onboarding[userType];
-
-  // seleciona ilustração por tipo
-  let Illustration: React.ComponentType<any>;
-  switch (userType) {
-    case 'company':
-      Illustration = OnboardingCompany;
-      break;
-    case 'til':
-      Illustration = OnboardingTil;
-      break;
-    case 'surdo':
-    default:
-      Illustration = OnboardingUser;
-      break;
-  }
+  const Illustration =
+    userType === 'company'
+      ? OnboardingCompany
+      : userType === 'til'
+      ? OnboardingTil
+      : OnboardingUser;
 
   function handlePress() {
     router.replace(NEXT_ROUTE);
@@ -53,54 +37,95 @@ export default function Onboarding() {
 
   return (
     <View
-      className="flex-1"
-      style={{
-        backgroundColor: colors.primaryBlue,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.primaryBlue,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
     >
-      <View className="flex-1 items-center justify-between px-6 pb-[95px]">
-        <View className="flex-1 items-center justify-center w-full">
-          <View className="w-full max-w-[360px] self-center flex-row items-center justify-center px-4 my-8">
-            <Logo width={120} height={120} accessibilityLabel={t.logoAlt} />
-            <Text
-              className="text-xl leading-7 font-bold ml-3 text-left flex-shrink"
-              style={{ color: colors.text }}
-              numberOfLines={0}
-            >
-              {t.title}
-            </Text>
-          </View>
-
-          <Illustration
-            width={320}
-            height={260}
-            accessibilityLabel={t.illoAlt}
+      <View style={styles.content}>
+        <View style={styles.topRow}>
+          <Logo
+            width={120}
+            height={120}
+            accessibilityLabel={data.logoAlt}
+            fillPrimary={colors.text}
+            fillAccent={colors.primaryOrange}
           />
-
-          <Text
-            className="text-lg font-normal text-center mt-4 px-4 self-center max-w-[360px]"
-            style={{ color: colors.text }}
-          >
-            {t.subtitle}
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={0}>
+            {data.title}
           </Text>
         </View>
 
+        <View style={styles.illoWrap}>
+          <Illustration width={320} height={260} accessibilityLabel={data.illoAlt} />
+        </View>
+
+        <Text style={[styles.subtitle, { color: colors.text }]}>{data.subtitle}</Text>
+
         <Pressable
           onPress={handlePress}
-          accessibilityLabel={t.cta}
-          className="w-full max-w-[360px] self-center mt-6 h-14 rounded-xl shadow-soft-2 justify-center items-center"
-          style={{ backgroundColor: colors.primaryOrange }}
+          accessibilityLabel={data.cta}
+          style={[styles.cta, { backgroundColor: colors.primaryOrange }]}
         >
-          <Text
-            className="text-lg font-bold text-center"
-            style={{ color: colors.text }}
-          >
-            {t.cta}
-          </Text>
+          <Text style={[styles.ctaText, { color: colors.text }]}>{data.cta}</Text>
         </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  topRow: {
+    width: '100%',
+    maxWidth: 360,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+    gap: 12,
+  },
+  title: {
+    fontSize: 20,
+    lineHeight: 24,
+    fontWeight: '700',
+    textAlign: 'left',
+    flexShrink: 1,
+  },
+  illoWrap: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    maxWidth: 360,
+    marginBottom: 24,
+  },
+  cta: {
+    width: '90%',
+    maxWidth: 360,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  ctaText: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+});
