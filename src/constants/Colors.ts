@@ -8,7 +8,7 @@ export const Colors = {
   light: {
     text: '#0D0D0D', // primary800 - Gluestack
     background: '#fff',
-    onboardingText: '#fff', 
+    onboardingText: '#fff',
     primaryOrange: '#F28D22',
     primaryBlue: '#43A2DB',
     disabled: '#999999', // primary50 - Gluestack
