@@ -1,13 +1,17 @@
+import { Button } from '@/src/components/ui/button';
+import { Radio } from '@/src/components/ui/radio';
+import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
+import { handleCnpjChange, handlePhoneChange, validateCnpj, validateEmail } from '@/src/utils/mask';
 import React, { useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import { RadioButton } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen() {
@@ -24,35 +28,6 @@ export default function RegisterScreen() {
   const [passwordError, setPasswordError] = useState(false);
 
   const colors = useColors();
-
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const handlePhoneChange = (text: string) => {
-    const cleaned = text.replace(/\D/g, '').slice(0, 11);
-
-    const formatted = cleaned
-      .replace(/^(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
-    setPhone(formatted);
-  };
-
-  const handleCnpjChange = (text: string) => {
-    const cleaned = text.replace(/\D/g, '').slice(0, 14);
-
-    const formatted = cleaned
-      .replace(/^(\d{2})(\d)/, '$1.$2')
-      .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/\.(\d{3})(\d)/, '.$1/$2')
-      .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
-    setCnpj(formatted);
-  };
-
-  const validateCnpj = (cnpj: string) => {
-    return cnpj.replace(/\D/g, '').length === 14;
-  };
 
   const handleSubmit = () => {
     let hasError = false;
@@ -115,157 +90,165 @@ export default function RegisterScreen() {
       <View style={{ zIndex: 999 }}>
         <Toast />
       </View>
-      <ScrollView className="flex-1 p-10 mt-10">
-        <Text className="font-ifood-medium text-lg mb-3 text-[18px]">
-          Boas-vindas!
-        </Text>
-        <Text className="font-ifood-regular mb-6">
-          Precisamos de algumas informações básicas para criar sua conta.
-        </Text>
+      <KeyboardAvoidingView
+        className="flex-1 p-10 mt-10"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView >
+          <Text className="font-ifood-medium text-lg mb-3 text-[18px]">
+            {Strings.register.title}
+          </Text>
+          <Text className="font-ifood-regular mb-6">
+            {Strings.register.subtitle}
+          </Text>
 
-        <Text className="font-ifood-medium mb-2">Quem é você?</Text>
-        <View className="flex-row mb-2">
-          <View className="flex-row items-center">
-            <RadioButton
-              value="client"
-              status={type === 'client' ? 'checked' : 'unchecked'}
-              onPress={() => setType('client')}
-              color={colors.primaryBlue}
-              uncheckedColor={colors.disabled}
-            />
-            <Text
-              style={{
-                color: type === 'client' ? colors.primaryBlue : colors.disabled,
-              }}
-              className="font-ifood-regular"
-            >
-              {' '}
-              Solicitante
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <RadioButton
-              value="enterprise"
-              status={type === 'enterprise' ? 'checked' : 'unchecked'}
-              onPress={() => setType('enterprise')}
-              color={colors.primaryBlue}
-              uncheckedColor={colors.disabled}
-            />
-            <Text
-              style={{
-                color:
-                  type === 'enterprise' ? colors.primaryBlue : colors.disabled,
-              }}
-              className="font-ifood-regular"
-            >
-              Empresa
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <RadioButton
-              value="interpreter"
-              status={type === 'interpreter' ? 'checked' : 'unchecked'}
-              onPress={() => setType('interpreter')}
-              color={colors.primaryBlue}
-              uncheckedColor={colors.disabled}
-            />
-            <Text
-              style={{
-                color:
-                  type === 'interpreter' ? colors.primaryBlue : colors.disabled,
-              }}
-              className="font-ifood-regular"
-            >
-              Intérprete
-            </Text>
-          </View>
-        </View>
-        <View className="flex-1 px-4 pt-2 justify-between">
-          <View>
-            <Text className="font-ifood-medium mb-2">
-              Razão Social
-              <Text style={{ color: colors.mandatory }}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="Empresa X"
-              value={reason}
-              onChangeText={setReason}
-              maxLength={100}
-              className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
-            />
-
-            <Text className="font-ifood-medium mb-2">
-              CNPJ
-              <Text style={{ color: colors.mandatory }}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="00.000.000/0001-00"
-              value={cnpj}
-              onChangeText={handleCnpjChange}
-              className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
-              maxLength={18}
-            />
-
-            <Text className="font-ifood-medium mb-2">
-              Telefone
-              <Text style={{ color: colors.mandatory }}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="(00) 00000-0000"
-              value={phone}
-              onChangeText={handlePhoneChange}
-              keyboardType="phone-pad"
-              className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
-              maxLength={15}
-            />
-
-            <Text className="font-ifood-medium mb-2">
-              Email
-              <Text style={{ color: colors.mandatory }}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="example@gmail.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              maxLength={250}
-              className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
-            />
-
-            <Text className="font-ifood-medium mb-2">
-              Senha
-              <Text style={{ color: colors.mandatory }}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="*******"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              maxLength={25}
-              className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
-            />
-          </View>
-          <View className="mt-5 pb-40">
-            <TouchableOpacity
-              style={{ backgroundColor: colors.primaryOrange }}
-              className="py-4 rounded-lg mb-3"
-              onPress={handleSubmit}
-            >
-              <Text className="font-ifood-bold text-center text-white text-lg">
-                + Criar conta
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
+          <Text className="font-ifood-medium mb-2">{Strings.register.typeSelect}</Text>
+          {/* <View className="flex-row mb-2">
+            <View className="flex-row items-center">
+              <Radio
+                value="client"
+                status={type === 'client' ? 'checked' : 'unchecked'}
+                onPress={() => setType('client')}
+                color={colors.primaryBlue}
+                uncheckedColor={colors.disabled}
+              />
               <Text
-                style={{ color: colors.primaryOrange }}
-                className="font-ifood-medium text-center"
+                style={{
+                  color: type === 'client' ? colors.primaryBlue : colors.disabled,
+                }}
+                className="font-ifood-regular"
               >
-                ✕ Cancelar
+                {' '}
+                {Strings.register.interpreter}
               </Text>
-            </TouchableOpacity>
+            </View>
+            <View className="flex-row items-center">
+              <Radio
+                value="enterprise"
+                status={type === 'enterprise' ? 'checked' : 'unchecked'}
+                onPress={() => setType('enterprise')}
+                color={colors.primaryBlue}
+                uncheckedColor={colors.disabled}
+              />
+              <Text
+                style={{
+                  color:
+                    type === 'enterprise' ? colors.primaryBlue : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {Strings.register.enterprise}
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <RadioButton
+                value="interpreter"
+                status={type === 'interpreter' ? 'checked' : 'unchecked'}
+                onPress={() => setType('interpreter')}
+                color={colors.primaryBlue}
+                uncheckedColor={colors.disabled}
+              />
+              <Text
+                style={{
+                  color:
+                    type === 'interpreter' ? colors.primaryBlue : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {Strings.register.interpreter}
+              </Text>
+            </View>
+          </View> */}
+          <View className="flex-1 px-4 pt-2 justify-between">
+            <View>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.socialReason}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Empresa X"
+                value={reason}
+                onChangeText={setReason}
+                maxLength={100}
+                className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
+              />
+
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.cnpj}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="00.000.000/0001-00"
+                value={cnpj}
+                onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
+                className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={18}
+              />
+
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.phone}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                keyboardType="phone-pad"
+                className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={15}
+              />
+
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.email}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="example@gmail.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                maxLength={250}
+                className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+              />
+
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.password}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="*******"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                maxLength={25}
+                className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+              />
+            </View>
+            <View className="mt-5 pb-10">
+              <Button
+                onPress={handleSubmit}
+                size="lg"
+                className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
+              >
+                <Text className="font-ifood-medium text-text-dark">
+                {Strings.register.create}
+                </Text>
+              </Button>
+            
+              <Button
+                action={"default"}
+                onPress={handleSubmit}
+                size="lg"
+                className="font-ifood-bold text-center text-blue text-lg data-[active=true]:bg-primary-orange-press-light"
+              >
+                <Text className="font-ifood-medium text-primary-orange">
+                  {Strings.register.cancel}
+                </Text>
+              </Button>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </>
   );
 }
