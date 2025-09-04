@@ -1,4 +1,3 @@
-// app/onboarding.tsx
 import Logo from '@/src/assets/svgs/LightOrangeLogo';
 import OnboardingCompany from '@/src/assets/svgs/OnBoardingCompany';
 import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
