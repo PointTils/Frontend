@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     lineHeight: 24,
-    fontFamily: 'iFoodRCTextos-Bold', 
+    fontFamily: 'iFoodRCTextos-Bold',
     textAlign: 'left',
     flexShrink: 1,
   },
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'iFoodRCTextos-Regular', 
+    fontFamily: 'iFoodRCTextos-Regular',
     textAlign: 'center',
     maxWidth: 360,
     marginBottom: 24,
@@ -136,7 +136,6 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: 18,
-    fontFamily: 'iFoodRCTextos-Bold', 
+    fontFamily: 'iFoodRCTextos-Bold',
   },
 });
-
