@@ -233,28 +233,35 @@ jobs:
           git fetch --tags --force
 
           if [ "$PROFILE" = "production" ]; then
-            # For production builds, compare with the latest production tag
-            CURRENT_TAG=$(git describe --tags --match "v*.*.*" --abbrev=0)
-            LATEST_TAG=$(git describe --tags --match "v*.*.*" --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || echo "")
-            echo "📦 Production build - comparing with latest production tag: ${LATEST_TAG:-none}"
+            # For production builds, get the two most recent production tags
+            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            PREVIOUS_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 2 | tail -n 1)
+            echo "📦 Production build - comparing ${PREVIOUS_TAG:-none} with ${LATEST_TAG:-none}"
           else
-            # For preview builds, compare with the latest nightly tag
-            CURRENT_TAG=$(git describe --tags --match "v*-nightly.*" --abbrev=0)
-            LATEST_TAG=$(git describe --tags --match "v*-nightly.*" --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || echo "")
-            echo "🌙 Preview build - comparing with latest nightly tag: ${LATEST_TAG:-none}"
+            # For preview builds, get the two most recent nightly tags
+            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-version:refname | head -n 1)
+            PREVIOUS_TAG=$(git tag -l "v*-nightly.*" --sort=-version:refname | head -n 2 | tail -n 1)
+            echo "🌙 Preview build - comparing ${PREVIOUS_TAG:-none} with ${LATEST_TAG:-none}"
+          fi
+
+
+          # Use PREVIOUS_TAG for comparison if it exists, otherwise compare from the beginning
+          COMPARE_TAG=""
+          if [ -n "$PREVIOUS_TAG" ] && [ "$PREVIOUS_TAG" != "$LATEST_TAG" ]; then
+            COMPARE_TAG="$PREVIOUS_TAG"
           fi
 
           COMMIT_COUNT=10
-
           # Create temporary file for changelog
-          if [ -z "$LATEST_TAG" ]; then
+          if [ -z "$COMPARE_TAG" ]; then
+            # If no previous tag, print nothing
             echo "" > changelog.tmp
           else
-            COMMITS_SINCE=$(git rev-list --count ${LATEST_TAG}..HEAD)
+            COMMITS_SINCE=$(git rev-list --count ${COMPARE_TAG}..HEAD)
             if [ "$COMMITS_SINCE" -eq 0 ]; then
               echo "No changes since last nightly build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s [%h]" > changelog.tmp
+              git log ${COMPARE_TAG}..HEAD --merges --pretty=format:"- %s [%h]" > changelog.tmp
             fi
           fi
 
