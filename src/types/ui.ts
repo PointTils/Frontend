@@ -4,3 +4,10 @@ export interface PointTilsLogoProps {
   primaryColor?: string;
   accentColor?: string;
 }
+
+export type BaseSvgProps = {
+  width?: number;
+  height?: number;
+  primaryColor?: string;
+  accentColor?: string;
+};

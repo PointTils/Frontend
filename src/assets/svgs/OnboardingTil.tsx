@@ -1,26 +1,15 @@
-// src/assets/svg/OnboardingTil.tsx
+import type { BaseSvgProps } from '@/src/types/ui';
 import * as React from 'react';
 import { ClipPath, Defs, G, Path, Rect, Svg } from 'react-native-svg';
 
-export type OnboardingTilProps = {
-  width?: number;
-  height?: number;
-  accessibilityLabel?: string;
-};
+export type OnboardingTilProps = BaseSvgProps;
 
 export default function OnboardingTil({
   width = 230,
   height = 224,
-  accessibilityLabel = 'Ilustração',
 }: OnboardingTilProps) {
   return (
-    <Svg
-      width={width}
-      height={height}
-      viewBox="0 0 230 224"
-      accessible
-      accessibilityLabel={accessibilityLabel}
-    >
+    <Svg width={width} height={height} viewBox="0 0 230 224" accessible>
       <G clipPath="url(#clip0_11764_3537)">
         <Path
           d="M134.477 218.87H128.515L125.059 186.987H134.272L134.477 218.87Z"

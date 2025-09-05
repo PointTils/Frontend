@@ -4,19 +4,17 @@ import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
 import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { router, useLocalSearchParams, type Href } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, View, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, Text, View, StyleSheet, Dimensions } from 'react-native';
 
 export const options = { headerShown: false };
+const { height } = Dimensions.get('window');
 
 type OnboardingKey = keyof typeof Strings.onboarding;
-const NEXT_ROUTE: Href = '/(tabs)';
 
 export default function Onboarding() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const { type } = useLocalSearchParams<{ type?: OnboardingKey }>();
 
   const userType: OnboardingKey =
@@ -30,18 +28,12 @@ export default function Onboarding() {
         ? OnboardingTil
         : OnboardingUser;
 
-  function handlePress() {
-    router.replace(NEXT_ROUTE);
-  }
-
   return (
     <View
       style={[
         styles.screen,
         {
           backgroundColor: colors.primaryBlue,
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
         },
       ]}
     >
@@ -50,12 +42,11 @@ export default function Onboarding() {
           <Logo
             width={120}
             height={120}
-            accessibilityLabel={data.logoAlt}
-            fillPrimary={colors.text}
+            fillPrimary={colors.onboardingText}
             fillAccent={colors.primaryOrange}
           />
           <Text
-            style={[styles.title, { color: colors.text }]}
+            style={[styles.title, { color: colors.onboardingText }]}
             numberOfLines={0}
           >
             {data.title}
@@ -70,16 +61,16 @@ export default function Onboarding() {
           />
         </View>
 
-        <Text style={[styles.subtitle, { color: colors.text }]}>
+        <Text style={[styles.subtitle, { color: colors.onboardingText }]}>
           {data.subtitle}
         </Text>
 
         <Pressable
-          onPress={handlePress}
+          onPress={() => router.replace('/(tabs)')}
           accessibilityLabel={data.cta}
           style={[styles.cta, { backgroundColor: colors.primaryOrange }]}
         >
-          <Text style={[styles.ctaText, { color: colors.text }]}>
+          <Text style={[styles.ctaText, { color: colors.onboardingText }]}>
             {data.cta}
           </Text>
         </Pressable>
@@ -88,7 +79,7 @@ export default function Onboarding() {
   );
 }
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
+  screen: { flex: 1, paddingTop: height * 0.12, paddingBottom: height * 0.15 },
   content: {
     flex: 1,
     alignItems: 'center',
@@ -129,10 +120,11 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 360,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 3,
+    marginTop: height * 0.1,
   },
   ctaText: {
     fontSize: 18,

@@ -1,14 +1,12 @@
 import { Colors } from '@/src/constants/Colors';
 import { useColors } from '@/src/hooks/useColors';
+import type { PointTilsLogoProps } from '@/src/types/ui';
 import Svg, { Path } from 'react-native-svg';
 
-export type LightOrangeLogoProps = {
-  width?: number;
-  height?: number;
+export type LightOrangeLogoProps = PointTilsLogoProps & {
   mode?: 'light' | 'dark';
-  fillPrimary?: string; // wordmark
-  fillAccent?: string; // accent dot/hand (laranja)
-  accessibilityLabel?: string;
+  fillPrimary?: string;
+  fillAccent?: string;
 };
 
 export default function LightOrangeLogo({
@@ -17,7 +15,6 @@ export default function LightOrangeLogo({
   mode,
   fillPrimary,
   fillAccent,
-  accessibilityLabel = 'Logotipo',
 }: LightOrangeLogoProps) {
   const theme = useColors();
   const palette = mode ? Colors[mode] : theme;
@@ -26,13 +23,7 @@ export default function LightOrangeLogo({
   const accent = fillAccent ?? palette.primaryOrange;
 
   return (
-    <Svg
-      width={width}
-      height={height}
-      viewBox="0 0 90 58"
-      accessible
-      accessibilityLabel={accessibilityLabel}
-    >
+    <Svg width={width} height={height} viewBox="0 0 90 58" accessible>
       <Path
         d="M31.3944 29.2562C31.4058 29.3886 31.3716 29.59 31.3545 29.7282C31.1319 31.7139 30.624 33.7974 30.4242 35.7774C30.3671 36.3184 30.3843 36.8594 30.5098 37.3602C30.5783 37.6365 30.6867 38.2005 31.0919 37.9242C32.3075 36.7616 33.934 34.4478 35.4407 35.881C35.6576 36.0882 35.8916 36.422 35.6176 36.7271C35.2524 37.13 34.676 37.5329 34.2651 37.9473C32.6728 39.5589 32.0393 41.4928 30.7381 43.2655C29.8649 44.4512 29.0146 44.8829 27.7305 45.1476C25.2137 45.6599 23.0507 45.7174 22.0177 43.1044C21.5498 41.9244 21.5326 40.7273 21.3786 39.4495C21.1389 37.4523 20.0089 35.5587 19.461 33.665C19.1414 32.4161 20.8935 31.4491 21.4585 32.5484L23.1192 36.1918L23.1306 36.2609L22.0235 30.7124C22.0006 29.3943 23.6157 28.7036 24.1921 29.78C24.7115 31.6563 24.974 33.642 25.539 35.4953C25.5846 35.6507 25.4306 35.4263 25.4819 35.4551H25.6474L25.3792 29.0778C25.4363 27.4259 27.7533 26.8043 27.8789 28.79C27.9873 30.5052 27.9987 32.2491 28.09 33.9701L28.227 35.0752C28.267 35.0234 28.2784 35.5069 28.2841 35.3802C28.3868 33.6132 28.7121 31.2419 29.123 29.4979C29.4826 27.9727 31.2974 27.9669 31.3887 29.2562H31.3944Z"
         fill={primary}

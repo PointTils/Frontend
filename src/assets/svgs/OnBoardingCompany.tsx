@@ -1,14 +1,9 @@
-// src/assets/svg/OnboardingCompany.tsx
 import { useColors } from '@/src/hooks/useColors';
+import type { BaseSvgProps } from '@/src/types/ui';
 import React, { memo } from 'react';
 import Svg, { ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
-export type OnboardingCompanyProps = {
-  width?: number;
-  height?: number;
-  /** Opcional: sobrescreve o laranja do tema */
-  accentColor?: string;
-};
+export type OnboardingCompanyProps = BaseSvgProps;
 
 function OnboardingCompany({
   width = 250,
