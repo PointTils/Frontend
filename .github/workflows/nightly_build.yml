@@ -251,7 +251,7 @@ jobs:
             if [ "$COMMITS_SINCE" -eq 0 ]; then
               echo "No changes since last build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s [%h]" > changelog.tmp
+              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s [%h]" | grep "Merge pull request" > changelog.tmp
             fi
           fi
 
