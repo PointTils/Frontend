@@ -63,15 +63,17 @@ jobs:
         run: npm install -g eas-cli@latest
 
       - name: Verify EAS Authentication
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           if ! eas whoami; then
             exit 1
           fi
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Generate build
         id: build-step
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           echo "Generating build..."
           ORIGINAL_VERSION=$(node -p "require('./package.json').version")
@@ -119,11 +121,11 @@ jobs:
           BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
           echo "build_id=${BUILD_ID}" >> $GITHUB_OUTPUT
           echo "BUILD_ID=${BUILD_ID}" >> $GITHUB_ENV
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Wait for build completion
         id: build-status
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           echo "⏳ Waiting for build to complete..."
 
@@ -199,8 +201,6 @@ jobs:
           echo "build_url=${FINAL_URL}" >> $GITHUB_OUTPUT
           echo "BUILD_STATUS=${BUILD_STATUS}" >> $GITHUB_ENV
           echo "BUILD_URL=${FINAL_URL}" >> $GITHUB_ENV
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Restore app.json
         if: always()
@@ -274,9 +274,14 @@ jobs:
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
           tag_name: v${{ needs.build.outputs.nightly_version }}
+          commitish: ${{ github.event.inputs.branch || 'dev' }}
           release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
+          draft: false
+          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
           body: |
             - **Date:** ${{ env.CURRENT_DATE }}
             - **Base Version:** ${{ needs.build.outputs.original_version }}
@@ -284,10 +289,6 @@ jobs:
 
             ## What's new
             ${{ env.CHANGELOG }}
-          draft: false
-          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
 
       - name: Download APK from EAS
         if: ${{ needs.build.outputs.build_status == 'FINISHED' && needs.build.outputs.build_url != 'Not available' }}
