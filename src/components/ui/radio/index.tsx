@@ -2,7 +2,11 @@
 import React from 'react';
 import { createRadio } from '@gluestack-ui/radio';
 import { Pressable, View, Platform, Text } from 'react-native';
-import { tva, VariantProps } from '@gluestack-ui/nativewind-utils';
+import { VariantProps } from '@gluestack-ui/nativewind-utils';
+import { tva } from '@gluestack-ui/nativewind-utils/tva';
+
+
+
 import {
   withStyleContext,
   useStyleContext,
