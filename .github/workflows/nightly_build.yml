@@ -36,6 +36,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch || 'dev' }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -62,15 +63,17 @@ jobs:
         run: npm install -g eas-cli@latest
 
       - name: Verify EAS Authentication
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           if ! eas whoami; then
             exit 1
           fi
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Generate build
         id: build-step
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           echo "Generating build..."
           ORIGINAL_VERSION=$(node -p "require('./package.json').version")
@@ -118,11 +121,11 @@ jobs:
           BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
           echo "build_id=${BUILD_ID}" >> $GITHUB_OUTPUT
           echo "BUILD_ID=${BUILD_ID}" >> $GITHUB_ENV
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Wait for build completion
         id: build-status
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           echo "⏳ Waiting for build to complete..."
 
@@ -198,8 +201,6 @@ jobs:
           echo "build_url=${FINAL_URL}" >> $GITHUB_OUTPUT
           echo "BUILD_STATUS=${BUILD_STATUS}" >> $GITHUB_ENV
           echo "BUILD_URL=${FINAL_URL}" >> $GITHUB_ENV
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Restore app.json
         if: always()
@@ -222,6 +223,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch || 'dev' }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Capture current date and time
         run: echo "CURRENT_DATE=$(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M:%S')" >> $GITHUB_ENV
@@ -232,27 +234,29 @@ jobs:
           PROFILE="${{ github.event.inputs.profile || 'preview' }}"
           git fetch --tags --force
 
-          if [ "$PROFILE" = "production" ]; then
-            # For production builds, compare with the latest production tag (v*.*.*)
-            LATEST_TAG=$(git tag -l "v*.*.*" --sort=-version:refname | grep -v "nightly" | head -n 1)
-            echo "📦 Production build - comparing with latest production tag: ${LATEST_TAG:-none}"
-          else
-            # For preview builds, compare with the latest nightly tag
-            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-creatordate | head -n 1)
-            echo "🌙 Preview build - comparing with latest nightly tag: ${LATEST_TAG:-none}"
-          fi
+          CURRENT_BRANCH=$(git branch --show-current)
+          echo "Current branch: $CURRENT_BRANCH"
 
-          COMMIT_COUNT=10
+          if [ "$PROFILE" = "production" ]; then
+            # For production builds, get the two most recent production tags
+            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            echo "📦 Production build - comparing ${LATEST_TAG:-none} with HEAD"
+          else
+            # For preview builds, get the two most recent nightly tags
+            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-version:refname | head -n 1)
+            echo "🌙 Preview build - comparing ${LATEST_TAG:-none} with HEAD"
+          fi
 
           # Create temporary file for changelog
           if [ -z "$LATEST_TAG" ]; then
-            git log -${COMMIT_COUNT} --pretty=format:"- %s [%h]" > changelog.tmp
+            # If no previous tag, print the last 5 merge commits
+            git log -n 5 --merges --pretty=format:"- %s - @%an" | grep "Merge pull request" > changelog.tmp
           else
             COMMITS_SINCE=$(git rev-list --count ${LATEST_TAG}..HEAD)
             if [ "$COMMITS_SINCE" -eq 0 ]; then
-              echo "No changes since last nightly build." > changelog.tmp
+              echo "No changes since last build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --pretty=format:"- %s [%h]" > changelog.tmp
+              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s - @%an" | grep "Merge pull request" > changelog.tmp
             fi
           fi
 
@@ -270,21 +274,21 @@ jobs:
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
           tag_name: v${{ needs.build.outputs.nightly_version }}
+          commitish: ${{ github.event.inputs.branch || 'dev' }}
           release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
+          draft: false
+          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
           body: |
-            ${{ (github.event.inputs.profile || 'preview') == 'production' && '🚀 Production Build' || '🌙 Nightly Build' }} Report
             - **Date:** ${{ env.CURRENT_DATE }}
             - **Base Version:** ${{ needs.build.outputs.original_version }}
             - **Build ID:** ${{ needs.build.outputs.build_id || 'Not available' }}
-            ---
-            ### What's new
+
+            ## What's new
             ${{ env.CHANGELOG }}
-          draft: false
-          prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
 
       - name: Download APK from EAS
         if: ${{ needs.build.outputs.build_status == 'FINISHED' && needs.build.outputs.build_url != 'Not available' }}
