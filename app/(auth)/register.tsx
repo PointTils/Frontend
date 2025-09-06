@@ -1,8 +1,18 @@
 import { Button } from '@/src/components/ui/button';
-import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '@/src/components/ui/radio';
+import {
+  Radio,
+  RadioGroup,
+  RadioIndicator,
+  RadioLabel,
+} from '@/src/components/ui/radio';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { handleCnpjChange, handlePhoneChange, validateCnpj, validateEmail } from '@/src/utils/mask';
+import {
+  handleCnpjChange,
+  handlePhoneChange,
+  validateCnpj,
+  validateEmail,
+} from '@/src/utils/mask';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -94,7 +104,7 @@ export default function RegisterScreen() {
         className="flex-1 p-10 mt-10"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView >
+        <ScrollView>
           <Text className="font-ifood-medium text-lg mb-3 text-[18px]">
             {Strings.register.title}
           </Text>
@@ -102,14 +112,21 @@ export default function RegisterScreen() {
             {Strings.register.subtitle}
           </Text>
 
-          <Text className="font-ifood-medium mb-2">{Strings.register.typeSelect}</Text>
-          <RadioGroup value={type} onChange={setType} className="flex-row items-center">
+          <Text className="font-ifood-medium mb-2">
+            {Strings.register.typeSelect}
+          </Text>
+          <RadioGroup
+            value={type}
+            onChange={setType}
+            className="flex-row items-center"
+          >
             <Radio value="client">
               <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
               <RadioLabel>
                 <Text
                   style={{
-                    color: type === 'client' ? colors.primaryBlue : colors.disabled,
+                    color:
+                      type === 'client' ? colors.primaryBlue : colors.disabled,
                   }}
                   className="font-ifood-regular"
                 >
@@ -121,30 +138,38 @@ export default function RegisterScreen() {
               <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
 
               <RadioLabel>
-              <Text
-                style={{
-                  color: type === 'enterprise' ? colors.primaryBlue : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                {Strings.register.enterprise}
-              </Text></RadioLabel>
+                <Text
+                  style={{
+                    color:
+                      type === 'enterprise'
+                        ? colors.primaryBlue
+                        : colors.disabled,
+                  }}
+                  className="font-ifood-regular"
+                >
+                  {Strings.register.enterprise}
+                </Text>
+              </RadioLabel>
             </Radio>
             <Radio value="interpreter">
               <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
               <RadioLabel>
-              <Text
-                style={{
-                  color: type === 'interpreter' ? colors.primaryBlue : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                {' '}
-                {Strings.register.interpreter}
-              </Text></RadioLabel>
+                <Text
+                  style={{
+                    color:
+                      type === 'interpreter'
+                        ? colors.primaryBlue
+                        : colors.disabled,
+                  }}
+                  className="font-ifood-regular"
+                >
+                  {' '}
+                  {Strings.register.interpreter}
+                </Text>
+              </RadioLabel>
             </Radio>
           </RadioGroup>
-         
+
           <View className="flex-1 px-4 pt-2 justify-between">
             <View>
               <Text className="font-ifood-medium mb-2">
@@ -217,12 +242,12 @@ export default function RegisterScreen() {
                 className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
               >
                 <Text className="font-ifood-medium text-text-dark">
-                {Strings.register.create}
+                  {Strings.register.create}
                 </Text>
               </Button>
-            
+
               <Button
-                action={"default"}
+                action={'default'}
                 onPress={handleSubmit}
                 size="lg"
                 className="font-ifood-bold text-center text-blue text-lg"

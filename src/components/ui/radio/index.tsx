@@ -5,8 +5,6 @@ import { Pressable, View, Platform, Text } from 'react-native';
 import { VariantProps } from '@gluestack-ui/nativewind-utils';
 import { tva } from '@gluestack-ui/nativewind-utils/tva';
 
-
-
 import {
   withStyleContext,
   useStyleContext,
@@ -84,11 +82,11 @@ const radioLabelStyle = tva({
   parentVariants: {
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -110,7 +108,7 @@ const Radio = React.forwardRef<React.ComponentRef<typeof UIRadio>, IRadioProps>(
         context={{ size }}
       />
     );
-  }
+  },
 );
 
 type IRadioGroupProps = React.ComponentProps<typeof UIRadio.Group> &
