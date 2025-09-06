@@ -1,5 +1,5 @@
 import { Button } from '@/src/components/ui/button';
-import { Radio } from '@/src/components/ui/radio';
+import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '@/src/components/ui/radio';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { handleCnpjChange, handlePhoneChange, validateCnpj, validateEmail } from '@/src/utils/mask';
@@ -103,62 +103,48 @@ export default function RegisterScreen() {
           </Text>
 
           <Text className="font-ifood-medium mb-2">{Strings.register.typeSelect}</Text>
-          {/* <View className="flex-row mb-2">
-            <View className="flex-row items-center">
-              <Radio
-                value="client"
-                status={type === 'client' ? 'checked' : 'unchecked'}
-                onPress={() => setType('client')}
-                color={colors.primaryBlue}
-                uncheckedColor={colors.disabled}
-              />
+          <RadioGroup value={type} onChange={setType} className="flex-row items-center">
+            <Radio value="client">
+              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+              <RadioLabel>
+                <Text
+                  style={{
+                    color: type === 'client' ? colors.primaryBlue : colors.disabled,
+                  }}
+                  className="font-ifood-regular"
+                >
+                  {Strings.register.client}
+                </Text>
+              </RadioLabel>
+            </Radio>
+            <Radio value="enterprise">
+              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+
+              <RadioLabel>
               <Text
                 style={{
-                  color: type === 'client' ? colors.primaryBlue : colors.disabled,
+                  color: type === 'enterprise' ? colors.primaryBlue : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {Strings.register.enterprise}
+              </Text></RadioLabel>
+            </Radio>
+            <Radio value="interpreter">
+              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+              <RadioLabel>
+              <Text
+                style={{
+                  color: type === 'interpreter' ? colors.primaryBlue : colors.disabled,
                 }}
                 className="font-ifood-regular"
               >
                 {' '}
                 {Strings.register.interpreter}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Radio
-                value="enterprise"
-                status={type === 'enterprise' ? 'checked' : 'unchecked'}
-                onPress={() => setType('enterprise')}
-                color={colors.primaryBlue}
-                uncheckedColor={colors.disabled}
-              />
-              <Text
-                style={{
-                  color:
-                    type === 'enterprise' ? colors.primaryBlue : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                {Strings.register.enterprise}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <RadioButton
-                value="interpreter"
-                status={type === 'interpreter' ? 'checked' : 'unchecked'}
-                onPress={() => setType('interpreter')}
-                color={colors.primaryBlue}
-                uncheckedColor={colors.disabled}
-              />
-              <Text
-                style={{
-                  color:
-                    type === 'interpreter' ? colors.primaryBlue : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                {Strings.register.interpreter}
-              </Text>
-            </View>
-          </View> */}
+              </Text></RadioLabel>
+            </Radio>
+          </RadioGroup>
+         
           <View className="flex-1 px-4 pt-2 justify-between">
             <View>
               <Text className="font-ifood-medium mb-2">
@@ -227,7 +213,7 @@ export default function RegisterScreen() {
             <View className="mt-5 pb-10">
               <Button
                 onPress={handleSubmit}
-                size="lg"
+                size="xl"
                 className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
               >
                 <Text className="font-ifood-medium text-text-dark">
@@ -239,7 +225,7 @@ export default function RegisterScreen() {
                 action={"default"}
                 onPress={handleSubmit}
                 size="lg"
-                className="font-ifood-bold text-center text-blue text-lg data-[active=true]:bg-primary-orange-press-light"
+                className="font-ifood-bold text-center text-blue text-lg"
               >
                 <Text className="font-ifood-medium text-primary-orange">
                   {Strings.register.cancel}
