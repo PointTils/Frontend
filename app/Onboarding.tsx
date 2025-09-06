@@ -2,11 +2,12 @@ import Logo from '@/src/assets/svgs/LightOrangeLogo';
 import OnboardingCompany from '@/src/assets/svgs/OnBoardingCompany';
 import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
 import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
+import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, View, StyleSheet, Dimensions } from 'react-native';
+import { Text, View, StyleSheet, Dimensions } from 'react-native';
 
 export const options = { headerShown: false };
 const { height } = Dimensions.get('window');
@@ -65,7 +66,7 @@ export default function Onboarding() {
           {data.subtitle}
         </Text>
 
-        <Pressable
+        <Button
           onPress={() => router.replace('/(tabs)')}
           accessibilityLabel={data.cta}
           style={[styles.cta, { backgroundColor: colors.primaryOrange }]}
@@ -73,7 +74,7 @@ export default function Onboarding() {
           <Text style={[styles.ctaText, { color: colors.onboardingText }]}>
             {data.cta}
           </Text>
-        </Pressable>
+        </Button>
       </View>
     </View>
   );
@@ -99,9 +100,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     lineHeight: 24,
-    fontFamily: 'iFoodRCTextos-Bold',
     textAlign: 'left',
     flexShrink: 1,
+    fontFamily: 'iFoodRC-Bold',
   },
   illoWrap: {
     flexGrow: 1,
@@ -111,10 +112,10 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'iFoodRCTextos-Regular',
     textAlign: 'center',
     maxWidth: 360,
     marginBottom: 24,
+    fontFamily: 'iFoodRC-Regular',
   },
   cta: {
     width: '90%',
@@ -128,6 +129,6 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: 18,
-    fontFamily: 'iFoodRCTextos-Bold',
+    fontFamily: 'iFoodRC-Medium',
   },
 });
