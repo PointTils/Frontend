@@ -4,11 +4,11 @@
  * When adding new colors, make sure to define them in both light and dark mode.
  * Also, ensure that the colors are declared at components/ui/gluestack-ui-provider/config.ts
  */
-
 export const Colors = {
   light: {
     text: '#0D0D0D', // primary800 - Gluestack
     background: '#fff',
+    onboardingText: '#fff',
     primaryOrange: '#F28D22',
     primaryBlue: '#43A2DB',
     disabled: '#999999', // primary50 - Gluestack
@@ -17,6 +17,7 @@ export const Colors = {
   },
   dark: {
     text: '#fff',
+    onboardingText: '#fff',
     background: '#151718',
     primaryOrange: '#FF9F3A',
     primaryBlue: '#5CB3E8',
