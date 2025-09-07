@@ -56,4 +56,31 @@ export const Strings = {
   profile: {
     title: 'Perfil',
   },
+
+  onboarding: {
+    til: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de boas-vindas',
+      title: 'Mostre seu trabalho para quem precisa',
+      subtitle:
+        'No Point Tils, você cadastra suas áreas de atuação, horários disponíveis e recebe solicitações de empresas e pessoas surdas. Gerencie sua agenda e amplie seu alcance profissional.',
+      cta: 'Começar agora',
+    },
+    company: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de busca de intérpretes',
+      title: 'Intérpretes certos para a sua necessidade',
+      subtitle:
+        'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
+      cta: 'Buscar intérprete',
+    },
+    user: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de cadastro de intérprete',
+      title: 'Conecte-se a intérpretes de forma rápida e simples',
+      subtitle:
+        'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes',
+      cta: 'Encontrar intérprete agora',
+    },
+  },
 } as const;
