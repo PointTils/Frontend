@@ -8,6 +8,6 @@ export interface PointTilsLogoProps {
 export type BaseSvgProps = {
   width?: number;
   height?: number;
-  primaryColor?: string;
   accentColor?: string;
+  accessibilityLabel?: string;
 };

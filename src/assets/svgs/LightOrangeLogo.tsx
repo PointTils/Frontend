@@ -3,24 +3,15 @@ import { useColors } from '@/src/hooks/useColors';
 import type { PointTilsLogoProps } from '@/src/types/ui';
 import Svg, { Path } from 'react-native-svg';
 
-export type LightOrangeLogoProps = PointTilsLogoProps & {
-  mode?: 'light' | 'dark';
-  fillPrimary?: string;
-  fillAccent?: string;
-};
-
 export default function LightOrangeLogo({
   width = 90,
   height = 58,
-  mode,
-  fillPrimary,
-  fillAccent,
-}: LightOrangeLogoProps) {
-  const theme = useColors();
-  const palette = mode ? Colors[mode] : theme;
-
-  const primary = fillPrimary ?? palette.text ?? Colors.dark.text;
-  const accent = fillAccent ?? palette.primaryOrange;
+  primaryColor = '',
+  accentColor = '',
+}: PointTilsLogoProps) {
+  const colors = useColors();
+  const primary = primaryColor || colors.text;
+  const accent = accentColor || colors.primaryBlue;
 
   return (
     <Svg width={width} height={height} viewBox="0 0 90 58" accessible>

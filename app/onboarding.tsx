@@ -17,7 +17,7 @@ export default function OnboardingScreen() {
   const colors = useColors();
 
   // This would be dynamically set based on backend/user data
-  const userType = 'company' as OnboardingKey;
+  const userType = 'til' as OnboardingKey;
 
   // Define content based on user type
   const data = Strings.onboarding[userType];
@@ -54,8 +54,8 @@ export default function OnboardingScreen() {
           <Logo
             width={120}
             height={120}
-            fillPrimary={colors.onboardingText}
-            fillAccent={colors.primaryOrange}
+            primaryColor={colors.onboardingText}
+            accentColor={colors.primaryOrange}
           />
           <Text
             style={[styles.title, { color: colors.onboardingText }]}

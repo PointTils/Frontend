@@ -1,15 +1,25 @@
+import { useColors } from '@/src/hooks/useColors';
 import type { BaseSvgProps } from '@/src/types/ui';
 import * as React from 'react';
 import { ClipPath, Defs, G, Path, Rect, Svg } from 'react-native-svg';
 
-export type OnboardingTilProps = BaseSvgProps;
-
 export default function OnboardingTil({
   width = 230,
   height = 224,
-}: OnboardingTilProps) {
+  accentColor,
+  accessibilityLabel = 'Ilustração',
+}: BaseSvgProps) {
+  const palette = useColors();
+  const accent = accentColor ?? palette.primaryOrange;
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 230 224" accessible>
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 0 230 224"
+      accessible
+      accessibilityLabel={accessibilityLabel}
+    >
       <G clipPath="url(#clip0_11764_3537)">
         <Path
           d="M134.477 218.87H128.515L125.059 186.987H134.272L134.477 218.87Z"
@@ -74,7 +84,7 @@ export default function OnboardingTil({
         />
         <Path
           d="M80.8765 50.7153H66.8164V64.3423H80.8765V50.7153Z"
-          fill="#F28D22"
+          fill={accent}
         />
         <Path
           d="M146.97 107.36L163.655 92.4785L168.577 94.9201L148.566 115.932L146.97 107.36Z"
@@ -110,7 +120,7 @@ export default function OnboardingTil({
         />
         <Path
           d="M172.204 78.5415H158.144V92.1684H172.204V78.5415Z"
-          fill="#F28D22"
+          fill={accent}
         />
         <Path
           d="M137.754 128.634C136.257 128.653 131.747 101.861 131.747 101.861L131.071 87.4215L126.143 87.257V86.9327C126.143 86.281 125.884 85.6561 125.424 85.1953C124.964 84.7345 124.34 84.4756 123.689 84.4756H114.303C113.68 84.4759 113.08 84.7138 112.625 85.1411C112.171 85.5684 111.896 86.1529 111.857 86.7757L107.992 86.6452L101.3 107.934C101.3 107.934 107.468 127.715 104.491 136.432C104.491 136.432 133.493 138.925 139.045 133.391C139.043 133.392 139.252 128.614 137.754 128.634Z"
@@ -122,7 +132,7 @@ export default function OnboardingTil({
         />
         <Path
           d="M126.54 103.188H112.48V116.814H126.54V103.188Z"
-          fill="#F28D22"
+          fill={accent}
         />
         <Path
           d="M101.693 108.113L96.8013 107.596C96.4924 108.255 96.3375 108.977 96.3482 109.705C96.3589 110.434 96.535 111.15 96.8631 111.801C97.1912 112.451 97.6628 113.018 98.2422 113.459C98.8215 113.9 99.4935 114.203 100.207 114.346L119.562 118.213L117.543 111.988L101.693 108.113Z"

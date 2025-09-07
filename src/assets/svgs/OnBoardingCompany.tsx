@@ -1,20 +1,25 @@
 import { useColors } from '@/src/hooks/useColors';
 import type { BaseSvgProps } from '@/src/types/ui';
-import React, { memo } from 'react';
+import React from 'react';
 import Svg, { ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
-export type OnboardingCompanyProps = BaseSvgProps;
-
-function OnboardingCompany({
+export default function OnboardingCompany({
   width = 250,
   height = 203,
   accentColor,
-}: OnboardingCompanyProps) {
+  accessibilityLabel = 'Ilustração',
+}: BaseSvgProps) {
   const palette = useColors();
   const accent = accentColor ?? palette.primaryOrange;
 
   return (
-    <Svg width={width} height={height} viewBox="0 0 250 203" accessible>
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 0 250 203"
+      accessible
+      accessibilityLabel={accessibilityLabel}
+    >
       <G clipPath="url(#clip0_11764_3604)">
         <Path
           d="M199.581 36.977C198.282 51.3026 194.583 66.4082 188.78 80.9831C181.605 99.0068 171.801 114.882 160.429 126.893L159.798 126.342C171.115 114.389 180.874 98.5838 188.019 80.6346C194.477 64.4142 198.318 47.5344 199.132 31.8276L199.939 31.9628C199.853 33.6216 199.734 35.293 199.581 36.977Z"
@@ -250,5 +255,3 @@ function OnboardingCompany({
     </Svg>
   );
 }
-
-export default memo(OnboardingCompany);
