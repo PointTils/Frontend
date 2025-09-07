@@ -5,29 +5,40 @@ import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 
-export const options = { headerShown: false };
 const { height } = Dimensions.get('window');
 
-type OnboardingKey = keyof typeof Strings.onboarding;
+type OnboardingKey = 'til' | 'company' | 'user';
 
-export default function Onboarding() {
+export default function OnboardingScreen() {
   const colors = useColors();
-  const { type } = useLocalSearchParams<{ type?: OnboardingKey }>();
 
-  const userType: OnboardingKey =
-    type === 'company' ? 'company' : type === 'user' ? 'user' : 'til';
+  // This would be dynamically set based on backend/user data
+  const userType = 'company' as OnboardingKey;
+
+  // Define content based on user type
   const data = Strings.onboarding[userType];
+  const title = data.title;
+  const subtitle = data.subtitle;
+  const cta = data.cta;
+  const illoAlt = data.illoAlt;
 
-  const Illustration =
-    userType === 'company'
-      ? OnboardingCompany
-      : userType === 'til'
-        ? OnboardingTil
-        : OnboardingUser;
+  let IllustrationComponent;
+  switch (userType) {
+    case 'company':
+      IllustrationComponent = OnboardingCompany;
+      break;
+    case 'til':
+      IllustrationComponent = OnboardingTil;
+      break;
+    case 'user':
+    default:
+      IllustrationComponent = OnboardingUser;
+      break;
+  }
 
   return (
     <View
@@ -50,29 +61,28 @@ export default function Onboarding() {
             style={[styles.title, { color: colors.onboardingText }]}
             numberOfLines={0}
           >
-            {data.title}
+            {title}
           </Text>
         </View>
 
         <View style={styles.illoWrap}>
-          <Illustration
-            width={320}
-            height={260}
-            accessibilityLabel={data.illoAlt}
-          />
+          <IllustrationComponent accessibilityLabel={illoAlt} />
         </View>
 
         <Text style={[styles.subtitle, { color: colors.onboardingText }]}>
-          {data.subtitle}
+          {subtitle}
         </Text>
+      </View>
 
+      <View className="absolute bottom-10 w-full px-6">
         <Button
+          className="w-full"
           onPress={() => router.replace('/(tabs)')}
-          accessibilityLabel={data.cta}
-          style={[styles.cta, { backgroundColor: colors.primaryOrange }]}
+          accessibilityLabel={cta}
+          size="lg"
         >
           <Text style={[styles.ctaText, { color: colors.onboardingText }]}>
-            {data.cta}
+            {cta}
           </Text>
         </Button>
       </View>
@@ -80,7 +90,11 @@ export default function Onboarding() {
   );
 }
 const styles = StyleSheet.create({
-  screen: { flex: 1, paddingTop: height * 0.12, paddingBottom: height * 0.15 },
+  screen: {
+    flex: 1,
+    paddingTop: height * 0.12,
+    paddingBottom: height * 0.15,
+  },
   content: {
     flex: 1,
     alignItems: 'center',
@@ -102,7 +116,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'left',
     flexShrink: 1,
-    fontFamily: 'iFoodRC-Bold',
+    fontFamily: 'iFoodRC-Medium',
   },
   illoWrap: {
     flexGrow: 1,
@@ -117,18 +131,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     fontFamily: 'iFoodRC-Regular',
   },
-  cta: {
-    width: '90%',
-    maxWidth: 360,
-    height: 56,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-    marginTop: height * 0.1,
-  },
   ctaText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'iFoodRC-Medium',
   },
 });
