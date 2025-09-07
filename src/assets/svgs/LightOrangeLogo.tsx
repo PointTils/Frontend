@@ -1,4 +1,3 @@
-import { Colors } from '@/src/constants/Colors';
 import { useColors } from '@/src/hooks/useColors';
 import type { PointTilsLogoProps } from '@/src/types/ui';
 import Svg, { Path } from 'react-native-svg';

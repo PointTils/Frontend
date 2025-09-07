@@ -1,7 +1,7 @@
-import * as React from 'react';
-import type { BaseSvgProps } from '@/src/types/ui';
-import { ClipPath, Defs, G, Path, Rect, Svg } from 'react-native-svg';
 import { useColors } from '@/src/hooks/useColors';
+import type { BaseSvgProps } from '@/src/types/ui';
+import * as React from 'react';
+import { ClipPath, Defs, G, Path, Rect, Svg } from 'react-native-svg';
 
 export default function OnboardingUser({
   width = 284,
