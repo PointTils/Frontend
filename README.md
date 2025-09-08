@@ -48,7 +48,10 @@ npx expo login
 npm run start
 ```
 
-> Pressione “s” para Expo Go emulador e escanei o QR Code (Android: escanei usando o app do Expo Go, iPhone: escanei usando a câmera do celular).
+> [!IMPORTANT]
+> Pressione “s” para Expo Go emulador e escanei o QR Code 
+> - Android: escanei usando o app do Expo Go
+> - iPhone: escanei usando a câmera do celular
 
 ## Scripts úteis
 
