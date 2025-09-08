@@ -40,7 +40,8 @@ npm install --global eas-cli
 npx expo login
 ```
 
-> Usar mesmas credenciais da conta criada no site do Expo Go
+> [!NOTE]
+> Use as mesmas credenciais da conta criada no site do Expo Go
 
 4. Iniciar o app (modo desenvolvimento)
 
