@@ -14,6 +14,7 @@ export const Colors = {
     disabled: '#999999', // primary50 - Gluestack
     onPressBlue: '#5CB3E8',
     onPressOrange: '#FF9F3A',
+    mandatory: '#B91C1C',
   },
   dark: {
     text: '#fff',
@@ -22,5 +23,6 @@ export const Colors = {
     primaryOrange: '#FF9F3A',
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
+    mandatory: '#B91C1C',
   },
 } as const;
