@@ -42,6 +42,7 @@ export const Strings = {
   },
 
   edit: {
+    title: 'Editar Perfil',
     data: 'Dados básicos',
     name: 'Nome',
     companyName: 'Razão Social',
