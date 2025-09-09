@@ -5,10 +5,9 @@ import {
   RadioIndicator,
   RadioLabel,
 } from '@/src/components/ui/radio';
+import { Select, SelectBackdrop, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper, SelectIcon, SelectInput, SelectItem, SelectPortal, SelectTrigger } from '@/src/components/ui/select';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import DateTimePicker from "@react-native-community/datetimepicker";
-
 import {
   formatDate,
   handleCnpjChange,
@@ -19,6 +18,8 @@ import {
   validateCpf,
   validateEmail,
 } from '@/src/utils/mask';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { ChevronDownIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -30,8 +31,6 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { Select, SelectBackdrop, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper, SelectIcon, SelectInput, SelectItem, SelectPortal, SelectTrigger } from '@/src/components/ui/select';
-import { ChevronDownIcon } from 'lucide-react-native';
 
 export default function RegisterScreen() {
   const [type, setType] = useState('enterprise');
