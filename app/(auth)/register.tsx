@@ -394,7 +394,7 @@ export default function RegisterScreen() {
                 </View>
               </>
             )}
-            <View className="mt-5 pb-10">
+            <View className="mt-5">
               <Button
                 onPress={handleSubmit}
                 size="xl"
@@ -411,7 +411,7 @@ export default function RegisterScreen() {
                 size="lg"
                 className="font-ifood-bold text-center text-blue text-lg"
               >
-                <Text className="font-ifood-medium text-primary-orange data-[active=true]:text-primary-orange-press-light">
+                <Text className="font-ifood-medium text-primary-orange-light data-[active=true]:text-text-primary-orange-press-dark">
                   {Strings.register.cancel}
                 </Text>
               </Button>
