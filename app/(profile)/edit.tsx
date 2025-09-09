@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
 import { Strings } from '@/src/constants/Strings';
-import { Colors } from '@/src/constants/Colors';
+import { useColors } from '@/src/hooks/useColors';
 import MultiSelect from '@/src/components/MultiSelect';
 import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
-import { Textarea, TextareaInput } from '@/src/components/ui/textarea';
+import {
+  Radio,
+  RadioGroup,
+  RadioIndicator,
+  RadioLabel,
+  RadioIcon,
+} from '@/src/components/ui/radio';
 import {
   FileText,
   Bookmark,
@@ -13,17 +19,13 @@ import {
   Check,
   X,
   ChevronLeft,
+  CircleIcon,
 } from 'lucide-react-native';
 import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-  FormControlHelper,
-  FormControlHelperText,
-  FormControlLabel,
-  FormControlLabelText,
-} from '@/src/components/ui/form-control';
+  handleBirthDateChange,
+  handleCnpjChange,
+  handlePhoneChange,
+} from '@/src/utils/mask';
 import { useRouter } from 'expo-router';
 
 type Day =
@@ -37,7 +39,7 @@ type Day =
 type TimeRange = [string, string];
 
 export default function EditScreen() {
-  // Estados para os campos de edição
+  // Estados
   const [name, setName] = useState('Jefinho');
   const [birthDate, setBirthDate] = useState('30/09/1996');
   const [gender, setGender] = useState('');
@@ -49,7 +51,7 @@ export default function EditScreen() {
   );
   const [modality, setModality] = useState(['Presencial', 'Online']);
   const [location, setLocation] = useState('Floresta, Porto Alegre - RS');
-  const [imageRight, setImageRight] = useState('Autoriza');
+  const [imageRight, setImageRight] = useState('authorize');
   const [minPrice, setMinPrice] = useState('100');
   const [maxPrice, setMaxPrice] = useState('1000');
 
@@ -62,12 +64,11 @@ export default function EditScreen() {
     saturday: ['12:30', '19:30'],
     sunday: ['12:30', '19:30'],
   });
+
   const router = useRouter();
+  const colors = useColors();
 
   const type = 'Intérprete';
-  // const type = "Solicitante";
-  // const type = "Empresa";
-
   const options: any[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5'];
 
   const handleChange = (options: any[]) => {
@@ -83,42 +84,38 @@ export default function EditScreen() {
   };
 
   return (
-    <ScrollView>
+    <>
       {/* Header */}
       <View className="flex-row justify-center py-12 w-full">
         <TouchableOpacity
           className="absolute top-12 left-2"
           onPress={handleBack}
         >
-          <ChevronLeft color={Colors.light.primaryOrange} />
+          <ChevronLeft color={colors.primaryOrange} />
         </TouchableOpacity>
 
         <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
           {Strings.edit.title}
         </Text>
       </View>
+      <ScrollView>
+        <View className="flex-col items-center gap-4 w-full">
+          <View className="w-full flex-row self-start items-center px-8 gap-2">
+            <FileText />
+            <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+              {Strings.edit.data}
+            </Text>
+          </View>
 
-      <View className="flex-col items-center gap-4 w-full">
-        <View className="w-full flex-row self-start items-center px-8 gap-2 ">
-          <FileText />
-          <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-            {Strings.edit.data}
-          </Text>
-        </View>
-
-        {/* Formulário de edição */}
-        <FormControl size="lg" className="gap-2 w-full items-center">
-          {/* Campos em comum para um usuário do tipo Solicitante ou Intérprete */}
+          {/* Campos comuns para Intérprete/Solicitante */}
           {(type === `${Strings.edit.client}` ||
             type === `${Strings.edit.interpreter}`) && (
             <>
-              {/* Campo para Nome */}
+              {/* Nome */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.name}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.name}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -129,30 +126,28 @@ export default function EditScreen() {
                 </Input>
               </View>
 
-              {/* Campo para Data de Nascimento */}
+              {/* Data Nascimento */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.birthDate}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.birthDate}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
                     placeholder="dd/mm/yyyy"
                     value={birthDate}
-                    onChangeText={setBirthDate}
+                    onChangeText={(text) =>
+                      setBirthDate(handleBirthDateChange(text))
+                    }
                   />
                 </Input>
               </View>
 
-              {/* Selector para Gênero */}
+              {/* Gênero */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.gender}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.gender}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -163,30 +158,26 @@ export default function EditScreen() {
                 </Input>
               </View>
 
-              {/* Campo para telefone */}
+              {/* Telefone */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.phone}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.phone}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
                     placeholder="(00) 00000-0000"
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
                   />
                 </Input>
               </View>
 
-              {/* Campo para E-mail */}
+              {/* Email */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.email}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.email}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -199,16 +190,14 @@ export default function EditScreen() {
             </>
           )}
 
-          {/* Campos para usuário do tipo Empresa */}
+          {/* Campos para Empresa */}
           {type === `${Strings.edit.enterprise}` && (
             <>
-              {/* Campo para Razão Social */}
+              {/* Razão Social */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.companyName}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.companyName}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -219,30 +208,26 @@ export default function EditScreen() {
                 </Input>
               </View>
 
-              {/* Campo para Telefone */}
+              {/* Telefone */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.phone}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.phone}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
                     placeholder="(00) 00000-0000"
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
                   />
                 </Input>
               </View>
 
-              {/* Campo para E-mail */}
+              {/* E-mail */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.email}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.email}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -255,7 +240,7 @@ export default function EditScreen() {
             </>
           )}
 
-          {/* Seção Preferências ou Área do Profissional */}
+          {/* Preferências ou Área Profissional */}
           <View className="flex-row self-start w-full pt-8 px-8 gap-2">
             {type === `${Strings.edit.client}` ||
             type === `${Strings.edit.enterprise}` ? (
@@ -283,51 +268,44 @@ export default function EditScreen() {
             onChange={handleChange}
           />
 
-          {/* Campos para um usuário do tipo Intérprete */}
+          {/* Intérprete */}
           {type === `${Strings.edit.interpreter}` && (
             <>
-              {/* Campo para CNPJ */}
+              {/* CNPJ */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.cnpj}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.cnpj}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
                     placeholder="XX.XXX.XXX/0001-XX"
                     value={cnpj}
-                    onChangeText={setCnpj}
+                    onChangeText={(text) => setCnpj(handleCnpjChange(text))}
                   />
                 </Input>
               </View>
 
-              {/* Campo para Descrição */}
+              {/* Descrição */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.description}
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <Textarea size="lg" className="w-80">
-                  <TextareaInput
-                    className=""
-                    type="text"
-                    placeholder=""
-                    value={description}
-                    onChangeText={setDescription}
-                  />
-                </Textarea>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.description}
+                </Text>
+                <TextInput
+                  className="w-80 border rounded border-primary-0 focus:border-primary-950 p-2"
+                  multiline
+                  numberOfLines={4}
+                  placeholder=""
+                  value={description}
+                  onChangeText={setDescription}
+                />
               </View>
 
-              {/* Checkboxes para Modalidade */}
+              {/* Modalidade */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.modality}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.modality}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
@@ -336,60 +314,66 @@ export default function EditScreen() {
                     onChangeText={() => {}}
                   />
                 </Input>
-                {/* Faltam os checkboxes para as modalidades */}
               </View>
 
-              {/* Selectors de Location (UF, Cidade e Bairro) */}
+              {/* Localização */}
               <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.location}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.location}
+                </Text>
                 <Input size="lg" className="w-80">
                   <InputField
                     type="text"
                     placeholder="Placeholder para os selectors"
-                    value={''}
+                    value={location}
                     onChangeText={setLocation}
                   />
                 </Input>
-                {/* Faltam os selectors para a location */}
               </View>
 
-              {/* Radios para Direito de Imagem */}
-              <View>
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.image}
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Placeholder para os radios"
-                    value={''}
-                    onChangeText={setImageRight}
-                  />
-                </Input>
-                {/* Faltam os radios para o direito de imagem */}
-              </View>
-
-              {/* Campos para Valor Mínimo/Máximo */}
+              {/* Direito de Imagem */}
               <View className="w-80">
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.valueRange}
-                  </FormControlLabelText>
-                </FormControlLabel>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.imageRight}
+                </Text>
+                <RadioGroup
+                  value={imageRight}
+                  onChange={setImageRight}
+                  className="flex-row items-center justify-around"
+                >
+                  <Radio value="authorize">
+                    <RadioIndicator>
+                      <RadioIcon as={CircleIcon} />
+                    </RadioIndicator>
+                    <RadioLabel>
+                      <Text className="font-ifood-regular">
+                        {Strings.edit.authorize}
+                      </Text>
+                    </RadioLabel>
+                  </Radio>
+                  <Radio value="deny">
+                    <RadioIndicator>
+                      <RadioIcon as={CircleIcon} />
+                    </RadioIndicator>
+                    <RadioLabel>
+                      <Text className="font-ifood-regular">
+                        {Strings.edit.deny}
+                      </Text>
+                    </RadioLabel>
+                  </Radio>
+                </RadioGroup>
+              </View>
+
+              {/* Valores Max/Min */}
+              <View className="w-80">
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.valueRange}
+                </Text>
                 <View className="flex-row justify-between">
                   <View>
-                    {/* Valor Mínimo */}
-                    <FormControlLabel>
-                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.edit.min}
-                      </FormControlLabelText>
-                    </FormControlLabel>
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.min}
+                    </Text>
                     <Input size="lg" className="w-36">
                       <InputField
                         type="text"
@@ -400,16 +384,13 @@ export default function EditScreen() {
                     </Input>
                   </View>
                   <View>
-                    {/* Valor Máximo */}
-                    <FormControlLabel>
-                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.edit.max}
-                      </FormControlLabelText>
-                    </FormControlLabel>
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.max}
+                    </Text>
                     <Input size="lg" className="w-36">
                       <InputField
                         type="text"
-                        placeholder="100"
+                        placeholder="1000"
                         value={maxPrice}
                         onChangeText={setMaxPrice}
                       />
@@ -418,70 +399,54 @@ export default function EditScreen() {
                 </View>
               </View>
 
-              {/* Horários de Trabalho */}
+              {/* Horários */}
               <View className="w-80 mt-4">
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-large text-text-light dark:text-text-dark">
-                    {Strings.edit.workingHours}
-                  </FormControlLabelText>
-                </FormControlLabel>
-
-                {/* Campos de horário de Segunda à Domingo */}
+                <Text className="font-ifood-large text-text-light dark:text-text-dark">
+                  {Strings.edit.workingHours}
+                </Text>
                 {(Object.keys(weekHours) as Day[]).map((day) => (
                   <View key={day} className="mb-4">
-                    <FormControlLabel>
-                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.edit[day]}
-                      </FormControlLabelText>
-                    </FormControlLabel>
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit[day]}
+                    </Text>
 
                     <View className="flex-row w-80 justify-between">
-                      {/* Horário Início */}
                       <View>
-                        <View>
-                          <FormControlLabel>
-                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                              {Strings.edit.from}
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input size="lg" className="w-36">
-                            <InputField
-                              type="text"
-                              placeholder="hh:mm"
-                              value={weekHours[day][0]}
-                              onChangeText={(text) =>
-                                setWeekHours((prev) => ({
-                                  ...prev,
-                                  [day]: [text, prev[day][1]],
-                                }))
-                              }
-                            />
-                          </Input>
-                        </View>
+                        <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                          {Strings.edit.from}
+                        </Text>
+                        <Input size="lg" className="w-36">
+                          <InputField
+                            type="text"
+                            placeholder="hh:mm"
+                            value={weekHours[day][0]}
+                            onChangeText={(text) =>
+                              setWeekHours((prev) => ({
+                                ...prev,
+                                [day]: [text, prev[day][1]],
+                              }))
+                            }
+                          />
+                        </Input>
                       </View>
 
-                      {/* Horário Fim */}
                       <View>
-                        <View>
-                          <FormControlLabel>
-                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                              {Strings.edit.to}
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input size="lg" className="w-36">
-                            <InputField
-                              type="text"
-                              placeholder="hh:mm"
-                              value={weekHours[day][1]}
-                              onChangeText={(text) =>
-                                setWeekHours((prev) => ({
-                                  ...prev,
-                                  [day]: [prev[day][0], text],
-                                }))
-                              }
-                            />
-                          </Input>
-                        </View>
+                        <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                          {Strings.edit.to}
+                        </Text>
+                        <Input size="lg" className="w-36">
+                          <InputField
+                            type="text"
+                            placeholder="hh:mm"
+                            value={weekHours[day][1]}
+                            onChangeText={(text) =>
+                              setWeekHours((prev) => ({
+                                ...prev,
+                                [day]: [prev[day][0], text],
+                              }))
+                            }
+                          />
+                        </Input>
                       </View>
                     </View>
                   </View>
@@ -490,33 +455,26 @@ export default function EditScreen() {
             </>
           )}
 
-          <FormControlHelper>
-            <FormControlHelperText />
-          </FormControlHelper>
-          <FormControlError>
-            <FormControlErrorIcon />
-            <FormControlErrorText />
-          </FormControlError>
-        </FormControl>
-
-        <View className="flex-col gap-4 self-center">
-          <TouchableOpacity className="w-96 py-2 rounded justify-center gap-2 flex-row text-primary-500 bg-primary-500 ">
-            <Check color={'white'} />
-            <Text className="font-ifood-medium text-typography-white">
-              {Strings.edit.save}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="w-96 py-2 rounded flex-row justify-center gap-2 text-primary-500 bg-background-light"
-            onPress={handleBack}
-          >
-            <X color={Colors.light.primaryOrange} />
-            <Text className="font-ifood-medium text-primary-500 ">
-              {Strings.edit.cancel}
-            </Text>
-          </TouchableOpacity>
+          {/* Botões */}
+          <View className="flex-col gap-4 self-center mb-8">
+            <TouchableOpacity className="w-96 py-2 rounded justify-center gap-2 flex-row text-primary-500 bg-primary-500">
+              <Check color={'white'} />
+              <Text className="font-ifood-medium text-typography-white">
+                {Strings.edit.save}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="w-96 py-2 rounded flex-row justify-center gap-2 text-primary-500 bg-background-light"
+              onPress={handleBack}
+            >
+              <X color={colors.primaryOrange} />
+              <Text className="font-ifood-medium text-primary-500 ">
+                {Strings.edit.cancel}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }

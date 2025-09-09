@@ -12,6 +12,7 @@
   "dependencies": {
     "@gluestack-ui/alert-dialog": "^0.1.38",
     "@gluestack-ui/button": "^1.0.14",
+    "@gluestack-ui/core": "^3.0.3",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.27",
     "@gluestack-ui/input": "^0.1.38",
@@ -19,6 +20,7 @@
     "@gluestack-ui/overlay": "^0.1.22",
     "@gluestack-ui/radio": "^0.1.40",
     "@gluestack-ui/toast": "^1.0.9",
+    "@gluestack-ui/utils": "^3.0.4",
     "@legendapp/motion": "^2.4.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
@@ -45,7 +47,8 @@
     "react-native-svg": "15.11.2",
     "react-native-toast-message": "^2.3.3",
     "react-native-webview": "13.13.5",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
