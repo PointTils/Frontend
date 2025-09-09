@@ -1,6 +1,8 @@
 import { Text } from '@/src/components/ui/text';
 import React from 'react';
 
+// esse é o componente da linha de informações da tela de perfil(apenas label e valor)
+
 type InfoRowProps = {
   label: string;
   value?: string;

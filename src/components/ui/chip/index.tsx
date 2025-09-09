@@ -2,6 +2,9 @@ import { Text } from '@/src/components/ui/text';
 import React from 'react';
 import { View } from 'react-native';
 
+
+// esse é o componente do quadrado azul das Preferências e Especialidades
+
 type ChipProps = {
   text: string;
 };

@@ -2,6 +2,8 @@ import { Chip } from '@/src/components/ui/chip';
 import React from 'react';
 import { View } from 'react-native';
 
+// esse é o componente do grid de chips das Preferências e Especialidades
+
 type ChipsSectionProps = {
   items?: string[];
 };
