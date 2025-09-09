@@ -27,6 +27,10 @@ export const Strings = {
     birthday: 'Data de Nascimento',
     cnpj: 'CNPJ',
     phone: 'Telefone',
+    gender: 'Gênero',
+    male: 'Masculino',
+    famale: 'Feminino',
+    others: 'Outros',
     email: 'Email',
     password: 'Senha',
     create: '+ Criar conta',
@@ -35,6 +39,7 @@ export const Strings = {
     obsText: 'Verifique os campos preenchidos',
     successTitle: 'Conta criada!',
     successText: 'Sua conta foi criada com sucesso. Faça login para continuar.',
+    select: 'Selecione',
   },
 
   auth: {

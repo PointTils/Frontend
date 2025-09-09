@@ -30,6 +30,8 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { Select, SelectBackdrop, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper, SelectIcon, SelectInput, SelectItem, SelectPortal, SelectTrigger } from '@/src/components/ui/select';
+import { ChevronDownIcon } from 'lucide-react-native';
 
 export default function RegisterScreen() {
   const [type, setType] = useState('enterprise');
@@ -41,6 +43,7 @@ export default function RegisterScreen() {
   const [birthday, setBirthday] = useState(""); 
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [reasonError, setReasonError] = useState(false);
@@ -51,6 +54,7 @@ export default function RegisterScreen() {
   const [nameError, setNameError] = useState(false);
   const [cpfError, setCpfError] = useState(false);
   const [birthdayError, setBirthdayError] = useState(false);
+  const [genderError, setGenderError] = useState(false);
   
 
   const colors = useColors();
@@ -65,8 +69,30 @@ export default function RegisterScreen() {
     setNameError(false);
     setCpfError(false);
     setBirthdayError(false);
+    setGenderError(false);
 
-    if (type === 'enterprise'){
+    if (type === 'client'){
+      if (name.length < 5) {
+        hasError = true;
+        setName('');
+        setNameError(true);
+      }
+      if (!validateCpf(cpf)) {
+        hasError = true;
+        setCpf('');
+        setCpfError(true);
+      }
+      if(!validateBirthday(birthday)){
+        hasError = true;
+        setBirthday('');
+        setBirthdayError(true);
+      }
+      if(gender === ''){
+        hasError = true;
+        setGender('');
+        setGenderError(true);
+      }
+    }else if (type === 'enterprise'){
       if (reason.length < 5) {
         hasError = true;
         setReason('');
@@ -140,7 +166,7 @@ export default function RegisterScreen() {
   const handlerError = (error: boolean) => {
     return error ? 'border-red-300' : 'border-gray-300';
   };
-
+  
   return (
     <>
       <View style={{ zIndex: 999 }}>
@@ -217,6 +243,126 @@ export default function RegisterScreen() {
           </RadioGroup>
 
           <View className="flex-1 px-4 pt-2 justify-between">
+            {type === 'client' && (
+              <>
+                <View>
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.name}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <TextInput
+                    placeholder="Nome X"
+                    value={name}
+                    onChangeText={setName}
+                    maxLength={100}
+                    className={`border ${handlerError(nameError)} rounded-lg px-4 py-3 mb-4`}
+                  />
+
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.cpf}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <TextInput
+                    placeholder="000.000.000-00"
+                    value={cpf}
+                    onChangeText={(cpf) => setCpf(handleCpfChange(cpf))}
+                    className={`border ${handlerError(cpfError)} rounded-lg px-4 py-3 mb-4`}
+                    maxLength={14}
+                  />
+
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.birthday}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <>
+                  <TouchableOpacity onPress={() => setShow(true)}>
+                    <TextInput 
+                      placeholder="DD/MM/AAAA"
+                      className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
+                      value={birthday} 
+                      editable={false} 
+                    />
+                  </TouchableOpacity>
+
+                    {show && (
+                      <DateTimePicker
+                        
+                        value={date}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => {
+                          setShow(false); // fecha após escolher
+                          if (selectedDate) {
+                            setDate(selectedDate);
+                            setBirthday(formatDate(selectedDate));
+                          }
+                        }}
+                      />
+                    )}
+                  </>
+
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.gender}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <Select onValueChange={setGender}>
+                    <SelectTrigger className={`border ${handlerError(genderError)} h-[40px] rounded-lg px-2 mb-4`}>
+                      <SelectInput placeholder={Strings.register.select} />
+                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                    </SelectTrigger>
+                    <SelectPortal>
+                      <SelectBackdrop />
+                      <SelectContent>
+                        <SelectDragIndicatorWrapper>
+                          <SelectDragIndicator />
+                        </SelectDragIndicatorWrapper>
+                        <SelectItem label={Strings.register.male} value="M" />
+                        <SelectItem label={Strings.register.famale} value="F" />
+                        <SelectItem label={Strings.register.others} value="O" />
+                      </SelectContent>
+                    </SelectPortal>
+                  </Select>
+
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.phone}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <TextInput
+                    placeholder="(00) 00000-0000"
+                    value={phone}
+                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                    keyboardType="phone-pad"
+                    className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+                    maxLength={15}
+                  />
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.email}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <TextInput
+                    placeholder="example@gmail.com"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    maxLength={250}
+                    className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+                  />
+
+                  <Text className="font-ifood-medium mb-2">
+                    {Strings.register.password}
+                    <Text style={{ color: colors.mandatory }}>*</Text>
+                  </Text>
+                  <TextInput
+                    placeholder="*******"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    maxLength={25}
+                    className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+                  />
+                </View>
+              </>
+            )}
             {type === 'enterprise' && (
               <>
                 <View>
