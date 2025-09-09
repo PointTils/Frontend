@@ -1,7 +1,21 @@
-import { ChevronLeft } from "lucide-react-native";
-import React from "react";
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ChevronLeft } from 'lucide-react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+
+import { useColors } from '../hooks/useColors';
+
+/**
+  Componente Header para telas com título e botão de voltar opcional.
+  @param title Título da página onde se encontra o header
+  @param showBackButton Booleano para mostrar ou esconder o botão de voltar
+  @param handleBack Função a ser chamada ao pressionar o botão de voltar
+
+  @example
+  <Header 
+    title="Página Inicial"
+    showBackButton={true}
+    handleBack={() => router.replace('(tabs)')}
+ */
 
 interface HeaderProps {
   title: string;
@@ -9,30 +23,31 @@ interface HeaderProps {
   handleBack?: () => void;
 }
 
-export default function Header({ title, showBackButton, handleBack }: HeaderProps) {
-  const colorScheme = useColorScheme();
-
-  const arrowColor = colorScheme === "dark" ? "#FF9F3A" : "#F28D22";
+export default function Header({
+  title,
+  showBackButton,
+  handleBack,
+}: HeaderProps) {
+  const colorScheme = useColors();
 
   return (
-    <SafeAreaView edges={["top"]} className="bg-background-0">
-      <View className="w-full flex-row items-center justify-between px-4 py-3 shadow-sm">
-        <View className="w-1/4">
-          {showBackButton && (
-            <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
-              <ChevronLeft size={24} color={arrowColor} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View className="w-2/4 items-center">
-          <Text className="text-xl font-ifood-bold text-typography-900 dark:text-typography-white">
-            {title}
-          </Text>
-        </View>
-
-        <View className="w-1/4" />
+    <View className="w-full flex-row justify-center items-denter px-4">
+      <View className="w-8 items-start justify-center">
+        {showBackButton && (
+          <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
+            <ChevronLeft size={24} color={colorScheme.primaryOrange} />
+          </TouchableOpacity>
+        )}
       </View>
-    </SafeAreaView>
+
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-lg font-ifood-bold text-text-light dark:text-text-dark">
+          {title.toUpperCase()}
+        </Text>
+      </View>
+
+      {/** Spacing to alignment */}
+      <View className="w-8" />
+    </View>
   );
 }
