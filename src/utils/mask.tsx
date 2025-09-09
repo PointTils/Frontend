@@ -42,13 +42,13 @@ export const validateCpf = (cpf: string) => {
   return cpf.replace(/\D/g, '').length === 11;
 };
 
-export const formatDate = (date: Date) =>{
+export const formatDate = (date: Date) => {
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-}
+};
 
 export const validateBirthday = (birthday: string) => {
   const cleaned = birthday.replace(/\D/g, '');
-  if (cleaned.length !== 8) return false; 
+  if (cleaned.length !== 8) return false;
 
   const day = parseInt(cleaned.substring(0, 2), 10);
   const month = parseInt(cleaned.substring(2, 4), 10);

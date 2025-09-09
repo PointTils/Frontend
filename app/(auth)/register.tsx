@@ -5,7 +5,18 @@ import {
   RadioIndicator,
   RadioLabel,
 } from '@/src/components/ui/radio';
-import { Select, SelectBackdrop, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper, SelectIcon, SelectInput, SelectItem, SelectPortal, SelectTrigger } from '@/src/components/ui/select';
+import {
+  Select,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectIcon,
+  SelectInput,
+  SelectItem,
+  SelectPortal,
+  SelectTrigger,
+} from '@/src/components/ui/select';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import {
@@ -18,7 +29,7 @@ import {
   validateCpf,
   validateEmail,
 } from '@/src/utils/mask';
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronDownIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -39,7 +50,7 @@ export default function RegisterScreen() {
   const [cnpj, setCnpj] = useState('');
   const [cpf, setCpf] = useState('');
   const [date, setDate] = useState(new Date());
-  const [birthday, setBirthday] = useState(""); 
+  const [birthday, setBirthday] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
@@ -54,7 +65,6 @@ export default function RegisterScreen() {
   const [cpfError, setCpfError] = useState(false);
   const [birthdayError, setBirthdayError] = useState(false);
   const [genderError, setGenderError] = useState(false);
-  
 
   const colors = useColors();
 
@@ -70,7 +80,7 @@ export default function RegisterScreen() {
     setBirthdayError(false);
     setGenderError(false);
 
-    if (type === 'client'){
+    if (type === 'client') {
       if (name.length < 5) {
         hasError = true;
         setName('');
@@ -81,17 +91,17 @@ export default function RegisterScreen() {
         setCpf('');
         setCpfError(true);
       }
-      if(!validateBirthday(birthday)){
+      if (!validateBirthday(birthday)) {
         hasError = true;
         setBirthday('');
         setBirthdayError(true);
       }
-      if(gender === ''){
+      if (gender === '') {
         hasError = true;
         setGender('');
         setGenderError(true);
       }
-    }else if (type === 'enterprise'){
+    } else if (type === 'enterprise') {
       if (reason.length < 5) {
         hasError = true;
         setReason('');
@@ -102,7 +112,7 @@ export default function RegisterScreen() {
         setCnpj('');
         setCNPJError(true);
       }
-    }else if (type === 'interpreter'){
+    } else if (type === 'interpreter') {
       if (name.length < 5) {
         hasError = true;
         setName('');
@@ -113,20 +123,20 @@ export default function RegisterScreen() {
         setCpf('');
         setCpfError(true);
       }
-      if(cnpj.length > 0){
+      if (cnpj.length > 0) {
         if (!validateCnpj(cnpj)) {
           hasError = true;
           setCnpj('');
           setCNPJError(true);
         }
       }
-      if(!validateBirthday(birthday)){
+      if (!validateBirthday(birthday)) {
         hasError = true;
         setBirthday('');
         setBirthdayError(true);
       }
     }
-  
+
     if (phone.replace(/\D/g, '').length < 10) {
       hasError = true;
       setPhone('');
@@ -165,7 +175,7 @@ export default function RegisterScreen() {
   const handlerError = (error: boolean) => {
     return error ? 'border-red-300' : 'border-gray-300';
   };
-  
+
   return (
     <>
       <View style={{ zIndex: 999 }}>
@@ -274,18 +284,17 @@ export default function RegisterScreen() {
                     <Text style={{ color: colors.mandatory }}>*</Text>
                   </Text>
                   <>
-                  <TouchableOpacity onPress={() => setShow(true)}>
-                    <TextInput 
-                      placeholder="DD/MM/AAAA"
-                      className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
-                      value={birthday} 
-                      editable={false} 
-                    />
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setShow(true)}>
+                      <TextInput
+                        placeholder="DD/MM/AAAA"
+                        className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
+                        value={birthday}
+                        editable={false}
+                      />
+                    </TouchableOpacity>
 
                     {show && (
                       <DateTimePicker
-                        
                         value={date}
                         mode="date"
                         display="default"
@@ -305,7 +314,9 @@ export default function RegisterScreen() {
                     <Text style={{ color: colors.mandatory }}>*</Text>
                   </Text>
                   <Select onValueChange={setGender}>
-                    <SelectTrigger className={`border ${handlerError(genderError)} h-[40px] rounded-lg px-2 mb-4`}>
+                    <SelectTrigger
+                      className={`border ${handlerError(genderError)} h-[40px] rounded-lg px-2 mb-4`}
+                    >
                       <SelectInput placeholder={Strings.register.select} />
                       <SelectIcon className="mr-3" as={ChevronDownIcon} />
                     </SelectTrigger>
@@ -458,7 +469,7 @@ export default function RegisterScreen() {
                   />
 
                   <Text className="font-ifood-medium mb-2">
-                    {Strings.register.cnpj}  ({Strings.common.optional})
+                    {Strings.register.cnpj} ({Strings.common.optional})
                   </Text>
                   <TextInput
                     placeholder="00.000.000/0001-00"
@@ -467,24 +478,23 @@ export default function RegisterScreen() {
                     className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
                     maxLength={18}
                   />
-                               
+
                   <Text className="font-ifood-medium mb-2">
                     {Strings.register.birthday}
                     <Text style={{ color: colors.mandatory }}>*</Text>
                   </Text>
                   <>
-                  <TouchableOpacity onPress={() => setShow(true)}>
-                    <TextInput 
-                      placeholder="DD/MM/AAAA"
-                      className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
-                      value={birthday} 
-                      editable={false} 
-                    />
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setShow(true)}>
+                      <TextInput
+                        placeholder="DD/MM/AAAA"
+                        className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
+                        value={birthday}
+                        editable={false}
+                      />
+                    </TouchableOpacity>
 
                     {show && (
                       <DateTimePicker
-                        
                         value={date}
                         mode="date"
                         display="default"
