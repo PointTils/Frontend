@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "point-tils",
+    "name": "Point Tils",
     "slug": "point-tils",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/apk-logo.png",
     "scheme": "pointtils",
+    "githubUrl": "https://github.com/PointTils/Frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
