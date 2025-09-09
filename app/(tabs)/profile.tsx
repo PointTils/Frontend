@@ -6,7 +6,7 @@ import { View } from '@/src/components/ui/view';
 import { formatDate, handleCnpjChange, handleCpfChange, handlePhoneChange } from '@/src/components/utils/mask';
 import { useColors } from '@/src/hooks/useColors';
 import type { ProfileModel } from '@/src/types/api';
-import { BadgeQuestionMark, ChevronRight, SquarePen } from 'lucide-react-native';
+import { BadgeHelp, ChevronRight, SquarePen } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, TouchableOpacity } from 'react-native';
 
@@ -95,7 +95,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity className="flex-1" onPress={() => {}}>
             <View className="w-full flex-row items-center">
-              <BadgeQuestionMark width={20} height={20} stroke={colors.disabled} />
+              <BadgeHelp width={20} height={20} stroke={colors.disabled} />
               <Text className="pl-2 text-base font-ifood-regular text-primary-50 flex-1">
                 Ajuda
               </Text>
