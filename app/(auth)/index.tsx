@@ -19,6 +19,7 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import { LoginCredentials } from '@/src/types/api';
 import { validateEmail } from '@/src/utils/mask';
 import { AlertCircleIcon } from 'lucide-react-native';
+import { router } from 'expo-router';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -156,7 +157,7 @@ export default function LoginScreen() {
           <Text className="font-ifood-regular text-text-light dark:text-text-dark">
             {Strings.auth.signUpPrefix}{' '}
           </Text>
-          <HapticTab onPress={() => console.warn('Navegar para cadastro')}>
+          <HapticTab onPress={() => router.push('/register')}>
             <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark underline">
               {Strings.auth.signUpAction}
             </Text>
