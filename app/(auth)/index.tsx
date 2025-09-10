@@ -15,9 +15,26 @@ import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { KeyboardAvoidingView, Platform } from 'react-native';
+import { LoginCredentials } from '@/src/types/api';
+import { useState } from 'react';
 
 export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const { login } = useAuth();
+
+  async function handleLogin() {
+    const data: LoginCredentials = {
+      email: email,
+      password: password,
+    };
+
+    await login(data);
+  }
+
   return (
     <View
       className="flex-1 items-center justify-center"
@@ -48,7 +65,12 @@ export default function LoginScreen() {
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
-              <InputField type="text" placeholder="email@example.com" />
+              <InputField
+                type="text"
+                placeholder="email@example.com"
+                onChangeText={setEmail}
+                value={email}
+              />
             </Input>
             <FormControlHelper>
               <FormControlHelperText />
@@ -70,7 +92,12 @@ export default function LoginScreen() {
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
-              <InputField type="password" placeholder="senha" />
+              <InputField
+                type="password"
+                placeholder="senha"
+                onChangeText={setPassword}
+                value={password}
+              />
             </Input>
             <FormControlHelper>
               <FormControlHelperText />
@@ -85,6 +112,7 @@ export default function LoginScreen() {
         {/* bottom buttons */}
         <Button
           size="md"
+          onPress={handleLogin}
           className="mb-10 mt-2 w-[300px] bg-primary-blue-light dark:bg-primary-blue-dark data-[active=true]:bg-primary-blue-press-light"
         >
           <Text className="font-ifood-regular text-text-dark">

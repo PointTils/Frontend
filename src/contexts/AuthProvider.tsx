@@ -58,8 +58,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function loadStoredAuth() {
     try {
       const [storedUser, storedAccessToken] = await Promise.all([
-        AsyncStorage.getItem(Storage.user_data),
-        AsyncStorage.getItem(Storage.access_token),
+        AsyncStorage.getItem(Storage.userData),
+        AsyncStorage.getItem(Storage.accessToken),
       ]);
 
       if (storedUser && storedAccessToken) {
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Request interceptor to add auth header
     api.interceptors.request.use(
       async (config) => {
-        const token = await AsyncStorage.getItem(Storage.access_token);
+        const token = await AsyncStorage.getItem(Storage.accessToken);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const refreshSuccess = await refreshToken();
           if (refreshSuccess) {
             // Get the new token and retry the original request
-            const newToken = await AsyncStorage.getItem(Storage.access_token);
+            const newToken = await AsyncStorage.getItem(Storage.accessToken);
             if (newToken) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
@@ -149,20 +149,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store user data and tokens
         await Promise.all([
-          AsyncStorage.setItem(Storage.user_data, JSON.stringify(userData)),
-          AsyncStorage.setItem(Storage.access_token, tokens.access_token),
-          AsyncStorage.setItem(Storage.refresh_token, tokens.refresh_token),
+          AsyncStorage.setItem(Storage.userData, JSON.stringify(userData)),
+          AsyncStorage.setItem(Storage.accessToken, tokens.accessToken),
+          AsyncStorage.setItem(Storage.refreshToken, tokens.refreshToken),
         ]);
 
         // Update API default headers
-        api.defaults.headers.common.Authorization = `Bearer ${tokens.access_token}`;
+        api.defaults.headers.common.Authorization = `Bearer ${tokens.accessToken}`;
 
         // Update state
         setUser(userData);
       } else {
         throw new Error(response.data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
       throw error;
     } finally {
@@ -173,7 +173,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function refreshToken(): Promise<boolean> {
     try {
       const storedRefreshToken = await AsyncStorage.getItem(
-        Storage.refresh_token,
+        Storage.refreshToken,
       );
 
       if (!storedRefreshToken) {
@@ -189,12 +189,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store new tokens
         await Promise.all([
-          AsyncStorage.setItem(Storage.access_token, tokens.access_token),
-          AsyncStorage.setItem(Storage.refresh_token, tokens.refresh_token),
+          AsyncStorage.setItem(Storage.accessToken, tokens.accessToken),
+          AsyncStorage.setItem(Storage.refreshToken, tokens.refreshToken),
         ]);
 
         // Update API default headers
-        api.defaults.headers.common.Authorization = `Bearer ${tokens.access_token}`;
+        api.defaults.headers.common.Authorization = `Bearer ${tokens.accessToken}`;
 
         return true;
       }
@@ -212,7 +212,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       try {
         const storedRefreshToken = await AsyncStorage.getItem(
-          Storage.refresh_token,
+          Storage.refreshToken,
         );
 
         await api.post('/auth/logout', {
@@ -225,9 +225,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Clear stored data
       await Promise.all([
-        AsyncStorage.removeItem(Storage.access_token),
-        AsyncStorage.removeItem(Storage.refresh_token),
-        AsyncStorage.removeItem(Storage.user_data),
+        AsyncStorage.removeItem(Storage.accessToken),
+        AsyncStorage.removeItem(Storage.refreshToken),
+        AsyncStorage.removeItem(Storage.userData),
       ]);
 
       // Clear API headers

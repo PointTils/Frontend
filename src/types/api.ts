@@ -4,21 +4,28 @@ export type ApiState<T> = {
   error: string | null;
 };
 
-// Auth types
+// User types
+export enum UserType {
+  PERSON = 'person',
+  COMPANY = 'company',
+  TIL = 'til',
+}
+
 export interface User {
   id: number;
   email: string;
   name: string;
-  type: string;
+  type: UserType;
   status: string;
 }
 
+// Auth types
 export interface Tokens {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_expires_in: number;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  refreshExpiresIn: number;
 }
 
 export interface LoginCredentials {
