@@ -9,31 +9,26 @@ import { avatarStyle } from './styles';
 type IAvatarProps = React.ComponentProps<typeof RNView> &
   VariantProps<typeof avatarStyle>;
 
-const Avatar = React.forwardRef<React.ComponentRef<typeof RNView>, IAvatarProps>(
-  function Avatar(
-    {
-      className,
-      size = 'md',
-      borderRadius = 'full',
-      ...props
-    },
-    ref,
-  ) {
-    return (
-      <RNView
-        className={avatarStyle({
-          size,
-          borderRadius,
-          class: className,
-        })}
-        {...props}
-        ref={ref}
-      />
-    );
-  },
-);
+const Avatar = React.forwardRef<
+  React.ComponentRef<typeof RNView>,
+  IAvatarProps
+>(function Avatar(
+  { className, size = 'md', borderRadius = 'full', ...props },
+  ref,
+) {
+  return (
+    <RNView
+      className={avatarStyle({
+        size,
+        borderRadius,
+        class: className,
+      })}
+      {...props}
+      ref={ref}
+    />
+  );
+});
 
 Avatar.displayName = 'Avatar';
 
 export { Avatar, AvatarFallbackText, AvatarImage };
-

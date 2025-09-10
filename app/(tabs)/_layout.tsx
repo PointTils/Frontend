@@ -43,7 +43,7 @@ export default function TabLayout() {
           ),
         }}
       />
-              <Tabs.Screen
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarLabel: ({ color }) => (
@@ -56,7 +56,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
     </Tabs>
   );
 }

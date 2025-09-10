@@ -11,9 +11,8 @@
   },
   "dependencies": {
     "@gluestack-style/react": "^1.0.57",
-    "@gluestack-ui/avatar": "^0.1.18",
-    "@gluestack-ui/themed": "^1.1.73",
     "@gluestack-ui/alert-dialog": "^0.1.38",
+    "@gluestack-ui/avatar": "^0.1.18",
     "@gluestack-ui/button": "^1.0.14",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.27",
@@ -21,6 +20,7 @@
     "@gluestack-ui/nativewind-utils": "^1.0.28",
     "@gluestack-ui/overlay": "^0.1.22",
     "@gluestack-ui/radio": "^0.1.40",
+    "@gluestack-ui/themed": "^1.1.73",
     "@gluestack-ui/toast": "^1.0.9",
     "@legendapp/motion": "^2.4.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -47,6 +47,7 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-toast-message": "^2.3.3",
+    "react-native-web": "^0.21.1",
     "react-native-webview": "13.13.5",
     "tailwindcss": "^3.4.17"
   },

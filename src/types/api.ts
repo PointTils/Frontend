@@ -4,7 +4,11 @@ export type ApiState<T> = {
   error: string | null;
 };
 
-export type Gender = 'Masculino' | 'Feminino' | 'Outro' | 'Prefiro não informar';
+export type Gender =
+  | 'Masculino'
+  | 'Feminino'
+  | 'Outro'
+  | 'Prefiro não informar';
 
 export type ProfileModel = {
   name?: string;
@@ -15,6 +19,6 @@ export type ProfileModel = {
   cnpj?: string;
   phone?: string;
   email?: string;
-  specialties?: string[];   
-  preferences?: string[];  
+  specialties?: string[];
+  preferences?: string[];
 };

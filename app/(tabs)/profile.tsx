@@ -3,18 +3,20 @@ import ChipsSection from '@/src/components/ui/chipSection';
 import { InfoRow } from '@/src/components/ui/infoRow';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import { formatDate, handleCnpjChange, handleCpfChange, handlePhoneChange } from '@/src/components/utils/mask';
+import {
+  formatDate,
+  handleCnpjChange,
+  handleCpfChange,
+  handlePhoneChange,
+} from '@/src/components/utils/mask';
 import { useColors } from '@/src/hooks/useColors';
 import type { ProfileModel } from '@/src/types/api';
 import { BadgeHelp, ChevronRight, SquarePen } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, TouchableOpacity } from 'react-native';
 
-
-
 export default function ProfileScreen() {
   const colors = useColors();
-
 
   const demoData: ProfileModel = {
     // PF exemplo
@@ -46,18 +48,31 @@ export default function ProfileScreen() {
 
   const model: ProfileModel = demoData;
   const title = model.corporateName ?? model.name ?? 'Perfil';
-  const hasSpecialties = Array.isArray(model.specialties) && model.specialties.length > 0;
-  const hasPreferences = Array.isArray(model.preferences) && model.preferences.length > 0;
-  const chipsLabel = hasSpecialties ? 'Especialidades' : hasPreferences ? 'Preferências' : undefined;
-  const chipsItems = hasSpecialties ? model.specialties : hasPreferences ? model.preferences : undefined;
+  const hasSpecialties =
+    Array.isArray(model.specialties) && model.specialties.length > 0;
+  const hasPreferences =
+    Array.isArray(model.preferences) && model.preferences.length > 0;
+  const chipsLabel = hasSpecialties
+    ? 'Especialidades'
+    : hasPreferences
+      ? 'Preferências'
+      : undefined;
+  const chipsItems = hasSpecialties
+    ? model.specialties
+    : hasPreferences
+      ? model.preferences
+      : undefined;
 
   return (
-    <ScrollView className="flex-1 pt-[124px]" style={{ backgroundColor: colors.background }}>
+    <ScrollView
+      className="flex-1 pt-[124px]"
+      style={{ backgroundColor: colors.background }}
+    >
       <View className="flex-1 justify-center items-center p-6">
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
-              uri: "https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x",
+              uri: 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
             }}
           />
         </Avatar>
@@ -67,12 +82,24 @@ export default function ProfileScreen() {
         </Text>
         <View className="w-full h-px bg-gray-200 mb-4" />
 
-        <InfoRow label="CPF" value={model.cpf ? handleCpfChange(model.cpf) : undefined} />
-        <InfoRow label="Data de nascimento" value={formatDate(model.birthDate)} />
+        <InfoRow
+          label="CPF"
+          value={model.cpf ? handleCpfChange(model.cpf) : undefined}
+        />
+        <InfoRow
+          label="Data de nascimento"
+          value={formatDate(model.birthDate)}
+        />
         <InfoRow label="Gênero" value={model.gender} />
-        <InfoRow label="Telefone" value={model.phone ? handlePhoneChange(model.phone) : undefined} />
+        <InfoRow
+          label="Telefone"
+          value={model.phone ? handlePhoneChange(model.phone) : undefined}
+        />
         <InfoRow label="E-mail" value={model.email} />
-        <InfoRow label="CNPJ" value={model.cnpj ? handleCnpjChange(model.cnpj) : undefined} />
+        <InfoRow
+          label="CNPJ"
+          value={model.cnpj ? handleCnpjChange(model.cnpj) : undefined}
+        />
         {chipsLabel && (
           <>
             <Text className="w-full pl-2 text-base font-ifood-medium text-left mb-1 text-primary-800">
