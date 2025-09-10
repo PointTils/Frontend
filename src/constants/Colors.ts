@@ -23,6 +23,6 @@ export const Colors = {
     primaryOrange: '#FF9F3A',
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
-    mandatory: '#B91C1C',
+    mandatory: '#EF4444',
   },
 } as const;

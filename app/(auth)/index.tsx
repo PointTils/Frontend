@@ -6,8 +6,6 @@ import {
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
-  FormControlHelper,
-  FormControlHelperText,
   FormControlLabel,
   FormControlLabelText,
 } from '@/src/components/ui/form-control';
@@ -16,20 +14,43 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
+import { useFormValidation } from '@/src/hooks/useFormValidation';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { LoginCredentials } from '@/src/types/api';
-import { useState } from 'react';
+import { validateEmail } from '@/src/utils/mask';
+import { AlertCircleIcon } from 'lucide-react-native';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
   const { login } = useAuth();
 
+  const { fields, setValue, validateForm } = useFormValidation({
+    email: {
+      value: '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim()) return Strings.common.requiredEmail;
+        if (!validateEmail(value)) return Strings.common.invalidEmail;
+        return null;
+      },
+    },
+    password: {
+      value: '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim()) return Strings.common.requiredPassword;
+        return null;
+      },
+    },
+  });
+
   async function handleLogin() {
+    if (!validateForm()) {
+      return;
+    }
+
     const data: LoginCredentials = {
-      email: email,
-      password: password,
+      email: fields.email.value,
+      password: fields.password.value,
     };
 
     await login(data);
@@ -53,11 +74,12 @@ export default function LoginScreen() {
         </View>
 
         {/* Forms */}
-        <View className="py-4">
+        <View className="py-4 gap-4">
           <FormControl
             size="md"
             accessibilityLabel={Strings.auth.email}
             isRequired={true}
+            isInvalid={!!fields.email.error}
           >
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -68,16 +90,21 @@ export default function LoginScreen() {
               <InputField
                 type="text"
                 placeholder="email@example.com"
-                onChangeText={setEmail}
-                value={email}
+                onChangeText={(text) => setValue('email', text)}
+                value={fields.email.value}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
               />
             </Input>
-            <FormControlHelper>
-              <FormControlHelperText />
-            </FormControlHelper>
             <FormControlError>
-              <FormControlErrorIcon />
-              <FormControlErrorText />
+              <FormControlErrorIcon
+                as={AlertCircleIcon}
+                className="text-red-600"
+              />
+              <FormControlErrorText className="text-red-600">
+                {fields.email.error}
+              </FormControlErrorText>
             </FormControlError>
           </FormControl>
 
@@ -85,6 +112,7 @@ export default function LoginScreen() {
             size="md"
             accessibilityLabel={Strings.auth.password}
             isRequired={true}
+            isInvalid={!!fields.password.error}
           >
             <FormControlLabel className="font-ifood-medium text-text-light dark:text-text-dark">
               <FormControlLabelText>
@@ -95,16 +123,20 @@ export default function LoginScreen() {
               <InputField
                 type="password"
                 placeholder="senha"
-                onChangeText={setPassword}
-                value={password}
+                onChangeText={(text) => setValue('password', text)}
+                value={fields.password.value}
+                autoCapitalize="none"
+                autoComplete="password"
               />
             </Input>
-            <FormControlHelper>
-              <FormControlHelperText />
-            </FormControlHelper>
             <FormControlError>
-              <FormControlErrorIcon />
-              <FormControlErrorText />
+              <FormControlErrorIcon
+                as={AlertCircleIcon}
+                className="text-red-600"
+              />
+              <FormControlErrorText className="text-red-600">
+                {fields.password.error}
+              </FormControlErrorText>
             </FormControlError>
           </FormControl>
         </View>

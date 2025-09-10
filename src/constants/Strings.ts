@@ -12,6 +12,9 @@ export const Strings = {
     error: 'Ocorreu um erro. Tente novamente.',
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
+    invalidEmail: 'Email inválido',
+    requiredEmail: 'Email obrigatório',
+    requiredPassword: 'Senha obrigatória',
   },
   register: {
     title: 'Boas-vindas!',
