@@ -41,3 +41,14 @@ export const validateBirthDate = (date: string) => {
   const regex = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
   return regex.test(date);
 };
+
+export const handleTimeChange = (text: string) => {
+  const cleaned = text.replace(/\D/g, '').slice(0, 4);
+  const formatted = cleaned.replace(/^(\d{2})(\d{0,2})$/, '$1:$2');
+  return formatted;
+};
+
+export const validateTime = (time: string) => {
+  const regex = /^$|^([01]\d|2[0-3]):([0-5]\d)$/;
+  return regex.test(time);
+};

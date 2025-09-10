@@ -20,14 +20,36 @@ import {
   X,
   ChevronLeft,
   CircleIcon,
+  ChevronDownIcon,
+  CheckIcon,
 } from 'lucide-react-native';
 import {
   handleBirthDateChange,
   handleCnpjChange,
   handlePhoneChange,
+  handleTimeChange,
+  validateTime,
 } from '@/src/utils/mask';
 import { useRouter } from 'expo-router';
-
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicatorWrapper,
+  SelectDragIndicator,
+  SelectItem,
+} from '@/src/components/ui/select';
+import {
+  Checkbox,
+  CheckboxGroup,
+  CheckboxIndicator,
+  CheckboxIcon,
+  CheckboxLabel,
+} from '@/src/components/ui/checkbox';
 type Day =
   | 'monday'
   | 'tuesday'
@@ -49,8 +71,12 @@ export default function EditScreen() {
   const [description, setDescription] = useState(
     'Descreva o seu trabalho, como tipos de serviços prestados e experiências.',
   );
-  const [modality, setModality] = useState(['Presencial', 'Online']);
-  const [location, setLocation] = useState('Floresta, Porto Alegre - RS');
+  const [modality, setModality] = useState<string[]>([]);
+  const [location, setLocation] = useState({
+    uf: '',
+    city: '',
+    neighborhood: '',
+  });
   const [imageRight, setImageRight] = useState('authorize');
   const [minPrice, setMinPrice] = useState('100');
   const [maxPrice, setMaxPrice] = useState('1000');
@@ -70,6 +96,20 @@ export default function EditScreen() {
 
   const type = 'Intérprete';
   const options: any[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5'];
+
+  const locations = {
+    RS: {
+      'Porto Alegre': ['Floresta', 'Centro', 'Moinhos de Vento'],
+      Canoas: ['Centro', 'Niterói'],
+    },
+    SP: {
+      'São Paulo': ['Pinheiros', 'Moema', 'Vila Mariana'],
+      Campinas: ['Cambuí', 'Barão Geraldo'],
+    },
+    RJ: {
+      'Rio de Janeiro': ['Copacabana', 'Botafogo', 'Tijuca'],
+    },
+  };
 
   const handleChange = (options: any[]) => {
     console.log(options);
@@ -98,6 +138,7 @@ export default function EditScreen() {
           {Strings.edit.title}
         </Text>
       </View>
+
       <ScrollView>
         <View className="flex-col items-center gap-4 w-full">
           <View className="w-full flex-row self-start items-center px-8 gap-2">
@@ -148,14 +189,26 @@ export default function EditScreen() {
                 <Text className="font-ifood-medium text-text-light dark:text-text-dark">
                   {Strings.edit.gender}
                 </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Era pra ser um selector"
-                    value={gender}
-                    onChangeText={setGender}
-                  />
-                </Input>
+                <Select
+                  selectedValue={gender}
+                  onValueChange={setGender}
+                  className="w-80"
+                >
+                  <SelectTrigger>
+                    <SelectInput placeholder="Gênero" className="flex-1" />
+                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      <SelectItem label="Masculino" value="Masculino" />
+                      <SelectItem label="Feminino" value="Feminino" />
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
               </View>
 
               {/* Telefone */}
@@ -306,14 +359,27 @@ export default function EditScreen() {
                 <Text className="font-ifood-medium text-text-light dark:text-text-dark">
                   {Strings.edit.modality}
                 </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Placeholder para os checkboxes"
-                    value={''}
-                    onChangeText={() => {}}
-                  />
-                </Input>
+                <CheckboxGroup
+                  value={modality}
+                  onChange={(keys) => {
+                    setModality(keys);
+                    alert(modality);
+                  }}
+                  className="flex-row justify-evenly w-80 py-2"
+                >
+                  <Checkbox value="Presencial">
+                    <CheckboxIndicator className="border w-6 h-6">
+                      <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                    </CheckboxIndicator>
+                    <CheckboxLabel>{Strings.edit.inPerson}</CheckboxLabel>
+                  </Checkbox>
+                  <Checkbox value="Online">
+                    <CheckboxIndicator className="border w-6 h-6">
+                      <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                    </CheckboxIndicator>
+                    <CheckboxLabel>{Strings.edit.online}</CheckboxLabel>
+                  </Checkbox>
+                </CheckboxGroup>
               </View>
 
               {/* Localização */}
@@ -321,14 +387,100 @@ export default function EditScreen() {
                 <Text className="font-ifood-medium text-text-light dark:text-text-dark">
                   {Strings.edit.location}
                 </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Placeholder para os selectors"
-                    value={location}
-                    onChangeText={setLocation}
-                  />
-                </Input>
+
+                <View className="flex-row justify-between mt-2">
+                  {/* UF */}
+                  <Select
+                    className="w-24"
+                    onValueChange={(uf) =>
+                      setLocation({ uf, city: '', neighborhood: '' })
+                    }
+                    selectedValue={location.uf}
+                  >
+                    <SelectTrigger>
+                      <SelectInput placeholder="UF" className="flex-1" />
+                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                    </SelectTrigger>
+                    <SelectPortal>
+                      <SelectBackdrop />
+                      <SelectContent>
+                        <SelectDragIndicatorWrapper>
+                          <SelectDragIndicator />
+                        </SelectDragIndicatorWrapper>
+                        {Object.keys(locations).map((ufKey) => (
+                          <SelectItem key={ufKey} label={ufKey} value={ufKey} />
+                        ))}
+                      </SelectContent>
+                    </SelectPortal>
+                  </Select>
+
+                  {/* Cidade */}
+                  <Select
+                    className="w-52"
+                    onValueChange={(city) =>
+                      setLocation((prev) => ({
+                        ...prev,
+                        city,
+                        neighborhood: '',
+                      }))
+                    }
+                    selectedValue={location.city}
+                    isDisabled={!location.uf}
+                  >
+                    <SelectTrigger>
+                      <SelectInput placeholder="Cidade" className="flex-1" />
+                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                    </SelectTrigger>
+                    <SelectPortal>
+                      <SelectBackdrop />
+                      <SelectContent>
+                        <SelectDragIndicatorWrapper>
+                          <SelectDragIndicator />
+                        </SelectDragIndicatorWrapper>
+                        {location.uf &&
+                          Object.keys(locations[location.uf]).map((cityKey) => (
+                            <SelectItem
+                              key={cityKey}
+                              label={cityKey}
+                              value={cityKey}
+                            />
+                          ))}
+                      </SelectContent>
+                    </SelectPortal>
+                  </Select>
+                </View>
+
+                {/* Bairro */}
+                <Select
+                  className="w-80 mt-2"
+                  onValueChange={(neighborhood) =>
+                    setLocation((prev) => ({ ...prev, neighborhood }))
+                  }
+                  selectedValue={location.neighborhood}
+                  isDisabled={!location.city}
+                >
+                  <SelectTrigger>
+                    <SelectInput placeholder="Bairro" className="flex-1" />
+                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      {location.uf &&
+                        location.city &&
+                        locations[location.uf][location.city].map((bairro) => (
+                          <SelectItem
+                            key={bairro}
+                            label={bairro}
+                            value={bairro}
+                          />
+                        ))}
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
               </View>
 
               {/* Direito de Imagem */}
@@ -423,9 +575,14 @@ export default function EditScreen() {
                             onChangeText={(text) =>
                               setWeekHours((prev) => ({
                                 ...prev,
-                                [day]: [text, prev[day][1]],
+                                [day]: [handleTimeChange(text), prev[day][1]],
                               }))
                             }
+                            onBlur={() => {
+                              if (!validateTime(weekHours[day][0])) {
+                                alert('Horário inválido! Use o formato hh:mm');
+                              }
+                            }}
                           />
                         </Input>
                       </View>
@@ -442,9 +599,14 @@ export default function EditScreen() {
                             onChangeText={(text) =>
                               setWeekHours((prev) => ({
                                 ...prev,
-                                [day]: [prev[day][0], text],
+                                [day]: [prev[day][0], handleTimeChange(text)],
                               }))
                             }
+                            onBlur={() => {
+                              if (!validateTime(weekHours[day][1])) {
+                                alert('Horário inválido! Use o formato hh:mm');
+                              }
+                            }}
                           />
                         </Input>
                       </View>
