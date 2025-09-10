@@ -35,7 +35,7 @@ export const Strings = {
     password: 'Senha',
     create: '+ Criar conta',
     cancel: '✕ Cancelar',
-    obsTitle: 'Formulario Invalido',
+    obsTitle: 'Formulário Invalido',
     obsText: 'Verifique os campos preenchidos',
     successTitle: 'Conta criada!',
     successText: 'Sua conta foi criada com sucesso. Faça login para continuar.',

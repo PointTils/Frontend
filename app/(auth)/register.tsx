@@ -17,6 +17,7 @@ import {
   SelectPortal,
   SelectTrigger,
 } from '@/src/components/ui/select';
+import { Toast, ToastDescription, ToastTitle, useToast } from '@/src/components/ui/toast';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import {
@@ -41,7 +42,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen() {
   const [type, setType] = useState('enterprise');
@@ -67,6 +67,9 @@ export default function RegisterScreen() {
   const [genderError, setGenderError] = useState(false);
 
   const colors = useColors();
+  const toast = useToast();
+  const [isToastVisible, setIsToastVisible] = useState(false);
+
 
   const handleSubmit = () => {
     let hasError = false;
@@ -153,22 +156,45 @@ export default function RegisterScreen() {
       setPasswordError(true);
     }
 
+    if (isToastVisible) return; // bloqueia spam
+    setIsToastVisible(true);
+    setTimeout(() => setIsToastVisible(false), 2000);
+  
     if (hasError) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.register.obsTitle,
-        text2: Strings.register.obsText,
-        position: 'top',
-        visibilityTime: 3000,
+      toast.show({
+      duration: 2000,
+      placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast
+              className="mt-12 w-[300px] rounded-none"
+              nativeID={`toast-${id}`}
+              action="error"
+              variant="solid"
+            >
+              <ToastTitle>{Strings.register.obsTitle}</ToastTitle>
+              <ToastDescription>{Strings.register.obsText}</ToastDescription>
+            </Toast>
+          );
+        },
       });
       return;
     }
-    Toast.show({
-      type: 'success',
-      text1: Strings.register.successTitle,
-      text2: Strings.register.successText,
-      position: 'top',
-      visibilityTime: 3000,
+    toast.show({
+      duration: 2000,
+      placement: "top",
+      render: ({ id }) => {
+        return (
+          <Toast
+            className="mt-12 w-[300px] rounded-none"
+            nativeID={`toast-${id}`}
+            action="success"
+          >
+            <ToastTitle>{Strings.register.successTitle}</ToastTitle>
+            <ToastDescription>{Strings.register.successText}</ToastDescription>
+          </Toast>
+        );
+      },
     });
   };
 
@@ -176,13 +202,34 @@ export default function RegisterScreen() {
     return error ? 'border-red-300' : 'border-gray-300';
   };
 
+  const handlerChangeType = (type: string) => {
+    setReasonError(false);
+    setCNPJError(false);
+    setPhoneError(false);
+    setEmailError(false);
+    setPasswordError(false);
+    setNameError(false);
+    setCpfError(false);
+    setBirthdayError(false);
+    setGenderError(false);
+
+    setReason('');
+    setCnpj('');
+    setPhone('');
+    setEmail('');
+    setPassword('');
+    setName('');
+    setCpf('');
+    setBirthday('');
+    setGender('');
+
+    setType(type);
+  };
+
   return (
     <>
-      <View style={{ zIndex: 999 }}>
-        <Toast />
-      </View>
       <KeyboardAvoidingView
-        className="flex-1 p-10 mt-10"
+        className="p-10 mt-10 pb-0"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView>
@@ -198,7 +245,7 @@ export default function RegisterScreen() {
           </Text>
           <RadioGroup
             value={type}
-            onChange={setType}
+            onChange={(value) => handlerChangeType(value)}
             className="flex-row items-center mb-4"
           >
             <Radio value="client">
