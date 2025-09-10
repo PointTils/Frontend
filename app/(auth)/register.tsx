@@ -17,7 +17,12 @@ import {
   SelectPortal,
   SelectTrigger,
 } from '@/src/components/ui/select';
-import { Toast, ToastDescription, ToastTitle, useToast } from '@/src/components/ui/toast';
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from '@/src/components/ui/toast';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import {
@@ -69,7 +74,6 @@ export default function RegisterScreen() {
   const colors = useColors();
   const toast = useToast();
   const [isToastVisible, setIsToastVisible] = useState(false);
-
 
   const handleSubmit = () => {
     let hasError = false;
@@ -159,11 +163,11 @@ export default function RegisterScreen() {
     if (isToastVisible) return; // bloqueia spam
     setIsToastVisible(true);
     setTimeout(() => setIsToastVisible(false), 2000);
-  
+
     if (hasError) {
       toast.show({
-      duration: 2000,
-      placement: "top",
+        duration: 2000,
+        placement: 'top',
         render: ({ id }) => {
           return (
             <Toast
@@ -182,7 +186,7 @@ export default function RegisterScreen() {
     }
     toast.show({
       duration: 2000,
-      placement: "top",
+      placement: 'top',
       render: ({ id }) => {
         return (
           <Toast
