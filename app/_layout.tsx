@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 import { View } from '@/src/components/ui/view';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CustomSplashScreen from './splash';
 
@@ -14,15 +15,32 @@ import 'react-native-reanimated';
 import { useCallback, useState, useEffect } from 'react';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
-SplashScreen.preventAutoHideAsync().catch(() => {
-  /* reloading the app might trigger some race conditions, ignore them */
-});
+SplashScreen.preventAutoHideAsync();
+
+async function clearAllStorage(): Promise<void> {
+  try {
+    await AsyncStorage.clear();
+    console.warn('All AsyncStorage cleared successfully');
+  } catch (error) {
+    console.error('Failed to clear all storage:', error);
+    throw error;
+  }
+}
 
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [isSplashReady, setIsSplashReady] = useState(false);
 
-  if (isLoading) {
-    return <CustomSplashScreen onFinish={() => {}} />;
+  useEffect(() => {
+    if (!isLoading) {
+      // Quando a autenticação estiver pronta, espere a splash animação
+      const timer = setTimeout(() => setIsSplashReady(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  if (isLoading || !isSplashReady) {
+    return <CustomSplashScreen onFinish={() => setIsSplashReady(true)} />;
   }
 
   return (
@@ -38,8 +56,9 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const [splashHidden, setSplashHidden] = useState(false);
 
-  const [loaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     'iFoodRC-Thin': require('../src/assets/fonts/iFoodRCTextos-Thin.ttf'),
     'iFoodRC-Light': require('../src/assets/fonts/iFoodRCTextos-Light.ttf'),
     'iFoodRC-Regular': require('../src/assets/fonts/iFoodRCTextos-Regular.ttf'),
@@ -51,34 +70,38 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Simulate some async tasks like fetching data or loading resources
+        await clearAllStorage();
+
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
-        console.warn('Error during app preparation:', e);
+        console.warn(e);
       } finally {
         setAppIsReady(true);
       }
     }
 
-    if (loaded) {
+    if (fontsLoaded) {
       prepare();
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
+  const hideNativeSplash = useCallback(async () => {
+    if (appIsReady && fontsLoaded) {
       await SplashScreen.hideAsync();
+      setSplashHidden(true);
     }
-  }, [appIsReady]);
+  }, [appIsReady, fontsLoaded]);
 
-  if (!appIsReady) {
+  if (!appIsReady || !fontsLoaded) {
     return null;
   }
 
   return (
     <AuthProvider>
       <ThemeProvider>
-        <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-          <RootNavigator />
+        <View onLayout={hideNativeSplash} style={{ flex: 1 }}>
+          {splashHidden && <RootNavigator />}
           <StatusBar style="auto" />
         </View>
       </ThemeProvider>
