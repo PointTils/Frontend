@@ -97,7 +97,7 @@ export default function RegisterScreen() {
 
   return (
     <>
-      <View style={{ zIndex: 999 }}>
+      <View className="z-[999]">
         <Toast />
       </View>
       <KeyboardAvoidingView
