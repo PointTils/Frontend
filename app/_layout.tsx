@@ -1,18 +1,18 @@
 import '@/global.css';
 
+import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import { View } from '@/src/components/ui/view';
-import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
+import { useCallback, useState, useEffect } from 'react';
 
 import CustomSplashScreen from './splash';
 
 import 'react-native-reanimated';
-import { useCallback, useState, useEffect } from 'react';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
@@ -33,7 +33,7 @@ function RootNavigator() {
 
   useEffect(() => {
     if (!isLoading) {
-      // Quando a autenticação estiver pronta, espere a splash animação
+      // When loading is done, ensure the splash screen is shown for at least 2 seconds
       const timer = setTimeout(() => setIsSplashReady(true), 2000);
       return () => clearTimeout(timer);
     }
@@ -100,7 +100,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <View onLayout={hideNativeSplash} style={{ flex: 1 }}>
+        <View onLayout={hideNativeSplash} className="flex-1">
           {splashHidden && <RootNavigator />}
           <StatusBar style="auto" />
         </View>

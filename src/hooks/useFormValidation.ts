@@ -91,7 +91,7 @@ export function useFormValidation<T extends FormFields>(initialFields: T) {
     let isValid = true;
     const updatedFields = { ...fields } as T;
 
-    (Object.keys(fields) as Array<keyof T>).forEach((fieldName) => {
+    (Object.keys(fields) as (keyof T)[]).forEach((fieldName) => {
       const field = fields[fieldName];
       const error = field.validate(field.value);
 
@@ -108,7 +108,7 @@ export function useFormValidation<T extends FormFields>(initialFields: T) {
   const clearErrors = useCallback(() => {
     setFields((prev) => {
       const clearedFields = { ...prev } as T;
-      (Object.keys(clearedFields) as Array<keyof T>).forEach((fieldName) => {
+      (Object.keys(clearedFields) as (keyof T)[]).forEach((fieldName) => {
         clearedFields[fieldName] = {
           ...clearedFields[fieldName],
           error: '',

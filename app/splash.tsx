@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
 import { View } from '@/src/components/ui/view';
 import LottieView from 'lottie-react-native';
+import { useEffect, useRef } from 'react';
+import { StyleSheet } from 'react-native';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -21,10 +22,17 @@ export default function CustomSplashScreen({ onFinish }: SplashScreenProps) {
         source={require('@/src/assets/animations/splash-hands.json')}
         autoPlay
         loop={false}
-        style={{ width: 250, height: 250 }}
+        style={styles.lottie}
         onAnimationFinish={onFinish}
         resizeMode="contain"
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  lottie: {
+    width: 250,
+    height: 250,
+  },
+});

@@ -15,11 +15,11 @@ import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import { LoginCredentials } from '@/src/types/api';
+import type { LoginCredentials } from '@/src/types/api';
 import { validateEmail } from '@/src/utils/mask';
-import { AlertCircleIcon } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { AlertCircleIcon } from 'lucide-react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 export default function LoginScreen() {
   const { login } = useAuth();
