@@ -31,4 +31,15 @@ module.exports = {
     require('depcheck/special/tslint'),
     require('depcheck/special/babel'),
   ],
+  ignoreMatches: [
+    "expo-splash-screen",
+    "expo-dev-client",
+    "eslint-plugin-import",
+    "tailwind-variants",
+    "typescript",
+    "react-native-web",
+    "@gluestack-style/react",
+    "@gluestack-ui/avatar",
+    "@gluestack-ui/themed"
+  ],
 };
