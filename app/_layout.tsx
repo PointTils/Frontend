@@ -19,10 +19,23 @@ SplashScreen.preventAutoHideAsync();
 
 async function clearAllStorage(): Promise<void> {
   try {
-    await AsyncStorage.clear();
-    console.warn('All AsyncStorage cleared successfully');
+    const allKeys = await AsyncStorage.getAllKeys();
+
+    // Filter out onboarding keys (they follow the pattern 'hasSeenOnboarding_*')
+    const keysToDelete = allKeys.filter(
+      (key) => !key.startsWith('hasSeenOnboarding_'),
+    );
+
+    if (keysToDelete.length > 0) {
+      await AsyncStorage.multiRemove(keysToDelete);
+      console.warn(
+        `Cleared ${keysToDelete.length} storage keys, preserved onboarding data`,
+      );
+    } else {
+      console.warn('No keys to clear, onboarding data preserved');
+    }
   } catch (error) {
-    console.error('Failed to clear all storage:', error);
+    console.error('Failed to clear storage:', error);
     throw error;
   }
 }
@@ -34,7 +47,7 @@ async function clearAllStorage(): Promise<void> {
  * @returns {JSX.Element} The navigation controller component.
  */
 function NavigationController({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isFirstTime } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -43,23 +56,35 @@ function NavigationController({ children }: { children: React.ReactNode }) {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
+    const inOnboarding = segments[0] === 'onboarding';
 
-    if (isAuthenticated && inAuthGroup) {
-      // User is authenticated but in auth screens, redirect to tabs
+    if (isAuthenticated && isFirstTime && !inOnboarding) {
+      // First time user, show onboarding
+      router.replace('/onboarding');
+    } else if (
+      isAuthenticated &&
+      !isFirstTime &&
+      (inAuthGroup || inOnboarding)
+    ) {
+      // Existing user, redirect to tabs
       router.replace('/(tabs)');
-    } else if (!isAuthenticated && inTabsGroup) {
-      // User is not authenticated but in protected screens, redirect to auth
+    } else if (!isAuthenticated && (inTabsGroup || inOnboarding)) {
+      // Not authenticated, redirect to auth
       router.replace('/(auth)');
-    } else if (!inAuthGroup && !inTabsGroup && !isLoading) {
-      // User is at root level, decide where to go
+    } else if (!inAuthGroup && !inTabsGroup && !inOnboarding && !isLoading) {
+      // At root level, decide where to go
       if (isAuthenticated) {
-        router.replace('/(tabs)');
+        if (isFirstTime) {
+          router.replace('/onboarding');
+        } else {
+          router.replace('/(tabs)');
+        }
       } else {
         router.replace('/(auth)');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, isFirstTime, segments]);
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{children}</>;
@@ -75,6 +100,7 @@ function RootNavigator() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" />
       </Stack>
     </NavigationController>
   );
