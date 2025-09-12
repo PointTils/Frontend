@@ -282,301 +282,295 @@ export default function RegisterScreen() {
 
         <View className="flex-1 px-4 pt-2 justify-between">
           {type === 'client' && (
-            <>
-              <View>
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.name}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="Nome X"
-                  value={name}
-                  onChangeText={setName}
-                  maxLength={100}
-                  className={`border ${handlerError(nameError)} rounded-lg px-4 py-3 mb-4`}
-                />
+            <View>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.name}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Nome X"
+                value={name}
+                onChangeText={setName}
+                maxLength={100}
+                className={`border ${handlerError(nameError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.cpf}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="000.000.000-00"
-                  value={cpf}
-                  onChangeText={(cpf) => setCpf(handleCpfChange(cpf))}
-                  className={`border ${handlerError(cpfError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={14}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.cpf}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChangeText={(cpf) => setCpf(handleCpfChange(cpf))}
+                className={`border ${handlerError(cpfError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={14}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.birthday}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <>
-                  <TouchableOpacity onPress={() => setShow(true)}>
-                    <TextInput
-                      placeholder="DD/MM/AAAA"
-                      className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
-                      value={birthday}
-                      editable={false}
-                    />
-                  </TouchableOpacity>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.birthday}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <>
+                <TouchableOpacity onPress={() => setShow(true)}>
+                  <TextInput
+                    placeholder="DD/MM/AAAA"
+                    className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
+                    value={birthday}
+                    editable={false}
+                  />
+                </TouchableOpacity>
 
-                  {show && (
-                    <DateTimePicker
-                      value={date}
-                      mode="date"
-                      display="default"
-                      onChange={(event, selectedDate) => {
-                        setShow(false); // fecha após escolher
-                        if (selectedDate) {
-                          setDate(selectedDate);
-                          setBirthday(formatDate(selectedDate));
-                        }
-                      }}
-                    />
-                  )}
-                </>
+                {show && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShow(false); // fecha após escolher
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                        setBirthday(formatDate(selectedDate));
+                      }
+                    }}
+                  />
+                )}
+              </>
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.gender}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <Select onValueChange={setGender}>
-                  <SelectTrigger
-                    className={`border ${handlerError(genderError)} h-[40px] rounded-lg px-2 mb-4`}
-                  >
-                    <SelectInput placeholder={Strings.register.select} />
-                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                  </SelectTrigger>
-                  <SelectPortal>
-                    <SelectBackdrop />
-                    <SelectContent>
-                      <SelectDragIndicatorWrapper>
-                        <SelectDragIndicator />
-                      </SelectDragIndicatorWrapper>
-                      <SelectItem label={Strings.register.male} value="M" />
-                      <SelectItem label={Strings.register.famale} value="F" />
-                      <SelectItem label={Strings.register.others} value="O" />
-                    </SelectContent>
-                  </SelectPortal>
-                </Select>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.gender}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <Select onValueChange={setGender}>
+                <SelectTrigger
+                  className={`border ${handlerError(genderError)} h-[40px] rounded-lg px-2 mb-4`}
+                >
+                  <SelectInput placeholder={Strings.register.select} />
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent>
+                    <SelectDragIndicatorWrapper>
+                      <SelectDragIndicator />
+                    </SelectDragIndicatorWrapper>
+                    <SelectItem label={Strings.register.male} value="M" />
+                    <SelectItem label={Strings.register.famale} value="F" />
+                    <SelectItem label={Strings.register.others} value="O" />
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.phone}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="(00) 00000-0000"
-                  value={phone}
-                  onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                  keyboardType="phone-pad"
-                  className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={15}
-                />
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.email}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="example@gmail.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  maxLength={250}
-                  className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.phone}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                keyboardType="phone-pad"
+                className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={15}
+              />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.email}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="example@gmail.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                maxLength={250}
+                className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.password}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="*******"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  maxLength={25}
-                  className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
-                />
-              </View>
-            </>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.password}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="*******"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                maxLength={25}
+                className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+              />
+            </View>
           )}
           {type === 'enterprise' && (
-            <>
-              <View>
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.socialReason}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="Empresa X"
-                  value={reason}
-                  onChangeText={setReason}
-                  maxLength={100}
-                  className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
-                />
+            <View>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.socialReason}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Empresa X"
+                value={reason}
+                onChangeText={setReason}
+                maxLength={100}
+                className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.cnpj}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="00.000.000/0001-00"
-                  value={cnpj}
-                  onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
-                  className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={18}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.cnpj}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="00.000.000/0001-00"
+                value={cnpj}
+                onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
+                className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={18}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.phone}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="(00) 00000-0000"
-                  value={phone}
-                  onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                  keyboardType="phone-pad"
-                  className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={15}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.phone}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                keyboardType="phone-pad"
+                className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={15}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.email}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="example@gmail.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  maxLength={250}
-                  className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.email}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="example@gmail.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                maxLength={250}
+                className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.password}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="*******"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  maxLength={25}
-                  className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
-                />
-              </View>
-            </>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.password}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="*******"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                maxLength={25}
+                className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+              />
+            </View>
           )}
           {type === 'interpreter' && (
-            <>
-              <View>
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.name}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="Nome X"
-                  value={name}
-                  onChangeText={setName}
-                  maxLength={100}
-                  className={`border ${handlerError(nameError)} rounded-lg px-4 py-3 mb-4`}
-                />
+            <View>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.name}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Nome X"
+                value={name}
+                onChangeText={setName}
+                maxLength={100}
+                className={`border ${handlerError(nameError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.cpf}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="000.000.000-00"
-                  value={cpf}
-                  onChangeText={(cpf) => setCpf(handleCpfChange(cpf))}
-                  className={`border ${handlerError(cpfError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={14}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.cpf}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChangeText={(cpf) => setCpf(handleCpfChange(cpf))}
+                className={`border ${handlerError(cpfError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={14}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.cnpj} ({Strings.common.optional})
-                </Text>
-                <TextInput
-                  placeholder="00.000.000/0001-00"
-                  value={cnpj}
-                  onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
-                  className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={18}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.cnpj} ({Strings.common.optional})
+              </Text>
+              <TextInput
+                placeholder="00.000.000/0001-00"
+                value={cnpj}
+                onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
+                className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={18}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.birthday}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <>
-                  <TouchableOpacity onPress={() => setShow(true)}>
-                    <TextInput
-                      placeholder="DD/MM/AAAA"
-                      className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
-                      value={birthday}
-                      editable={false}
-                    />
-                  </TouchableOpacity>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.birthday}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <>
+                <TouchableOpacity onPress={() => setShow(true)}>
+                  <TextInput
+                    placeholder="DD/MM/AAAA"
+                    className={`border ${handlerError(birthdayError)} rounded-lg px-4 py-3 mb-4`}
+                    value={birthday}
+                    editable={false}
+                  />
+                </TouchableOpacity>
 
-                  {show && (
-                    <DateTimePicker
-                      value={date}
-                      mode="date"
-                      display="default"
-                      onChange={(event, selectedDate) => {
-                        setShow(false); // fecha após escolher
-                        if (selectedDate) {
-                          setDate(selectedDate);
-                          setBirthday(formatDate(selectedDate));
-                        }
-                      }}
-                    />
-                  )}
-                </>
+                {show && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShow(false); // fecha após escolher
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                        setBirthday(formatDate(selectedDate));
+                      }
+                    }}
+                  />
+                )}
+              </>
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.phone}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="(00) 00000-0000"
-                  value={phone}
-                  onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                  keyboardType="phone-pad"
-                  className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
-                  maxLength={15}
-                />
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.email}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="example@gmail.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  maxLength={250}
-                  className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
-                />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.phone}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                keyboardType="phone-pad"
+                className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+                maxLength={15}
+              />
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.email}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="example@gmail.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                maxLength={250}
+                className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+              />
 
-                <Text className="font-ifood-medium mb-2">
-                  {Strings.register.password}
-                  <Text style={{ color: colors.mandatory }}>*</Text>
-                </Text>
-                <TextInput
-                  placeholder="*******"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  maxLength={25}
-                  className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
-                />
-              </View>
-            </>
+              <Text className="font-ifood-medium mb-2">
+                {Strings.register.password}
+                <Text style={{ color: colors.mandatory }}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="*******"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                maxLength={25}
+                className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+              />
+            </View>
           )}
           <View className="mt-5">
             <Button
