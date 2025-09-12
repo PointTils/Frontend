@@ -19,6 +19,7 @@ export default function ProfileScreen() {
   const colors = useColors();
 
   // PF exemplo
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pf: ProfileModel = {
     name: 'Nome Sobrenome',
     cpf: '12345678901',
@@ -39,6 +40,7 @@ export default function ProfileScreen() {
   };
 
   // Intérprete exemplo
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const interpreter: ProfileModel = {
     name: 'Ana Paula',
     cpf: '98765432100',
@@ -50,7 +52,7 @@ export default function ProfileScreen() {
     cnpj: '11222333000181',
   };
 
-  const model: ProfileModel = pj;
+  const model: ProfileModel = interpreter;
   const title = model.corporateName ?? model.name ?? 'Perfil';
   const hasSpecialties =
     Array.isArray(model.specialties) && model.specialties.length > 0;
@@ -69,10 +71,7 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 justify-center items-center pt-32 px-4">
-      <ScrollView
-        className="w-full "
-        contentContainerStyle={{ alignItems: 'center' }}
-      >
+      <ScrollView className="w-full" contentContainerClassName="items-center">
         {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
@@ -114,7 +113,7 @@ export default function ProfileScreen() {
           </>
         )}
 
-        <View className="w-full mt-8">
+        <View className="w-full mt-8 pb-4">
           <TouchableOpacity className="flex-1" onPress={() => {}}>
             <View className="w-full flex-row items-center mb-3">
               <SquarePen width={20} height={20} stroke={colors.disabled} />
