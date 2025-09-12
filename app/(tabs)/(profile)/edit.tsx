@@ -103,14 +103,20 @@ export default function EditScreen() {
 
   // Mocks para a página
   const type = 'Intérprete'; // Pode ser 'Intérprete', 'Solicitante' ou 'Empresa'
-  const specialtiesOptions: any[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5'];
+  const specialtiesOptions: any[] = [
+    'Type 1',
+    'Type 2',
+    'Type 3',
+    'Type 4',
+    'Type 5',
+  ];
   const genderOptions = ['Masculino', 'Feminino', 'Outro'];
 
   const locationsMock: Location = {
-    'RS': {
+    RS: {
       'Porto Alegre': ['Floresta', 'Centro', 'Moinhos de Vento'],
-      'Canoas': ['Centro', 'Niterói'],
-    }
+      Canoas: ['Centro', 'Niterói'],
+    },
   };
 
   // Teste para verificação dos estados
@@ -160,83 +166,83 @@ export default function EditScreen() {
           {/* Campos comuns para Intérprete/Solicitante */}
           {(type === `${Strings.edit.client}` ||
             type === `${Strings.edit.interpreter}`) && (
-              <>
-                {/* Nome */}
-                <View>
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.name}
-                  </Text>
-                  <Input size="lg" className="w-80">
-                    <InputField
-                      type="text"
-                      placeholder="Digite seu nome"
-                      value={name}
-                      onChangeText={setName}
-                    />
-                  </Input>
-                </View>
-
-                {/* Data Nascimento */}
-                <View>
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.birthDate}
-                  </Text>
-                  <Input size="lg" className="w-80">
-                    <InputField
-                      type="text"
-                      placeholder="dd/mm/yyyy"
-                      value={birthDate}
-                      onChangeText={(text) =>
-                        setBirthDate(handleBirthDateChange(text))
-                      }
-                    />
-                  </Input>
-                </View>
-
-                {/* Gênero */}
-                <View>
-                  <MultiSelect
-                    label="Gênero"
-                    options={genderOptions}
-                    width="w-80"
-                    placeholder="Gênero"
-                    onChange={(values) => {
-                      setGender(values[0] || '');
-                    }}
+            <>
+              {/* Nome */}
+              <View>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.name}
+                </Text>
+                <Input size="lg" className="w-80">
+                  <InputField
+                    type="text"
+                    placeholder="Digite seu nome"
+                    value={name}
+                    onChangeText={setName}
                   />
-                </View>
+                </Input>
+              </View>
 
-                {/* Telefone */}
-                <View>
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.phone}
-                  </Text>
-                  <Input size="lg" className="w-80">
-                    <InputField
-                      type="text"
-                      placeholder="(00) 00000-0000"
-                      value={phone}
-                      onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                    />
-                  </Input>
-                </View>
+              {/* Data Nascimento */}
+              <View>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.birthDate}
+                </Text>
+                <Input size="lg" className="w-80">
+                  <InputField
+                    type="text"
+                    placeholder="dd/mm/yyyy"
+                    value={birthDate}
+                    onChangeText={(text) =>
+                      setBirthDate(handleBirthDateChange(text))
+                    }
+                  />
+                </Input>
+              </View>
 
-                {/* Email */}
-                <View>
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.edit.email}
-                  </Text>
-                  <Input size="lg" className="w-80">
-                    <InputField
-                      type="text"
-                      placeholder="exemplo@exemplo.com"
-                      value={email}
-                      onChangeText={setEmail}
-                    />
-                  </Input>
-                </View>
-              </>
-            )}
+              {/* Gênero */}
+              <View>
+                <MultiSelect
+                  label="Gênero"
+                  options={genderOptions}
+                  width="w-80"
+                  placeholder="Gênero"
+                  onChange={(values) => {
+                    setGender(values[0] || '');
+                  }}
+                />
+              </View>
+
+              {/* Telefone */}
+              <View>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.phone}
+                </Text>
+                <Input size="lg" className="w-80">
+                  <InputField
+                    type="text"
+                    placeholder="(00) 00000-0000"
+                    value={phone}
+                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                  />
+                </Input>
+              </View>
+
+              {/* Email */}
+              <View>
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.edit.email}
+                </Text>
+                <Input size="lg" className="w-80">
+                  <InputField
+                    type="text"
+                    placeholder="exemplo@exemplo.com"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                </Input>
+              </View>
+            </>
+          )}
 
           {/* Campos para Empresa */}
           {type === `${Strings.edit.enterprise}` && (
@@ -291,7 +297,7 @@ export default function EditScreen() {
           {/* Preferências ou Área Profissional */}
           <View className="flex-row self-start w-full pt-8 px-8 gap-2">
             {type === `${Strings.edit.client}` ||
-              type === `${Strings.edit.enterprise}` ? (
+            type === `${Strings.edit.enterprise}` ? (
               <>
                 <Bookmark />
                 <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -406,8 +412,10 @@ export default function EditScreen() {
                     options={
                       location.uf.length
                         ? Object.keys(
-                          locationsMock[location.uf[0] as keyof typeof locationsMock]
-                        )
+                            locationsMock[
+                              location.uf[0] as keyof typeof locationsMock
+                            ],
+                          )
                         : []
                     }
                     onChange={(cities) =>
@@ -428,10 +436,14 @@ export default function EditScreen() {
                   options={
                     location.uf.length && location.city.length
                       ? location.city.flatMap((city) =>
-                        (locationsMock[location.uf[0] as keyof typeof locationsMock][
-                          city as keyof typeof locationsMock[typeof location.uf[0]]
-                        ] ?? []).map((neighborhood) => `${city} - ${neighborhood}`)
-                      )
+                          (
+                            locationsMock[
+                              location.uf[0] as keyof typeof locationsMock
+                            ][
+                              city as keyof (typeof locationsMock)[(typeof location.uf)[0]]
+                            ] ?? []
+                          ).map((neighborhood) => `${city} - ${neighborhood}`),
+                        )
                       : []
                   }
                   onChange={(neighborhoods) =>
@@ -441,7 +453,6 @@ export default function EditScreen() {
                     }))
                   }
                 />
-
               </View>
 
               {/* Direito de Imagem */}

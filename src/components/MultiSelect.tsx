@@ -151,9 +151,7 @@ export default function MultiSelect({
 
   return (
     <View className={`relative ${width || 'w-full'}`}>
-      {label !== '' && (
-        <Text className="font-ifood-medium mb-2">{label}</Text>
-      )}
+      {label !== '' && <Text className="font-ifood-medium mb-2">{label}</Text>}
 
       <TouchableOpacity
         ref={fieldRef}

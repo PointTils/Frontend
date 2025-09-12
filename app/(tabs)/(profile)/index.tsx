@@ -14,10 +14,7 @@ export default function ProfileScreen() {
       accessibilityLabel={Strings.profile.title}
     >
       <Text>Edit</Text>
-      <Button
-        title="Editar Perfil"
-        onPress={() => router.push('/edit')}
-      />
+      <Button title="Editar Perfil" onPress={() => router.push('/edit')} />
     </View>
   );
 }
