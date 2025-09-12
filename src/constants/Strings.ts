@@ -12,6 +12,9 @@ export const Strings = {
     error: 'Ocorreu um erro. Tente novamente.',
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
+    invalidEmail: 'Email inválido',
+    requiredEmail: 'Email obrigatório',
+    requiredPassword: 'Senha obrigatória',
   },
   register: {
     title: 'Boas-vindas!',
@@ -27,7 +30,6 @@ export const Strings = {
     password: 'Senha',
     create: '+ Criar conta',
     cancel: '✕ Cancelar',
-    // demais textos
   },
 
   auth: {
@@ -43,6 +45,8 @@ export const Strings = {
     sessionExpired: 'Sessão Expirada',
     sessionExpiredMessage:
       'Sua sessão expirou. Você será redirecionado para o login.',
+    invalidCredentials: 'Credenciais inválidas. Tente novamente.',
+    loginFailed: 'Falha no login',
   },
 
   home: {

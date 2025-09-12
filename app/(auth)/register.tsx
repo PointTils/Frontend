@@ -22,7 +22,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const [type, setType] = useState('enterprise');
@@ -79,15 +79,20 @@ export default function RegisterScreen() {
         text2: 'Verifique os campos preenchidos',
         position: 'top',
         visibilityTime: 3000,
+        autoHide: true,
+        closeIconSize: 1, // To "hide" the close icon
       });
       return;
     }
+
     Toast.show({
       type: 'success',
       text1: 'Sucesso',
       text2: 'Você criou o usuario com exito',
       position: 'top',
       visibilityTime: 3000,
+      autoHide: true,
+      closeIconSize: 1, // To "hide" the close icon
     });
   };
 
@@ -96,170 +101,165 @@ export default function RegisterScreen() {
   };
 
   return (
-    <>
-      <View style={{ zIndex: 999 }}>
-        <Toast />
-      </View>
-      <KeyboardAvoidingView
-        className="flex-1 p-10 mt-10"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView>
-          <Text className="font-ifood-medium text-lg mb-3 text-[18px]">
-            {Strings.register.title}
-          </Text>
-          <Text className="font-ifood-regular mb-6">
-            {Strings.register.subtitle}
-          </Text>
+    <KeyboardAvoidingView
+      className="flex-1 p-10 mt-10"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView>
+        <Text className="font-ifood-medium text-lg mb-3 text-[18px]">
+          {Strings.register.title}
+        </Text>
+        <Text className="font-ifood-regular mb-6">
+          {Strings.register.subtitle}
+        </Text>
 
-          <Text className="font-ifood-medium mb-2">
-            {Strings.register.typeSelect}
-          </Text>
-          <RadioGroup
-            value={type}
-            onChange={setType}
-            className="flex-row items-center"
-          >
-            <Radio value="client">
-              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-              <RadioLabel>
-                <Text
-                  style={{
-                    color:
-                      type === 'client' ? colors.primaryBlue : colors.disabled,
-                  }}
-                  className="font-ifood-regular"
-                >
-                  {Strings.register.client}
-                </Text>
-              </RadioLabel>
-            </Radio>
-            <Radio value="enterprise">
-              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-
-              <RadioLabel>
-                <Text
-                  style={{
-                    color:
-                      type === 'enterprise'
-                        ? colors.primaryBlue
-                        : colors.disabled,
-                  }}
-                  className="font-ifood-regular"
-                >
-                  {Strings.register.enterprise}
-                </Text>
-              </RadioLabel>
-            </Radio>
-            <Radio value="interpreter">
-              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-              <RadioLabel>
-                <Text
-                  style={{
-                    color:
-                      type === 'interpreter'
-                        ? colors.primaryBlue
-                        : colors.disabled,
-                  }}
-                  className="font-ifood-regular"
-                >
-                  {' '}
-                  {Strings.register.interpreter}
-                </Text>
-              </RadioLabel>
-            </Radio>
-          </RadioGroup>
-
-          <View className="flex-1 px-4 pt-2 justify-between">
-            <View>
-              <Text className="font-ifood-medium mb-2">
-                {Strings.register.socialReason}
-                <Text style={{ color: colors.mandatory }}>*</Text>
-              </Text>
-              <TextInput
-                placeholder="Empresa X"
-                value={reason}
-                onChangeText={setReason}
-                maxLength={100}
-                className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
-              />
-
-              <Text className="font-ifood-medium mb-2">
-                {Strings.register.cnpj}
-                <Text style={{ color: colors.mandatory }}>*</Text>
-              </Text>
-              <TextInput
-                placeholder="00.000.000/0001-00"
-                value={cnpj}
-                onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
-                className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
-                maxLength={18}
-              />
-
-              <Text className="font-ifood-medium mb-2">
-                {Strings.register.phone}
-                <Text style={{ color: colors.mandatory }}>*</Text>
-              </Text>
-              <TextInput
-                placeholder="(00) 00000-0000"
-                value={phone}
-                onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                keyboardType="phone-pad"
-                className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
-                maxLength={15}
-              />
-
-              <Text className="font-ifood-medium mb-2">
-                {Strings.register.email}
-                <Text style={{ color: colors.mandatory }}>*</Text>
-              </Text>
-              <TextInput
-                placeholder="example@gmail.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                maxLength={250}
-                className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
-              />
-
-              <Text className="font-ifood-medium mb-2">
-                {Strings.register.password}
-                <Text style={{ color: colors.mandatory }}>*</Text>
-              </Text>
-              <TextInput
-                placeholder="*******"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                maxLength={25}
-                className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
-              />
-            </View>
-            <View className="mt-5 pb-10">
-              <Button
-                onPress={handleSubmit}
-                size="xl"
-                className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
+        <Text className="font-ifood-medium mb-2">
+          {Strings.register.typeSelect}
+        </Text>
+        <RadioGroup
+          value={type}
+          onChange={setType}
+          className="flex-row items-center"
+        >
+          <Radio value="client">
+            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+            <RadioLabel>
+              <Text
+                style={{
+                  color:
+                    type === 'client' ? colors.primaryBlue : colors.disabled,
+                }}
+                className="font-ifood-regular"
               >
-                <Text className="font-ifood-medium text-text-dark">
-                  {Strings.register.create}
-                </Text>
-              </Button>
+                {Strings.register.client}
+              </Text>
+            </RadioLabel>
+          </Radio>
+          <Radio value="enterprise">
+            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
 
-              <Button
-                action={'default'}
-                onPress={handleSubmit}
-                size="lg"
-                className="font-ifood-bold text-center text-blue text-lg"
+            <RadioLabel>
+              <Text
+                style={{
+                  color:
+                    type === 'enterprise'
+                      ? colors.primaryBlue
+                      : colors.disabled,
+                }}
+                className="font-ifood-regular"
               >
-                <Text className="font-ifood-medium text-primary-orange">
-                  {Strings.register.cancel}
-                </Text>
-              </Button>
-            </View>
+                {Strings.register.enterprise}
+              </Text>
+            </RadioLabel>
+          </Radio>
+          <Radio value="interpreter">
+            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+            <RadioLabel>
+              <Text
+                style={{
+                  color:
+                    type === 'interpreter'
+                      ? colors.primaryBlue
+                      : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {' '}
+                {Strings.register.interpreter}
+              </Text>
+            </RadioLabel>
+          </Radio>
+        </RadioGroup>
+
+        <View className="flex-1 px-4 pt-2 justify-between">
+          <View>
+            <Text className="font-ifood-medium mb-2">
+              {Strings.register.socialReason}
+              <Text style={{ color: colors.mandatory }}>*</Text>
+            </Text>
+            <TextInput
+              placeholder="Empresa X"
+              value={reason}
+              onChangeText={setReason}
+              maxLength={100}
+              className={`border ${handlerError(reasonError)} rounded-lg px-4 py-3 mb-4`}
+            />
+
+            <Text className="font-ifood-medium mb-2">
+              {Strings.register.cnpj}
+              <Text style={{ color: colors.mandatory }}>*</Text>
+            </Text>
+            <TextInput
+              placeholder="00.000.000/0001-00"
+              value={cnpj}
+              onChangeText={(cnpj) => setCnpj(handleCnpjChange(cnpj))}
+              className={`border ${handlerError(cnpjError)} rounded-lg px-4 py-3 mb-4`}
+              maxLength={18}
+            />
+
+            <Text className="font-ifood-medium mb-2">
+              {Strings.register.phone}
+              <Text style={{ color: colors.mandatory }}>*</Text>
+            </Text>
+            <TextInput
+              placeholder="(00) 00000-0000"
+              value={phone}
+              onChangeText={(text) => setPhone(handlePhoneChange(text))}
+              keyboardType="phone-pad"
+              className={`border ${handlerError(phoneError)} rounded-lg px-4 py-3 mb-4`}
+              maxLength={15}
+            />
+
+            <Text className="font-ifood-medium mb-2">
+              {Strings.register.email}
+              <Text style={{ color: colors.mandatory }}>*</Text>
+            </Text>
+            <TextInput
+              placeholder="example@gmail.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              maxLength={250}
+              className={`border ${handlerError(emailError)} rounded-lg px-4 py-3 mb-4`}
+            />
+
+            <Text className="font-ifood-medium mb-2">
+              {Strings.register.password}
+              <Text style={{ color: colors.mandatory }}>*</Text>
+            </Text>
+            <TextInput
+              placeholder="*******"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              maxLength={25}
+              className={`border ${handlerError(passwordError)} rounded-lg px-4 py-3 mb-6`}
+            />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </>
+          <View className="mt-5 pb-10">
+            <Button
+              onPress={handleSubmit}
+              size="xl"
+              className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
+            >
+              <Text className="font-ifood-medium text-text-dark">
+                {Strings.register.create}
+              </Text>
+            </Button>
+
+            <Button
+              action={'default'}
+              onPress={handleSubmit}
+              size="lg"
+              className="font-ifood-bold text-center text-blue text-lg"
+            >
+              <Text className="font-ifood-medium text-primary-orange">
+                {Strings.register.cancel}
+              </Text>
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
