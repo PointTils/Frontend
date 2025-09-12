@@ -1,3 +1,5 @@
+import type { Strings } from '@/src/constants/Strings';
+
 export type ApiState<T> = {
   data: T | null;
   loading: boolean;
@@ -25,6 +27,11 @@ export type ProfileModel = {
   specialties?: string[];
   preferences?: string[];
 };
+
+export type Gender =
+  | typeof Strings.gender.male
+  | typeof Strings.gender.female
+  | typeof Strings.gender.others;
 
 // Auth types
 export interface Tokens {
@@ -58,14 +65,14 @@ export interface RefreshResponse {
 }
 
 // Enums
-export type Gender =
-  | 'Masculino'
-  | 'Feminino'
-  | 'Outro'
-  | 'Prefiro não informar';
+export enum GenderType {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHERS = 'OTHERS',
+}
 
 export enum UserType {
-  PERSON = 'person',
-  COMPANY = 'company',
-  TIL = 'til',
+  CLIENT = 'CLIENT',
+  ENTERPRISE = 'ENTERPRISE',
+  INTERPRETER = 'INTERPRETER',
 }

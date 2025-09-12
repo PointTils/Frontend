@@ -41,7 +41,6 @@ export default function ProfileScreen() {
   };
 
   // Intérprete exemplo
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const interpreter: ProfileModel = {
     name: 'Ana Paula',
     cpf: '98765432100',

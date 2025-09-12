@@ -5,19 +5,18 @@ import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
+import { UserType } from '@/src/types/api';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 
 const { height } = Dimensions.get('window');
 
-type OnboardingKey = 'til' | 'company' | 'user';
-
 export default function OnboardingScreen() {
   const colors = useColors();
 
   // This would be dynamically set based on backend/user data
-  const userType = 'til' as OnboardingKey;
+  const userType = 'CLIENT' as UserType;
 
   // Define content based on user type
   const data = Strings.onboarding[userType];
@@ -28,13 +27,13 @@ export default function OnboardingScreen() {
 
   let IllustrationComponent;
   switch (userType) {
-    case 'company':
+    case UserType.ENTERPRISE:
       IllustrationComponent = OnboardingCompany;
       break;
-    case 'til':
+    case UserType.INTERPRETER:
       IllustrationComponent = OnboardingTil;
       break;
-    case 'user':
+    case UserType.CLIENT:
     default:
       IllustrationComponent = OnboardingUser;
       break;
