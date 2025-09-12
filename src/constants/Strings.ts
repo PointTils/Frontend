@@ -13,6 +13,9 @@ export const Strings = {
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
     optional: 'Opcional',
+    invalidEmail: 'Email inválido',
+    requiredEmail: 'Email obrigatório',
+    requiredPassword: 'Senha obrigatória',
   },
   register: {
     title: 'Boas-vindas!',
@@ -55,6 +58,8 @@ export const Strings = {
     sessionExpired: 'Sessão Expirada',
     sessionExpiredMessage:
       'Sua sessão expirou. Você será redirecionado para o login.',
+    invalidCredentials: 'Credenciais inválidas. Tente novamente.',
+    loginFailed: 'Falha no login',
   },
 
   home: {

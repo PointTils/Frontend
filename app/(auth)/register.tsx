@@ -269,38 +269,38 @@ export default function RegisterScreen() {
             <Radio value="enterprise">
               <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
 
-              <RadioLabel>
-                <Text
-                  style={{
-                    color:
-                      type === 'enterprise'
-                        ? colors.primaryBlue
-                        : colors.disabled,
-                  }}
-                  className="font-ifood-regular"
-                >
-                  {Strings.register.enterprise}
-                </Text>
-              </RadioLabel>
-            </Radio>
-            <Radio value="interpreter">
-              <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-              <RadioLabel>
-                <Text
-                  style={{
-                    color:
-                      type === 'interpreter'
-                        ? colors.primaryBlue
-                        : colors.disabled,
-                  }}
-                  className="font-ifood-regular"
-                >
-                  {' '}
-                  {Strings.register.interpreter}
-                </Text>
-              </RadioLabel>
-            </Radio>
-          </RadioGroup>
+            <RadioLabel>
+              <Text
+                style={{
+                  color:
+                    type === 'enterprise'
+                      ? colors.primaryBlue
+                      : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {Strings.register.enterprise}
+              </Text>
+            </RadioLabel>
+          </Radio>
+          <Radio value="interpreter">
+            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
+            <RadioLabel>
+              <Text
+                style={{
+                  color:
+                    type === 'interpreter'
+                      ? colors.primaryBlue
+                      : colors.disabled,
+                }}
+                className="font-ifood-regular"
+              >
+                {' '}
+                {Strings.register.interpreter}
+              </Text>
+            </RadioLabel>
+          </Radio>
+        </RadioGroup>
 
           <View className="flex-1 px-4 pt-2 justify-between">
             {type === 'client' && (
