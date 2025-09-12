@@ -36,10 +36,13 @@ interface AuthContextData {
   isLoggingOut: boolean;
   loginError: string | null;
   isAuthenticated: boolean;
+  isFirstTime: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
   setLoginError: (error: string | null) => void;
+  setIsFirstTime: (value: boolean) => void;
+  completeOnboarding: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -55,6 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showLogoutAlertDialog, setShowLogoutAlertDialog] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState<boolean>(false);
 
   const isAuthenticated = !!user;
 
@@ -193,6 +197,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Update API default headers
         api.defaults.headers.common.Authorization = `Bearer ${tokens.accessToken}`;
 
+        // Check if this specific user has seen onboarding
+        const userOnboardingKey = `hasSeenOnboarding_${userData.id}`;
+        const hasSeenOnboarding = await AsyncStorage.getItem(userOnboardingKey);
+        setIsFirstTime(!hasSeenOnboarding);
+
         // Update state
         setUser(userData);
       } else {
@@ -277,11 +286,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Update state
       setUser(null);
+      setIsFirstTime(false);
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
       setIsLoggingOut(false);
     }
+  }
+
+  async function completeOnboarding(): Promise<void> {
+    await AsyncStorage.setItem(`hasSeenOnboarding_${user?.id}`, 'true');
+    setIsFirstTime(false);
   }
 
   const value: AuthContextData = {
@@ -291,10 +306,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoggingOut,
     isAuthenticated,
     loginError,
+    isFirstTime,
     login,
     logout,
     refreshToken,
     setLoginError,
+    setIsFirstTime,
+    completeOnboarding,
   };
 
   return (
