@@ -44,29 +44,17 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
 
-    console.log('NavigationController - Auth state:', {
-      isAuthenticated,
-      isLoading,
-      segments,
-      inAuthGroup,
-      inTabsGroup,
-    });
-
     if (isAuthenticated && inAuthGroup) {
       // User is authenticated but in auth screens, redirect to tabs
-      console.log('Redirecting to tabs...');
       router.replace('/(tabs)');
     } else if (!isAuthenticated && inTabsGroup) {
       // User is not authenticated but in protected screens, redirect to auth
-      console.log('Redirecting to auth...');
       router.replace('/(auth)');
     } else if (!inAuthGroup && !inTabsGroup && !isLoading) {
       // User is at root level, decide where to go
       if (isAuthenticated) {
-        console.log('Initial redirect to tabs...');
         router.replace('/(tabs)');
       } else {
-        console.log('Initial redirect to auth...');
         router.replace('/(auth)');
       }
     }
