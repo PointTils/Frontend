@@ -25,6 +25,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -57,12 +58,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!user;
 
+  const initialLoadRef = useRef(false);
+
   const handleCloseLogoutAlertDialog = () => {
     setShowLogoutAlertDialog(false);
     router.replace('/(auth)');
   };
 
   async function loadStoredAuth() {
+    if (initialLoadRef.current) return;
+    initialLoadRef.current = true;
+
     try {
       const [storedUser, storedAccessToken, storedRefreshToken] =
         await Promise.all([
@@ -81,9 +87,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Invalid token or user data, clear storage
           await logout();
         }
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Failed to load stored auth:', error);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
