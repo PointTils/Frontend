@@ -1,18 +1,16 @@
 import '@/global.css';
 
+import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
-import { useRouter, useSegments } from 'expo-router';
 import ToastManager from 'toastify-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import CustomSplashScreen from '@/app/splash';
 
 import 'react-native-reanimated';
 
@@ -69,8 +67,10 @@ function NavigationController({ children }: { children: React.ReactNode }) {
         router.replace('/(auth)');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading, segments]);
 
+  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{children}</>;
 }
 

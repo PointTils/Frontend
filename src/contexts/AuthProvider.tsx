@@ -85,6 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           api.defaults.headers.common.Authorization = `Bearer ${storedAccessToken}`;
         } catch (error) {
           // Invalid token or user data, clear storage
+          console.error('Invalid stored auth data, logging out:', error);
           await logout();
         }
       } else {
@@ -160,6 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Load stored user data and tokens on app start
   useEffect(() => {
     loadStoredAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Configure API interceptors
