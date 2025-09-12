@@ -5,10 +5,11 @@ import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
+import ToastManager from 'toastify-react-native';
 
 import CustomSplashScreen from './splash';
 
@@ -44,13 +45,16 @@ function RootNavigator() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
-        <Stack.Screen name="(tabs)" />
-      ) : (
+    <>
+      {/* Redirects based on authentication */}
+      {!isAuthenticated && <Redirect href="/(auth)" />}
+      {isAuthenticated && <Redirect href="/(tabs)" />}
+
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
-      )}
-    </Stack>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </>
   );
 }
 
@@ -101,7 +105,12 @@ export default function RootLayout() {
     <AuthProvider>
       <ThemeProvider>
         <View onLayout={hideNativeSplash} className="flex-1">
-          {splashHidden && <RootNavigator />}
+          {splashHidden && (
+            <>
+              <RootNavigator />
+              <ToastManager />
+            </>
+          )}
           <StatusBar style="auto" />
         </View>
       </ThemeProvider>

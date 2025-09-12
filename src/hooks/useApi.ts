@@ -18,6 +18,10 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
   const serializedParams = JSON.stringify(params ?? {});
 
   useEffect(() => {
+    if (!endpoint) {
+      setState({ data: null, loading: false, error: null });
+      return;
+    }
     let isMounted = true;
     setState((prev) => ({ ...prev, loading: true }));
 
@@ -54,6 +58,11 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
     error: null,
   });
 
+  if (!endpoint) {
+    setState({ data: null, loading: false, error: null });
+    return;
+  }
+
   const post = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
@@ -84,6 +93,11 @@ export const useApiPut = <T, U>(endpoint: string, body?: U) => {
     loading: false,
     error: null,
   });
+
+  if (!endpoint) {
+    setState({ data: null, loading: false, error: null });
+    return;
+  }
 
   const put = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));

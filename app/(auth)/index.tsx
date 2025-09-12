@@ -19,10 +19,31 @@ import type { LoginCredentials } from '@/src/types/api';
 import { validateEmail } from '@/src/utils/mask';
 import { router } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
+import { ActivityIndicator } from 'react-native';
+import { Toast } from 'toastify-react-native';
+import { useColors } from '@/src/hooks/useColors';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, isLoggingIn, loginError, setLoginError } = useAuth();
+  const colors = useColors();
+
+  useEffect(() => {
+    if (loginError) {
+      console.warn('Login error detected:', loginError);
+      Toast.show({
+        type: 'error',
+        text1: Strings.auth.loginFailed,
+        text2: Strings.auth.invalidCredentials,
+        position: 'top',
+        visibilityTime: 3000,
+        autoHide: true,
+        closeIconSize: 1, // To "hide" the close icon
+        onHide: () => setLoginError(null),
+      });
+    }
+  }, [loginError, setLoginError]);
 
   const { fields, setValue, validateForm } = useFormValidation({
     email: {
@@ -148,9 +169,13 @@ export default function LoginScreen() {
           onPress={handleLogin}
           className="mb-10 mt-2 w-[300px] bg-primary-blue-light dark:bg-primary-blue-dark data-[active=true]:bg-primary-blue-press-light"
         >
-          <Text className="font-ifood-regular text-text-dark">
-            {Strings.auth.signIn}
-          </Text>
+          {isLoggingIn ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text className="font-ifood-regular text-text-dark">
+              {Strings.auth.signIn}
+            </Text>
+          )}
         </Button>
 
         <View className="flex-row mb-12">

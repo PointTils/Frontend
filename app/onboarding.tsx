@@ -54,11 +54,11 @@ export default function OnboardingScreen() {
           <Logo
             width={120}
             height={120}
-            primaryColor={colors.onboardingText}
+            primaryColor={colors.white}
             accentColor={colors.primaryOrange}
           />
           <Text
-            style={[styles.title, { color: colors.onboardingText }]}
+            style={[styles.title, { color: colors.white }]}
             numberOfLines={0}
           >
             {title}
@@ -69,7 +69,7 @@ export default function OnboardingScreen() {
           <IllustrationComponent accessibilityLabel={illoAlt} />
         </View>
 
-        <Text style={[styles.subtitle, { color: colors.onboardingText }]}>
+        <Text style={[styles.subtitle, { color: colors.white }]}>
           {subtitle}
         </Text>
       </View>
@@ -81,9 +81,7 @@ export default function OnboardingScreen() {
           accessibilityLabel={cta}
           size="lg"
         >
-          <Text style={[styles.ctaText, { color: colors.onboardingText }]}>
-            {cta}
-          </Text>
+          <Text style={[styles.ctaText, { color: colors.white }]}>{cta}</Text>
         </Button>
       </View>
     </View>

@@ -30,7 +30,6 @@ export const Strings = {
     password: 'Senha',
     create: '+ Criar conta',
     cancel: '✕ Cancelar',
-    // demais textos
   },
 
   auth: {
@@ -46,6 +45,8 @@ export const Strings = {
     sessionExpired: 'Sessão Expirada',
     sessionExpiredMessage:
       'Sua sessão expirou. Você será redirecionado para o login.',
+    invalidCredentials: 'Credenciais inválidas. Tente novamente.',
+    loginFailed: 'Falha no login',
   },
 
   home: {

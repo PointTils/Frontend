@@ -31,10 +31,14 @@ import {
 interface AuthContextData {
   user: User | null;
   isLoading: boolean;
+  isLoggingIn: boolean;
+  isLoggingOut: boolean;
+  loginError: string | null;
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
+  setLoginError: (error: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -46,6 +50,9 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [showLogoutAlertDialog, setShowLogoutAlertDialog] = useState(false);
 
   const isAuthenticated = !!user;
@@ -79,6 +86,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Request interceptor to add auth header
     api.interceptors.request.use(
       async (config) => {
+        // Do not set Authorization header for refresh endpoint
+        if (config.url?.includes('/auth/refresh')) {
+          // Remove Authorization header if present
+          if (config.headers && 'Authorization' in config.headers) {
+            delete config.headers.Authorization;
+          }
+          return config;
+        }
+
         const token = await AsyncStorage.getItem(Storage.accessToken);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -103,6 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             return Promise.reject(error);
           }
 
+          console.log('Access token expired, attempting to refresh...');
           const refreshSuccess = await refreshToken();
           if (refreshSuccess) {
             // Get the new token and retry the original request
@@ -110,9 +127,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (newToken) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
+
+            console.log('Retrying original request...');
             return api(originalRequest);
           } else {
             // Refresh failed, logout user and redirect to login
+            console.log('Token refresh failed, logging out...');
             await logout();
             setShowLogoutAlertDialog(true);
             return Promise.reject(error);
@@ -137,7 +157,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // API CALLS
   async function login(credentials: LoginCredentials): Promise<void> {
     try {
-      setIsLoading(true);
+      setIsLoggingIn(true);
+      setLoginError(null);
 
       const response = await api.post<LoginResponse>(
         '/auth/login',
@@ -145,6 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
 
       if (response.data.success) {
+        console.log('Login response data:\n', response.data);
         const { user: userData, tokens } = response.data.data;
 
         // Store user data and tokens
@@ -160,13 +182,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Update state
         setUser(userData);
       } else {
-        throw new Error(response.data.message);
+        setLoginError(response.data.message);
       }
     } catch (error: any) {
-      console.error('Login failed:', error);
-      throw error;
+      setLoginError(error?.message || Strings.auth.sessionExpiredMessage);
     } finally {
-      setIsLoading(false);
+      setIsLoggingIn(false);
     }
   }
 
@@ -180,11 +201,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
 
-      const response = await api.post<RefreshResponse>('/auth/refresh', {
-        refresh_token: storedRefreshToken,
-      });
+      console.log('Refresh token:', storedRefreshToken);
+      const response = await api.post<RefreshResponse>(
+        '/auth/refresh',
+        storedRefreshToken,
+        {
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          transformRequest: [(data) => data], // Prevent axios from adding quotes
+        },
+      );
 
       if (response.data.success) {
+        console.log('Token refresh response data:\n', response.data);
+
         const { tokens } = response.data.data;
 
         // Store new tokens
@@ -208,7 +239,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function logout(): Promise<void> {
     try {
-      setIsLoading(true);
+      setIsLoggingOut(true);
 
       try {
         const storedRefreshToken = await AsyncStorage.getItem(
@@ -237,19 +268,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
-      throw error;
     } finally {
-      setIsLoading(false);
+      setIsLoggingOut(false);
     }
   }
 
   const value: AuthContextData = {
     user,
     isLoading,
+    isLoggingIn,
+    isLoggingOut,
     isAuthenticated,
+    loginError,
     login,
     logout,
     refreshToken,
+    setLoginError,
   };
 
   return (
