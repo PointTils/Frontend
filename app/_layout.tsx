@@ -29,6 +29,9 @@ async function clearAllStorage(): Promise<void> {
 
 /**
  * Navigation controller that handles route changes based on auth state
+ * @param {Object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components to render.
+ * @returns {JSX.Element} The navigation controller component.
  */
 function NavigationController({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -75,7 +78,8 @@ function NavigationController({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Root navigator component with fixed routing structure
+ * Root navigator component that defines the main navigation structure.
+ * @returns {JSX.Element} The root navigator component.
  */
 function RootNavigator() {
   return (
@@ -90,6 +94,7 @@ function RootNavigator() {
 
 /**
  * App content component that uses the auth context.
+ * @returns {JSX.Element} The app content component.
  */
 function AppContent() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -110,7 +115,7 @@ function AppContent() {
     async function prepare() {
       try {
         // Pre-load fonts, make any API calls you need to do here
-        await clearAllStorage();
+        //await clearAllStorage();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);
