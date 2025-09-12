@@ -12,6 +12,10 @@ export const Strings = {
     error: 'Ocorreu um erro. Tente novamente.',
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
+    optional: 'Opcional',
+    invalidEmail: 'Email inválido',
+    requiredEmail: 'Email obrigatório',
+    requiredPassword: 'Senha obrigatória',
   },
   register: {
     title: 'Boas-vindas!',
@@ -21,13 +25,24 @@ export const Strings = {
     enterprise: 'Empresa',
     interpreter: 'Intérprete',
     socialReason: 'Razão Social',
+    name: 'Nome',
+    cpf: 'CPF',
+    birthday: 'Data de Nascimento',
     cnpj: 'CNPJ',
     phone: 'Telefone',
+    gender: 'Gênero',
+    male: 'Masculino',
+    famale: 'Feminino',
+    others: 'Outros',
     email: 'Email',
     password: 'Senha',
     create: '+ Criar conta',
     cancel: '✕ Cancelar',
-    // demais textos
+    obsTitle: 'Formulário Inválido',
+    obsText: 'Verifique os campos preenchidos',
+    successTitle: 'Conta criada!',
+    successText: 'Sua conta foi criada com sucesso. Faça login para continuar.',
+    select: 'Selecione',
   },
 
   auth: {
@@ -43,6 +58,8 @@ export const Strings = {
     sessionExpired: 'Sessão Expirada',
     sessionExpiredMessage:
       'Sua sessão expirou. Você será redirecionado para o login.',
+    invalidCredentials: 'Credenciais inválidas. Tente novamente.',
+    loginFailed: 'Falha no login',
   },
 
   home: {

@@ -18,8 +18,8 @@ import { ScrollView, TouchableOpacity } from 'react-native';
 export default function ProfileScreen() {
   const colors = useColors();
 
-  const demoData: ProfileModel = {
-    // PF exemplo
+  // PF exemplo
+  const pf: ProfileModel = {
     name: 'Nome Sobrenome',
     cpf: '12345678901',
     birthDate: '2000-03-14',
@@ -27,26 +27,30 @@ export default function ProfileScreen() {
     phone: '51987654321',
     email: 'exemplo@dominio.com',
     preferences: ['Atendimento Online', 'Eventos', 'Emergência'],
-
-    // Para PJ, comente acima e use:
-    // corporateName: 'Razão Social Ltda',
-    // cnpj: '11222333000181',
-    // phone: '5133345566',
-    // email: 'contato@empresa.com',
-    // preferences: ['Treinamentos', 'Corporativo', 'Palestras'],
-
-    // Para Intérprete, comente e use:
-    // name: 'Ana Paula',
-    // cpf: '98765432100',
-    // birthDate: '1995-09-20',
-    // gender: 'Feminino',
-    // phone: '51999998888',
-    // email: 'ana.paula@dominio.com',
-    // specialties: ['Acadêmico', 'Saúde', 'Eventos'],
-    // cnpj: '11222333000181',
   };
 
-  const model: ProfileModel = demoData;
+  // PJ exemplo
+  const pj: ProfileModel = {
+    corporateName: 'Empresa Exemplo Ltda',
+    cnpj: '12345678000199',
+    phone: '5133345566',
+    email: 'contato@empresa.com',
+    preferences: ['Treinamentos', 'Corporativo', 'Palestras'],
+  };
+
+  // Intérprete exemplo
+  const interpreter: ProfileModel = {
+    name: 'Ana Paula',
+    cpf: '98765432100',
+    birthDate: '1995-09-20',
+    gender: 'Feminino',
+    phone: '51999998888',
+    email: 'ana.paula@dominio.com',
+    specialties: ['Acadêmico', 'Saúde', 'Eventos'],
+    cnpj: '11222333000181',
+  };
+
+  const model: ProfileModel = pj;
   const title = model.corporateName ?? model.name ?? 'Perfil';
   const hasSpecialties =
     Array.isArray(model.specialties) && model.specialties.length > 0;
@@ -64,11 +68,12 @@ export default function ProfileScreen() {
       : undefined;
 
   return (
-    <ScrollView
-      className="flex-1 pt-[124px]"
-      style={{ backgroundColor: colors.background }}
-    >
-      <View className="flex-1 justify-center items-center p-6">
+    <View className="flex-1 justify-center items-center pt-32 px-4">
+      <ScrollView
+        className="w-full "
+        contentContainerStyle={{ alignItems: 'center' }}
+      >
+        {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
@@ -109,7 +114,7 @@ export default function ProfileScreen() {
           </>
         )}
 
-        <View className="w-full mt-2">
+        <View className="w-full mt-8">
           <TouchableOpacity className="flex-1" onPress={() => {}}>
             <View className="w-full flex-row items-center mb-3">
               <SquarePen width={20} height={20} stroke={colors.disabled} />
@@ -130,7 +135,7 @@ export default function ProfileScreen() {
             </View>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
