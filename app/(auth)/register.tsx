@@ -1,3 +1,4 @@
+import { registerEnterprise } from '@/src/api/enterprise';
 import { Button } from '@/src/components/ui/button';
 import {
   Radio,
@@ -19,6 +20,7 @@ import {
 } from '@/src/components/ui/select';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
+import type { EnterpriseRegisterPayload } from '@/src/types/api';
 import {
   formatDate,
   handleCnpjChange,
@@ -68,8 +70,9 @@ export default function RegisterScreen() {
 
   const colors = useColors();
   const [isToastVisible, setIsToastVisible] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let hasError = false;
     setReasonError(false);
     setCNPJError(false);
@@ -170,6 +173,72 @@ export default function RegisterScreen() {
       });
       return;
     }
+    // If it's enterprise, call backend to create the model
+    if (type === 'enterprise') {
+      try {
+        setSubmitting(true);
+        const onlyDigits = (val: string) => val.replace(/\D/g, '');
+        const payload: EnterpriseRegisterPayload = {
+          corporate_reason: reason.trim(),
+          cnpj: onlyDigits(cnpj),
+          email: email.trim(),
+          password,
+          phone: onlyDigits(phone),
+          picture: undefined,
+          status: 'pending_verification',
+          type: 'enterprise',
+          // TODO: Hook real location fields when UI provides them
+          location: {
+            uf: 'SP',
+            city: 'São Paulo',
+          },
+        };
+
+        const res = await registerEnterprise(payload);
+        if (res?.success) {
+          Toast.show({
+            type: 'success',
+            text1: Strings.register.successTitle,
+            text2: Strings.register.successText,
+            position: 'top',
+            visibilityTime: 3000,
+            autoHide: true,
+            closeIconSize: 1,
+          });
+          // Optionally reset form
+          setReason('');
+          setCnpj('');
+          setPhone('');
+          setEmail('');
+          setPassword('');
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: Strings.common.error,
+            text2: res?.message || 'Falha ao criar empresa.',
+            position: 'top',
+            visibilityTime: 3000,
+            autoHide: true,
+            closeIconSize: 1,
+          });
+        }
+      } catch (e: any) {
+        Toast.show({
+          type: 'error',
+          text1: Strings.common.error,
+          text2: e?.message || 'Falha ao criar empresa.',
+          position: 'top',
+          visibilityTime: 3000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // For other types (client/interpreter): keep existing local success toast for now
     Toast.show({
       type: 'success',
       text1: Strings.register.successTitle,
@@ -577,6 +646,7 @@ export default function RegisterScreen() {
               onPress={handleSubmit}
               size="xl"
               className="font-ifood-bold py-3 mb-3 text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
+              disabled={submitting}
             >
               <Text className="font-ifood-medium text-text-dark">
                 {Strings.register.create}

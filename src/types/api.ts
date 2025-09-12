@@ -76,3 +76,29 @@ export enum UserType {
   ENTERPRISE = 'ENTERPRISE',
   INTERPRETER = 'INTERPRETER',
 }
+
+// ===== Enterprise Registration =====
+export interface EnterpriseRegisterPayload {
+  corporate_reason: string; // Razão Social
+  cnpj: string; // only numbers, backend will validate mask
+  email: string;
+  password: string;
+  phone: string; // only numbers
+  picture?: string | null; // base64 image (optional)
+  status?: 'pending_verification' | 'active' | 'inactive';
+  type: 'enterprise';
+  location: {
+    uf: string; // e.g., 'SP'
+    city: string; // e.g., 'São Paulo'
+  };
+}
+
+export interface ApiBaseResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+export type EnterpriseRegisterResponse = ApiBaseResponse<
+  { id: string | number } | undefined
+>;
