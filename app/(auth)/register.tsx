@@ -193,8 +193,19 @@ export default function RegisterScreen() {
             city: 'São Paulo',
           },
         };
+        if (__DEV__) {
+          const { password: _pw, ...safePayload } = payload;
+          console.warn('[Register Enterprise] Payload', safePayload);
+        }
 
         const res = await registerEnterprise(payload);
+        if (__DEV__) {
+          console.warn('[Register Enterprise] Response', {
+            success: res?.success,
+            hasData: Boolean(res?.data),
+            message: res?.message,
+          });
+        }
         if (res?.success) {
           Toast.show({
             type: 'success',
@@ -223,6 +234,9 @@ export default function RegisterScreen() {
           });
         }
       } catch (e: any) {
+        if (__DEV__) {
+          console.error('[Register Enterprise] Error', e?.message || e);
+        }
         Toast.show({
           type: 'error',
           text1: Strings.common.error,
