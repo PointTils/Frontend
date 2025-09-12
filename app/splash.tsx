@@ -1,6 +1,6 @@
 import { View } from '@/src/components/ui/view';
 import LottieView from 'lottie-react-native';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { StyleSheet } from 'react-native';
 
 interface SplashScreenProps {
@@ -9,11 +9,6 @@ interface SplashScreenProps {
 
 export default function CustomSplashScreen({ onFinish }: SplashScreenProps) {
   const animationRef = useRef<LottieView>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(onFinish, 2500); // Fallback após 2.5s
-    return () => clearTimeout(timer);
-  }, [onFinish]);
 
   return (
     <View className="flex-1 items-center justify-center bg-white">

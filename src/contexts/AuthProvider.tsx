@@ -64,19 +64,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function loadStoredAuth() {
     try {
-      const [storedUser, storedAccessToken] = await Promise.all([
-        AsyncStorage.getItem(Storage.userData),
-        AsyncStorage.getItem(Storage.accessToken),
-      ]);
+      const [storedUser, storedAccessToken, storedRefreshToken] =
+        await Promise.all([
+          AsyncStorage.getItem(Storage.userData),
+          AsyncStorage.getItem(Storage.accessToken),
+          AsyncStorage.getItem(Storage.refreshToken),
+        ]);
 
-      if (storedUser && storedAccessToken) {
-        setUser(JSON.parse(storedUser));
-        api.defaults.headers.common.Authorization = `Bearer ${storedAccessToken}`;
+      if (storedUser && storedAccessToken && storedRefreshToken) {
+        try {
+          // TODO: Validate token (e.g., decode and check expiry)
+
+          setUser(JSON.parse(storedUser));
+          api.defaults.headers.common.Authorization = `Bearer ${storedAccessToken}`;
+        } catch (error) {
+          // Invalid token or user data, clear storage
+          await logout();
+        }
       }
     } catch (error) {
       console.error('Failed to load stored auth:', error);
-      // Redirect to login if unable to load stored auth
-      router.replace('/(auth)');
     } finally {
       setIsLoading(false);
     }

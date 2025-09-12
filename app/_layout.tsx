@@ -3,7 +3,6 @@ import '@/global.css';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -18,27 +17,22 @@ import 'react-native-reanimated';
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
 
-async function clearAllStorage(): Promise<void> {
-  try {
-    await AsyncStorage.clear();
-    console.warn('All AsyncStorage cleared successfully');
-  } catch (error) {
-    console.error('Failed to clear all storage:', error);
-    throw error;
-  }
-}
-
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isSplashReady, setIsSplashReady] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
-      // When loading is done, ensure the splash screen is shown for at least 2 seconds
-      const timer = setTimeout(() => setIsSplashReady(true), 2000);
-      return () => clearTimeout(timer);
+      // If the user is authenticated, skip the splash screen delay
+      if (isAuthenticated) {
+        setIsSplashReady(true);
+      } else {
+        // When loading is done, ensure the splash screen is shown for at least 2 seconds
+        const timer = setTimeout(() => setIsSplashReady(true), 2000);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isLoading]);
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading || !isSplashReady) {
     return <CustomSplashScreen onFinish={() => setIsSplashReady(true)} />;
@@ -74,9 +68,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Simulate some async tasks like fetching data or loading resources
-        await clearAllStorage();
-
+        // Pre-load fonts, make any API calls you need to do here
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);
