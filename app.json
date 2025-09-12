@@ -36,7 +36,8 @@
           "imageWidth": 200,
           "imageHeight": 200
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
