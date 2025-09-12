@@ -31,6 +31,7 @@ export default function ProfileScreen() {
   };
 
   // PJ exemplo
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pj: ProfileModel = {
     corporateName: 'Empresa Exemplo Ltda',
     cnpj: '12345678000199',
