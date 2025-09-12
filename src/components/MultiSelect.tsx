@@ -151,11 +151,13 @@ export default function MultiSelect({
 
   return (
     <View className={`relative ${width || 'w-full'}`}>
-      <Text className="font-ifood-regular font-bold text-lg mb-2">{label}</Text>
+      {label !== '' && (
+        <Text className="font-ifood-medium mb-2">{label}</Text>
+      )}
 
       <TouchableOpacity
         ref={fieldRef}
-        className="border border-outline-300 rounded-lg p-3 justify-center bg-background-0 flex-row items-center"
+        className="border border-outline-300 rounded-md p-2 justify-center bg-background-0 flex-row items-center"
         onPress={open ? () => setOpen(false) : openDropdown}
         activeOpacity={0.8}
       >

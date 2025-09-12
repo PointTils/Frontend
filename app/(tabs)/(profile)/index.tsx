@@ -16,7 +16,7 @@ export default function ProfileScreen() {
       <Text>Edit</Text>
       <Button
         title="Editar Perfil"
-        onPress={() => router.push('/(profile)/edit')}
+        onPress={() => router.push('/edit')}
       />
     </View>
   );

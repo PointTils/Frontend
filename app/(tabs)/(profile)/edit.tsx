@@ -20,7 +20,6 @@ import {
   X,
   ChevronLeft,
   CircleIcon,
-  ChevronDownIcon,
   CheckIcon,
 } from 'lucide-react-native';
 import {
@@ -32,24 +31,13 @@ import {
 } from '@/src/utils/mask';
 import { useRouter } from 'expo-router';
 import {
-  Select,
-  SelectTrigger,
-  SelectInput,
-  SelectIcon,
-  SelectPortal,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
-  SelectItem,
-} from '@/src/components/ui/select';
-import {
   Checkbox,
   CheckboxGroup,
   CheckboxIndicator,
   CheckboxIcon,
   CheckboxLabel,
 } from '@/src/components/ui/checkbox';
+
 type Day =
   | 'monday'
   | 'tuesday'
@@ -59,9 +47,13 @@ type Day =
   | 'saturday'
   | 'sunday';
 type TimeRange = [string, string];
-
+type Location = {
+  [uf: string]: {
+    [city: string]: string[];
+  };
+};
 export default function EditScreen() {
-  // Estados
+  // Estados com dados mockados
   const [name, setName] = useState('Jefinho');
   const [birthDate, setBirthDate] = useState('30/09/1996');
   const [gender, setGender] = useState('');
@@ -72,11 +64,16 @@ export default function EditScreen() {
     'Descreva o seu trabalho, como tipos de serviços prestados e experiências.',
   );
   const [modality, setModality] = useState<string[]>([]);
-  const [location, setLocation] = useState({
-    uf: '',
-    city: '',
-    neighborhood: '',
+  const [location, setLocation] = useState<{
+    uf: string[];
+    city: string[];
+    neighborhood: string[];
+  }>({
+    uf: [],
+    city: [],
+    neighborhood: [],
   });
+
   const [imageRight, setImageRight] = useState('authorize');
   const [minPrice, setMinPrice] = useState('100');
   const [maxPrice, setMaxPrice] = useState('1000');
@@ -94,23 +91,6 @@ export default function EditScreen() {
   const router = useRouter();
   const colors = useColors();
 
-  const type = 'Intérprete';
-  const options: any[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5'];
-
-  const locations = {
-    RS: {
-      'Porto Alegre': ['Floresta', 'Centro', 'Moinhos de Vento'],
-      Canoas: ['Centro', 'Niterói'],
-    },
-    SP: {
-      'São Paulo': ['Pinheiros', 'Moema', 'Vila Mariana'],
-      Campinas: ['Cambuí', 'Barão Geraldo'],
-    },
-    RJ: {
-      'Rio de Janeiro': ['Copacabana', 'Botafogo', 'Tijuca'],
-    },
-  };
-
   const handleChange = (options: any[]) => {
     console.log(options);
   };
@@ -118,9 +98,38 @@ export default function EditScreen() {
   const handleBack = () => {
     if (router.canGoBack?.()) {
       router.back();
-    } else {
-      router.replace('/profile');
     }
+  };
+
+  // Mocks para a página
+  const type = 'Intérprete'; // Pode ser 'Intérprete', 'Solicitante' ou 'Empresa'
+  const specialtiesOptions: any[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5'];
+  const genderOptions = ['Masculino', 'Feminino', 'Outro'];
+
+  const locationsMock: Location = {
+    'RS': {
+      'Porto Alegre': ['Floresta', 'Centro', 'Moinhos de Vento'],
+      'Canoas': ['Centro', 'Niterói'],
+    }
+  };
+
+  // Teste para verificação dos estados
+  const handleSubmit = () => {
+    console.log('--- Valores do formulário ---');
+    console.log('name:', name);
+    console.log('birthDate:', birthDate);
+    console.log('gender:', gender);
+    console.log('phone:', phone);
+    console.log('email:', email);
+    console.log('cnpj:', cnpj);
+    console.log('description:', description);
+    console.log('modality:', modality);
+    console.log('location:', location);
+    console.log('imageRight:', imageRight);
+    console.log('minPrice:', minPrice);
+    console.log('maxPrice:', maxPrice);
+    console.log('weekHours:', weekHours);
+    console.log('-----------------------------');
   };
 
   return (
@@ -151,97 +160,83 @@ export default function EditScreen() {
           {/* Campos comuns para Intérprete/Solicitante */}
           {(type === `${Strings.edit.client}` ||
             type === `${Strings.edit.interpreter}`) && (
-            <>
-              {/* Nome */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.name}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Digite seu nome"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </Input>
-              </View>
+              <>
+                {/* Nome */}
+                <View>
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.edit.name}
+                  </Text>
+                  <Input size="lg" className="w-80">
+                    <InputField
+                      type="text"
+                      placeholder="Digite seu nome"
+                      value={name}
+                      onChangeText={setName}
+                    />
+                  </Input>
+                </View>
 
-              {/* Data Nascimento */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.birthDate}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="dd/mm/yyyy"
-                    value={birthDate}
-                    onChangeText={(text) =>
-                      setBirthDate(handleBirthDateChange(text))
-                    }
-                  />
-                </Input>
-              </View>
+                {/* Data Nascimento */}
+                <View>
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.edit.birthDate}
+                  </Text>
+                  <Input size="lg" className="w-80">
+                    <InputField
+                      type="text"
+                      placeholder="dd/mm/yyyy"
+                      value={birthDate}
+                      onChangeText={(text) =>
+                        setBirthDate(handleBirthDateChange(text))
+                      }
+                    />
+                  </Input>
+                </View>
 
-              {/* Gênero */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.gender}
-                </Text>
-                <Select
-                  selectedValue={gender}
-                  onValueChange={setGender}
-                  className="w-80"
-                >
-                  <SelectTrigger>
-                    <SelectInput placeholder="Gênero" className="flex-1" />
-                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                  </SelectTrigger>
-                  <SelectPortal>
-                    <SelectBackdrop />
-                    <SelectContent>
-                      <SelectDragIndicatorWrapper>
-                        <SelectDragIndicator />
-                      </SelectDragIndicatorWrapper>
-                      <SelectItem label="Masculino" value="Masculino" />
-                      <SelectItem label="Feminino" value="Feminino" />
-                    </SelectContent>
-                  </SelectPortal>
-                </Select>
-              </View>
-
-              {/* Telefone */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.phone}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="(00) 00000-0000"
-                    value={phone}
-                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                {/* Gênero */}
+                <View>
+                  <MultiSelect
+                    label="Gênero"
+                    options={genderOptions}
+                    width="w-80"
+                    placeholder="Gênero"
+                    onChange={(values) => {
+                      setGender(values[0] || '');
+                    }}
                   />
-                </Input>
-              </View>
+                </View>
 
-              {/* Email */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.email}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="exemplo@exemplo.com"
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                </Input>
-              </View>
-            </>
-          )}
+                {/* Telefone */}
+                <View>
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.edit.phone}
+                  </Text>
+                  <Input size="lg" className="w-80">
+                    <InputField
+                      type="text"
+                      placeholder="(00) 00000-0000"
+                      value={phone}
+                      onChangeText={(text) => setPhone(handlePhoneChange(text))}
+                    />
+                  </Input>
+                </View>
+
+                {/* Email */}
+                <View>
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.edit.email}
+                  </Text>
+                  <Input size="lg" className="w-80">
+                    <InputField
+                      type="text"
+                      placeholder="exemplo@exemplo.com"
+                      value={email}
+                      onChangeText={setEmail}
+                    />
+                  </Input>
+                </View>
+              </>
+            )}
 
           {/* Campos para Empresa */}
           {type === `${Strings.edit.enterprise}` && (
@@ -296,7 +291,7 @@ export default function EditScreen() {
           {/* Preferências ou Área Profissional */}
           <View className="flex-row self-start w-full pt-8 px-8 gap-2">
             {type === `${Strings.edit.client}` ||
-            type === `${Strings.edit.enterprise}` ? (
+              type === `${Strings.edit.enterprise}` ? (
               <>
                 <Bookmark />
                 <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -315,7 +310,7 @@ export default function EditScreen() {
 
           <MultiSelect
             label="Especialidades"
-            options={options}
+            options={specialtiesOptions}
             width="w-80"
             placeholder="Especialidades"
             onChange={handleChange}
@@ -363,9 +358,8 @@ export default function EditScreen() {
                   value={modality}
                   onChange={(keys) => {
                     setModality(keys);
-                    alert(modality);
                   }}
-                  className="flex-row justify-evenly w-80 py-2"
+                  className="flex-row justify-around w-80 py-2"
                 >
                   <Checkbox value="Presencial">
                     <CheckboxIndicator className="border w-6 h-6">
@@ -388,99 +382,66 @@ export default function EditScreen() {
                   {Strings.edit.location}
                 </Text>
 
-                <View className="flex-row justify-between mt-2">
+                <View className="flex-row justify-between mt-2 mb-4">
                   {/* UF */}
-                  <Select
-                    className="w-24"
-                    onValueChange={(uf) =>
-                      setLocation({ uf, city: '', neighborhood: '' })
+                  <MultiSelect
+                    label=""
+                    placeholder="UF"
+                    width="w-24"
+                    options={Object.keys(locationsMock)}
+                    onChange={(ufs) =>
+                      setLocation({
+                        uf: ufs,
+                        city: [],
+                        neighborhood: [],
+                      })
                     }
-                    selectedValue={location.uf}
-                  >
-                    <SelectTrigger>
-                      <SelectInput placeholder="UF" className="flex-1" />
-                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        {Object.keys(locations).map((ufKey) => (
-                          <SelectItem key={ufKey} label={ufKey} value={ufKey} />
-                        ))}
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
+                  />
 
                   {/* Cidade */}
-                  <Select
-                    className="w-52"
-                    onValueChange={(city) =>
+                  <MultiSelect
+                    label=""
+                    placeholder="Cidades"
+                    width="w-52"
+                    options={
+                      location.uf.length
+                        ? Object.keys(
+                          locationsMock[location.uf[0] as keyof typeof locationsMock]
+                        )
+                        : []
+                    }
+                    onChange={(cities) =>
                       setLocation((prev) => ({
                         ...prev,
-                        city,
-                        neighborhood: '',
+                        city: cities,
+                        neighborhood: [],
                       }))
                     }
-                    selectedValue={location.city}
-                    isDisabled={!location.uf}
-                  >
-                    <SelectTrigger>
-                      <SelectInput placeholder="Cidade" className="flex-1" />
-                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        {location.uf &&
-                          Object.keys(locations[location.uf]).map((cityKey) => (
-                            <SelectItem
-                              key={cityKey}
-                              label={cityKey}
-                              value={cityKey}
-                            />
-                          ))}
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
+                  />
                 </View>
 
                 {/* Bairro */}
-                <Select
-                  className="w-80 mt-2"
-                  onValueChange={(neighborhood) =>
-                    setLocation((prev) => ({ ...prev, neighborhood }))
+                <MultiSelect
+                  label=""
+                  placeholder="Bairros"
+                  width="w-80"
+                  options={
+                    location.uf.length && location.city.length
+                      ? location.city.flatMap((city) =>
+                        (locationsMock[location.uf[0] as keyof typeof locationsMock][
+                          city as keyof typeof locationsMock[typeof location.uf[0]]
+                        ] ?? []).map((neighborhood) => `${city} - ${neighborhood}`)
+                      )
+                      : []
                   }
-                  selectedValue={location.neighborhood}
-                  isDisabled={!location.city}
-                >
-                  <SelectTrigger>
-                    <SelectInput placeholder="Bairro" className="flex-1" />
-                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                  </SelectTrigger>
-                  <SelectPortal>
-                    <SelectBackdrop />
-                    <SelectContent>
-                      <SelectDragIndicatorWrapper>
-                        <SelectDragIndicator />
-                      </SelectDragIndicatorWrapper>
-                      {location.uf &&
-                        location.city &&
-                        locations[location.uf][location.city].map((bairro) => (
-                          <SelectItem
-                            key={bairro}
-                            label={bairro}
-                            value={bairro}
-                          />
-                        ))}
-                    </SelectContent>
-                  </SelectPortal>
-                </Select>
+                  onChange={(neighborhoods) =>
+                    setLocation((prev) => ({
+                      ...prev,
+                      neighborhood: neighborhoods,
+                    }))
+                  }
+                />
+
               </View>
 
               {/* Direito de Imagem */}
@@ -580,7 +541,7 @@ export default function EditScreen() {
                             }
                             onBlur={() => {
                               if (!validateTime(weekHours[day][0])) {
-                                alert('Horário inválido! Use o formato hh:mm');
+                                // alert('Horário inválido! Use o formato hh:mm');
                               }
                             }}
                           />
@@ -604,7 +565,7 @@ export default function EditScreen() {
                             }
                             onBlur={() => {
                               if (!validateTime(weekHours[day][1])) {
-                                alert('Horário inválido! Use o formato hh:mm');
+                                // alert('Horário inválido! Use o formato hh:mm');
                               }
                             }}
                           />
@@ -619,7 +580,10 @@ export default function EditScreen() {
 
           {/* Botões */}
           <View className="flex-col gap-4 self-center mb-8">
-            <TouchableOpacity className="w-96 py-2 rounded justify-center gap-2 flex-row text-primary-500 bg-primary-500">
+            <TouchableOpacity
+              className="w-96 py-2 rounded justify-center gap-2 flex-row text-primary-500 bg-primary-500"
+              onPress={handleSubmit}
+            >
               <Check color={'white'} />
               <Text className="font-ifood-medium text-typography-white">
                 {Strings.edit.save}
