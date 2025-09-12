@@ -14,16 +14,19 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
+import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { LoginCredentials } from '@/src/types/api';
 import { validateEmail } from '@/src/utils/mask';
 import { router } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import { ActivityIndicator } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
-import { useColors } from '@/src/hooks/useColors';
 
 export default function LoginScreen() {
   const { login, isLoggingIn, loginError, setLoginError } = useAuth();

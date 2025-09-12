@@ -119,7 +119,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             return Promise.reject(error);
           }
 
-          console.log('Access token expired, attempting to refresh...');
           const refreshSuccess = await refreshToken();
           if (refreshSuccess) {
             // Get the new token and retry the original request
@@ -128,11 +127,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
 
-            console.log('Retrying original request...');
             return api(originalRequest);
           } else {
             // Refresh failed, logout user and redirect to login
-            console.log('Token refresh failed, logging out...');
             await logout();
             setShowLogoutAlertDialog(true);
             return Promise.reject(error);
@@ -166,7 +163,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
 
       if (response.data.success) {
-        console.log('Login response data:\n', response.data);
         const { user: userData, tokens } = response.data.data;
 
         // Store user data and tokens
@@ -201,7 +197,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
 
-      console.log('Refresh token:', storedRefreshToken);
       const response = await api.post<RefreshResponse>(
         '/auth/refresh',
         storedRefreshToken,
@@ -214,8 +209,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
 
       if (response.data.success) {
-        console.log('Token refresh response data:\n', response.data);
-
         const { tokens } = response.data.data;
 
         // Store new tokens
