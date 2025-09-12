@@ -1,4 +1,4 @@
-import { Strings } from '@/src/constants/Strings';
+import type { Strings } from '@/src/constants/Strings';
 
 export type ApiState<T> = {
   data: T | null;
