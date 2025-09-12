@@ -5,12 +5,6 @@ export type ApiState<T> = {
 };
 
 // User types
-export enum UserType {
-  PERSON = 'person',
-  COMPANY = 'company',
-  TIL = 'til',
-}
-
 export interface User {
   id: number;
   email: string;
@@ -18,6 +12,19 @@ export interface User {
   type: UserType;
   status: string;
 }
+
+export type ProfileModel = {
+  name?: string;
+  corporateName?: string;
+  cpf?: string;
+  birthDate?: string | Date | null;
+  gender?: Gender;
+  cnpj?: string;
+  phone?: string;
+  email?: string;
+  specialties?: string[];
+  preferences?: string[];
+};
 
 // Auth types
 export interface Tokens {
@@ -48,4 +55,17 @@ export interface RefreshResponse {
   data: {
     tokens: Tokens;
   };
+}
+
+// Enums
+export type Gender =
+  | 'Masculino'
+  | 'Feminino'
+  | 'Outro'
+  | 'Prefiro não informar';
+
+export enum UserType {
+  PERSON = 'person',
+  COMPANY = 'company',
+  TIL = 'til',
 }
