@@ -6,11 +6,7 @@ Descreva brevemente as mudanças implementadas neste PR.
 
 ## 📱 Screenshots/Videos
 
-Se aplicável, adicione screenshots ou videos demonstrando as mudanças:
-
-### Antes
-
-### Depois
+Se aplicável, adicione screenshots ou videos demonstrando as mudanças.
 
 ## ✅ Checklist
 
@@ -25,6 +21,5 @@ Se aplicável, adicione screenshots ou videos demonstrando as mudanças:
 
 Adicione qualquer contexto adicional sobre o PR aqui.
 
----
-
-> **Nota:** Certifique-se de que todos os checks da CI passaram antes de solicitar review.
+> [!IMPORTANT]
+> Certifique-se de que todos os checks da CI passaram antes de solicitar review.
