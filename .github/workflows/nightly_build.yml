@@ -250,13 +250,13 @@ jobs:
           # Create temporary file for changelog
           if [ -z "$LATEST_TAG" ]; then
             # If no previous tag, print the last 5 merge commits
-            git log -n 5 --merges --pretty=format:"- %s - @%an" | grep "Merge pull request" > changelog.tmp
+            git log -n 5 --merges --pretty=format:"- %s - %an" | grep "Merge pull request" > changelog.tmp
           else
             COMMITS_SINCE=$(git rev-list --count ${LATEST_TAG}..HEAD)
             if [ "$COMMITS_SINCE" -eq 0 ]; then
               echo "No changes since last build." > changelog.tmp
             else
-              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s - @%an" | grep "Merge pull request" > changelog.tmp
+              git log ${LATEST_TAG}..HEAD --merges --pretty=format:"- %s - %an" | grep "Merge pull request" > changelog.tmp
             fi
           fi
 

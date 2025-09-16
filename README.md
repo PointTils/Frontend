@@ -50,7 +50,8 @@ npm run start
 ```
 
 > [!IMPORTANT]
-> Pressione “s” para Expo Go emulador e escanei o QR Code 
+> Pressione “s” para Expo Go emulador e escanei o QR Code.
+>
 > - Android: escanei usando o app do Expo Go
 > - iPhone: escanei usando a câmera do celular
 
