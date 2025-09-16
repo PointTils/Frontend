@@ -105,4 +105,17 @@ export const Strings = {
     female: 'Feminino',
     others: 'Outros',
   },
+
+  search: {
+    title: 'PESQUISA',
+    details: 'Dados',
+    reviews: 'Avaliações',
+    createAppointment: '+ Fazer solicitação',
+    description: 'Serviços e experiência',
+    modality: 'Modalidade',
+    localization: 'Localização',
+    imageRights: 'Direito de imagem',
+    valueRange: 'Faixa de valores',
+    calendar: 'Calendário',
+  },
 } as const;
