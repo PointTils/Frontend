@@ -6,7 +6,7 @@ export type ApiState<T> = {
   error: string | null;
 };
 
-// User types
+// Auth types
 export interface User {
   id: number;
   email: string;
@@ -15,25 +15,6 @@ export interface User {
   status: string;
 }
 
-export type ProfileModel = {
-  name?: string;
-  corporateName?: string;
-  cpf?: string;
-  birthDate?: string | Date | null;
-  gender?: Gender;
-  cnpj?: string;
-  phone?: string;
-  email?: string;
-  specialties?: string[];
-  preferences?: string[];
-};
-
-export type Gender =
-  | typeof Strings.gender.male
-  | typeof Strings.gender.female
-  | typeof Strings.gender.others;
-
-// Auth types
 export interface Tokens {
   accessToken: string;
   refreshToken: string;
@@ -75,4 +56,34 @@ export enum UserType {
   CLIENT = 'CLIENT',
   ENTERPRISE = 'ENTERPRISE',
   INTERPRETER = 'INTERPRETER',
+}
+
+// API REQUEST/RESPONSE TYPES
+
+// Profile
+export type ProfileModel = {
+  name: string;
+  corporate_reason: string;
+  cpf: string | null;
+  status: string;
+  birthday: string | Date | null;
+  type: string;
+  picture: string | null;
+  gender: Gender;
+  cnpj: string | null;
+  phone: string;
+  email: string;
+  specialties: string[] | null;
+  preferences: string[] | null;
+};
+
+export type Gender =
+  | typeof Strings.gender.male
+  | typeof Strings.gender.female
+  | typeof Strings.gender.others;
+
+export interface ProfileResponse {
+  success: boolean;
+  message: string;
+  data: ProfileModel;
 }

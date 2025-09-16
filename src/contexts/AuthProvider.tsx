@@ -267,7 +267,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         );
 
         await api.post('/auth/logout', {
-          refresh_token: storedRefreshToken,
+          refreshToken: storedRefreshToken,
         });
       } catch (error) {
         // Continue with local logout even if API call fails

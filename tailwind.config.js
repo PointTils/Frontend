@@ -31,6 +31,10 @@ module.exports = {
           light: '#5CB3E8',
           dark: '#43A2DB',
         },
+        'primary-gray-press': {
+          light: '#e4e4e4ff',
+          dark: '#374151',
+        },
         text: {
           light: '#0D0D0D',
           dark: '#fff',

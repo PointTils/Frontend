@@ -72,6 +72,25 @@ export const Strings = {
 
   profile: {
     title: 'Perfil',
+    cpf: 'CPF',
+    cnpj: 'CNPJ',
+    birthday: 'Data de Nascimento',
+    gender: 'Gênero',
+    phone: 'Telefone',
+    email: 'Email',
+    tilArea: 'Área do profissional',
+    specialties: 'Especialidades',
+    preferences: 'Preferências',
+    editProfile: 'Editar Perfil',
+    help: 'Ajuda',
+    logout: 'Sair',
+
+    toast: {
+      profileUpdated: 'Perfil atualizado com sucesso!',
+      profileUpdateFailed: 'Falha ao atualizar o perfil.',
+      errorGetProfileTitle: 'Erro ao obter dados do perfil.',
+      errorGetProfileText: 'Verifique sua conexão e tente novamente.',
+    },
   },
 
   onboarding: {

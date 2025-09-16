@@ -1,3 +1,6 @@
+import { Strings } from '@/src/constants/Strings';
+import { GenderType } from '@/src/types/api';
+
 export const validateEmail = (email: string) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -61,4 +64,17 @@ export const validateBirthday = (birthday: string) => {
     dateObj.getMonth() === month - 1 &&
     dateObj.getDate() === day
   );
+};
+
+export const mapGender = (gender: GenderType | string): string => {
+  switch (gender) {
+    case GenderType.MALE:
+      return Strings.gender.male;
+    case GenderType.FEMALE:
+      return Strings.gender.female;
+    case GenderType.OTHERS:
+      return Strings.gender.others;
+    default:
+      return '-';
+  }
 };

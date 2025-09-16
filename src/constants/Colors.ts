@@ -15,6 +15,7 @@ export const Colors = {
     onPressBlue: '#5CB3E8',
     onPressOrange: '#FF9F3A',
     mandatory: '#B91C1C',
+    onPressGray: '#e4e4e4ff',
   },
   dark: {
     text: '#fff',
@@ -24,5 +25,8 @@ export const Colors = {
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
     mandatory: '#EF4444',
+    onPressBlue: '#43A2DB',
+    onPressOrange: '#F28D22',
+    onPressGray: '#374151',
   },
 } as const;
