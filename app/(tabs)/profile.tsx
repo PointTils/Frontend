@@ -15,12 +15,12 @@ import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { UserType, type ProfileResponse } from '@/src/types/api';
 import { mapGender } from '@/src/utils/mask';
-import { clearAllStorage } from '@/src/utils/temp';
 import { router } from 'expo-router';
 import { Edit, HelpCircle, LogOut } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, ActivityIndicator } from 'react-native';
 import { Toast } from 'toastify-react-native';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -30,19 +30,19 @@ export default function ProfileScreen() {
   let route = '';
   switch (user?.type) {
     case UserType.CLIENT:
-      route = '/deaf-users';
+      route = ApiRoutes.clients.profile(user?.id);
       break;
     case UserType.INTERPRETER:
-      route = '/interpreters';
+      route = ApiRoutes.interpreters.profile(user?.id);
       break;
     case UserType.ENTERPRISE:
-      route = '/enterprise-users';
+      route = ApiRoutes.enterprises.profile(user?.id);
       break;
   }
 
   // Integration with API to fetch profile data
   const { data, loading, error } = useApiGet<ProfileResponse>(
-    user?.id ? `${route}/${user.id}` : '',
+    user?.id ? route : '',
   );
 
   if (loading) {
@@ -76,11 +76,6 @@ export default function ProfileScreen() {
     chipsItems = profile.specialties ?? undefined;
   } else {
     chipsItems = profile.preferences ?? undefined;
-  }
-
-  async function handleLogout() {
-    await clearAllStorage(logout); // Temporarily clear all storage on logout
-    router.replace('/(auth)');
   }
 
   return (
@@ -208,7 +203,7 @@ export default function ProfileScreen() {
 
           <Button
             size="md"
-            onPress={handleLogout}
+            onPress={logout}
             variant={'linked'}
             className="w-[330px] bg-transparent data-[active=true]:bg-primary-gray-press-light items-center justify-start p-2"
           >

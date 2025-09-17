@@ -41,7 +41,7 @@ export default function Header({
       </View>
 
       <View className="flex-1 items-center justify-center">
-        <Text className="text-lg font-ifood-bold text-text-light dark:text-text-dark">
+        <Text className="text-md font-ifood-bold text-text-light dark:text-text-dark">
           {title.toUpperCase()}
         </Text>
       </View>
