@@ -179,6 +179,7 @@ export default function ProfileScreen() {
         <View className="w-full">
           <Button
             size="md"
+            onPress={() => router.push('/(tabs)/(profile)/edit')}
             variant={'linked'}
             className="w-[330px] bg-transparent data-[active=true]:bg-primary-gray-press-light items-center justify-start p-2"
           >
