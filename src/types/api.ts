@@ -76,3 +76,18 @@ export enum UserType {
   ENTERPRISE = 'ENTERPRISE',
   INTERPRETER = 'INTERPRETER',
 }
+
+
+export interface Appointment {
+  id: string;
+  nome: string;  // posso aproveitar do ProfileModel
+  cpf: string;
+  avatarUrl?: string;
+  descricao?: string;
+  inicio: string; // ISO
+  fim: string;    // ISO
+  endereco?: string;
+  telefone?: string;
+  email?: string;
+}
+

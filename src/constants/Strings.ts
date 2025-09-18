@@ -105,4 +105,24 @@ export const Strings = {
     female: 'Feminino',
     others: 'Outros',
   },
+
+    scheduling: {
+    title: 'AGENDAMENTO',
+    tabs: {
+      scheduling: 'Agendamento',
+      requester: 'Solicitante',
+    },
+    sections: {
+      description: 'Descrição',
+      date: 'Data',
+      location: 'Localização',
+      phone: 'Telefone',
+      email: 'E-mail',
+    },
+    cta: {
+      cancel: 'Cancelar agendamento',
+      whatsapp: 'WhatsApp',
+    },
+  },
+
 } as const;
