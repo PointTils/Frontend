@@ -1,5 +1,5 @@
 import { Strings } from '@/src/constants/Strings';
-import { GenderType } from '@/src/types/api';
+import { Gender } from '@/src/types/api';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.
@@ -98,13 +98,13 @@ export const validateBirthday = (birthday: string) => {
 };
 
 // Mapping
-export const mapGender = (gender: GenderType | string): string => {
+export const mapGender = (gender: Gender | string): string => {
   switch (gender) {
-    case GenderType.MALE:
+    case Gender.MALE:
       return Strings.gender.male;
-    case GenderType.FEMALE:
+    case Gender.FEMALE:
       return Strings.gender.female;
-    case GenderType.OTHERS:
+    case Gender.OTHERS:
       return Strings.gender.others;
     default:
       return '-';

@@ -1,5 +1,3 @@
-import type { Strings } from '@/src/constants/Strings';
-
 // Types
 export type Profile = {
   name: string;
@@ -17,11 +15,6 @@ export type Profile = {
   preferences: string[] | null;
 };
 
-export type Gender =
-  | typeof Strings.gender.male
-  | typeof Strings.gender.female
-  | typeof Strings.gender.others;
-
 // API types
 export interface ProfileResponse {
   success: boolean;
@@ -30,7 +23,7 @@ export interface ProfileResponse {
 }
 
 // Enums
-export enum GenderType {
+export enum Gender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   OTHERS = 'OTHERS',
