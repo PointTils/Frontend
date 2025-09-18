@@ -17,7 +17,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { LoginCredentials } from '@/src/types/api';
-import { validateEmail } from '@/src/utils/mask';
+import { validateEmail } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
 import { useEffect } from 'react';

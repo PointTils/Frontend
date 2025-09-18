@@ -4,23 +4,23 @@ import ChipsSection from '@/src/components/ui/chipSection';
 import { InfoRow } from '@/src/components/ui/infoRow';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import {
-  formatDate,
-  handleCnpjChange,
-  handlePhoneChange,
-} from '@/src/components/utils/mask';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { UserType, type ProfileResponse } from '@/src/types/api';
-import { mapGender } from '@/src/utils/mask';
+import {
+  formatDate,
+  handleCnpjChange,
+  handlePhoneChange,
+  mapGender,
+} from '@/src/utils/masks';
 import { router } from 'expo-router';
 import { Edit, HelpCircle, LogOut } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, ActivityIndicator } from 'react-native';
 import { Toast } from 'toastify-react-native';
-import { ApiRoutes } from '@/src/constants/ApiRoutes';
 
 export default function ProfileScreen() {
   const colors = useColors();

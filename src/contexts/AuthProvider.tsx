@@ -9,6 +9,7 @@ import {
 } from '@/src/components/ui/alert-dialog';
 import { Button, ButtonText } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { StorageKeys } from '@/src/constants/StorageKeys';
 import { Strings } from '@/src/constants/Strings';
 import type {
@@ -28,7 +29,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ApiRoutes } from '../constants/ApiRoutes';
 
 interface AuthContextData {
   user: User | null;
