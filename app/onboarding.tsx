@@ -4,20 +4,21 @@ import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
 import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
+import { UserType } from '@/src/types/api';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 
 const { height } = Dimensions.get('window');
 
-type OnboardingKey = 'til' | 'company' | 'user';
-
 export default function OnboardingScreen() {
   const colors = useColors();
+  const { user, completeOnboarding } = useAuth();
 
-  // This would be dynamically set based on backend/user data
-  const userType = 'til' as OnboardingKey;
+  // Get user type from authenticated user or default to CLIENT
+  const userType = (user?.type as UserType) || UserType.CLIENT;
 
   // Define content based on user type
   const data = Strings.onboarding[userType];
@@ -28,16 +29,21 @@ export default function OnboardingScreen() {
 
   let IllustrationComponent;
   switch (userType) {
-    case 'company':
+    case UserType.ENTERPRISE:
       IllustrationComponent = OnboardingCompany;
       break;
-    case 'til':
+    case UserType.INTERPRETER:
       IllustrationComponent = OnboardingTil;
       break;
-    case 'user':
+    case UserType.CLIENT:
     default:
       IllustrationComponent = OnboardingUser;
       break;
+  }
+
+  async function handleContinue() {
+    await completeOnboarding();
+    router.replace('/(tabs)');
   }
 
   return (
@@ -54,11 +60,11 @@ export default function OnboardingScreen() {
           <Logo
             width={120}
             height={120}
-            primaryColor={colors.onboardingText}
+            primaryColor={colors.white}
             accentColor={colors.primaryOrange}
           />
           <Text
-            style={[styles.title, { color: colors.onboardingText }]}
+            style={[styles.title, { color: colors.white }]}
             numberOfLines={0}
           >
             {title}
@@ -69,7 +75,7 @@ export default function OnboardingScreen() {
           <IllustrationComponent accessibilityLabel={illoAlt} />
         </View>
 
-        <Text style={[styles.subtitle, { color: colors.onboardingText }]}>
+        <Text style={[styles.subtitle, { color: colors.white }]}>
           {subtitle}
         </Text>
       </View>
@@ -77,13 +83,11 @@ export default function OnboardingScreen() {
       <View className="absolute bottom-10 w-full px-6">
         <Button
           className="w-full"
-          onPress={() => router.replace('/(tabs)')}
+          onPress={handleContinue}
           accessibilityLabel={cta}
           size="lg"
         >
-          <Text style={[styles.ctaText, { color: colors.onboardingText }]}>
-            {cta}
-          </Text>
+          <Text style={[styles.ctaText, { color: colors.white }]}>{cta}</Text>
         </Button>
       </View>
     </View>

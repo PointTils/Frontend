@@ -12,8 +12,16 @@ export const Strings = {
     error: 'Ocorreu um erro. Tente novamente.',
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
+    optional: 'Opcional',
+    required: 'obrigatório',
+    invalid: 'inválido',
+    minPassword: 'Senha deve ter no mínimo 8 caracteres',
+    select: 'Selecione',
+    email: 'Email',
+    password: 'Senha',
   },
   register: {
+    header: 'Cadastro',
     title: 'Boas-vindas!',
     subtitle: 'Precisamos de algumas informações básicas para criar sua conta.',
     typeSelect: 'Quem é você?',
@@ -21,28 +29,35 @@ export const Strings = {
     enterprise: 'Empresa',
     interpreter: 'Intérprete',
     socialReason: 'Razão Social',
+    name: 'Nome',
+    cpf: 'CPF',
+    birthday: 'Data de Nascimento',
     cnpj: 'CNPJ',
     phone: 'Telefone',
-    email: 'Email',
-    password: 'Senha',
-    create: '+ Criar conta',
-    cancel: '✕ Cancelar',
-    // demais textos
+    gender: 'Gênero',
+    create: 'Criar conta',
+
+    toast: {
+      errorTitle: 'Falha no cadastro',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Cadastro realizado com sucesso!',
+      successDescription: 'Faça login para continuar.',
+    },
   },
 
   auth: {
     login: 'Login',
     signIn: 'Entrar',
-    password: 'Senha',
     register: 'Cadastrar',
     forgotPassword: 'Esqueci a senha',
-    email: 'Email',
     signUp: 'Ainda não possui conta? Criar conta',
     signUpPrefix: 'Ainda não possui conta?',
     signUpAction: 'Criar conta',
     sessionExpired: 'Sessão Expirada',
     sessionExpiredMessage:
       'Sua sessão expirou. Você será redirecionado para o login.',
+    invalidCredentials: 'Credenciais inválidas. Tente novamente.',
+    loginFailed: 'Falha no login',
   },
 
   home: {
@@ -55,10 +70,29 @@ export const Strings = {
 
   profile: {
     title: 'Perfil',
+    cpf: 'CPF',
+    cnpj: 'CNPJ',
+    birthday: 'Data de Nascimento',
+    gender: 'Gênero',
+    phone: 'Telefone',
+    email: 'Email',
+    tilArea: 'Área do profissional',
+    specialties: 'Especialidades',
+    preferences: 'Preferências',
+    editProfile: 'Editar Perfil',
+    help: 'Ajuda',
+    logout: 'Sair',
+
+    toast: {
+      profileUpdated: 'Perfil atualizado com sucesso!',
+      profileUpdateFailed: 'Falha ao atualizar o perfil.',
+      errorGetProfileTitle: 'Erro ao obter dados do perfil.',
+      errorGetProfileText: 'Verifique sua conexão e tente novamente.',
+    },
   },
 
   onboarding: {
-    til: {
+    INTERPRETER: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de boas-vindas',
       title: 'Mostre seu trabalho para quem precisa',
@@ -66,7 +100,7 @@ export const Strings = {
         'No Point Tils, você cadastra suas áreas de atuação, horários disponíveis e recebe solicitações de empresas e pessoas surdas. Gerencie sua agenda e amplie seu alcance profissional.',
       cta: 'Começar agora',
     },
-    company: {
+    ENTERPRISE: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de busca de intérpretes',
       title: 'Intérpretes certos para a sua necessidade',
@@ -74,7 +108,7 @@ export const Strings = {
         'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
       cta: 'Buscar intérprete',
     },
-    user: {
+    CLIENT: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de cadastro de intérprete',
       title: 'Conecte-se a intérpretes de forma rápida e simples',
@@ -82,6 +116,11 @@ export const Strings = {
         'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes',
       cta: 'Encontrar intérprete agora',
     },
+  },
+  gender: {
+    male: 'Masculino',
+    female: 'Feminino',
+    others: 'Outros',
   },
 
   edit: {

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import MultiSelect from '@/src/components/MultiSelect';
 import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import {
@@ -23,12 +22,11 @@ import {
   CheckIcon,
 } from 'lucide-react-native';
 import {
-  handleBirthDateChange,
   handleCnpjChange,
   handlePhoneChange,
   handleTimeChange,
   validateTime,
-} from '@/src/utils/mask';
+} from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import {
   Checkbox,
@@ -192,24 +190,16 @@ export default function EditScreen() {
                     type="text"
                     placeholder="dd/mm/yyyy"
                     value={birthDate}
-                    onChangeText={(text) =>
-                      setBirthDate(handleBirthDateChange(text))
-                    }
+                    onChangeText={(text) => console.log(text)}
                   />
                 </Input>
               </View>
 
               {/* Gênero */}
               <View>
-                <MultiSelect
-                  label="Gênero"
-                  options={genderOptions}
-                  width="w-80"
-                  placeholder="Gênero"
-                  onChange={(values) => {
-                    setGender(values[0] || '');
-                  }}
-                />
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  Genero
+                </Text>
               </View>
 
               {/* Telefone */}
@@ -314,13 +304,9 @@ export default function EditScreen() {
             )}
           </View>
 
-          <MultiSelect
-            label="Especialidades"
-            options={specialtiesOptions}
-            width="w-80"
-            placeholder="Especialidades"
-            onChange={handleChange}
-          />
+          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+            Especialidades
+          </Text>
 
           {/* Intérprete */}
           {type === `${Strings.edit.interpreter}` && (
@@ -362,7 +348,7 @@ export default function EditScreen() {
                 </Text>
                 <CheckboxGroup
                   value={modality}
-                  onChange={(keys) => {
+                  onChange={(keys: string[]) => {
                     setModality(keys);
                   }}
                   className="flex-row justify-around w-80 py-2"
@@ -390,69 +376,20 @@ export default function EditScreen() {
 
                 <View className="flex-row justify-between mt-2 mb-4">
                   {/* UF */}
-                  <MultiSelect
-                    label=""
-                    placeholder="UF"
-                    width="w-24"
-                    options={Object.keys(locationsMock)}
-                    onChange={(ufs) =>
-                      setLocation({
-                        uf: ufs,
-                        city: [],
-                        neighborhood: [],
-                      })
-                    }
-                  />
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    UF
+                  </Text>
 
                   {/* Cidade */}
-                  <MultiSelect
-                    label=""
-                    placeholder="Cidades"
-                    width="w-52"
-                    options={
-                      location.uf.length
-                        ? Object.keys(
-                            locationsMock[
-                              location.uf[0] as keyof typeof locationsMock
-                            ],
-                          )
-                        : []
-                    }
-                    onChange={(cities) =>
-                      setLocation((prev) => ({
-                        ...prev,
-                        city: cities,
-                        neighborhood: [],
-                      }))
-                    }
-                  />
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                    Cidades
+                  </Text>
                 </View>
 
                 {/* Bairro */}
-                <MultiSelect
-                  label=""
-                  placeholder="Bairros"
-                  width="w-80"
-                  options={
-                    location.uf.length && location.city.length
-                      ? location.city.flatMap((city) =>
-                          (
-                            locationsMock[
-                              location.uf[0] as keyof typeof locationsMock
-                            ][
-                              city as keyof (typeof locationsMock)[(typeof location.uf)[0]]
-                            ] ?? []
-                          ).map((neighborhood) => `${city} - ${neighborhood}`),
-                        )
-                      : []
-                  }
-                  onChange={(neighborhoods) =>
-                    setLocation((prev) => ({
-                      ...prev,
-                      neighborhood: neighborhoods,
-                    }))
-                  }
-                />
+                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                  Bairros
+                </Text>
               </View>
 
               {/* Direito de Imagem */}
