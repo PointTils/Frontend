@@ -1,7 +1,12 @@
 import api from '@/src/api';
-import type { ApiState } from '@/src/types/api';
 import type { AxiosError, AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
+
+type ApiState<T> = {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+};
 
 /**
  * Usage example:

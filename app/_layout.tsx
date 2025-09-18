@@ -4,7 +4,6 @@ import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,29 +15,6 @@ import 'react-native-reanimated';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
-
-async function clearAllStorage(): Promise<void> {
-  try {
-    const allKeys = await AsyncStorage.getAllKeys();
-
-    // Filter out onboarding keys (they follow the pattern 'hasSeenOnboarding_*')
-    const keysToDelete = allKeys.filter(
-      (key) => !key.startsWith('hasSeenOnboarding_'),
-    );
-
-    if (keysToDelete.length > 0) {
-      await AsyncStorage.multiRemove(keysToDelete);
-      console.warn(
-        `Cleared ${keysToDelete.length} storage keys, preserved onboarding data`,
-      );
-    } else {
-      console.warn('No keys to clear, onboarding data preserved');
-    }
-  } catch (error) {
-    console.error('Failed to clear storage:', error);
-    throw error;
-  }
-}
 
 /**
  * Navigation controller that handles route changes based on auth state
@@ -129,7 +105,6 @@ function AppContent() {
     async function prepare() {
       try {
         // Pre-load fonts, make any API calls you need to do here
-        await clearAllStorage(); // Force clear storage on each app start (logout in dev)
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);

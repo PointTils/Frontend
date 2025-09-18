@@ -9,7 +9,8 @@ import {
 } from '@/src/components/ui/alert-dialog';
 import { Button, ButtonText } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
-import { Storage } from '@/src/constants/Auth';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { StorageKeys } from '@/src/constants/StorageKeys';
 import { Strings } from '@/src/constants/Strings';
 import type {
   LoginCredentials,
@@ -76,9 +77,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const [storedUser, storedAccessToken, storedRefreshToken] =
         await Promise.all([
-          AsyncStorage.getItem(Storage.userData),
-          AsyncStorage.getItem(Storage.accessToken),
-          AsyncStorage.getItem(Storage.refreshToken),
+          AsyncStorage.getItem(StorageKeys.user_data),
+          AsyncStorage.getItem(StorageKeys.access_token),
+          AsyncStorage.getItem(StorageKeys.refresh_token),
         ]);
 
       if (storedUser && storedAccessToken && storedRefreshToken) {
@@ -108,7 +109,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     api.interceptors.request.use(
       async (config) => {
         // Do not set Authorization header for refresh endpoint
-        if (config.url?.includes('/auth/refresh')) {
+        if (config.url?.includes(ApiRoutes.auth.refreshToken)) {
           // Remove Authorization header if present
           if (config.headers && 'Authorization' in config.headers) {
             delete config.headers.Authorization;
@@ -116,7 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return config;
         }
 
-        const token = await AsyncStorage.getItem(Storage.accessToken);
+        const token = await AsyncStorage.getItem(StorageKeys.access_token);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -136,14 +137,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           originalRequest._retry = true;
 
           // Skip refresh for auth endpoints to avoid infinite loops
-          if (originalRequest.url?.includes('/auth/')) {
+          if (originalRequest.url?.includes(ApiRoutes.auth.base)) {
             return Promise.reject(error);
           }
 
           const refreshSuccess = await refreshToken();
           if (refreshSuccess) {
             // Get the new token and retry the original request
-            const newToken = await AsyncStorage.getItem(Storage.accessToken);
+            const newToken = await AsyncStorage.getItem(
+              StorageKeys.access_token,
+            );
             if (newToken) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
@@ -180,7 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoginError(null);
 
       const response = await api.post<LoginResponse>(
-        '/auth/login',
+        ApiRoutes.auth.login,
         credentials,
       );
 
@@ -189,17 +192,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store user data and tokens
         await Promise.all([
-          AsyncStorage.setItem(Storage.userData, JSON.stringify(userData)),
-          AsyncStorage.setItem(Storage.accessToken, tokens.accessToken),
-          AsyncStorage.setItem(Storage.refreshToken, tokens.refreshToken),
+          AsyncStorage.setItem(StorageKeys.user_data, JSON.stringify(userData)),
+          AsyncStorage.setItem(StorageKeys.access_token, tokens.access_token),
+          AsyncStorage.setItem(StorageKeys.refresh_token, tokens.refresh_token),
         ]);
 
         // Update API default headers
-        api.defaults.headers.common.Authorization = `Bearer ${tokens.accessToken}`;
+        api.defaults.headers.common.Authorization = `Bearer ${tokens.access_token}`;
 
         // Check if this specific user has seen onboarding
-        const userOnboardingKey = `hasSeenOnboarding_${userData.id}`;
-        const hasSeenOnboarding = await AsyncStorage.getItem(userOnboardingKey);
+        const hasSeenOnboarding = await AsyncStorage.getItem(
+          StorageKeys.hasSeenOnboarding(userData.id),
+        );
         setIsFirstTime(!hasSeenOnboarding);
 
         // Update state
@@ -217,7 +221,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function refreshToken(): Promise<boolean> {
     try {
       const storedRefreshToken = await AsyncStorage.getItem(
-        Storage.refreshToken,
+        StorageKeys.refresh_token,
       );
 
       if (!storedRefreshToken) {
@@ -225,13 +229,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const response = await api.post<RefreshResponse>(
-        '/auth/refresh',
-        storedRefreshToken,
+        ApiRoutes.auth.refreshToken,
         {
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-          transformRequest: [(data) => data], // Prevent axios from adding quotes
+          refresh_token: storedRefreshToken,
         },
       );
 
@@ -240,12 +240,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store new tokens
         await Promise.all([
-          AsyncStorage.setItem(Storage.accessToken, tokens.accessToken),
-          AsyncStorage.setItem(Storage.refreshToken, tokens.refreshToken),
+          AsyncStorage.setItem(StorageKeys.access_token, tokens.access_token),
+          AsyncStorage.setItem(StorageKeys.refresh_token, tokens.refresh_token),
         ]);
 
         // Update API default headers
-        api.defaults.headers.common.Authorization = `Bearer ${tokens.accessToken}`;
+        api.defaults.headers.common.Authorization = `Bearer ${tokens.access_token}`;
 
         return true;
       }
@@ -263,10 +263,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       try {
         const storedRefreshToken = await AsyncStorage.getItem(
-          Storage.refreshToken,
+          StorageKeys.refresh_token,
         );
 
-        await api.post('/auth/logout', {
+        await api.post(ApiRoutes.auth.logout, {
           refresh_token: storedRefreshToken,
         });
       } catch (error) {
@@ -276,9 +276,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Clear stored data
       await Promise.all([
-        AsyncStorage.removeItem(Storage.accessToken),
-        AsyncStorage.removeItem(Storage.refreshToken),
-        AsyncStorage.removeItem(Storage.userData),
+        AsyncStorage.removeItem(StorageKeys.access_token),
+        AsyncStorage.removeItem(StorageKeys.refresh_token),
+        AsyncStorage.removeItem(StorageKeys.user_data),
       ]);
 
       // Clear API headers
@@ -295,7 +295,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function completeOnboarding(): Promise<void> {
-    await AsyncStorage.setItem(`hasSeenOnboarding_${user?.id}`, 'true');
+    if (!user?.id) return;
+    await AsyncStorage.setItem(StorageKeys.hasSeenOnboarding(user.id), 'true');
     setIsFirstTime(false);
   }
 
