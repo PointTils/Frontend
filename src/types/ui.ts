@@ -16,3 +16,8 @@ export type BaseSvgProps = {
   accentColor?: string;
   accessibilityLabel?: string;
 };
+
+export interface OptionItem {
+  label: string;
+  value: string;
+}

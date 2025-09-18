@@ -188,7 +188,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
 
       if (response.data.success) {
-        console.log('Login response:', response.data);
         const { user: userData, tokens } = response.data.data;
 
         // Store user data and tokens
