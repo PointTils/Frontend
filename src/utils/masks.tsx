@@ -52,6 +52,12 @@ export const handleCpfChange = (text: string) => {
   return formatted;
 };
 
+export const handleTimeChange = (text: string) => {
+  const cleaned = text.replace(/\D/g, '').slice(0, 4);
+  const formatted = cleaned.replace(/^(\d{2})(\d{0,2})$/, '$1:$2');
+  return formatted;
+};
+
 export const formatDate = (date?: string | Date | null) => {
   if (!date) return undefined;
   const dt = typeof date === 'string' ? new Date(date) : date;
@@ -95,6 +101,11 @@ export const validateBirthday = (birthday: string) => {
     dateObj.getMonth() === month - 1 &&
     dateObj.getDate() === day
   );
+};
+
+export const validateTime = (time: string) => {
+  const regex = /^$|^([01]\d|2[0-3]):([0-5]\d)$/;
+  return regex.test(time);
 };
 
 // Mapping
