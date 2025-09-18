@@ -24,7 +24,7 @@ import { Toast } from 'toastify-react-native';
 
 export default function ProfileScreen() {
   const colors = useColors();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Determine API route based on user type
   let route = '';
@@ -42,8 +42,13 @@ export default function ProfileScreen() {
 
   // Integration with API to fetch profile data
   const { data, loading, error } = useApiGet<ProfileResponse>(
-    user?.id ? route : '',
+    user?.id && isAuthenticated ? route : '',
   );
+
+  // Early return if not authenticated
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -69,7 +74,6 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  console.log('Profile data:', profile);
 
   let chipsItems: string[] | undefined = undefined;
   if (profile.type === UserType.INTERPRETER) {

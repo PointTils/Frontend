@@ -1,7 +1,26 @@
 import { Strings } from '@/src/constants/Strings';
 import { GenderType } from '@/src/types/api';
 
-// Formatting and validation functions
+/**
+ * Collection of utility functions for formatting, validating, and mapping data.
+ * Includes input masks for Brazilian documents (CPF/CNPJ), phone numbers,
+ * date formatting, validation functions, and gender mapping.
+ *
+ * @example
+ * // Phone formatting
+ * const formattedPhone = handlePhoneChange('11999887766');
+ * // Result: '(11) 99988-7766'
+ *
+ * // Validation
+ * const isValidEmail = validateEmail('user@example.com');
+ * // Result: true
+ *
+ * // Gender mapping
+ * const genderText = mapGender(GenderType.MALE);
+ * // Result: 'Masculino'
+ */
+
+// Formatting
 export const handlePhoneChange = (text: string) => {
   const cleaned = text.replace(/\D/g, '').slice(0, 11);
 
@@ -23,7 +42,7 @@ export const handleCnpjChange = (text: string) => {
 };
 
 export const handleCpfChange = (text: string) => {
-  const cleaned = text.replace(/\D/g, '').slice(0, 11); // Máx 11 dígitos
+  const cleaned = text.replace(/\D/g, '').slice(0, 11);
 
   const formatted = cleaned
     .replace(/^(\d{3})(\d)/, '$1.$2')
@@ -32,10 +51,6 @@ export const handleCpfChange = (text: string) => {
 
   return formatted;
 };
-
-// export const formatDate = (date: Date) => {
-//   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-// };
 
 export const formatDate = (date?: string | Date | null) => {
   if (!date) return undefined;
@@ -47,6 +62,7 @@ export const formatDate = (date?: string | Date | null) => {
   return `${day}/${mon}/${year}`;
 };
 
+// Validation
 export const validatePhone = (phone: string) => {
   return phone.replace(/\D/g, '').length === 11;
 };
@@ -81,6 +97,7 @@ export const validateBirthday = (birthday: string) => {
   );
 };
 
+// Mapping
 export const mapGender = (gender: GenderType | string): string => {
   switch (gender) {
     case GenderType.MALE:

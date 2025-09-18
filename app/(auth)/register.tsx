@@ -1,3 +1,4 @@
+import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
@@ -27,13 +28,14 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import type {
-  InterpreterRegisterResponse,
-  EnterpriseRegisterResponse,
-  EnterpriseRegisterData,
-  ClientRegisterResponse,
-  ClientRegisterData,
-  InterpreterRegisterData,
+import {
+  type InterpreterRegisterResponse,
+  type EnterpriseRegisterResponse,
+  type EnterpriseRegisterData,
+  type ClientRegisterResponse,
+  type ClientRegisterData,
+  type InterpreterRegisterData,
+  UserType,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -66,7 +68,7 @@ import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const colors = useColors();
-  const [type, setType] = useState('client');
+  const [type, setType] = useState(UserType.CLIENT);
   const [show, setShow] = useState(false);
   const [date, setDate] = useState(new Date());
 
@@ -76,7 +78,7 @@ export default function RegisterScreen() {
     { label: Strings.gender.others, value: 'others' },
   ];
 
-  const handleChangeType = (newType: string) => {
+  const handleChangeType = (newType: UserType) => {
     setType(newType);
     clearErrors();
 
@@ -103,7 +105,7 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
-        ctx?.type !== 'enterprise' && value.trim().length < 5
+        ctx?.type !== UserType.ENTERPRISE && value.trim().length < 5
           ? Strings.register.name + ' ' + Strings.common.required
           : null,
     },
@@ -111,7 +113,7 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
-        ctx?.type === 'enterprise' && !value.trim()
+        ctx?.type === UserType.ENTERPRISE && !value.trim()
           ? Strings.register.socialReason + ' ' + Strings.common.required
           : null,
     },
@@ -120,12 +122,14 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
         if (
-          (ctx?.type === 'client' || ctx?.type === 'interpreter') &&
+          (ctx?.type === UserType.CLIENT ||
+            ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
           return Strings.register.cpf + ' ' + Strings.common.required;
         if (
-          (ctx?.type === 'client' || ctx?.type === 'interpreter') &&
+          (ctx?.type === UserType.CLIENT ||
+            ctx?.type === UserType.INTERPRETER) &&
           !validateCpf(value)
         )
           return Strings.register.cpf + ' ' + Strings.common.invalid;
@@ -136,11 +140,15 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
-        if (ctx?.type === 'enterprise' && !value.trim())
+        if (ctx?.type === UserType.ENTERPRISE && !value.trim())
           return Strings.register.cnpj + ' ' + Strings.common.required;
-        if (ctx?.type === 'enterprise' && !validateCnpj(value))
+        if (ctx?.type === UserType.ENTERPRISE && !validateCnpj(value))
           return Strings.register.cnpj + ' ' + Strings.common.invalid;
-        if (ctx?.type === 'interpreter' && value.trim() && !validateCnpj(value))
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          value.trim() &&
+          !validateCnpj(value)
+        )
           return Strings.register.cnpj + ' ' + Strings.common.invalid;
         return null;
       },
@@ -150,12 +158,14 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
         if (
-          (ctx?.type === 'client' || ctx?.type === 'interpreter') &&
+          (ctx?.type === UserType.CLIENT ||
+            ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
           return Strings.register.birthday + ' ' + Strings.common.required;
         if (
-          (ctx?.type === 'client' || ctx?.type === 'interpreter') &&
+          (ctx?.type === UserType.CLIENT ||
+            ctx?.type === UserType.INTERPRETER) &&
           !validateBirthday(value)
         )
           return Strings.register.birthday + ' ' + Strings.common.invalid;
@@ -166,7 +176,8 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
-        (ctx?.type === 'client' || ctx?.type === 'interpreter') && !value.trim()
+        (ctx?.type === UserType.CLIENT || ctx?.type === UserType.INTERPRETER) &&
+        !value.trim()
           ? Strings.register.gender + ' ' + Strings.common.required
           : null,
     },
@@ -186,9 +197,9 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string) => {
         if (!value.trim())
-          return Strings.register.email + ' ' + Strings.common.required;
+          return Strings.common.email + ' ' + Strings.common.required;
         if (!validateEmail(value))
-          return Strings.register.email + ' ' + Strings.common.invalid;
+          return Strings.common.email + ' ' + Strings.common.invalid;
         return null;
       },
     },
@@ -197,7 +208,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string) => {
         if (!value.trim())
-          return Strings.register.password + ' ' + Strings.common.required;
+          return Strings.common.password + ' ' + Strings.common.required;
         if (value.length < 8) return Strings.common.minPassword;
         return null;
       },
@@ -207,7 +218,7 @@ export default function RegisterScreen() {
   // Helper to build payload based on user type
   const buildRegisterPayload = () => {
     switch (type) {
-      case 'client':
+      case UserType.CLIENT:
         return {
           name: fields.name.value,
           email: fields.email.value,
@@ -221,7 +232,7 @@ export default function RegisterScreen() {
             city: 'Porto Alegre',
           },
         } as ClientRegisterData;
-      case 'enterprise':
+      case UserType.ENTERPRISE:
         return {
           cnpj: fields.cnpj.value.replace(/\D/g, ''),
           email: fields.email.value,
@@ -233,7 +244,7 @@ export default function RegisterScreen() {
           },
           corporate_reason: fields.reason.value,
         } as EnterpriseRegisterData;
-      case 'interpreter':
+      case UserType.INTERPRETER:
         return {
           name: fields.name.value,
           email: fields.email.value,
@@ -275,20 +286,20 @@ export default function RegisterScreen() {
 
     let api: any;
     switch (type) {
-      case 'client':
+      case UserType.CLIENT:
         api = clientApi;
         break;
-      case 'enterprise':
+      case UserType.ENTERPRISE:
         api = enterpriseApi;
         break;
-      case 'interpreter':
+      case UserType.INTERPRETER:
         api = interpreterApi;
         break;
       default:
         return;
     }
 
-    console.log('Submitting payload:', payload);
+    console.warn('Submitting payload:', payload);
     await api.post(payload);
 
     if (api.loading) return;
@@ -297,8 +308,8 @@ export default function RegisterScreen() {
       console.error('Registration error:', api.error || 'Unknown error');
       Toast.show({
         type: 'error',
-        text1: Strings.register.obsTitle,
-        text2: Strings.register.obsText,
+        text1: Strings.register.toast.errorTitle,
+        text2: Strings.register.toast.errorDescription,
         position: 'top',
         visibilityTime: 2500,
         autoHide: true,
@@ -308,13 +319,13 @@ export default function RegisterScreen() {
     }
 
     // Successful registration logic (e.g., navigate to login)
-    console.log('Registration successful:', api.data.data);
+    console.warn('Registration successful:', api.data.data);
     router.back();
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
       type: 'success',
-      text1: Strings.register.successTitle,
-      text2: Strings.register.successText,
+      text1: Strings.register.toast.successTitle,
+      text2: Strings.register.toast.successDescription,
       position: 'top',
       visibilityTime: 2500,
       autoHide: true,
@@ -355,14 +366,17 @@ export default function RegisterScreen() {
               onChange={handleChangeType}
               className="flex-row items-center justify-between"
             >
-              <Radio value="client">
+              <Radio value={UserType.CLIENT}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
                 <RadioLabel>
                   <Text
                     style={{
-                      color: type === 'client' ? colors.text : colors.disabled,
+                      color:
+                        type === UserType.CLIENT
+                          ? colors.text
+                          : colors.disabled,
                     }}
                     className="font-ifood-regular"
                   >
@@ -370,7 +384,7 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value="enterprise">
+              <Radio value={UserType.ENTERPRISE}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -378,7 +392,9 @@ export default function RegisterScreen() {
                   <Text
                     style={{
                       color:
-                        type === 'enterprise' ? colors.text : colors.disabled,
+                        type === UserType.ENTERPRISE
+                          ? colors.text
+                          : colors.disabled,
                     }}
                     className="font-ifood-regular"
                   >
@@ -386,7 +402,7 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value="interpreter">
+              <Radio value={UserType.INTERPRETER}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -394,7 +410,9 @@ export default function RegisterScreen() {
                   <Text
                     style={{
                       color:
-                        type === 'interpreter' ? colors.text : colors.disabled,
+                        type === UserType.INTERPRETER
+                          ? colors.text
+                          : colors.disabled,
                     }}
                     className="font-ifood-regular"
                   >
@@ -407,17 +425,18 @@ export default function RegisterScreen() {
 
           <View className="flex-1 px-4 justify-between">
             {/* Enterprise fields */}
-            {type === 'enterprise' && (
+            {type === UserType.ENTERPRISE && (
               <View className="gap-3">
                 <FormControl isRequired isInvalid={!!fields.reason.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.socialReason}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
                     <InputField
                       placeholder="Empresa X"
+                      className="font-ifood-regular"
                       value={fields.reason.value}
                       onChangeText={(v) => setValue('reason', v)}
                       maxLength={100}
@@ -436,13 +455,14 @@ export default function RegisterScreen() {
 
                 <FormControl isRequired isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.cnpj}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
                     <InputField
                       placeholder="00.000.000/0001-00"
+                      className="font-ifood-regular"
                       value={fields.cnpj.value}
                       onChangeText={(v) =>
                         setValue('cnpj', handleCnpjChange(v))
@@ -465,17 +485,18 @@ export default function RegisterScreen() {
             )}
 
             {/* Client and Interpreter fields */}
-            {(type === 'client' || type === 'interpreter') && (
+            {(type === UserType.CLIENT || type === UserType.INTERPRETER) && (
               <View className="gap-3">
                 <FormControl isRequired isInvalid={!!fields.name.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.name}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
                     <InputField
                       placeholder="Nome X"
+                      className="font-ifood-regular"
                       value={fields.name.value}
                       onChangeText={(v) => setValue('name', v)}
                       maxLength={100}
@@ -494,13 +515,14 @@ export default function RegisterScreen() {
 
                 <FormControl isRequired isInvalid={!!fields.cpf.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.cpf}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
                     <InputField
                       placeholder="000.000.000-00"
+                      className="font-ifood-regular"
                       value={fields.cpf.value}
                       onChangeText={(v) => setValue('cpf', handleCpfChange(v))}
                       maxLength={14}
@@ -520,7 +542,7 @@ export default function RegisterScreen() {
 
                 <FormControl isRequired isInvalid={!!fields.birthday.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.birthday}
                     </FormControlLabelText>
                   </FormControlLabel>
@@ -528,6 +550,7 @@ export default function RegisterScreen() {
                     <Input pointerEvents="none">
                       <InputField
                         placeholder="DD/MM/AAAA"
+                        className="font-ifood-regular"
                         value={fields.birthday.value}
                         editable={false}
                       />
@@ -554,7 +577,7 @@ export default function RegisterScreen() {
 
                 <FormControl isRequired isInvalid={!!fields.gender.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.gender}
                     </FormControlLabelText>
                   </FormControlLabel>
@@ -578,17 +601,18 @@ export default function RegisterScreen() {
             )}
 
             {/* Interpreter CNPJ */}
-            {type === 'interpreter' && (
+            {type === UserType.INTERPRETER && (
               <View className="gap-3 mt-3">
                 <FormControl isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
-                    <FormControlLabelText>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                       {Strings.register.cnpj} ({Strings.common.optional})
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
                     <InputField
                       placeholder="00.000.000/0001-00"
+                      className="font-ifood-regular"
                       value={fields.cnpj.value}
                       onChangeText={(v) =>
                         setValue('cnpj', handleCnpjChange(v))
@@ -614,13 +638,14 @@ export default function RegisterScreen() {
             <View className="gap-3 mt-4">
               <FormControl isRequired isInvalid={!!fields.phone.error}>
                 <FormControlLabel>
-                  <FormControlLabelText>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
                     {Strings.register.phone}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
                   <InputField
                     placeholder="(00) 00000-0000"
+                    className="font-ifood-regular"
                     value={fields.phone.value}
                     onChangeText={(v) =>
                       setValue('phone', handlePhoneChange(v))
@@ -642,14 +667,16 @@ export default function RegisterScreen() {
 
               <FormControl isRequired isInvalid={!!fields.email.error}>
                 <FormControlLabel>
-                  <FormControlLabelText>
-                    {Strings.register.email}
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.email}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
                   <InputField
                     placeholder="example@gmail.com"
+                    className="font-ifood-regular"
                     value={fields.email.value}
+                    autoCapitalize="none"
                     onChangeText={(v) => setValue('email', v)}
                     keyboardType="email-address"
                     maxLength={250}
@@ -668,13 +695,15 @@ export default function RegisterScreen() {
 
               <FormControl isRequired isInvalid={!!fields.password.error}>
                 <FormControlLabel>
-                  <FormControlLabelText>
-                    {Strings.register.password}
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.password}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
                   <InputField
                     placeholder="********"
+                    className="font-ifood-regular"
+                    autoCapitalize="none"
                     value={fields.password.value}
                     onChangeText={(v) => setValue('password', v)}
                     secureTextEntry
@@ -694,33 +723,30 @@ export default function RegisterScreen() {
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-14 pb-6 gap-3">
+            <View className="mt-14 pb-4 gap-4">
               <Button
                 onPress={handleRegister}
                 size="md"
-                className="font-ifood-bold text-center text-white text-lg data-[active=true]:bg-primary-orange-press-light"
+                className="data-[active=true]:bg-primary-orange-press-light"
               >
                 <ButtonIcon as={PlusIcon} className="text-white" />
-                <Text className="font-ifood-medium text-text-dark">
+                <Text className="font-ifood-regular text-text-dark">
                   {Strings.register.create}
                 </Text>
               </Button>
 
-              <Button
-                action="default"
+              <HapticTab
                 onPress={() => {
                   clearErrors();
                   router.back();
                 }}
-                size="md"
-                variant="linked"
-                className="font-ifood-bold text-center text-blue text-lg"
+                className="flex-row justify-center gap-2 py-2"
               >
-                <ButtonIcon as={XIcon} className="text-primary-orange-light" />
-                <Text className="font-ifood-medium text-primary-orange-light dark:text-primary-orange-dark">
-                  {Strings.register.cancel}
+                <XIcon color={colors.primaryOrange} />
+                <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                  {Strings.common.cancel}
                 </Text>
-              </Button>
+              </HapticTab>
             </View>
           </View>
         </ScrollView>
