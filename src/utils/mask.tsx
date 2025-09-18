@@ -1,11 +1,7 @@
 import { Strings } from '@/src/constants/Strings';
 import { GenderType } from '@/src/types/api';
 
-export const validateEmail = (email: string) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-};
-
+// Formatting and validation functions
 export const handlePhoneChange = (text: string) => {
   const cleaned = text.replace(/\D/g, '').slice(0, 11);
 
@@ -26,10 +22,6 @@ export const handleCnpjChange = (text: string) => {
   return formatted;
 };
 
-export const validateCnpj = (cnpj: string) => {
-  return cnpj.replace(/\D/g, '').length === 14;
-};
-
 export const handleCpfChange = (text: string) => {
   const cleaned = text.replace(/\D/g, '').slice(0, 11); // Máx 11 dígitos
 
@@ -41,12 +33,25 @@ export const handleCpfChange = (text: string) => {
   return formatted;
 };
 
-export const validateCpf = (cpf: string) => {
-  return cpf.replace(/\D/g, '').length === 11;
-};
-
 export const formatDate = (date: Date) => {
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+};
+
+export const validatePhone = (phone: string) => {
+  return phone.replace(/\D/g, '').length === 11;
+};
+
+export const validateEmail = (email: string) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+export const validateCnpj = (cnpj: string) => {
+  return cnpj.replace(/\D/g, '').length === 14;
+};
+
+export const validateCpf = (cpf: string) => {
+  return cpf.replace(/\D/g, '').length === 11;
 };
 
 export const validateBirthday = (birthday: string) => {
