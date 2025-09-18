@@ -52,7 +52,7 @@ export default function ModalMultipleSelection({
   items,
   selectedValues,
   onSelectionChange,
-  placeholderText = Strings.register.select,
+  placeholderText = Strings.common.select,
   hasError = false,
   scrollableHeight = 280,
   maxSelections,

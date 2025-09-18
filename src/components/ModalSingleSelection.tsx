@@ -49,7 +49,7 @@ export default function ModalSingleSelection({
   items,
   selectedValue,
   onSelectionChange,
-  placeholderText = Strings.register.select,
+  placeholderText = Strings.common.select,
   hasError = false,
   scrollableHeight = 280,
 }: ModalSingleSelectionProps) {
