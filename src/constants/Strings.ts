@@ -33,7 +33,7 @@ export const Strings = {
     phone: 'Telefone',
     gender: 'Gênero',
     male: 'Masculino',
-    famale: 'Feminino',
+    female: 'Feminino',
     others: 'Outros',
     email: 'Email',
     password: 'Senha',
