@@ -53,8 +53,10 @@ export default function LoginScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim()) return Strings.common.requiredEmail;
-        if (!validateEmail(value)) return Strings.common.invalidEmail;
+        if (!value.trim())
+          return Strings.auth.email + ' ' + Strings.common.required;
+        if (!validateEmail(value))
+          return Strings.auth.email + ' ' + Strings.common.invalid;
         return null;
       },
     },
@@ -62,7 +64,8 @@ export default function LoginScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim()) return Strings.common.requiredPassword;
+        if (!value.trim())
+          return Strings.auth.password + ' ' + Strings.common.required;
         return null;
       },
     },
