@@ -5,16 +5,18 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useColors } from '../hooks/useColors';
 
 /**
-  Componente Header para telas com título e botão de voltar opcional.
-  @param title Título da página onde se encontra o header
-  @param showBackButton Booleano para mostrar ou esconder o botão de voltar
-  @param handleBack Função a ser chamada ao pressionar o botão de voltar
-
-  @example
-  <Header 
-    title="Página Inicial"
-    showBackButton={true}
-    handleBack={() => router.replace('(tabs)')}
+ * Header component for screens with title and optional back button.
+ *
+ * @param title - Title of the page where the header is located
+ * @param showBackButton - Boolean to show or hide the back button
+ * @param handleBack - Function to be called when pressing the back button
+ *
+ * @example
+ * <Header
+ *   title="Home Page"
+ *   showBackButton={true}
+ *   handleBack={() => router.replace('(tabs)')}
+ * />
  */
 
 interface HeaderProps {
