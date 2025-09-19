@@ -17,7 +17,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { LoginCredentials } from '@/src/types/api';
-import { validateEmail } from '@/src/utils/mask';
+import { validateEmail } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
@@ -34,13 +34,12 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (loginError) {
-      console.warn('Login error detected:', loginError);
       Toast.show({
         type: 'error',
         text1: Strings.auth.loginFailed,
         text2: Strings.auth.invalidCredentials,
         position: 'top',
-        visibilityTime: 3000,
+        visibilityTime: 2500,
         autoHide: true,
         closeIconSize: 1, // To "hide" the close icon
         onHide: () => setLoginError(null),
@@ -48,13 +47,15 @@ export default function LoginScreen() {
     }
   }, [loginError, setLoginError]);
 
-  const { fields, setValue, validateForm } = useFormValidation({
+  const { fields, setValue, validateForm, clearErrors } = useFormValidation({
     email: {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim()) return Strings.common.requiredEmail;
-        if (!validateEmail(value)) return Strings.common.invalidEmail;
+        if (!value.trim())
+          return Strings.common.email + ' ' + Strings.common.required;
+        if (!validateEmail(value))
+          return Strings.common.email + ' ' + Strings.common.invalid;
         return null;
       },
     },
@@ -62,7 +63,8 @@ export default function LoginScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim()) return Strings.common.requiredPassword;
+        if (!value.trim())
+          return Strings.common.password + ' ' + Strings.common.required;
         return null;
       },
     },
@@ -102,18 +104,19 @@ export default function LoginScreen() {
         <View className="py-4 gap-4">
           <FormControl
             size="md"
-            accessibilityLabel={Strings.auth.email}
+            accessibilityLabel={Strings.common.email}
             isRequired={true}
             isInvalid={!!fields.email.error}
           >
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                {Strings.auth.email}
+                {Strings.common.email}
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
               <InputField
                 type="text"
+                className="font-ifood-regular"
                 placeholder="email@example.com"
                 onChangeText={(text) => setValue('email', text)}
                 value={fields.email.value}
@@ -135,19 +138,20 @@ export default function LoginScreen() {
 
           <FormControl
             size="md"
-            accessibilityLabel={Strings.auth.password}
+            accessibilityLabel={Strings.common.password}
             isRequired={true}
             isInvalid={!!fields.password.error}
           >
-            <FormControlLabel className="font-ifood-medium text-text-light dark:text-text-dark">
-              <FormControlLabelText>
-                {Strings.auth.password}
+            <FormControlLabel>
+              <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.common.password}
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
               <InputField
                 type="password"
-                placeholder="senha"
+                className="font-ifood-regular"
+                placeholder="********"
                 onChangeText={(text) => setValue('password', text)}
                 value={fields.password.value}
                 autoCapitalize="none"
@@ -185,7 +189,12 @@ export default function LoginScreen() {
           <Text className="font-ifood-regular text-text-light dark:text-text-dark">
             {Strings.auth.signUpPrefix}{' '}
           </Text>
-          <HapticTab onPress={() => router.push('/register')}>
+          <HapticTab
+            onPress={() => {
+              router.push('/register');
+              clearErrors();
+            }}
+          >
             <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark underline">
               {Strings.auth.signUpAction}
             </Text>
@@ -193,7 +202,10 @@ export default function LoginScreen() {
         </View>
 
         <HapticTab
-          onPress={() => console.warn('Navegar para recuperação de senha')}
+          onPress={() => {
+            console.warn('Navegar para recuperação de senha');
+            clearErrors();
+          }}
         >
           <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark">
             {Strings.auth.forgotPassword}

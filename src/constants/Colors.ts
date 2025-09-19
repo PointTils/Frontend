@@ -15,6 +15,10 @@ export const Colors = {
     onPressBlue: '#5CB3E8',
     onPressOrange: '#FF9F3A',
     mandatory: '#B91C1C',
+    onPressGray: '#e4e4e4ff',
+    fieldGray: '#D3D3D3', // border300 - Gluestack
+    detailsGray: '#737373', // typography600 - Gluestack
+    modalOverlay: 'rgba(0, 0, 0, 0.5)', // Modal backdrop
   },
   dark: {
     text: '#fff',
@@ -24,5 +28,11 @@ export const Colors = {
     primaryBlue: '#5CB3E8',
     disabled: '#9BA1A6',
     mandatory: '#EF4444',
+    onPressBlue: '#43A2DB',
+    onPressOrange: '#F28D22',
+    onPressGray: '#374151',
+    fieldGray: '#374151', // border600 - Gluestack
+    detailsGray: '#9CA3AF', // typography400 - Gluestack
+    modalOverlay: 'rgba(0, 0, 0, 0.6)', // Modal backdrop - slightly darker for dark mode
   },
 } as const;
