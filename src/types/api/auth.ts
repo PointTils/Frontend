@@ -11,7 +11,7 @@ export interface Tokens {
   access_token: string;
   refresh_token: string;
   token_type: string;
-  expiresIn: number;
+  expires_in: number;
   refresh_expires_in: number;
 }
 
