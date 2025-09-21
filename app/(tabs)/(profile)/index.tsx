@@ -9,7 +9,8 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import { UserType, type ProfileResponse } from '@/src/types/api';
+import type { ProfileResponse } from '@/src/types/api';
+import { UserType } from '@/src/types/common';
 import {
   formatDate,
   handleCnpjChange,
@@ -29,8 +30,8 @@ export default function ProfileScreen() {
   // Determine API route based on user type
   let route = '';
   switch (user?.type) {
-    case UserType.CLIENT:
-      route = ApiRoutes.clients.profile(user?.id);
+    case UserType.PERSON:
+      route = ApiRoutes.persons.profile(user?.id);
       break;
     case UserType.INTERPRETER:
       route = ApiRoutes.interpreters.profile(user?.id);
@@ -74,13 +75,8 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-
-  let chipsItems: string[] | undefined = undefined;
-  if (profile.type === UserType.INTERPRETER) {
-    chipsItems = profile.specialties ?? undefined;
-  } else {
-    chipsItems = profile.preferences ?? undefined;
-  }
+  console.log(profile);
+  let chipsItems = profile.specialties ?? undefined;
 
   return (
     <View className="flex-1 justify-center items-center pt-32 px-4">

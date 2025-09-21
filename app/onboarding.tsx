@@ -1,12 +1,12 @@
 import Logo from '@/src/assets/svgs/LightOrangeLogo';
 import OnboardingCompany from '@/src/assets/svgs/OnBoardingCompany';
+import OnboardingPerson from '@/src/assets/svgs/OnboardingPerson';
 import OnboardingTil from '@/src/assets/svgs/OnboardingTil';
-import OnboardingUser from '@/src/assets/svgs/OnboardingUser';
 import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
-import { UserType } from '@/src/types/api';
+import { UserType } from '@/src/types/common';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
@@ -18,7 +18,7 @@ export default function OnboardingScreen() {
   const { user, completeOnboarding } = useAuth();
 
   // Get user type from authenticated user or default to CLIENT
-  const userType = (user?.type as UserType) || UserType.CLIENT;
+  const userType = (user?.type as UserType) || UserType.PERSON;
 
   // Define content based on user type
   const data = Strings.onboarding[userType];
@@ -35,9 +35,9 @@ export default function OnboardingScreen() {
     case UserType.INTERPRETER:
       IllustrationComponent = OnboardingTil;
       break;
-    case UserType.CLIENT:
+    case UserType.PERSON:
     default:
-      IllustrationComponent = OnboardingUser;
+      IllustrationComponent = OnboardingPerson;
       break;
   }
 
