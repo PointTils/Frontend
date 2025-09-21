@@ -32,11 +32,11 @@ import {
   type InterpreterRegisterResponse,
   type EnterpriseRegisterResponse,
   type EnterpriseRegisterData,
-  type ClientRegisterResponse,
-  type ClientRegisterData,
   type InterpreterRegisterData,
-  UserType,
+  type PersonRegisterResponse,
+  type PersonRegisterData,
 } from '@/src/types/api';
+import { Gender, UserType } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
 import {
   formatDate,
@@ -68,14 +68,14 @@ import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const colors = useColors();
-  const [type, setType] = useState(UserType.CLIENT);
+  const [type, setType] = useState(UserType.PERSON);
   const [show, setShow] = useState(false);
   const [date, setDate] = useState(new Date());
 
   const genderChoices: OptionItem[] = [
-    { label: Strings.gender.male, value: 'male' },
-    { label: Strings.gender.female, value: 'female' },
-    { label: Strings.gender.others, value: 'others' },
+    { label: Strings.gender.male, value: Gender.MALE },
+    { label: Strings.gender.female, value: Gender.FEMALE },
+    { label: Strings.gender.others, value: Gender.OTHERS },
   ];
 
   const handleChangeType = (newType: UserType) => {
@@ -122,13 +122,13 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
         if (
-          (ctx?.type === UserType.CLIENT ||
+          (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
           return Strings.register.cpf + ' ' + Strings.common.required;
         if (
-          (ctx?.type === UserType.CLIENT ||
+          (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !validateCpf(value)
         )
@@ -158,13 +158,13 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
         if (
-          (ctx?.type === UserType.CLIENT ||
+          (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
           return Strings.register.birthday + ' ' + Strings.common.required;
         if (
-          (ctx?.type === UserType.CLIENT ||
+          (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !validateBirthday(value)
         )
@@ -176,7 +176,7 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
-        (ctx?.type === UserType.CLIENT || ctx?.type === UserType.INTERPRETER) &&
+        (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
         !value.trim()
           ? Strings.register.gender + ' ' + Strings.common.required
           : null,
@@ -218,7 +218,7 @@ export default function RegisterScreen() {
   // Helper to build payload based on user type
   const buildRegisterPayload = () => {
     switch (type) {
-      case UserType.CLIENT:
+      case UserType.PERSON:
         return {
           name: fields.name.value,
           email: fields.email.value,
@@ -227,22 +227,14 @@ export default function RegisterScreen() {
           gender: fields.gender.value,
           birthday: fields.birthday.value,
           cpf: fields.cpf.value.replace(/\D/g, ''),
-          location: {
-            uf: 'RS',
-            city: 'Porto Alegre',
-          },
-        } as ClientRegisterData;
+        } as PersonRegisterData;
       case UserType.ENTERPRISE:
         return {
+          corporate_reason: fields.reason.value,
           cnpj: fields.cnpj.value.replace(/\D/g, ''),
           email: fields.email.value,
           password: fields.password.value,
           phone: fields.phone.value.replace(/\D/g, ''),
-          location: {
-            uf: 'RS',
-            city: 'Porto Alegre',
-          },
-          corporate_reason: fields.reason.value,
         } as EnterpriseRegisterData;
       case UserType.INTERPRETER:
         return {
@@ -253,11 +245,11 @@ export default function RegisterScreen() {
           gender: fields.gender.value,
           birthday: fields.birthday.value,
           cpf: fields.cpf.value.replace(/\D/g, ''),
-          location: {
-            uf: 'RS',
-            city: 'Porto Alegre',
+          professional_info: {
+            cnpj: fields.cnpj.value
+              ? fields.cnpj.value.replace(/\D/g, '')
+              : null,
           },
-          professional_info: null,
         } as InterpreterRegisterData;
       default:
         return null; // Unknown type
@@ -265,8 +257,8 @@ export default function RegisterScreen() {
   };
 
   // UseApiPost hooks for each type of registration
-  const clientApi = useApiPost<ClientRegisterResponse, ClientRegisterData>(
-    ApiRoutes.clients.register,
+  const personApi = useApiPost<PersonRegisterResponse, PersonRegisterData>(
+    ApiRoutes.persons.register,
   );
   const enterpriseApi = useApiPost<
     EnterpriseRegisterResponse,
@@ -286,8 +278,8 @@ export default function RegisterScreen() {
 
     let api: any;
     switch (type) {
-      case UserType.CLIENT:
-        api = clientApi;
+      case UserType.PERSON:
+        api = personApi;
         break;
       case UserType.ENTERPRISE:
         api = enterpriseApi;
@@ -366,7 +358,7 @@ export default function RegisterScreen() {
               onChange={handleChangeType}
               className="flex-row items-center justify-between"
             >
-              <Radio value={UserType.CLIENT}>
+              <Radio value={UserType.PERSON}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -374,7 +366,7 @@ export default function RegisterScreen() {
                   <Text
                     style={{
                       color:
-                        type === UserType.CLIENT
+                        type === UserType.PERSON
                           ? colors.text
                           : colors.disabled,
                     }}
@@ -484,8 +476,8 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            {/* Client and Interpreter fields */}
-            {(type === UserType.CLIENT || type === UserType.INTERPRETER) && (
+            {/* Person and Interpreter fields */}
+            {(type === UserType.PERSON || type === UserType.INTERPRETER) && (
               <View className="gap-3">
                 <FormControl isRequired isInvalid={!!fields.name.error}>
                   <FormControlLabel>
