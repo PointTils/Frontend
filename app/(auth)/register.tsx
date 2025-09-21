@@ -28,13 +28,13 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import {
-  type InterpreterRegisterResponse,
-  type EnterpriseRegisterResponse,
-  type EnterpriseRegisterData,
-  type InterpreterRegisterData,
-  type PersonRegisterResponse,
-  type PersonRegisterData,
+import type {
+  InterpreterRegisterResponse,
+  EnterpriseRegisterResponse,
+  EnterpriseRegisterData,
+  InterpreterRegisterData,
+  PersonRegisterResponse,
+  PersonRegisterData,
 } from '@/src/types/api';
 import { Gender, UserType } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
