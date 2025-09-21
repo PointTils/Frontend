@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import {
   Radio,
@@ -15,19 +21,21 @@ import {
   FileText,
   Bookmark,
   BriefcaseBusiness,
-  Check,
-  X,
-  ChevronLeft,
   CircleIcon,
   CheckIcon,
+  XIcon,
+  AlertCircleIcon,
+  User,
 } from 'lucide-react-native';
 import {
-  handleCnpjChange,
+  formatDate,
+  formatPhone,
   handlePhoneChange,
-  handleTimeChange,
-  validateTime,
+  validateBirthday,
+  validateEmail,
+  validatePhone,
 } from '@/src/utils/masks';
-import { useRouter } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   Checkbox,
   CheckboxGroup,
@@ -35,6 +43,23 @@ import {
   CheckboxIcon,
   CheckboxLabel,
 } from '@/src/components/ui/checkbox';
+import Header from '@/src/components/Header';
+import HapticTab from '@/src/components/HapticTab';
+import { Button, ButtonIcon } from '@/src/components/ui/button';
+import { Gender, Profile, UserType } from '@/src/types/api';
+import { FormFields, useFormValidation } from '@/src/hooks/useFormValidation';
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from '@/src/components/ui/form-control';
+import { Input, InputField } from '@/src/components/ui/input';
+import ModalSingleSelection from '@/src/components/ModalSingleSelection';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { OptionItem } from '@/src/types/ui';
 
 type Day =
   | 'monday'
@@ -45,33 +70,38 @@ type Day =
   | 'saturday'
   | 'sunday';
 type TimeRange = [string, string];
-type Location = {
-  [uf: string]: {
-    [city: string]: string[];
-  };
-};
+
 export default function EditScreen() {
-  // Estados com dados mockados
-  const [name, setName] = useState('Jefinho');
-  const [birthDate, setBirthDate] = useState('30/09/1996');
-  const [gender, setGender] = useState('');
-  const [phone, setPhone] = useState('(51) 99876-4422');
-  const [email, setEmail] = useState('exemplo@exemplo.com');
-  const [cnpj, setCnpj] = useState('XX.XXX.XXX/0001-XX');
+  const params = useLocalSearchParams();
+  const colors = useColors();
+
+  // Parse the profile data from params if available
+  const profile = params.data
+    ? (JSON.parse(params.data as string) as Profile)
+    : null;
+  console.log('Params recebidos:', profile);
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+
+  const genderChoices: OptionItem[] = [
+    { label: Strings.gender.male, value: Gender.MALE },
+    { label: Strings.gender.female, value: Gender.FEMALE },
+    { label: Strings.gender.others, value: Gender.OTHERS },
+  ];
+
+  const handleDateChange = (_event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+      setValue('birthday', formatDate(selectedDate));
+    }
+  };
+
   const [description, setDescription] = useState(
     'Descreva o seu trabalho, como tipos de serviços prestados e experiências.',
   );
   const [modality, setModality] = useState<string[]>([]);
-  const [location, setLocation] = useState<{
-    uf: string[];
-    city: string[];
-    neighborhood: string[];
-  }>({
-    uf: [],
-    city: [],
-    neighborhood: [],
-  });
-
   const [imageRight, setImageRight] = useState('authorize');
   const [minPrice, setMinPrice] = useState('100');
   const [maxPrice, setMaxPrice] = useState('1000');
@@ -86,469 +116,551 @@ export default function EditScreen() {
     sunday: ['12:30', '19:30'],
   });
 
-  const router = useRouter();
-  const colors = useColors();
+  function handleBack() {
+    clearErrors();
+    router.back();
+  }
 
-  const handleChange = (options: any[]) => {
-    console.log(options);
-  };
-
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-
-  // Mocks para a página
-  const type = 'Intérprete'; // Pode ser 'Intérprete', 'Solicitante' ou 'Empresa'
-  const specialtiesOptions: any[] = [
-    'Type 1',
-    'Type 2',
-    'Type 3',
-    'Type 4',
-    'Type 5',
-  ];
-  const genderOptions = ['Masculino', 'Feminino', 'Outro'];
-
-  const locationsMock: Location = {
-    RS: {
-      'Porto Alegre': ['Floresta', 'Centro', 'Moinhos de Vento'],
-      Canoas: ['Centro', 'Niterói'],
+  const { fields, setValue, validateForm, clearErrors } = useFormValidation<
+    FormFields<{ profile: Profile }>,
+    { profile: Profile }
+  >({
+    name: {
+      value: profile?.name || '',
+      error: '',
+      validate: (value: string, ctx?: { profile: Profile }) =>
+        ctx?.profile.type !== UserType.ENTERPRISE && value.trim().length < 5
+          ? Strings.register.name + ' ' + Strings.common.required
+          : null,
     },
-  };
+    reason: {
+      value: profile?.corporate_reason || '',
+      error: '',
+      validate: (value: string, ctx?: { profile: Profile }) =>
+        ctx?.profile.type === UserType.ENTERPRISE && !value.trim()
+          ? Strings.register.socialReason + ' ' + Strings.common.required
+          : null,
+    },
+    birthday: {
+      value: formatDate(profile?.birthday) || '',
+      error: '',
+      validate: (value: string, ctx?: { profile: Profile }) => {
+        if (
+          (ctx?.profile.type === UserType.CLIENT ||
+            ctx?.profile.type === UserType.INTERPRETER) &&
+          !value.trim()
+        )
+          return Strings.register.birthday + ' ' + Strings.common.required;
+        if (
+          (ctx?.profile.type === UserType.CLIENT ||
+            ctx?.profile.type === UserType.INTERPRETER) &&
+          !validateBirthday(value)
+        )
+          return Strings.register.birthday + ' ' + Strings.common.invalid;
+        return null;
+      },
+    },
+    gender: {
+      value: profile?.gender || '',
+      error: '',
+      validate: (value: string, ctx?: { profile: Profile }) =>
+        (ctx?.profile.type === UserType.CLIENT ||
+          ctx?.profile.type === UserType.INTERPRETER) &&
+        !value.trim()
+          ? Strings.register.gender + ' ' + Strings.common.required
+          : null,
+    },
+    phone: {
+      value: formatPhone(profile?.phone) || '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim())
+          return Strings.register.phone + ' ' + Strings.common.required;
+        if (!validatePhone(value))
+          return Strings.register.phone + ' ' + Strings.common.invalid;
+        return null;
+      },
+    },
+    email: {
+      value: profile?.email || '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim())
+          return Strings.common.email + ' ' + Strings.common.required;
+        if (!validateEmail(value))
+          return Strings.common.email + ' ' + Strings.common.invalid;
+        return null;
+      },
+    },
+  });
 
-  // Teste para verificação dos estados
-  const handleSubmit = () => {
-    console.log('--- Valores do formulário ---');
-    console.log('name:', name);
-    console.log('birthDate:', birthDate);
-    console.log('gender:', gender);
-    console.log('phone:', phone);
-    console.log('email:', email);
-    console.log('cnpj:', cnpj);
-    console.log('description:', description);
-    console.log('modality:', modality);
-    console.log('location:', location);
-    console.log('imageRight:', imageRight);
-    console.log('minPrice:', minPrice);
-    console.log('maxPrice:', maxPrice);
-    console.log('weekHours:', weekHours);
-    console.log('-----------------------------');
-  };
+  function handleUpdate() {
+    if (!profile) return;
+    if (!validateForm({ profile: profile })) return;
+
+    // Todo: implement API call to update profile
+  }
 
   return (
-    <>
-      {/* Header */}
-      <View className="flex-row justify-center py-12 w-full">
-        <TouchableOpacity
-          className="absolute top-12 left-2"
-          onPress={handleBack}
-        >
-          <ChevronLeft color={colors.primaryOrange} />
-        </TouchableOpacity>
-
-        <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-          {Strings.edit.title}
-        </Text>
+    <View className="flex-1 justify-center items-center">
+      <View className="mt-12 pb-2">
+        <Header
+          title={Strings.edit.header}
+          showBackButton={true}
+          handleBack={handleBack}
+        />
       </View>
+      <KeyboardAvoidingView
+        className="flex-1 w-full px-10"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="mt-8">
+            <View className="w-full flex-row self-start items-center gap-2 mb-4">
+              <FileText />
+              <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.edit.basicData}
+              </Text>
+            </View>
 
-      <ScrollView>
-        <View className="flex-col items-center gap-4 w-full">
-          <View className="w-full flex-row self-start items-center px-8 gap-2">
-            <FileText />
-            <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-              {Strings.edit.data}
-            </Text>
-          </View>
-
-          {/* Campos comuns para Intérprete/Solicitante */}
-          {(type === `${Strings.edit.client}` ||
-            type === `${Strings.edit.interpreter}`) && (
-            <>
-              {/* Nome */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.name}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Digite seu nome"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </Input>
-              </View>
-
-              {/* Data Nascimento */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.birthDate}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="dd/mm/yyyy"
-                    value={birthDate}
-                    onChangeText={(text) => console.log(text)}
-                  />
-                </Input>
-              </View>
-
-              {/* Gênero */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  Genero
-                </Text>
-              </View>
-
-              {/* Telefone */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.phone}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="(00) 00000-0000"
-                    value={phone}
-                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                  />
-                </Input>
-              </View>
-
-              {/* Email */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.email}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="exemplo@exemplo.com"
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                </Input>
-              </View>
-            </>
-          )}
-
-          {/* Campos para Empresa */}
-          {type === `${Strings.edit.enterprise}` && (
-            <>
-              {/* Razão Social */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.companyName}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="Digite o nome da empresa"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </Input>
-              </View>
-
-              {/* Telefone */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.phone}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="(00) 00000-0000"
-                    value={phone}
-                    onChangeText={(text) => setPhone(handlePhoneChange(text))}
-                  />
-                </Input>
-              </View>
-
-              {/* E-mail */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.email}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="exemplo@exemplo.com"
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                </Input>
-              </View>
-            </>
-          )}
-
-          {/* Preferências ou Área Profissional */}
-          <View className="flex-row self-start w-full pt-8 px-8 gap-2">
-            {type === `${Strings.edit.client}` ||
-            type === `${Strings.edit.enterprise}` ? (
-              <>
-                <Bookmark />
-                <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.preferences}
-                </Text>
-              </>
-            ) : (
-              <>
-                <BriefcaseBusiness />
-                <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.professionalArea}
-                </Text>
-              </>
-            )}
-          </View>
-
-          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-            Especialidades
-          </Text>
-
-          {/* Intérprete */}
-          {type === `${Strings.edit.interpreter}` && (
-            <>
-              {/* CNPJ */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.cnpj}
-                </Text>
-                <Input size="lg" className="w-80">
-                  <InputField
-                    type="text"
-                    placeholder="XX.XXX.XXX/0001-XX"
-                    value={cnpj}
-                    onChangeText={(text) => setCnpj(handleCnpjChange(text))}
-                  />
-                </Input>
-              </View>
-
-              {/* Descrição */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.description}
-                </Text>
-                <TextInput
-                  className="w-80 border rounded border-primary-0 focus:border-primary-950 p-2"
-                  multiline
-                  numberOfLines={4}
-                  placeholder=""
-                  value={description}
-                  onChangeText={setDescription}
-                />
-              </View>
-
-              {/* Modalidade */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.modality}
-                </Text>
-                <CheckboxGroup
-                  value={modality}
-                  onChange={(keys: string[]) => {
-                    setModality(keys);
-                  }}
-                  className="flex-row justify-around w-80 py-2"
-                >
-                  <Checkbox value="Presencial">
-                    <CheckboxIndicator className="border w-6 h-6">
-                      <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
-                    </CheckboxIndicator>
-                    <CheckboxLabel>{Strings.edit.inPerson}</CheckboxLabel>
-                  </Checkbox>
-                  <Checkbox value="Online">
-                    <CheckboxIndicator className="border w-6 h-6">
-                      <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
-                    </CheckboxIndicator>
-                    <CheckboxLabel>{Strings.edit.online}</CheckboxLabel>
-                  </Checkbox>
-                </CheckboxGroup>
-              </View>
-
-              {/* Localização */}
-              <View>
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.location}
-                </Text>
-
-                <View className="flex-row justify-between mt-2 mb-4">
-                  {/* UF */}
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    UF
-                  </Text>
-
-                  {/* Cidade */}
-                  <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                    Cidades
-                  </Text>
-                </View>
-
-                {/* Bairro */}
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  Bairros
-                </Text>
-              </View>
-
-              {/* Direito de Imagem */}
-              <View className="w-80">
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.imageRight}
-                </Text>
-                <RadioGroup
-                  value={imageRight}
-                  onChange={setImageRight}
-                  className="flex-row items-center justify-around"
-                >
-                  <Radio value="authorize">
-                    <RadioIndicator>
-                      <RadioIcon as={CircleIcon} />
-                    </RadioIndicator>
-                    <RadioLabel>
-                      <Text className="font-ifood-regular">
-                        {Strings.edit.authorize}
-                      </Text>
-                    </RadioLabel>
-                  </Radio>
-                  <Radio value="deny">
-                    <RadioIndicator>
-                      <RadioIcon as={CircleIcon} />
-                    </RadioIndicator>
-                    <RadioLabel>
-                      <Text className="font-ifood-regular">
-                        {Strings.edit.deny}
-                      </Text>
-                    </RadioLabel>
-                  </Radio>
-                </RadioGroup>
-              </View>
-
-              {/* Valores Max/Min */}
-              <View className="w-80">
-                <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.edit.valueRange}
-                </Text>
-                <View className="flex-row justify-between">
-                  <View>
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.min}
-                    </Text>
-                    <Input size="lg" className="w-36">
+            <View className="flex-1 justify-between">
+              {/* Enterprise fields */}
+              {profile?.type === UserType.ENTERPRISE && (
+                <View className="gap-3">
+                  <FormControl isRequired isInvalid={!!fields.reason.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.register.socialReason}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <Input>
                       <InputField
-                        type="text"
-                        placeholder="100"
-                        value={minPrice}
-                        onChangeText={setMinPrice}
+                        placeholder="Empresa X"
+                        className="font-ifood-regular"
+                        value={fields.reason.value}
+                        onChangeText={(v) => setValue('reason', v)}
+                        maxLength={100}
                       />
                     </Input>
-                  </View>
-                  <View>
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.max}
-                    </Text>
-                    <Input size="lg" className="w-36">
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.reason.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
+                </View>
+              )}
+
+              {/* Client and Interpreter fields */}
+              {(profile?.type === UserType.CLIENT ||
+                profile?.type === UserType.INTERPRETER) && (
+                <View className="gap-3">
+                  <FormControl isRequired isInvalid={!!fields.name.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.register.name}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <Input>
                       <InputField
-                        type="text"
-                        placeholder="1000"
-                        value={maxPrice}
-                        onChangeText={setMaxPrice}
+                        placeholder="Nome X"
+                        className="font-ifood-regular"
+                        value={fields.name.value}
+                        onChangeText={(v) => setValue('name', v)}
+                        maxLength={100}
                       />
                     </Input>
-                  </View>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.name.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
+
+                  <FormControl isRequired isInvalid={!!fields.birthday.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.register.birthday}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                      <Input pointerEvents="none">
+                        <InputField
+                          placeholder="DD/MM/AAAA"
+                          className="font-ifood-regular"
+                          value={fields.birthday.value}
+                          editable={false}
+                        />
+                      </Input>
+                    </TouchableOpacity>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.birthday.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={date}
+                        mode="date"
+                        display="default"
+                        onChange={handleDateChange}
+                      />
+                    )}
+                  </FormControl>
+
+                  <FormControl isRequired isInvalid={!!fields.gender.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.register.gender}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <ModalSingleSelection
+                      items={genderChoices}
+                      selectedValue={fields.gender.value}
+                      onSelectionChange={(value) => setValue('gender', value)}
+                      hasError={!!fields.gender.error}
+                    />
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.gender.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
                 </View>
+              )}
+
+              {/* Common fields */}
+              <View className="gap-3 mt-4">
+                <FormControl isRequired isInvalid={!!fields.phone.error}>
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.register.phone}
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Input>
+                    <InputField
+                      placeholder="(00) 00000-0000"
+                      className="font-ifood-regular"
+                      value={fields.phone.value}
+                      onChangeText={(v) =>
+                        setValue('phone', handlePhoneChange(v))
+                      }
+                      keyboardType="phone-pad"
+                      maxLength={15}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.phone.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+
+                <FormControl isRequired isInvalid={!!fields.email.error}>
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.common.email}
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Input>
+                    <InputField
+                      placeholder="example@gmail.com"
+                      className="font-ifood-regular"
+                      value={fields.email.value}
+                      autoCapitalize="none"
+                      onChangeText={(v) => setValue('email', v)}
+                      keyboardType="email-address"
+                      maxLength={250}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.email.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
               </View>
 
-              {/* Horários */}
-              <View className="w-80 mt-4">
-                <Text className="font-ifood-large text-text-light dark:text-text-dark">
-                  {Strings.edit.workingHours}
-                </Text>
-                {(Object.keys(weekHours) as Day[]).map((day) => (
-                  <View key={day} className="mb-4">
+              {/* Preferências ou Área Profissional */}
+              <View className="flex-row self-start pt-8 gap-2">
+                {profile?.type === UserType.INTERPRETER ? (
+                  <>
+                    <BriefcaseBusiness />
+                    <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.professionalArea}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Bookmark />
+                    <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.preferences}
+                    </Text>
+                  </>
+                )}
+              </View>
+
+              <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                Especialidades
+              </Text>
+
+              {/* Intérprete */}
+              {profile?.type === UserType.INTERPRETER && (
+                <>
+                  {/* Descrição */}
+                  <View>
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit[day]}
+                      {Strings.edit.description}
+                    </Text>
+                    <TextInput
+                      className="w-80 border rounded border-primary-0 focus:border-primary-950 p-2"
+                      multiline
+                      numberOfLines={4}
+                      placeholder=""
+                      value={description}
+                      onChangeText={setDescription}
+                    />
+                  </View>
+
+                  {/* Modalidade */}
+                  <View>
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.modality}
+                    </Text>
+                    <CheckboxGroup
+                      value={modality}
+                      onChange={(keys: string[]) => {
+                        setModality(keys);
+                      }}
+                      className="flex-row justify-around w-80 py-2"
+                    >
+                      <Checkbox value="Presencial">
+                        <CheckboxIndicator className="border w-6 h-6">
+                          <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                        </CheckboxIndicator>
+                        <CheckboxLabel>{Strings.edit.inPerson}</CheckboxLabel>
+                      </Checkbox>
+                      <Checkbox value="Online">
+                        <CheckboxIndicator className="border w-6 h-6">
+                          <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                        </CheckboxIndicator>
+                        <CheckboxLabel>{Strings.edit.online}</CheckboxLabel>
+                      </Checkbox>
+                    </CheckboxGroup>
+                  </View>
+
+                  {/* Localização */}
+                  <View>
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.location}
                     </Text>
 
-                    <View className="flex-row w-80 justify-between">
+                    <View className="flex-row justify-between mt-2 mb-4">
+                      {/* UF */}
+                      <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                        UF
+                      </Text>
+
+                      {/* Cidade */}
+                      <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                        Cidades
+                      </Text>
+                    </View>
+
+                    {/* Bairro */}
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      Bairros
+                    </Text>
+                  </View>
+
+                  {/* Direito de Imagem */}
+                  <View className="w-80">
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.imageRight}
+                    </Text>
+                    <RadioGroup
+                      value={imageRight}
+                      onChange={setImageRight}
+                      className="flex-row items-center justify-around"
+                    >
+                      <Radio value="authorize">
+                        <RadioIndicator>
+                          <RadioIcon as={CircleIcon} />
+                        </RadioIndicator>
+                        <RadioLabel>
+                          <Text className="font-ifood-regular">
+                            {Strings.edit.authorize}
+                          </Text>
+                        </RadioLabel>
+                      </Radio>
+                      <Radio value="deny">
+                        <RadioIndicator>
+                          <RadioIcon as={CircleIcon} />
+                        </RadioIndicator>
+                        <RadioLabel>
+                          <Text className="font-ifood-regular">
+                            {Strings.edit.deny}
+                          </Text>
+                        </RadioLabel>
+                      </Radio>
+                    </RadioGroup>
+                  </View>
+
+                  {/* Valores Max/Min */}
+                  <View className="w-80">
+                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.edit.valueRange}
+                    </Text>
+                    <View className="flex-row justify-between">
                       <View>
                         <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.edit.from}
+                          {Strings.edit.min}
                         </Text>
                         <Input size="lg" className="w-36">
                           <InputField
                             type="text"
-                            placeholder="hh:mm"
-                            value={weekHours[day][0]}
-                            onChangeText={(text) =>
-                              setWeekHours((prev) => ({
-                                ...prev,
-                                [day]: [handleTimeChange(text), prev[day][1]],
-                              }))
-                            }
-                            onBlur={() => {
-                              if (!validateTime(weekHours[day][0])) {
-                                // alert('Horário inválido! Use o formato hh:mm');
-                              }
-                            }}
+                            placeholder="100"
+                            value={minPrice}
+                            onChangeText={setMinPrice}
                           />
                         </Input>
                       </View>
-
                       <View>
                         <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.edit.to}
+                          {Strings.edit.max}
                         </Text>
                         <Input size="lg" className="w-36">
                           <InputField
                             type="text"
-                            placeholder="hh:mm"
-                            value={weekHours[day][1]}
-                            onChangeText={(text) =>
-                              setWeekHours((prev) => ({
-                                ...prev,
-                                [day]: [prev[day][0], handleTimeChange(text)],
-                              }))
-                            }
-                            onBlur={() => {
-                              if (!validateTime(weekHours[day][1])) {
-                                // alert('Horário inválido! Use o formato hh:mm');
-                              }
-                            }}
+                            placeholder="1000"
+                            value={maxPrice}
+                            onChangeText={setMaxPrice}
                           />
                         </Input>
                       </View>
                     </View>
                   </View>
-                ))}
-              </View>
-            </>
-          )}
 
-          {/* Botões */}
-          <View className="flex-col gap-4 self-center mb-8">
-            <TouchableOpacity
-              className="w-96 py-2 rounded justify-center gap-2 flex-row text-primary-500 bg-primary-500"
-              onPress={handleSubmit}
-            >
-              <Check color={'white'} />
-              <Text className="font-ifood-medium text-typography-white">
-                {Strings.edit.save}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-96 py-2 rounded flex-row justify-center gap-2 text-primary-500 bg-background-light"
-              onPress={handleBack}
-            >
-              <X color={colors.primaryOrange} />
-              <Text className="font-ifood-medium text-primary-500 ">
-                {Strings.edit.cancel}
-              </Text>
-            </TouchableOpacity>
+                  {/* Horários */}
+                  <View className="w-80 mt-4">
+                    <Text className="font-ifood-large text-text-light dark:text-text-dark">
+                      {Strings.edit.workingHours}
+                    </Text>
+                    {/* {(Object.keys(weekHours) as Day[]).map((day) => (
+                    <View key={day} className="mb-4">
+                      <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.edit[day]}
+                      </Text>
+
+                      <View className="flex-row w-80 justify-between">
+                        <View>
+                          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.edit.from}
+                          </Text>
+                          <Input size="lg" className="w-36">
+                            <InputField
+                              type="text"
+                              placeholder="hh:mm"
+                              value={weekHours[day][0]}
+                              onChangeText={(text) =>
+                                setWeekHours((prev) => ({
+                                  ...prev,
+                                  [day]: [handleTimeChange(text), prev[day][1]],
+                                }))
+                              }
+                              onBlur={() => {
+                                if (!validateTime(weekHours[day][0])) {
+                                  // alert('Horário inválido! Use o formato hh:mm');
+                                }
+                              }}
+                            />
+                          </Input>
+                        </View>
+
+                        <View>
+                          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.edit.to}
+                          </Text>
+                          <Input size="lg" className="w-36">
+                            <InputField
+                              type="text"
+                              placeholder="hh:mm"
+                              value={weekHours[day][1]}
+                              onChangeText={(text) =>
+                                setWeekHours((prev) => ({
+                                  ...prev,
+                                  [day]: [prev[day][0], handleTimeChange(text)],
+                                }))
+                              }
+                              onBlur={() => {
+                                if (!validateTime(weekHours[day][1])) {
+                                  // alert('Horário inválido! Use o formato hh:mm');
+                                }
+                              }}
+                            />
+                          </Input>
+                        </View>
+                      </View>
+                    </View>
+                  ))} */}
+                  </View>
+                </>
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </>
+
+          {/* Bottom buttons */}
+          <View className="mt-8 pb-4 gap-4">
+            <Button
+              size="md"
+              onPress={handleUpdate}
+              className="data-[active=true]:bg-primary-orange-press-light"
+            >
+              <ButtonIcon as={CheckIcon} className="text-white" />
+              <Text className="font-ifood-regular text-text-dark">
+                {Strings.common.save}
+              </Text>
+            </Button>
+
+            <HapticTab
+              onPress={handleBack}
+              className="flex-row justify-center gap-2 py-2"
+            >
+              <XIcon color={colors.primaryOrange} />
+              <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                {Strings.common.cancel}
+              </Text>
+            </HapticTab>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

@@ -1,3 +1,5 @@
+import { UserType } from "./auth";
+
 // Types
 export type Profile = {
   name: string;
@@ -5,7 +7,7 @@ export type Profile = {
   cpf: string | null;
   status: string;
   birthday: string | Date | null;
-  type: string;
+  type: UserType;
   picture: string | null;
   gender: Gender;
   cnpj: string | null;

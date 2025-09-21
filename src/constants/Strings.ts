@@ -124,8 +124,8 @@ export const Strings = {
   },
 
   edit: {
-    title: 'Editar Perfil',
-    data: 'Dados básicos',
+    header: 'Editar Perfil',
+    basicData: 'Dados básicos',
     name: 'Nome',
     companyName: 'Razão Social',
     birthDate: 'Data de nascimento',
@@ -160,7 +160,5 @@ export const Strings = {
     friday: 'Sexta-Feira',
     saturday: 'Sábado',
     sunday: 'Domingo',
-    save: 'Salvar',
-    cancel: 'Cancelar',
   },
 } as const;

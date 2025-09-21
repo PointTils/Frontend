@@ -36,6 +36,7 @@ import {
   type ClientRegisterData,
   type InterpreterRegisterData,
   UserType,
+  Gender,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -69,13 +70,13 @@ import { Toast } from 'toastify-react-native';
 export default function RegisterScreen() {
   const colors = useColors();
   const [type, setType] = useState(UserType.CLIENT);
-  const [show, setShow] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
 
   const genderChoices: OptionItem[] = [
-    { label: Strings.gender.male, value: 'male' },
-    { label: Strings.gender.female, value: 'female' },
-    { label: Strings.gender.others, value: 'others' },
+    { label: Strings.gender.male, value: Gender.MALE },
+    { label: Strings.gender.female, value: Gender.FEMALE },
+    { label: Strings.gender.others, value: Gender.OTHERS },
   ];
 
   const handleChangeType = (newType: UserType) => {
@@ -90,7 +91,7 @@ export default function RegisterScreen() {
   };
 
   const handleDateChange = (_event: any, selectedDate?: Date) => {
-    setShow(false);
+    setShowDatePicker(false);
     if (selectedDate) {
       setDate(selectedDate);
       setValue('birthday', formatDate(selectedDate));
@@ -546,7 +547,7 @@ export default function RegisterScreen() {
                       {Strings.register.birthday}
                     </FormControlLabelText>
                   </FormControlLabel>
-                  <TouchableOpacity onPress={() => setShow(true)}>
+                  <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <Input pointerEvents="none">
                       <InputField
                         placeholder="DD/MM/AAAA"
@@ -565,7 +566,7 @@ export default function RegisterScreen() {
                       {fields.birthday.error}
                     </FormControlErrorText>
                   </FormControlError>
-                  {show && (
+                  {showDatePicker && (
                     <DateTimePicker
                       value={date}
                       mode="date"
