@@ -9,6 +9,7 @@ export const Strings = {
     save: 'Salvar',
     delete: 'Excluir',
     back: 'Voltar',
+    search: 'Pesquisar',
     error: 'Ocorreu um erro. Tente novamente.',
     understood: 'Entendi',
     slogan: 'Interpretando o mundo, aproximando pessoas',
@@ -105,4 +106,11 @@ export const Strings = {
     female: 'Feminino',
     others: 'Outros',
   },
+
+  search:{
+    datesAvaible: 'Datas disponíveis',
+    online:'Online',
+    filter :' Filtro',
+    modality: 'Modalidade'
+  }
 } as const;
