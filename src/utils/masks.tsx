@@ -118,7 +118,8 @@ export const validateTime = (time: string) => {
 };
 
 // Mapping
-export const mapGender = (gender: Gender | string): string => {
+export const mapGender = (gender: Gender | string | undefined): string => {
+  if (!gender) return '-';
   switch (gender) {
     case Gender.MALE:
       return Strings.gender.male;

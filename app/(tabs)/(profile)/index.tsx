@@ -76,7 +76,7 @@ export default function ProfileScreen() {
 
   const profile = data.data;
   console.log(profile);
-  let chipsItems = profile.specialties ?? undefined;
+  const chipsItems = profile.specialties?.map((item) => item.name) ?? undefined;
 
   return (
     <View className="flex-1 justify-center items-center pt-32 px-4">
@@ -146,7 +146,7 @@ export default function ProfileScreen() {
           {/* Interpreter area */}
           {profile.type === UserType.INTERPRETER && (
             <>
-              <Text className="w-full text-xl font-ifood-regular text-center mb-4 text-primary-800">
+              <Text className="w-full text-lg font-ifood-medium text-center mt-6 mb-4 text-primary-800">
                 {Strings.profile.tilArea}
               </Text>
 

@@ -6,9 +6,9 @@
 // Models
 export interface Location {
   id: string | null;
-  uf: string;
   city: string;
   neighborhood: string;
+  uf: string;
 }
 
 export interface Specialty {
@@ -43,6 +43,8 @@ export enum Modalities {
   PRESENTIAL = 'PRESENTIAL',
   ONLINE = 'ONLINE',
 }
+
+// Types
 export type Day =
   | 'monday'
   | 'tuesday'
@@ -53,8 +55,3 @@ export type Day =
   | 'sunday';
 
 export type TimeRange = [string, string];
-
-interface Response {
-  specialties: Specialty[];
-  locations: Location[];
-}

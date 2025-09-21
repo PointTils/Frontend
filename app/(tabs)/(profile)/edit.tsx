@@ -46,7 +46,7 @@ import {
 import Header from '@/src/components/Header';
 import HapticTab from '@/src/components/HapticTab';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
-import { Gender, Profile, UserType } from '@/src/types/api';
+import { Profile } from '@/src/types/api';
 import { FormFields, useFormValidation } from '@/src/hooks/useFormValidation';
 import {
   FormControl,
@@ -60,6 +60,7 @@ import { Input, InputField } from '@/src/components/ui/input';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { OptionItem } from '@/src/types/ui';
+import { Gender, UserType } from '@/src/types/common';
 
 type Day =
   | 'monday'
@@ -146,13 +147,13 @@ export default function EditScreen() {
       error: '',
       validate: (value: string, ctx?: { profile: Profile }) => {
         if (
-          (ctx?.profile.type === UserType.CLIENT ||
+          (ctx?.profile.type === UserType.PERSON ||
             ctx?.profile.type === UserType.INTERPRETER) &&
           !value.trim()
         )
           return Strings.register.birthday + ' ' + Strings.common.required;
         if (
-          (ctx?.profile.type === UserType.CLIENT ||
+          (ctx?.profile.type === UserType.PERSON ||
             ctx?.profile.type === UserType.INTERPRETER) &&
           !validateBirthday(value)
         )
@@ -164,7 +165,7 @@ export default function EditScreen() {
       value: profile?.gender || '',
       error: '',
       validate: (value: string, ctx?: { profile: Profile }) =>
-        (ctx?.profile.type === UserType.CLIENT ||
+        (ctx?.profile.type === UserType.PERSON ||
           ctx?.profile.type === UserType.INTERPRETER) &&
         !value.trim()
           ? Strings.register.gender + ' ' + Strings.common.required
@@ -258,8 +259,8 @@ export default function EditScreen() {
                 </View>
               )}
 
-              {/* Client and Interpreter fields */}
-              {(profile?.type === UserType.CLIENT ||
+              {/* Person and Interpreter fields */}
+              {(profile?.type === UserType.PERSON ||
                 profile?.type === UserType.INTERPRETER) && (
                 <View className="gap-3">
                   <FormControl isRequired isInvalid={!!fields.name.error}>

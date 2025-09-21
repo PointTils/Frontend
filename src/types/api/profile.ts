@@ -1,4 +1,10 @@
-import type { InterpreterProfessionalInfo, UserType, Gender } from '../common';
+import type {
+  InterpreterProfessionalInfo,
+  UserType,
+  Gender,
+  Specialty,
+  Location,
+} from '../common';
 
 // Models
 export type Profile = {
@@ -14,8 +20,8 @@ export type Profile = {
   cnpj: string | null;
   phone: string;
   email: string;
-  specialties: string[] | null;
-  locations: string[] | null;
+  specialties: Specialty[] | null;
+  locations: Location[] | null;
   professional_info: InterpreterProfessionalInfo | null;
 };
 
