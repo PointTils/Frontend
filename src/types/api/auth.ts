@@ -1,4 +1,6 @@
-// API types
+import type { UserType } from '../common';
+
+// Models
 export interface User {
   id: string;
   email: string;
@@ -11,10 +13,11 @@ export interface Tokens {
   access_token: string;
   refresh_token: string;
   token_type: string;
-  expiresIn: number;
+  expires_in: number;
   refresh_expires_in: number;
 }
 
+// API types
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -35,11 +38,4 @@ export interface RefreshResponse {
   data: {
     tokens: Tokens;
   };
-}
-
-// Enums
-export enum UserType {
-  CLIENT = 'CLIENT',
-  ENTERPRISE = 'ENTERPRISE',
-  INTERPRETER = 'INTERPRETER',
 }

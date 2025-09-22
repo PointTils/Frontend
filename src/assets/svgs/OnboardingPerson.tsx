@@ -3,7 +3,7 @@ import type { BaseSvgProps } from '@/src/types/ui';
 import * as React from 'react';
 import { ClipPath, Defs, G, Path, Rect, Svg } from 'react-native-svg';
 
-export default function OnboardingUser({
+export default function OnboardingPerson({
   width = 284,
   height = 145,
   accentColor,
