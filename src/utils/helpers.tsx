@@ -82,14 +82,14 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         email: fields.email.value,
-        phone: fields.phone.value,
+        phone: fields.phone.value.replace(/\D/g, ''),
         picture: '',
       };
     case UserType.ENTERPRISE:
       return {
         cnpj: fields.cnpj.value,
         email: fields.email.value,
-        phone: fields.phone.value,
+        phone: fields.phone.value.replace(/\D/g, ''),
         corporate_reason: fields.reason.value,
         picture: '',
       };
@@ -97,14 +97,14 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
       return {
         name: fields.name.value,
         email: fields.email.value,
-        phone: fields.phone.value,
+        phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         picture: '',
         // locations: /* your logic */,
         // specialties: /* your logic */,
         professional_data: {
-          cnpj: fields.cnpj.value,
+          cnpj: fields.cnpj.value.replace(/\D/g, ''),
           modality: modalityToSend(fields.modality.value),
           description: fields.description.value,
           image_rights:

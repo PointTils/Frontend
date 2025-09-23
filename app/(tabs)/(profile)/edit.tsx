@@ -524,7 +524,7 @@ export default function EditScreen() {
               </View>
 
               {/* Preferências ou Área Profissional */}
-              <View className="flex-row self-start mt-12 gap-2">
+              <View className="flex-row self-start mt-10 gap-2">
                 {profile?.type === UserType.INTERPRETER ? (
                   <>
                     <BriefcaseBusiness />
@@ -742,7 +742,7 @@ export default function EditScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-8 pb-4 gap-4">
+          <View className="mt-14 pb-4 gap-4">
             <Button
               size="md"
               onPress={handleUpdate}
