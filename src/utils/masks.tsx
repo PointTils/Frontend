@@ -1,5 +1,5 @@
 import { Strings } from '@/src/constants/Strings';
-import { Gender } from '@/src/types/common';
+import { Gender, Modality } from '@/src/types/common';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.
@@ -59,6 +59,7 @@ export const handleTimeChange = (text: string) => {
 };
 
 export const formatDate = (date?: string | Date | null) => {
+  // Returns "DD/MM/AAAA"
   if (!date) return '';
   const dt = typeof date === 'string' ? new Date(date) : date;
   if (!(dt instanceof Date) || Number.isNaN(dt.getTime())) return '';
@@ -68,13 +69,27 @@ export const formatDate = (date?: string | Date | null) => {
   return `${day}/${mon}/${year}`;
 };
 
+export const formatDateToISO = (dateString: string): string => {
+  // Expects "DD/MM/AAAA" and returns "AAAA-MM-DD"
+  const [day, month, year] = dateString.split('/');
+  if (!day || !month || !year) return '';
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
 export const formatPhone = (phone?: string | null) => {
+  // Returns "(XX) XXXXX-XXXX"
   if (!phone) return '';
   const cleaned = phone.replace(/\D/g, '').slice(0, 11);
   const formatted = cleaned
     .replace(/^(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
   return formatted;
+};
+
+export const formatValueRange = (min?: number, max?: number) => {
+  // Returns "R$ X - R$ Y"
+  if (min === undefined && max === undefined) return '-';
+  return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
 };
 
 // Validation
@@ -127,6 +142,27 @@ export const mapGender = (gender: Gender | string | undefined): string => {
       return Strings.gender.female;
     case Gender.OTHERS:
       return Strings.gender.others;
+    default:
+      return '-';
+  }
+};
+
+export const mapImageRights = (value: boolean | undefined): string => {
+  if (value === undefined) return '-';
+  return value ? Strings.common.options.authorize : Strings.common.options.deny;
+};
+
+export const mapModality = (
+  modality: Modality | string | undefined,
+): string => {
+  if (!modality) return '-';
+  switch (modality) {
+    case Modality.ONLINE:
+      return Strings.common.options.online;
+    case Modality.PERSONALLY:
+      return Strings.common.options.inPerson;
+    case Modality.ALL:
+      return `${Strings.common.options.online} e ${Strings.common.options.inPerson}`;
     default:
       return '-';
   }

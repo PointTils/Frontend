@@ -1,41 +1,8 @@
-import React, { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { Strings } from '@/src/constants/Strings';
-import { useColors } from '@/src/hooks/useColors';
-import { Text } from '@/src/components/ui/text';
-import {
-  Radio,
-  RadioGroup,
-  RadioIndicator,
-  RadioLabel,
-  RadioIcon,
-} from '@/src/components/ui/radio';
-import {
-  FileText,
-  Bookmark,
-  BriefcaseBusiness,
-  CircleIcon,
-  CheckIcon,
-  XIcon,
-  AlertCircleIcon,
-  User,
-} from 'lucide-react-native';
-import {
-  formatDate,
-  formatPhone,
-  handlePhoneChange,
-  validateBirthday,
-  validateEmail,
-  validatePhone,
-} from '@/src/utils/masks';
-import { router, useLocalSearchParams } from 'expo-router';
+import HapticTab from '@/src/components/HapticTab';
+import Header from '@/src/components/Header';
+import ModalMultipleSelection from '@/src/components/ModalMultipleSelection';
+import ModalSingleSelection from '@/src/components/ModalSingleSelection';
+import { Button, ButtonIcon } from '@/src/components/ui/button';
 import {
   Checkbox,
   CheckboxGroup,
@@ -43,11 +10,6 @@ import {
   CheckboxIcon,
   CheckboxLabel,
 } from '@/src/components/ui/checkbox';
-import Header from '@/src/components/Header';
-import HapticTab from '@/src/components/HapticTab';
-import { Button, ButtonIcon } from '@/src/components/ui/button';
-import { Profile } from '@/src/types/api';
-import { FormFields, useFormValidation } from '@/src/hooks/useFormValidation';
 import {
   FormControl,
   FormControlError,
@@ -57,40 +19,87 @@ import {
   FormControlLabelText,
 } from '@/src/components/ui/form-control';
 import { Input, InputField } from '@/src/components/ui/input';
-import ModalSingleSelection from '@/src/components/ModalSingleSelection';
+import {
+  Radio,
+  RadioGroup,
+  RadioIndicator,
+  RadioLabel,
+  RadioIcon,
+} from '@/src/components/ui/radio';
+import { Text } from '@/src/components/ui/text';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { specialties, genders } from '@/src/constants/ItemsSelection';
+import { Strings } from '@/src/constants/Strings';
+import { useApiPatch } from '@/src/hooks/useApi';
+import { useColors } from '@/src/hooks/useColors';
+import { useFormValidation } from '@/src/hooks/useFormValidation';
+import type { FormFields } from '@/src/hooks/useFormValidation';
+import type {
+  UserRequest,
+  UserResponse,
+  UserResponseData,
+} from '@/src/types/api';
+import { Modality, UserType } from '@/src/types/common';
+import {
+  buildEditPayload,
+  buildInvalidFieldError,
+  buildRequiredFieldError,
+  getModality,
+} from '@/src/utils/helpers';
+import {
+  formatDate,
+  formatPhone,
+  handlePhoneChange,
+  mapImageRights,
+  validateBirthday,
+  validateEmail,
+  validatePhone,
+} from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { OptionItem } from '@/src/types/ui';
-import { Gender, UserType } from '@/src/types/common';
-
-type Day =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday';
-type TimeRange = [string, string];
+import { router, useLocalSearchParams } from 'expo-router';
+import {
+  FileText,
+  Bookmark,
+  BriefcaseBusiness,
+  CircleIcon,
+  CheckIcon,
+  XIcon,
+  AlertCircleIcon,
+} from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 export default function EditScreen() {
   const params = useLocalSearchParams();
   const colors = useColors();
 
   // Parse the profile data from params if available
-  const profile = params.data
-    ? (JSON.parse(params.data as string) as Profile)
+  let profile = params.data
+    ? (JSON.parse(params.data as string) as UserResponseData)
     : null;
   console.log('Params recebidos:', profile);
 
+  // API hooks for different user types
+  const personApi = useApiPatch<UserResponse, UserRequest>(
+    ApiRoutes.person.profile(profile?.id || ''),
+  );
+  const enterpriseApi = useApiPatch<UserResponse, UserRequest>(
+    ApiRoutes.enterprises.profile(profile?.id || ''),
+  );
+  const interpreterApi = useApiPatch<UserResponse, UserRequest>(
+    ApiRoutes.interpreters.profile(profile?.id || ''),
+  );
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
-
-  const genderChoices: OptionItem[] = [
-    { label: Strings.gender.male, value: Gender.MALE },
-    { label: Strings.gender.female, value: Gender.FEMALE },
-    { label: Strings.gender.others, value: Gender.OTHERS },
-  ];
-
   const handleDateChange = (_event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -99,86 +108,70 @@ export default function EditScreen() {
     }
   };
 
-  const [description, setDescription] = useState(
-    'Descreva o seu trabalho, como tipos de serviços prestados e experiências.',
-  );
-  const [modality, setModality] = useState<string[]>([]);
-  const [imageRight, setImageRight] = useState('authorize');
-  const [minPrice, setMinPrice] = useState('100');
-  const [maxPrice, setMaxPrice] = useState('1000');
-
-  const [weekHours, setWeekHours] = useState<Record<Day, TimeRange>>({
-    monday: ['12:30', '19:30'],
-    tuesday: ['12:30', '19:30'],
-    wednesday: ['12:30', '19:30'],
-    thursday: ['12:30', '19:30'],
-    friday: ['12:30', '19:30'],
-    saturday: ['12:30', '19:30'],
-    sunday: ['12:30', '19:30'],
-  });
-
   function handleBack() {
     clearErrors();
     router.back();
   }
 
+  // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
-    FormFields<{ profile: Profile }>,
-    { profile: Profile }
+    FormFields<{ type: string }>,
+    { type: string }
   >({
     name: {
-      value: profile?.name || '',
+      value: profile?.type !== UserType.ENTERPRISE ? profile?.name : '',
       error: '',
-      validate: (value: string, ctx?: { profile: Profile }) =>
-        ctx?.profile.type !== UserType.ENTERPRISE && value.trim().length < 5
-          ? Strings.register.name + ' ' + Strings.common.required
+      validate: (value: string, ctx?: { type: string }) =>
+        ctx?.type !== UserType.ENTERPRISE && value.trim().length < 5
+          ? buildRequiredFieldError('name')
           : null,
     },
     reason: {
-      value: profile?.corporate_reason || '',
+      value:
+        profile?.type === UserType.ENTERPRISE ? profile?.corporate_reason : '',
       error: '',
-      validate: (value: string, ctx?: { profile: Profile }) =>
-        ctx?.profile.type === UserType.ENTERPRISE && !value.trim()
-          ? Strings.register.socialReason + ' ' + Strings.common.required
+      validate: (value: string, ctx?: { type: string }) =>
+        ctx?.type === UserType.ENTERPRISE && !value.trim()
+          ? buildRequiredFieldError('reason')
           : null,
     },
     birthday: {
-      value: formatDate(profile?.birthday) || '',
+      value:
+        profile?.type !== UserType.ENTERPRISE
+          ? formatDate(profile?.birthday)
+          : '',
       error: '',
-      validate: (value: string, ctx?: { profile: Profile }) => {
+      validate: (value: string, ctx?: { type: string }) => {
         if (
-          (ctx?.profile.type === UserType.PERSON ||
-            ctx?.profile.type === UserType.INTERPRETER) &&
+          (ctx?.type === UserType.PERSON ||
+            ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
-          return Strings.register.birthday + ' ' + Strings.common.required;
+          return buildRequiredFieldError('birthday');
         if (
-          (ctx?.profile.type === UserType.PERSON ||
-            ctx?.profile.type === UserType.INTERPRETER) &&
+          (ctx?.type === UserType.PERSON ||
+            ctx?.type === UserType.INTERPRETER) &&
           !validateBirthday(value)
         )
-          return Strings.register.birthday + ' ' + Strings.common.invalid;
+          return buildInvalidFieldError('birthday');
         return null;
       },
     },
     gender: {
-      value: profile?.gender || '',
+      value: profile?.type !== UserType.ENTERPRISE ? profile?.gender : '',
       error: '',
-      validate: (value: string, ctx?: { profile: Profile }) =>
-        (ctx?.profile.type === UserType.PERSON ||
-          ctx?.profile.type === UserType.INTERPRETER) &&
+      validate: (value: string, ctx?: { type: string }) =>
+        (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
         !value.trim()
-          ? Strings.register.gender + ' ' + Strings.common.required
+          ? buildRequiredFieldError('gender')
           : null,
     },
     phone: {
       value: formatPhone(profile?.phone) || '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.register.phone + ' ' + Strings.common.required;
-        if (!validatePhone(value))
-          return Strings.register.phone + ' ' + Strings.common.invalid;
+        if (!value.trim()) return buildRequiredFieldError('phone');
+        if (!validatePhone(value)) return buildInvalidFieldError('phone');
         return null;
       },
     },
@@ -186,20 +179,141 @@ export default function EditScreen() {
       value: profile?.email || '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.common.email + ' ' + Strings.common.required;
-        if (!validateEmail(value))
-          return Strings.common.email + ' ' + Strings.common.invalid;
+        if (!value.trim()) return buildRequiredFieldError('email');
+        if (!validateEmail(value)) return buildInvalidFieldError('email');
         return null;
       },
     },
+    selectedSpecialties: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? (profile?.specialties?.map((item) => item.id!).filter(Boolean) ??
+            [])
+          : [],
+      error: '',
+      validate: (value: string[], ctx?: { type: string }) =>
+        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
+          ? buildRequiredFieldError('specialties')
+          : null,
+    },
+    modality: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? getModality(profile?.professional_data?.modality)
+          : [],
+      error: '',
+      validate: (value: Modality[], ctx?: { type: string }) =>
+        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
+          ? buildRequiredFieldError('modality')
+          : null,
+    },
+    description: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.professional_data?.description
+          : '',
+      error: '',
+      validate: (value: string, ctx?: { type: string }) => {
+        if (ctx?.type === UserType.INTERPRETER && !value.trim())
+          return buildRequiredFieldError('description');
+        return null;
+      },
+    },
+    imageRight: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? mapImageRights(profile?.professional_data?.image_rights)
+          : '',
+      error: '',
+      validate: (_value: string, _ctx?: { type: string }) => null,
+    },
+    minPrice: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? (profile?.professional_data?.min_value?.toString() ?? '')
+          : '',
+      error: '',
+      validate: (_value: string, _ctx?: { type: string }) => null,
+    },
+    maxPrice: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? (profile?.professional_data?.max_value?.toString() ?? '')
+          : '',
+      error: '',
+      validate: (_value: string, _ctx?: { type: string }) => null,
+    },
   });
 
-  function handleUpdate() {
-    if (!profile) return;
-    if (!validateForm({ profile: profile })) return;
+  // Early return if no profile data
+  if (!profile) {
+    console.error('No profile data provided in params');
+    router.back();
+    Toast.show({
+      type: 'error',
+      text1: Strings.edit.toast.errorTitle,
+      text2: Strings.edit.toast.errorDescription,
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: true,
+      closeIconSize: 1, // To "hide" the close icon
+    });
+    return null;
+  }
 
-    // Todo: implement API call to update profile
+  async function handleUpdate() {
+    if (!profile) return;
+    if (!validateForm({ type: profile.type })) return;
+
+    const payload = buildEditPayload(profile.type, fields);
+    if (!payload) return;
+
+    let api;
+    switch (profile.type) {
+      case UserType.PERSON:
+        api = personApi;
+        break;
+      case UserType.ENTERPRISE:
+        api = enterpriseApi;
+        break;
+      case UserType.INTERPRETER:
+        api = interpreterApi;
+        break;
+      default:
+        return;
+    }
+    if (!api) return;
+
+    console.log('Submitting payload:', payload);
+    const result = await api.patch(payload);
+
+    if (!result?.success || !result?.data) {
+      console.error('Update error:', api.error || 'Unknown error');
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.errorApiTitle,
+        text2: Strings.edit.toast.errorApiDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1, // To "hide" the close icon
+      });
+      return;
+    }
+
+    // Successful update logic (e.g., navigate to login)
+    console.log('Update successful:', result.data);
+    router.back();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    Toast.show({
+      type: 'success',
+      text1: Strings.edit.toast.successTitle,
+      text2: Strings.edit.toast.successDescription,
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: true,
+      closeIconSize: 1, // To "hide" the close icon
+    });
   }
 
   return (
@@ -234,7 +348,7 @@ export default function EditScreen() {
                   <FormControl isRequired isInvalid={!!fields.reason.error}>
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.register.socialReason}
+                        {Strings.common.fields.reason}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <Input>
@@ -266,7 +380,7 @@ export default function EditScreen() {
                   <FormControl isRequired isInvalid={!!fields.name.error}>
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.register.name}
+                        {Strings.common.fields.name}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <Input>
@@ -292,7 +406,7 @@ export default function EditScreen() {
                   <FormControl isRequired isInvalid={!!fields.birthday.error}>
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.register.birthday}
+                        {Strings.common.fields.birthday}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)}>
@@ -327,11 +441,11 @@ export default function EditScreen() {
                   <FormControl isRequired isInvalid={!!fields.gender.error}>
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.register.gender}
+                        {Strings.common.fields.gender}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <ModalSingleSelection
-                      items={genderChoices}
+                      items={genders}
                       selectedValue={fields.gender.value}
                       onSelectionChange={(value) => setValue('gender', value)}
                       hasError={!!fields.gender.error}
@@ -354,7 +468,7 @@ export default function EditScreen() {
                 <FormControl isRequired isInvalid={!!fields.phone.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.phone}
+                      {Strings.common.fields.phone}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -383,7 +497,7 @@ export default function EditScreen() {
                 <FormControl isRequired isInvalid={!!fields.email.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.email}
+                      {Strings.common.fields.email}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -410,69 +524,95 @@ export default function EditScreen() {
               </View>
 
               {/* Preferências ou Área Profissional */}
-              <View className="flex-row self-start pt-8 gap-2">
+              <View className="flex-row self-start mt-12 gap-2">
                 {profile?.type === UserType.INTERPRETER ? (
                   <>
                     <BriefcaseBusiness />
                     <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.professionalArea}
+                      {Strings.common.fields.professionalArea}
                     </Text>
                   </>
                 ) : (
                   <>
                     <Bookmark />
                     <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.preferences}
+                      {Strings.common.fields.preferences}
                     </Text>
                   </>
                 )}
               </View>
 
-              <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                Especialidades
-              </Text>
+              <FormControl
+                isRequired
+                isInvalid={!!fields.gender.error}
+                className="mt-4"
+              >
+                <FormControlLabel>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.specialties}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <ModalMultipleSelection
+                  items={specialties}
+                  selectedValues={fields.selectedSpecialties.value}
+                  onSelectionChange={(value) =>
+                    setValue('selectedSpecialties', value)
+                  }
+                  hasError={!!fields.gender.error}
+                />
+                <FormControlError>
+                  <FormControlErrorIcon
+                    as={AlertCircleIcon}
+                    className="text-red-600"
+                  />
+                  <FormControlErrorText>
+                    {fields.gender.error}
+                  </FormControlErrorText>
+                </FormControlError>
+              </FormControl>
 
-              {/* Intérprete */}
               {profile?.type === UserType.INTERPRETER && (
                 <>
-                  {/* Descrição */}
-                  <View>
+                  <View className="my-4">
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.description}
+                      {Strings.common.fields.description}
                     </Text>
                     <TextInput
-                      className="w-80 border rounded border-primary-0 focus:border-primary-950 p-2"
+                      className="w-90 border rounded border-primary-0 focus:border-primary-950 p-2"
                       multiline
-                      numberOfLines={4}
+                      numberOfLines={7}
                       placeholder=""
-                      value={description}
-                      onChangeText={setDescription}
+                      value={fields.description.value}
+                      onChangeText={(text) => setValue('description', text)}
                     />
                   </View>
 
-                  {/* Modalidade */}
                   <View>
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.modality}
+                      {Strings.common.fields.modality}
                     </Text>
                     <CheckboxGroup
-                      value={modality}
+                      value={fields.modality.value}
                       onChange={(keys: string[]) => {
-                        setModality(keys);
+                        setValue('modality', keys as Modality[]);
                       }}
                       className="flex-row justify-around w-80 py-2"
                     >
-                      <Checkbox value="Presencial">
+                      <Checkbox value={Modality.PERSONALLY}>
                         <CheckboxIndicator className="border w-6 h-6">
                           <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
                         </CheckboxIndicator>
-                        <CheckboxLabel>{Strings.edit.inPerson}</CheckboxLabel>
+                        <CheckboxLabel>
+                          {Strings.common.options.inPerson}
+                        </CheckboxLabel>
                       </Checkbox>
-                      <Checkbox value="Online">
+                      <Checkbox value={Modality.ONLINE}>
                         <CheckboxIndicator className="border w-6 h-6">
                           <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
                         </CheckboxIndicator>
-                        <CheckboxLabel>{Strings.edit.online}</CheckboxLabel>
+                        <CheckboxLabel>
+                          {Strings.common.options.online}
+                        </CheckboxLabel>
                       </Checkbox>
                     </CheckboxGroup>
                   </View>
@@ -480,54 +620,72 @@ export default function EditScreen() {
                   {/* Localização */}
                   <View>
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.location}
+                      {Strings.common.fields.location}
                     </Text>
 
                     <View className="flex-row justify-between mt-2 mb-4">
                       {/* UF */}
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        UF
+                        {Strings.common.fields.state}
                       </Text>
 
                       {/* Cidade */}
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        Cidades
+                        {Strings.common.fields.cities}
                       </Text>
                     </View>
 
                     {/* Bairro */}
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      Bairros
+                      {Strings.common.fields.neighborhoods}
                     </Text>
                   </View>
 
                   {/* Direito de Imagem */}
-                  <View className="w-80">
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.imageRight}
+                  <View className="w-80 my-4">
+                    <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
+                      {Strings.common.fields.imageRights}
                     </Text>
                     <RadioGroup
-                      value={imageRight}
-                      onChange={setImageRight}
+                      value={fields.imageRight.value}
+                      onChange={(value) => setValue('imageRight', value)}
                       className="flex-row items-center justify-around"
                     >
-                      <Radio value="authorize">
+                      <Radio value={Strings.common.options.authorize}>
                         <RadioIndicator>
                           <RadioIcon as={CircleIcon} />
                         </RadioIndicator>
                         <RadioLabel>
-                          <Text className="font-ifood-regular">
-                            {Strings.edit.authorize}
+                          <Text
+                            className="font-ifood-regular"
+                            style={{
+                              color:
+                                fields.imageRight.value ===
+                                Strings.common.options.authorize
+                                  ? colors.text
+                                  : colors.disabled,
+                            }}
+                          >
+                            {Strings.common.options.authorize}
                           </Text>
                         </RadioLabel>
                       </Radio>
-                      <Radio value="deny">
+                      <Radio value={Strings.common.options.deny}>
                         <RadioIndicator>
                           <RadioIcon as={CircleIcon} />
                         </RadioIndicator>
                         <RadioLabel>
-                          <Text className="font-ifood-regular">
-                            {Strings.edit.deny}
+                          <Text
+                            className="font-ifood-regular"
+                            style={{
+                              color:
+                                fields.imageRight.value ===
+                                Strings.common.options.deny
+                                  ? colors.text
+                                  : colors.disabled,
+                            }}
+                          >
+                            {Strings.common.options.deny}
                           </Text>
                         </RadioLabel>
                       </Radio>
@@ -537,32 +695,34 @@ export default function EditScreen() {
                   {/* Valores Max/Min */}
                   <View className="w-80">
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.edit.valueRange}
+                      {Strings.common.fields.valueRange}
                     </Text>
                     <View className="flex-row justify-between">
                       <View>
                         <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.edit.min}
+                          {Strings.common.fields.min}
                         </Text>
                         <Input size="lg" className="w-36">
                           <InputField
                             type="text"
                             placeholder="100"
-                            value={minPrice}
-                            onChangeText={setMinPrice}
+                            value={fields.minPrice.value}
+                            onChangeText={(text) => setValue('minPrice', text)}
+                            keyboardType="numeric"
                           />
                         </Input>
                       </View>
                       <View>
                         <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.edit.max}
+                          {Strings.common.fields.max}
                         </Text>
                         <Input size="lg" className="w-36">
                           <InputField
                             type="text"
                             placeholder="1000"
-                            value={maxPrice}
-                            onChangeText={setMaxPrice}
+                            value={fields.maxPrice.value}
+                            onChangeText={(text) => setValue('maxPrice', text)}
+                            keyboardType="numeric"
                           />
                         </Input>
                       </View>
@@ -572,65 +732,9 @@ export default function EditScreen() {
                   {/* Horários */}
                   <View className="w-80 mt-4">
                     <Text className="font-ifood-large text-text-light dark:text-text-dark">
-                      {Strings.edit.workingHours}
+                      {Strings.hours.title}
                     </Text>
-                    {/* {(Object.keys(weekHours) as Day[]).map((day) => (
-                    <View key={day} className="mb-4">
-                      <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.edit[day]}
-                      </Text>
-
-                      <View className="flex-row w-80 justify-between">
-                        <View>
-                          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.edit.from}
-                          </Text>
-                          <Input size="lg" className="w-36">
-                            <InputField
-                              type="text"
-                              placeholder="hh:mm"
-                              value={weekHours[day][0]}
-                              onChangeText={(text) =>
-                                setWeekHours((prev) => ({
-                                  ...prev,
-                                  [day]: [handleTimeChange(text), prev[day][1]],
-                                }))
-                              }
-                              onBlur={() => {
-                                if (!validateTime(weekHours[day][0])) {
-                                  // alert('Horário inválido! Use o formato hh:mm');
-                                }
-                              }}
-                            />
-                          </Input>
-                        </View>
-
-                        <View>
-                          <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.edit.to}
-                          </Text>
-                          <Input size="lg" className="w-36">
-                            <InputField
-                              type="text"
-                              placeholder="hh:mm"
-                              value={weekHours[day][1]}
-                              onChangeText={(text) =>
-                                setWeekHours((prev) => ({
-                                  ...prev,
-                                  [day]: [prev[day][0], handleTimeChange(text)],
-                                }))
-                              }
-                              onBlur={() => {
-                                if (!validateTime(weekHours[day][1])) {
-                                  // alert('Horário inválido! Use o formato hh:mm');
-                                }
-                              }}
-                            />
-                          </Input>
-                        </View>
-                      </View>
-                    </View>
-                  ))} */}
+                    {/** TO DO: Add week hours inputs */}
                   </View>
                 </>
               )}
@@ -646,7 +750,7 @@ export default function EditScreen() {
             >
               <ButtonIcon as={CheckIcon} className="text-white" />
               <Text className="font-ifood-regular text-text-dark">
-                {Strings.common.save}
+                {Strings.common.buttons.save}
               </Text>
             </Button>
 
@@ -656,7 +760,7 @@ export default function EditScreen() {
             >
               <XIcon color={colors.primaryOrange} />
               <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                {Strings.common.cancel}
+                {Strings.common.buttons.cancel}
               </Text>
             </HapticTab>
           </View>

@@ -6,9 +6,9 @@ export default function HomeScreen() {
   return (
     <View
       className="flex-1 items-center justify-center"
-      accessibilityLabel={Strings.home.title}
+      accessibilityLabel={Strings.home.tabBar}
     >
-      <Text className="font-ifood-regular">{Strings.home.title}</Text>
+      <Text className="font-ifood-regular">{Strings.home.tabBar}</Text>
     </View>
   );
 }

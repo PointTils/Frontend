@@ -52,7 +52,7 @@ export default function ModalMultipleSelection({
   items,
   selectedValues,
   onSelectionChange,
-  placeholderText = Strings.common.select,
+  placeholderText = Strings.common.fields.select,
   hasError = false,
   scrollableHeight = 280,
   maxSelections,
@@ -97,7 +97,10 @@ export default function ModalMultipleSelection({
       return selectedItem?.label || '';
     }
 
-    return `${selectedValues.length} selecionados`;
+    return Strings.common.fields.selected.replace(
+      '{count}',
+      `${selectedValues.length}`,
+    );
   };
 
   const getItemBackgroundColor = (itemValue: string) => {
@@ -204,7 +207,7 @@ export default function ModalMultipleSelection({
                 className="text-center font-ifood-medium"
                 style={{ color: colors.disabled }}
               >
-                {Strings.common.cancel}
+                {Strings.common.buttons.cancel}
               </Text>
             </TouchableOpacity>
           </View>

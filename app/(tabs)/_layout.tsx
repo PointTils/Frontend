@@ -1,11 +1,11 @@
 import HapticTab from '@/src/components/HapticTab';
 import { Text } from '@/src/components/ui/text';
+import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { Tabs, useSegments } from 'expo-router';
 import { FileClock, House, User } from 'lucide-react-native';
 import React from 'react';
-import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 
 export default function TabLayout() {
   const colors = useColors();
@@ -29,7 +29,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
-              {Strings.home.title}
+              {Strings.home.tabBar}
             </Text>
           ),
           tabBarIcon: ({ color }) => (
@@ -42,7 +42,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
-              {Strings.history.title}
+              {Strings.history.tabBar}
             </Text>
           ),
           tabBarIcon: ({ color }) => (
@@ -55,7 +55,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
-              {Strings.profile.title}
+              {Strings.profile.tabBar}
             </Text>
           ),
           tabBarIcon: ({ color }) => (
