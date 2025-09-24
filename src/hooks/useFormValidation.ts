@@ -1,26 +1,29 @@
 import { useState, useCallback } from 'react';
 
-type ValidationRule<T> = (value: T) => string | null;
+type ValidationRule<T, C = undefined> = (
+  value: T,
+  context?: C,
+) => string | null;
 
-type FormField<T> = {
+export type FormField<T, C = undefined> = {
   value: T;
   error: string;
-  validate: ValidationRule<T>;
+  validate: ValidationRule<T, C>;
 };
 
-type FormFields = Record<string, FormField<any>>;
+export type FormFields<C = undefined> = Record<string, FormField<any, C>>;
 
 /**
- * Custom hook for form validation with real-time error handling
+ * Custom hook for form validation with optional context
  *
  * @example
  * ```tsx
- * // Basic usage
- * const { fields, setValue, validateForm, clearErrors } = useFormValidation({
+ * // Sem contexto
+ * const { fields, setValue, validateForm } = useFormValidation({
  *   email: {
  *     value: '',
  *     error: '',
- *     validate: (value: string) => {
+ *     validate: (value) => {
  *       if (!value.trim()) return 'Email is required';
  *       if (!validateEmail(value)) return 'Invalid email';
  *       return null;
@@ -28,32 +31,33 @@ type FormFields = Record<string, FormField<any>>;
  *   },
  * });
  *
- * // In your component JSX
- * <InputField
- *   value={fields.email.value}
- *   onChangeText={(text) => setValue('email', text)}
- *   placeholder="email@example.com"
- * />
- * {fields.email.error && (
- *   <Text className="text-red-600">
- *     {fields.email.error}
- *   </Text>
- * )}
+ * // Com contexto
+ * const { fields, setValue, validateForm } = useFormValidation<
+     FormFields<{ type: string }>, // cada campo sabe que pode receber ctx
+     { type: string }              // o tipo do contexto
+   >({
+ *   cnpj: {
+ *     value: '',
+ *     error: '',
+ *     validate: (value, ctx?: { type: string }) => {
+ *       if (ctx?.type !== 'enterprise') return null;
+ *       if (!value.trim()) return 'CNPJ obrigatório';
+ *       if (!validateCnpj(value)) return 'CNPJ inválido';
+ *       return null;
+ *     },
+ *   },
+ * });
  *
- * // Form submission
- * const handleSubmit = () => {
- *   if (validateForm()) {
- *     // All fields are valid, proceed with submission
- *     const formData = {
- *       email: fields.email.value,
- *     };
- *     // Submit form...
- *   }
- * };
+ * // Submissão com contexto
+ * const isValid = validateForm({ type: 'enterprise' });
  * ```
  */
-export function useFormValidation<T extends FormFields>(initialFields: T) {
-  const [fields, setFields] = useState(initialFields);
+
+export function useFormValidation<T extends FormFields<C>, C = undefined>(
+  initialFields: T,
+) {
+  // Removed JSON.parse/stringify to preserve functions like 'validate'
+  const [fields, setFields] = useState<T>(initialFields);
 
   const setValue = useCallback(
     <K extends keyof T>(fieldName: K, value: T[K]['value']) => {
@@ -62,6 +66,7 @@ export function useFormValidation<T extends FormFields>(initialFields: T) {
         [fieldName]: {
           ...prev[fieldName],
           value,
+          // Clears error on value change; remove if not desired
           error: prev[fieldName].error ? '' : prev[fieldName].error,
         },
       }));
@@ -70,9 +75,9 @@ export function useFormValidation<T extends FormFields>(initialFields: T) {
   );
 
   const validateField = useCallback(
-    <K extends keyof T>(fieldName: K): boolean => {
+    <K extends keyof T>(fieldName: K, context?: C): boolean => {
       const field = fields[fieldName];
-      const error = field.validate(field.value);
+      const error = field.validate(field.value, context);
 
       if (error) {
         setFields((prev) => ({
@@ -87,23 +92,26 @@ export function useFormValidation<T extends FormFields>(initialFields: T) {
     [fields],
   );
 
-  const validateForm = useCallback((): boolean => {
-    let isValid = true;
-    const updatedFields = { ...fields } as T;
+  const validateForm = useCallback(
+    (context?: C): boolean => {
+      let isValid = true;
+      const updatedFields = { ...fields } as T;
 
-    (Object.keys(fields) as (keyof T)[]).forEach((fieldName) => {
-      const field = fields[fieldName];
-      const error = field.validate(field.value);
+      (Object.keys(fields) as (keyof T)[]).forEach((fieldName) => {
+        const field = fields[fieldName];
+        const error = field.validate(field.value, context);
 
-      if (error) {
-        updatedFields[fieldName] = { ...field, error } as T[keyof T];
-        isValid = false;
-      }
-    });
+        if (error) {
+          updatedFields[fieldName] = { ...field, error } as T[keyof T];
+          isValid = false;
+        }
+      });
 
-    setFields(updatedFields);
-    return isValid;
-  }, [fields]);
+      setFields(updatedFields);
+      return isValid;
+    },
+    [fields],
+  );
 
   const clearErrors = useCallback(() => {
     setFields((prev) => {
