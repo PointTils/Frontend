@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, Pressable } from 'react-native';
 import { Text } from '@/src/components/ui/text';
 import { CalendarDays, MapPin } from 'lucide-react-native';
+import { useColors } from '@/src/hooks/useColors';
 
 interface CardProps {
   photoUrl: string;
@@ -22,6 +23,8 @@ export function Card({
   location,
   className,
 }: CardProps) {
+  const colors = useColors();
+  
   // Função para renderizar as estrelas
   const renderStars = (rating: number) => {
     const stars = [];
@@ -31,7 +34,7 @@ export function Card({
     // Estrelas preenchidas
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Text key={i} className="text-lg" style={{ color: '#43A2DB' }}>
+        <Text key={i} className="text-lg" style={{ color: colors.primaryBlue }}>
           ★
         </Text>
       );
@@ -40,7 +43,7 @@ export function Card({
     // Meia estrela
     if (hasHalfStar) {
       stars.push(
-        <Text key="half" className="text-lg" style={{ color: '#43A2DB' }}>
+        <Text key="half" className="text-lg" style={{ color: colors.primaryBlue }}>
           ☆
         </Text>
       );
@@ -61,7 +64,7 @@ export function Card({
 
   return (
     <Pressable
-      className={`bg-background-0 border border-border-200 p-6 w-full ${className || ''}`}
+      className={`bg-background-0 p-6 w-full ${className || ''}`}
     >
       {/* Seção Superior - Perfil e Avaliação */}
       <View className="flex-row items-center mb-4">
@@ -76,10 +79,10 @@ export function Card({
 
         {/* Informações do Perfil */}
         <View className="flex-1 items-start">
-          <Text className="text-typography-900 font-medium text-base">
+          <Text className="text-typography-900 font-medium text-sm mb-0.5">
             {fullName}
           </Text>
-          <Text className="text-typography-600 font-regular text-sm">
+          <Text className="text-typography-600 font-regular text-xs">
             {specialty}
           </Text>
           
@@ -88,7 +91,7 @@ export function Card({
             <View className="flex-row mr-2">
               {renderStars(rating)}
             </View>
-            <Text className="text-typography-600 text-sm">
+            <Text className="text-typography-600 text-xs">
               {rating.toFixed(1)}
             </Text>
           </View>
@@ -100,8 +103,8 @@ export function Card({
         {/* Data */}
         <View className="flex-1 mr-4">
           <View className="flex-row items-center mb-1">
-            <CalendarDays size={16} color="#6B7280"/>
-            <Text className="text-typography-600 text-sm font-medium ml-1">
+            <CalendarDays size={12} color="#000000"/>
+            <Text className="text-primary-800 text-xs font-medium ml-1">
               Data
             </Text>
           </View>
@@ -113,8 +116,8 @@ export function Card({
         {/* Localização */}
         <View className="flex-1">
           <View className="flex-row items-center mb-1">
-            <MapPin size={16} color="#6B7280"/>
-            <Text className="text-typography-600 text-sm font-medium ml-1">
+            <MapPin size={12} color="#000000"/>
+            <Text className="text-primary-800 text-xs font-regular ml-1">
               Localização
             </Text>
           </View>

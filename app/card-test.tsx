@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from '@/src/components/ui/view';
 import { Card } from '@/src/components/ui/card';
+import { useColors } from '@/src/hooks/useColors';
 
 /**
  * PÁGINA DE TESTE DO COMPONENTE CARD
@@ -13,6 +14,8 @@ import { Card } from '@/src/components/ui/card';
  * 3. Remova a rota "card-test" do Stack Navigator
  */
 export default function CardTestScreen() {
+  const colors = useColors();
+  
   // Dados do mockup
   const profileData = {
     photoUrl: 'https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg',
@@ -24,7 +27,21 @@ export default function CardTestScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background-0 items-center justify-center p-4">
+    <View className="flex-1 bg-background-50 items-center justify-center p-4">
+      {/* 
+        EXEMPLOS DE COMO USAR AS CORES GLOBAIS:
+        
+        1. Com Tailwind (recomendado para estilos simples):
+           - bg-background-0, bg-background-50, bg-background-100
+           - text-typography-900, text-typography-600
+           - bg-primary-500, bg-secondary-200
+        
+        2. Com hook useColors (para lógica dinâmica):
+           - colors.background, colors.text, colors.primaryOrange
+        
+        3. Com style inline usando as cores:
+           - style={{ backgroundColor: colors.fieldGray }}
+      */}
 
       <Card
         photoUrl={profileData.photoUrl}
