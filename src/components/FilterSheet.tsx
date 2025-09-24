@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Modal, TouchableOpacity } from 'react-native';
-import { Strings } from '../constants/Strings';
-import { Radio, RadioGroup, RadioIndicator, RadioLabel } from './ui/radio';
+import { View, Text, TextInput,  Modal, TouchableOpacity } from 'react-native';
 import { useColors } from '../hooks/useColors';
+import { Button } from './ui/button';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Checkbox } from 'react-native-paper';
+
+import { formatDateTime } from '../utils/mask';
+import MultiSelect from './MultiSelect';
 
 interface FilterSheetProps {
   onApply: (filters: any) => void;
@@ -10,80 +14,129 @@ interface FilterSheetProps {
 }
 
 const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
-  const [modality, setModality] = useState('P');
+  const [checkedOnline, setCheckedOnline] = useState(false);
+  const [checkedPersonally, setCheckedPersonally] = useState(false);
   const [specialty, setSpecialty] = useState('');
-  const [date, setDate] = useState('');
-  const [gender, setGender] = useState('');
-  const [filter1, setFilter1] = useState('');
-  const [filter2, setFilter2] = useState('');
+  const [availableDates, setAvailableDates] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
+  const [gender, setGender] = useState([]);
+  const [city, setCity] =  useState<string[]>([]);
+  const [state, setState] = useState('');
+  const [show, setShow] = useState(false);
+  
 
   const colors = useColors();
 
   const handleApply = () => {
-    onApply({ filter1, filter2 });
-  };
+    const filters = {
+      // modalityOnline,
+      // modalityPersonally,
+      specialty,
+      availableDates,
+      gender,
+      city,
+      state,
+    };
 
+    const cleanedFilters = Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) => value !== undefined && value !== '')
+    );
+
+    onApply(cleanedFilters);
+  };
+  
   return (
     <Modal transparent animationType="slide">
       <TouchableOpacity className="flex-1 bg-black/40" activeOpacity={1} onPress={onClose} />
-      <View className="bg-white p-4 rounded-t-2xl max-h-1/2">
-        <Text className="text-lg font-bold mb-4">{Strings.search.modality}</Text>
-        <RadioGroup
-          value={modality}
-          onChange={(value) => setModality(value)}
-          className="flex-row items-center mb-4"
-        >
-          <Radio value="presencial">
-            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-            <RadioLabel>
-              <Text
-                style={{
-                  color:
-                    modality === 'presencial' ? colors.primaryBlue : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                Presencial
-              </Text>
-            </RadioLabel>
-          </Radio>
-          <Radio value="online">
-            <RadioIndicator className="data-[checked=true]:bg-primary-blue-light data-[checked=true]:border-primary-blue-light" />
-
-            <RadioLabel>
-              <Text
-                style={{
-                  color:
-                    modality === 'online'
-                      ? colors.primaryBlue
-                      : colors.disabled,
-                }}
-                className="font-ifood-regular"
-              >
-                {Strings.search.online}
-              </Text>
-            </RadioLabel>
-          </Radio>
-        </RadioGroup>
-
-        <Text className="mb-1">Filtro 1</Text>
-        <TextInput
-          className="border border-gray-300 rounded p-2 mb-3"
-          placeholder="Digite algo..."
-          value={filter1}
-          onChangeText={setFilter1}
+      <View className="flex-1 p-4 bg-white">
+      <View className="p-4">
+      <Text className="text-lg font-bold mb-2">Modalidade</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Checkbox
+          status={checkedOnline ? 'checked' : 'unchecked'}
+          onPress={() => setCheckedOnline(!checkedOnline)}
         />
-
-        <Text className="mb-1">Filtro 2</Text>
-        <TextInput
-          className="border border-gray-300 rounded p-2 mb-3"
-          placeholder="Digite algo..."
-          value={filter2}
-          onChangeText={setFilter2}
+        <Text>Online</Text>
+        <Checkbox
+          status={checkedPersonally ? 'checked' : 'unchecked'}
+          onPress={() => setCheckedPersonally(!checkedPersonally)}
         />
-
-        <Button title="Aplicar" onPress={handleApply} />
+        <Text>Presencial</Text>
       </View>
+    </View>
+      <Text className="text-lg font-semibold mb-2">Localização</Text>
+      <MultiSelect
+          label="city"
+          options={['Porto Alergre', 'Canoas']}
+          width='w-80'
+          placeholder="Selecione uma ou mais opções"
+          onChange={setCity}
+      />
+      <Text className="text-lg font-semibold mb-2">Especialidade</Text>
+      <MultiSelect
+          label="city"
+          options={['Especialidade 1', 'Especialidade 2']}
+          width='w-80'
+          placeholder="Selecione uma ou mais opções"
+          onChange={setCity}
+      />
+      {/* <Picker selectedValue={city} onValueChange={setCity} className="mb-4 bg-gray-100">
+        <Picker.Item label="Selecione a cidade" value="" />
+        <Picker.Item label="Porto Alegre" value="Porto Alegre" />
+        <Picker.Item label="São Paulo" value="São Paulo" />
+      </Picker> */}
+
+      {/* Especialidade */}
+      <Text className="text-lg font-semibold mb-2">Especialidade</Text>
+      {/* <Picker selectedValue={specialty} onValueChange={setSpecialty} className="mb-4 bg-gray-100">
+        <Picker.Item label="Selecione a especialidade" value="" />
+        <Picker.Item label="Psicologia" value="Psicologia" />
+        <Picker.Item label="Nutrição" value="Nutrição" />
+      </Picker> */}
+
+      {/* Data */}
+      <Text className="text-lg font-semibold mb-2">Data</Text>
+      <>
+        <TouchableOpacity onPress={() => setShow(true)}>
+          <TextInput
+            placeholder="DD/MM/AAAA"
+            className={`border rounded-lg px-4 py-3 mb-4`}
+            value={availableDates}
+            editable={false}
+          />
+        </TouchableOpacity>
+
+        {show && (
+          <DateTimePicker
+            value={date ?? new Date()}
+            mode="datetime"
+            display="default"
+            onChange={(event, selectedDate?: Date | undefined) => {
+              setShow(false); 
+              if (selectedDate) {
+                setDate(selectedDate);
+                setAvailableDates(formatDateTime(selectedDate));
+              }
+            }}
+          />
+        )}
+      </>
+
+      {/* Gênero */}
+      <Text className="text-lg font-semibold mb-2">Gênero</Text>
+      {/* <Picker selectedValue={gender} onValueChange={setGender} className="mb-6 bg-gray-100">
+        <Picker.Item label="Selecione o gênero" value="" />
+        <Picker.Item label="Masculino" value="Masculino" />
+        <Picker.Item label="Feminino" value="Feminino" />
+        <Picker.Item label="Outro" value="Outro" />
+      </Picker> */}
+
+      {/* Botão Buscar */}
+      <TouchableOpacity className="bg-orange-500 py-3 rounded">
+       
+        <Button className="text-white text-center text-lg font-semibold" onPress={handleApply} />
+      </TouchableOpacity>
+    </View>
     </Modal>
   );
 };
