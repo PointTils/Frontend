@@ -30,11 +30,6 @@ function NavigationController({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return; // Don't navigate while loading
 
-    // TEMPORÁRIO: Sempre redirecionar para a página de teste do card
-    // Para voltar ao comportamento normal, descomente o código abaixo e remova esta linha
-    router.replace('/card-test');
-    return;
-
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
@@ -82,7 +77,6 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
-        <Stack.Screen name="card-test" />
       </Stack>
     </NavigationController>
   );
