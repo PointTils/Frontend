@@ -1,5 +1,5 @@
 import { Strings } from '@/src/constants/Strings';
-import { Gender } from '@/src/types/api';
+import { Gender } from '@/src/types/common';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.

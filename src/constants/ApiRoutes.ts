@@ -10,10 +10,10 @@ export const ApiRoutes = {
     logout: '/auth/logout',
     refreshToken: '/auth/refresh',
   },
-  clients: {
-    base: '/deaf-users',
-    register: '/deaf-users/register',
-    profile: (id: string) => `/deaf-users/${id}`,
+  persons: {
+    base: '/person',
+    register: '/person/register',
+    profile: (id: string) => `/person/${id}`,
   },
   enterprises: {
     base: '/enterprise-users',

@@ -1,18 +1,22 @@
-// Types
+import type { InterpreterProfessionalInfo, UserType, Gender } from '../common';
+
+// Models
 export type Profile = {
-  name: string;
-  corporate_reason: string;
+  id: string;
+  name: string | null;
+  corporate_reason: string | null;
   cpf: string | null;
   status: string;
   birthday: string | Date | null;
-  type: string;
+  type: UserType;
   picture: string | null;
   gender: Gender;
   cnpj: string | null;
   phone: string;
   email: string;
   specialties: string[] | null;
-  preferences: string[] | null;
+  locations: string[] | null;
+  professional_info: InterpreterProfessionalInfo | null;
 };
 
 // API types
@@ -20,11 +24,4 @@ export interface ProfileResponse {
   success: boolean;
   message: string;
   data: Profile;
-}
-
-// Enums
-export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-  OTHERS = 'OTHERS',
 }

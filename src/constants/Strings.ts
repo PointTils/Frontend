@@ -108,7 +108,7 @@ export const Strings = {
         'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
       cta: 'Buscar intérprete',
     },
-    CLIENT: {
+    PERSON: {
       logoAlt: 'Logotipo do Point Tils',
       illoAlt: 'Ilustração da tela de cadastro de intérprete',
       title: 'Conecte-se a intérpretes de forma rápida e simples',
