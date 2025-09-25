@@ -75,7 +75,6 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  console.log(profile);
   let chipsItems = profile.specialties ?? undefined;
 
   return (
