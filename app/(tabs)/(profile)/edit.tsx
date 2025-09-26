@@ -2,6 +2,7 @@ import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
 import ModalMultipleSelection from '@/src/components/ModalMultipleSelection';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
+import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
 import {
   Checkbox,
@@ -30,7 +31,7 @@ import { Text } from '@/src/components/ui/text';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { specialties, genders } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
-import { useApiPatch } from '@/src/hooks/useApi';
+import { useApiGet, useApiPatch } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
@@ -39,12 +40,14 @@ import type {
   UserResponse,
   UserResponseData,
 } from '@/src/types/api';
-import { Modality, UserType } from '@/src/types/common';
+import { Modality, StateAndCityResponse, UserType } from '@/src/types/common';
+import { OptionItem } from '@/src/types/ui';
 import {
   buildEditPayload,
   buildInvalidFieldError,
   buildRequiredFieldError,
   getModality,
+  pickImage,
 } from '@/src/utils/helpers';
 import {
   formatDate,
@@ -56,6 +59,7 @@ import {
   validatePhone,
 } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   FileText,
@@ -65,6 +69,7 @@ import {
   CheckIcon,
   XIcon,
   AlertCircleIcon,
+  Pencil,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -97,6 +102,34 @@ export default function EditProfileScreen() {
     ApiRoutes.interpreters.profile(profile?.id || ''),
   );
 
+  // Fetch all states
+  const [selectedState, setselectedState] = useState('');
+  const { data: states } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.base,
+  );
+
+  let stateOptions: OptionItem[] = [];
+  if (states?.success && states?.data) {
+    stateOptions = states.data.map((state) => ({
+      label: state.name,
+      value: state.name,
+    }));
+  }
+
+  // Fetch cities based on selected state
+  const [selectedCities, setSelectedCities] = useState(['']);
+  const { data: cities } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.cities(selectedState),
+  );
+
+  let cityOptions: OptionItem[] = [];
+  if (cities?.success && cities?.data) {
+    cityOptions = cities.data.map((city) => ({
+      label: city.name,
+      value: city.name,
+    }));
+  }
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const handleDateChange = (_event: any, selectedDate?: Date) => {
@@ -106,6 +139,17 @@ export default function EditProfileScreen() {
       setValue('birthday', formatDate(selectedDate));
     }
   };
+
+  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
+    null,
+  );
+  async function handlePickProfileAvatar() {
+    const image = await pickImage();
+    if (image) {
+      console.warn('Picked image:', image);
+      setSelectedImage(image);
+    }
+  }
 
   function handleBack() {
     clearErrors();
@@ -331,6 +375,33 @@ export default function EditProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View className="mt-8">
+            <TouchableOpacity
+              onPress={handlePickProfileAvatar}
+              className="justify-center items-center mb-4"
+            >
+              <View className="relative">
+                <Avatar size="lg" borderRadius="full" className="h-32 w-32">
+                  <AvatarImage
+                    source={{
+                      uri:
+                        selectedImage?.uri ||
+                        profile?.picture ||
+                        'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                    }}
+                  />
+                </Avatar>
+                <View className="absolute bottom-2 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
+                  <Pencil size={20} color={colors.primaryBlue} />
+                </View>
+              </View>
+              <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.edit.basicData}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View className="w-full h-px bg-gray-200 mb-6" />
+
             <View className="w-full flex-row self-start items-center gap-2 mb-4">
               <FileText />
               <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -614,31 +685,85 @@ export default function EditProfileScreen() {
                     </CheckboxGroup>
                   </View>
 
-                  {/* Localização */}
-                  <View>
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.location}
-                    </Text>
-
-                    <View className="flex-row justify-between mt-2 mb-4">
-                      {/* UF */}
+                  {/* Location */}
+                  {fields.modality.value.includes(Modality.PERSONALLY) && (
+                    <View className="mt-4">
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.state}
+                        {Strings.common.fields.location}
                       </Text>
 
-                      {/* Cidade */}
+                      <View className="flex-row justify-between mt-2 mb-4">
+                        {/* State */}
+                        <FormControl
+                          isRequired
+                          isInvalid={!selectedState}
+                          className="w-24"
+                        >
+                          <FormControlLabel>
+                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                              {Strings.common.fields.state}
+                            </FormControlLabelText>
+                          </FormControlLabel>
+                          <ModalSingleSelection
+                            items={stateOptions}
+                            selectedValue={selectedState}
+                            onSelectionChange={(value) => {
+                              setselectedState(value);
+                            }}
+                            placeholderText={Strings.common.fields.state}
+                            hasError={false}
+                          />
+                          <FormControlError>
+                            <FormControlErrorIcon
+                              as={AlertCircleIcon}
+                              className="text-red-600"
+                            />
+                            <FormControlErrorText>
+                              {fields.gender.error}
+                            </FormControlErrorText>
+                          </FormControlError>
+                        </FormControl>
+
+                        {/* Cities */}
+                        <FormControl
+                          isRequired
+                          isInvalid={!selectedState}
+                          className="w-52"
+                        >
+                          <FormControlLabel>
+                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                              {Strings.common.fields.cities}
+                            </FormControlLabelText>
+                          </FormControlLabel>
+                          <ModalMultipleSelection
+                            items={cityOptions}
+                            selectedValues={selectedCities}
+                            onSelectionChange={(value) => {
+                              setSelectedCities(value);
+                            }}
+                            placeholderText={Strings.common.fields.cities}
+                            hasError={false}
+                          />
+                          <FormControlError>
+                            <FormControlErrorIcon
+                              as={AlertCircleIcon}
+                              className="text-red-600"
+                            />
+                            <FormControlErrorText>
+                              {fields.gender.error}
+                            </FormControlErrorText>
+                          </FormControlError>
+                        </FormControl>
+                      </View>
+
+                      {/* Neighborhoods */}
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.cities}
+                        {Strings.common.fields.neighborhoods}
                       </Text>
                     </View>
+                  )}
 
-                    {/* Bairro */}
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.neighborhoods}
-                    </Text>
-                  </View>
-
-                  {/* Direito de Imagem */}
+                  {/* Image Rights */}
                   <View className="w-80 my-4">
                     <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
                       {Strings.common.fields.imageRights}

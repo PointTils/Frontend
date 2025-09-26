@@ -16,6 +16,17 @@ export interface Specialty {
   name: string;
 }
 
+// API types
+export interface StateAndCityResponse {
+  success: boolean;
+  message: string;
+  data: [
+    {
+      name: string;
+    },
+  ];
+}
+
 // Enums
 export enum UserType {
   PERSON = 'PERSON',
