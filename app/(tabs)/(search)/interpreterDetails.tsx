@@ -15,46 +15,119 @@ import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { useRouter } from 'expo-router';
 import { StarRating } from '@/src/components/Rating';
+import { useApiGet } from '@/src/hooks/useApi';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
+import { PaginatedScheduleResponseDTO } from '@/src/types/api/schedule';
+import { InterpreterResponseDTO } from '@/src/types/api/interpreter';
+import { useSearchParams } from 'expo-router/build/hooks';
 
-interface InterpreterProps {
-  description: string | null;
-  image: string;
-  name: string;
-  rating: number;
-  specialty: string[];
-  modality: string[];
-  location: string[];
-  imageRights: string;
-  valueRange: string[];
-  calendar: string[];
-}
 
-export default function Interpreter({
-  description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`',
-  image = 'https://www.w3schools.com/howto/img_avatar.png',
-  name = 'Jefinho Silva',
-  rating = 2.5,
-  specialty = ['Intérprete de Libras'],
-  modality = ['Online e Presencial'],
-  location = ['Porto Alegre', 'Canoas', 'Gravataí'],
-  imageRights = 'Autoriza',
-  valueRange = ['100 - 300'],
-}: InterpreterProps) {
+export const mockInterpreter: InterpreterResponseDTO = {
+  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  email: "jefinho.silva@example.com",
+  type: "professional",
+  status: "active",
+  phone: "+55 51 99999-9999",
+  picture: "https://www.w3schools.com/howto/img_avatar.png",
+  name: "Jefinho Silva",
+  gender: "MALE",
+  birthday: "1990-05-20",
+  cpf: "123.456.789-00",
+  locations: [
+    {
+      id: "1",
+      uf: "RS",
+      city: "Porto Alegre",
+      neighborhood: "Moinhos de Vento",
+    },
+    {
+      id: "2",
+      uf: "RS",
+      city: "Canoas",
+      neighborhood: "Centro",
+    },
+  ],
+  specialties: [
+    {
+      id: "1",
+      name: "Intérprete de Libras",
+    },
+    {
+      id: "2",
+      name: "Tradução Técnica",
+    },
+  ],
+  professional_data: {
+    cnpj: null,
+    rating: 4.5,
+    modality: "Online e Presencial",
+    description: "Intérprete profissional com 10 anos de experiência em Libras e tradução técnica.",
+    min_value: 100,
+    max_value: 300,
+    image_rights: true,
+  },
+};
+
+export const mockSchedules: PaginatedScheduleResponseDTO = {
+  page: 1,
+  size: 30,
+  total: 30,
+  items: Array.from({ length: 30 }, (_, i) => {
+    const today = new Date();
+    today.setDate(today.getDate() + i);
+
+    const day = today.toISOString().split("T")[0];
+
+    return {
+      id: i + 1,
+      interpreterId: 1,
+      day,
+      startTime: "09:00",
+      endTime: "18:00",
+    };
+  }),
+};
+
+
+export default function InterpreterDetails() {
   const [section, setSection] = useState<'Avaliações' | 'Dados'>(
     Strings.search.details,
   );
 
   const colors = useColors();
   const router = useRouter();
+  const params = useSearchParams();
 
+  const now = new Date();
+  const then = new Date(now);
+  then.setDate(now.getDate() + 30);
+  const interpreterString = params.get('interpreter'); 
+
+  // Mock pra teste caso não receba o parâmetro
+  const interpreter: InterpreterResponseDTO = interpreterString
+    ? JSON.parse(interpreterString) as InterpreterResponseDTO
+    : mockInterpreter; 
+
+  // Request dos schedules
+  const { data: schedules, loading, error } = useApiGet<PaginatedScheduleResponseDTO>(
+    '/schedules',
+    {
+      interpreterId: interpreter.id,
+      status: 'available',
+      dateFrom: now.toISOString().split('T')[0],
+      dateTo: then.toISOString().split('T')[0],
+    }
+  );
+
+  // Handler de retorno
   const handleBack = () => {
     if (router.canGoBack?.()) {
       router.back();
     }
   };
 
-  const handleAppoitnmentCreate = () => {
+  // Handler para criar agendamento
+  const handleAppointmentCreate = () => {
     // @TODO: router.push('/(app)/appointment/create');
   };
 
@@ -77,16 +150,16 @@ export default function Interpreter({
       {/* Name and photo section */}
       <ScrollView className="px-8">
         <View className="items-center flex-row w-full justify-center gap-4">
-          <Image className="w-24 h-24 rounded-full" source={{ uri: image }} />
+          <Image className="w-24 h-24 rounded-full" source={{ uri: interpreter.picture }} />
 
           <View className="flex-col gap-1">
             <Text className="font-ifood-bold text-lg text-text-light dark:text-text-dark">
-              {name}
+              {interpreter.name}
             </Text>
             <Text className="font-ifood-normal text-lg text-text-light dark:text-text-dark">
-              {specialty[0]}
+              {interpreter.specialties[0].name}
             </Text>
-            <StarRating rating={rating} size={20} />
+            <StarRating rating={interpreter.professional_data.rating} size={20} />
           </View>
         </View>
 
@@ -145,35 +218,42 @@ export default function Interpreter({
                 {Strings.search.description}
               </Text>
             </View>
-            <Text className="px-7">{description}</Text>
+            <Text className="px-7">{interpreter.professional_data.description}</Text>
             <View className="flex-row items-center gap-2 mt-6">
               <InfoIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
                 {Strings.search.modality}
               </Text>
             </View>
-            <Text className="px-7">{modality.join(', ')}</Text>
+            <Text className="px-7">{interpreter.professional_data.modality}</Text>
             <View className="flex-row items-center gap-2 mt-6">
               <MapPinIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
                 {Strings.search.localization}
               </Text>
             </View>
-            <Text className="px-7">{location.join(', ')}</Text>
+            <Text className="px-7">
+              {interpreter.locations.map(loc => loc.neighborhood).join(", ")}
+            </Text>
+
             <View className="flex-row items-center gap-2 mt-6">
               <CameraIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
                 {Strings.search.imageRights}
               </Text>
             </View>
-            <Text className="px-7">{imageRights}</Text>
+            <Text className="px-7">{interpreter.professional_data.image_rights
+              ? Strings.search.imageRightsAuthorize
+              : Strings.search.imageRightsNotAuthorize
+            }</Text>
             <View className="flex-row items-center gap-2 mt-6">
               <BanknoteIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
                 {Strings.search.valueRange}
               </Text>
             </View>
-            <Text className="px-7">{'R$' + valueRange.join('- ')}</Text>
+            <Text className="px-7">{'R$' + interpreter.professional_data.min_value + '-'
+              + interpreter.professional_data.max_value}</Text>
             <View className="flex-row items-center gap-2 mt-6">
               <CalendarIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
@@ -181,7 +261,12 @@ export default function Interpreter({
               </Text>
             </View>
 
-            <InterpreterCalendar/>
+
+            {
+              // @TODO: loading and error states
+              <InterpreterCalendar schedules={mockSchedules?.items ?? []} />
+            }
+
           </>
         )}
       </ScrollView>
@@ -189,9 +274,9 @@ export default function Interpreter({
       <View className="items-center w-full p-6">
         <TouchableOpacity
           className="w-4/5 bg-primary-orange-light rounded-md py-3 px-6 mb-6"
-          onPress={handleAppoitnmentCreate}
+          onPress={handleAppointmentCreate}
         >
-          <Text className="font-ifood-bold text-white text-lg">
+          <Text className="font-ifood-bold text-white text-lg text-center">
             {Strings.search.createAppointment}
           </Text>
         </TouchableOpacity>

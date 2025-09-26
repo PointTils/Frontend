@@ -31,6 +31,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="(search)"
+        options={{
+          tabBarLabel: ({ color }) => (
+            <Text className="font-ifood-regular text-xs" style={{ color }}>
+              {Strings.home.title}
+            </Text>
+          ),
+          tabBarIcon: ({ color }) => (
+            <House width={24} height={24} stroke={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           tabBarLabel: ({ color }) => (

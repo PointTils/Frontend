@@ -3,111 +3,118 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Colors } from "../constants/Colors";
 
+type Schedule = {
+  id: number;
+  interpreterId: number;
+  day: string;
+  startTime: string;
+  endTime: string;
+};
 
-// TODO: Pegar dados da schedule do backend e popular o calendário
-function generateDays() {
-    const today = new Date();
-    const days = [];
+type InterpreterCalendarProps = {
+  schedules: Schedule[];
+};
 
-    for (let i = 0; i <= 30; i++) {
-        const date = new Date();
-        date.setDate(today.getDate() + i);
+export default function InterpreterCalendar({ schedules }: InterpreterCalendarProps) {
 
-        const dayName = date
-            .toLocaleDateString("pt-BR", { weekday: "short" })
-            .replace(".", "");
-        const day = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-
-        const dateStr = date.toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "short",
-        });
-
-        days.push({
-            day,
-            date: dateStr,
-            times: ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00"],
-        });
+  // Organiza os schedules em dias com intervalos de 30min
+  const daysArray = schedules.reduce((acc, schedule) => {
+    const dateStr = schedule.day; // se vier date no backend, usar schedule.date
+    if (!acc[dateStr]) {
+      acc[dateStr] = { day: schedule.day, date: dateStr, times: [] as string[] };
     }
 
-    return days;
-}
+    let start = new Date(`2025-01-01T${schedule.startTime}:00`);
+    const end = new Date(`2025-01-01T${schedule.endTime}:00`);
 
-type SelectedTime = {
-    date: string;
-    time: string;
-} | null;
+    while (start < end) {
+      const timeStr = start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-export default function InterpreterCalendar() {
-    const days = generateDays();
-    const [startIndex, setStartIndex] = useState(0);
-    const [selectedTime, setSelectedTime] = useState<SelectedTime>(null);
+      if (!acc[dateStr].times.includes(timeStr)) {
+        acc[dateStr].times.push(timeStr);
+      }
 
-    const currentDays = days.slice(startIndex, startIndex + 3);
+      start.setMinutes(start.getMinutes() + 30);
+    }
 
-    return (
-        <View>
-            <View className="flex-row justify-around">
-                <TouchableOpacity
-                    disabled={startIndex === 0}
-                    onPress={() => setStartIndex((prev) => Math.max(prev - 3, 0))}
-                >
-                    <Text className='mt-6'>
-                        <ChevronLeftIcon color={Colors.light.primaryBlue} />
-                    </Text>
-                </TouchableOpacity>
+    return acc;
+  }, {} as Record<string, { day: string; date: string; times: string[] }>);
 
-                <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 20 }}>
-                    {currentDays.map((day) => (
-                        <View key={day.date} className="items-center">
+  const days = Object.values(daysArray);
 
-                            {/* Dia */}
-                            <Text className='font-ifood-medium mb-2'>{day.day}</Text>
-                            <Text className='font-ifood-light mb-6'>{day.date}</Text>
+  // Estados de navegação e seleção
+  const [startIndex, setStartIndex] = useState(0);
+  const [selectedTime, setSelectedTime] = useState<{ date: string; time: string } | null>(null);
 
-                            {/* Horários */}
-                            {day.times.map((time) => {
-                                const isSelected =
-                                    selectedTime?.date === day.date && selectedTime?.time === time;
+  const currentDays = days.slice(startIndex, startIndex + 3);
 
-                                return (
-                                    <TouchableOpacity
-                                        key={time}
-                                        className='px-4 py-3 items-center mb-2 mx-3 rounded'                                        
-                                        style={{
-                                            backgroundColor: isSelected ? `${Colors.light.primaryBlue}` : `${Colors.light.primaryBlue}30`,
-                                        }}
-                                        onPress={() => setSelectedTime({ date: day.date, time })}
-                                    >
-                                        <Text className='font-ifood-medium' style={{ color: isSelected ? `${Colors.light.white}` : `${Colors.light.primaryBlue}` }}>{time}</Text>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-                    ))}
-                </View>
+  return (
+    <View>
+      <View className="flex-row justify-around">
+        {/* Navegação esquerda */}
+        <TouchableOpacity
+          disabled={startIndex === 0}
+          onPress={() => setStartIndex((prev) => Math.max(prev - 3, 0))}
+        >
+          <Text className="mt-6">
+            <ChevronLeftIcon color={Colors.light.primaryBlue} />
+          </Text>
+        </TouchableOpacity>
 
-                <TouchableOpacity
-                    disabled={startIndex + 3 >= days.length}
-                    onPress={() =>
-                        setStartIndex((prev) =>
-                            Math.min(prev + 3, days.length - (days.length % 3 || 3))
-                        )
-                    }
-                >
-                    <Text className='mt-6'>
-                        <ChevronRightIcon color={Colors.light.primaryBlue} />
-                    </Text>
-                </TouchableOpacity>
-            </View>
+        {/* Dias */}
+        <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 20 }}>
+          {currentDays.map((day) => {
+            const dateObj = new Date(day.date);
+            const dayName = dateObj.toLocaleDateString("pt-BR", { weekday: "short" });
+            const formattedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+            const formattedDate = dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
-            {/* Dia selecionado (debugging) */}
-            <Text style={{ marginTop: 20, textAlign: "center" }}>
-                Selecionado:{" "}
-                {selectedTime
-                    ? `${selectedTime.date} - ${selectedTime.time}`
-                    : "nenhum horário"}
-            </Text>
+            return (
+              <View key={day.date} className="items-center">
+                <Text className="font-ifood-medium mb-2">{formattedDayName}</Text>
+                <Text className="font-ifood-light mb-6">{formattedDate}</Text>
+
+                {day.times.map((time) => {
+                  const isSelected = selectedTime?.date === day.date && selectedTime?.time === time;
+
+                  return (
+                    <TouchableOpacity
+                      key={time}
+                      className="px-4 py-3 items-center mb-2 mx-3 rounded"
+                      style={{
+                        backgroundColor: isSelected
+                          ? Colors.light.primaryBlue
+                          : `${Colors.light.primaryBlue}30`,
+                      }}
+                      onPress={() => setSelectedTime({ date: day.date, time })}
+                    >
+                      <Text
+                        className="font-ifood-medium"
+                        style={{ color: isSelected ? Colors.light.white : Colors.light.primaryBlue }}
+                      >
+                        {time}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            );
+          })}
         </View>
-    );
+
+        {/* Navegação direita */}
+        <TouchableOpacity
+          disabled={startIndex + 3 >= days.length && startIndex + 1 >= days.length}
+          onPress={() =>
+            setStartIndex((prev) => Math.min(prev + 3, days.length - 1))
+          }
+
+        >
+          <Text className="mt-6">
+            <ChevronRightIcon color={Colors.light.primaryBlue} />
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }

@@ -134,5 +134,8 @@ export const Strings = {
     imageRights: 'Direito de imagem',
     valueRange: 'Faixa de valores',
     calendar: 'Calendário',
+    noSchedulesFound: 'Nenhum agendamento encontrado.',
+    imageRightsAuthorize: 'Autoriza',
+    imageRightsNotAuthorize: 'Não autoriza',
   },
 } as const;
