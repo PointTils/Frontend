@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
@@ -134,11 +136,52 @@ const modalityToSend = (modality: Modality[]) => {
   return modalityToSend;
 };
 
-export async function clearAsyncStorage() {
+export const clearAsyncStorage = async () => {
   try {
     await AsyncStorage.clear();
     console.warn('AsyncStorage cleared');
   } catch (e) {
     console.error('Failed to clear AsyncStorage', e);
   }
-}
+};
+
+export const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    return result.assets[0];
+  }
+
+  console.warn('User canceled image picker');
+  return null;
+};
+
+export const pickFile = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+      ],
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+
+    if (result.canceled) {
+      console.warn('User canceled document picker');
+      return null;
+    }
+
+    return result.assets[0];
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
