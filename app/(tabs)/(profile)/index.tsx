@@ -9,16 +9,25 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { ProfileResponse } from '@/src/types/api';
+import type { UserResponse } from '@/src/types/api';
+import type { SpecialtyResponse } from '@/src/types/api/specialty';
 import { UserType } from '@/src/types/common';
 import {
   formatDate,
+  formatValueRange,
   handleCnpjChange,
   handlePhoneChange,
   mapGender,
+  mapImageRights,
+  mapModality,
 } from '@/src/utils/masks';
 import { router } from 'expo-router';
-import { Edit, HelpCircle, LogOut } from 'lucide-react-native';
+import {
+  BriefcaseBusiness,
+  Edit,
+  HelpCircle,
+  LogOut,
+} from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, ActivityIndicator } from 'react-native';
 import { Toast } from 'toastify-react-native';
@@ -29,29 +38,36 @@ export default function ProfileScreen() {
 
   // Determine API route based on user type
   let route = '';
+  let specialtyRoute = '';
   switch (user?.type) {
     case UserType.PERSON:
-      route = ApiRoutes.persons.profile(user?.id);
+      route = ApiRoutes.person.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.INTERPRETER:
       route = ApiRoutes.interpreters.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.ENTERPRISE:
       route = ApiRoutes.enterprises.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
   }
 
   // Integration with API to fetch profile data
-  const { data, loading, error } = useApiGet<ProfileResponse>(
-    user?.id && isAuthenticated ? route : '',
-  );
+  const { data, loading, error } = useApiGet<UserResponse>(route);
+  const {
+    data: userSpecialties,
+    loading: specialtiesLoading,
+    error: specialtiesError,
+  } = useApiGet<SpecialtyResponse>(specialtyRoute);
 
   // Early return if not authenticated
   if (!isAuthenticated || !user) {
     return null;
   }
 
-  if (loading) {
+  if (loading || specialtiesLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="large" />
@@ -60,14 +76,21 @@ export default function ProfileScreen() {
   }
 
   // Redirect to home if no profile data or error occurs
-  if (error || !data?.success || !data.data) {
+  if (
+    error ||
+    !data?.success ||
+    !data.data ||
+    specialtiesError ||
+    !userSpecialties?.success ||
+    !userSpecialties?.data
+  ) {
     router.push('/(tabs)');
     Toast.show({
       type: 'error',
-      text1: Strings.profile.toast.errorGetProfileTitle,
-      text2: Strings.profile.toast.errorGetProfileText,
+      text1: Strings.profile.toast.errorTitle,
+      text2: Strings.profile.toast.errorDescription,
       position: 'top',
-      visibilityTime: 2500,
+      visibilityTime: 2000,
       autoHide: true,
       closeIconSize: 1, // To "hide" the close icon
     });
@@ -75,25 +98,35 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  let chipsItems = profile.specialties ?? undefined;
+  const chipsItems =
+    profile.type === UserType.INTERPRETER
+      ? (profile.specialties?.map((item) => item.name) ?? undefined)
+      : userSpecialties.data.userSpecialties.map((item) => item.specialtyName);
 
   return (
-    <View className="flex-1 justify-center items-center pt-32 px-4">
+    <View className="flex-1 justify-center items-center mt-8 px-4">
       <ScrollView
         className="w-full"
         contentContainerClassName="items-center pb-4"
         showsVerticalScrollIndicator={false}
       >
+        {/* For alignment purposes */}
+        <View className="w-full mb-24" />
+
         {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
-              uri: 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+              uri:
+                profile.picture ||
+                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
             }}
           />
         </Avatar>
         <Text className="w-full text-xl font-ifood-regular text-center mb-4 mt-2 text-primary-800">
-          {profile.corporate_reason || profile.name}
+          {profile.type === UserType.ENTERPRISE
+            ? profile.corporate_reason
+            : profile.name}
         </Text>
 
         {/* Divider */}
@@ -102,12 +135,12 @@ export default function ProfileScreen() {
         <View className="w-full mb-8">
           {profile.type === UserType.ENTERPRISE ? (
             <InfoRow
-              label={Strings.profile.cnpj}
+              label={Strings.common.fields.cnpj}
               value={profile.cnpj ? handleCnpjChange(profile.cnpj) : undefined}
             />
           ) : (
             <InfoRow
-              label={Strings.profile.cpf}
+              label={Strings.common.fields.cpf}
               value={profile.cpf ?? undefined}
             />
           )}
@@ -115,28 +148,28 @@ export default function ProfileScreen() {
           {profile.type !== UserType.ENTERPRISE && (
             <>
               <InfoRow
-                label={Strings.profile.birthday}
+                label={Strings.common.fields.birthday}
                 value={formatDate(profile.birthday)}
               />
               <InfoRow
-                label={Strings.profile.gender}
+                label={Strings.common.fields.gender}
                 value={mapGender(profile.gender)}
               />
             </>
           )}
 
           <InfoRow
-            label={Strings.profile.phone}
+            label={Strings.common.fields.phone}
             value={profile.phone ? handlePhoneChange(profile.phone) : undefined}
           />
 
-          <InfoRow label={Strings.profile.email} value={profile.email} />
+          <InfoRow label={Strings.common.fields.email} value={profile.email} />
 
           {/* Chips section */}
-          {profile.type !== UserType.INTERPRETER && chipsItems && (
+          {profile.type !== UserType.INTERPRETER && chipsItems.length > 0 && (
             <>
-              <Text className="w-full pl-2 text-base font-ifood-medium text-left mb-1 text-primary-800">
-                {Strings.profile.preferences}
+              <Text className="w-full pl-2 text-lg font-ifood-medium text-left mb-1 text-primary-800">
+                {Strings.common.fields.preferences}
               </Text>
               <ChipsSection items={chipsItems} />
             </>
@@ -145,35 +178,80 @@ export default function ProfileScreen() {
           {/* Interpreter area */}
           {profile.type === UserType.INTERPRETER && (
             <>
-              <Text className="w-full text-xl font-ifood-regular text-center mb-4 text-primary-800">
-                {Strings.profile.tilArea}
-              </Text>
+              <View className="w-full flex-row self-start items-center justify-center gap-2 mt-8 mb-6">
+                <BriefcaseBusiness />
+                <Text className="text-lg font-ifood-medium text-primary-800">
+                  {Strings.common.fields.professionalArea}
+                </Text>
+              </View>
 
               {/* Show CNPJ if available */}
               <InfoRow
-                label={Strings.profile.cnpj}
+                label={Strings.common.fields.cnpj}
                 value={
-                  profile.cnpj ? handleCnpjChange(profile.cnpj) : undefined
+                  profile.professional_data?.cnpj
+                    ? handleCnpjChange(profile.professional_data.cnpj)
+                    : undefined
                 }
               />
 
-              {/* Show specialties chips if available */}
-              {chipsItems && (
+              {chipsItems.length > 0 && (
                 <>
                   <Text className="w-full pl-2 text-base font-ifood-medium text-left mb-1 text-primary-800">
-                    {Strings.profile.specialties}
+                    {Strings.common.fields.specialties}
                   </Text>
                   <ChipsSection items={chipsItems} />
                 </>
               )}
+
+              <InfoRow
+                label={Strings.common.fields.modality}
+                value={mapModality(profile.professional_data?.modality)}
+              />
+
+              <InfoRow
+                label={Strings.common.fields.description}
+                value={
+                  profile.professional_data?.description
+                    ? profile.professional_data.description
+                    : undefined
+                }
+              />
+
+              <InfoRow
+                label={Strings.common.fields.imageRights}
+                value={mapImageRights(profile.professional_data?.image_rights)}
+              />
+
+              <InfoRow
+                label={Strings.common.fields.valueRange}
+                value={formatValueRange(
+                  profile.professional_data?.min_value,
+                  profile.professional_data?.max_value,
+                )}
+              />
+
+              {/* TO DO: Show schedule */}
             </>
           )}
         </View>
+
+        {profile.type === UserType.ENTERPRISE && (
+          <View className="w-full h-16" />
+        )}
 
         {/* Buttons */}
         <View className="w-full">
           <Button
             size="md"
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/(profile)/edit',
+                params: {
+                  data: JSON.stringify(profile),
+                },
+              })
+            }
             variant={'linked'}
             className="w-[330px] bg-transparent data-[active=true]:bg-primary-gray-press-light items-center justify-start p-2"
           >

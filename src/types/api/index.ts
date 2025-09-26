@@ -4,5 +4,4 @@
  */
 
 export * from './auth';
-export * from './profile';
-export * from './register';
+export * from './user';

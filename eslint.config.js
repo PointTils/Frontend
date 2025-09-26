@@ -6,11 +6,29 @@ const reactNativePlugin = require('eslint-plugin-react-native');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'src/components/ui/**'],
+    ignores: [
+      'dist/*',
+      'src/components/ui/**',
+      '*.config.js',
+      'babel.config.js',
+      'metro.config.js',
+      'tailwind.config.js',
+      'depcheck.config.js',
+      'eslint.config.js',
+    ],
   },
   {
     plugins: {
       'react-native': reactNativePlugin,
+      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
+    },
+    languageOptions: {
+      parser: require('@typescript-eslint/parser'),
+      parserOptions: {
+        project: ['./tsconfig.json'],
+        tsconfigRootDir: __dirname,
+        sourceType: 'module',
+      },
     },
     rules: {
       // General best practices

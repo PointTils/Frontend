@@ -54,7 +54,7 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
  * Usage example:
  *
  *   const { data, loading, error, post } = useApiPost<User, NewUser>('/users');
- *   await post({ name: 'John' });
+ *   const result =await post({ name: 'John' });
  */
 export const useApiPost = <T, U>(endpoint: string, body?: U) => {
   const [state, setState] = useState<ApiState<T>>({
@@ -62,11 +62,6 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
     loading: false,
     error: null,
   });
-
-  if (!endpoint) {
-    setState({ data: null, loading: false, error: null });
-    return;
-  }
 
   const post = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));
@@ -89,25 +84,23 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
 /**
  * Usage example:
  *
- *   const { data, loading, error, put } = useApiPut<User, UpdateUser>('/users/1');
- *   await put({ name: 'Jane' });
+ *   const { data, loading, error, patch } = useApiPatch<User, PartialUser>('/users/1');
+ *   const result = await patch({ name: 'Jane' });
  */
-export const useApiPut = <T, U>(endpoint: string, body?: U) => {
+export const useApiPatch = <T, U>(endpoint: string, body?: U) => {
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: false,
     error: null,
   });
 
-  if (!endpoint) {
-    setState({ data: null, loading: false, error: null });
-    return;
-  }
-
-  const put = async (payload?: U) => {
+  const patch = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
-      const res: AxiosResponse<T> = await api.put<T>(endpoint, payload ?? body);
+      const res: AxiosResponse<T> = await api.patch<T>(
+        endpoint,
+        payload ?? body,
+      );
       setState({ data: res.data, loading: false, error: null });
       return res.data;
     } catch (err: any) {
@@ -116,5 +109,5 @@ export const useApiPut = <T, U>(endpoint: string, body?: U) => {
     }
   };
 
-  return { ...state, put };
+  return { ...state, patch };
 };

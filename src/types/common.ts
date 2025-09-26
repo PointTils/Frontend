@@ -6,24 +6,14 @@
 // Models
 export interface Location {
   id: string | null;
-  uf: string;
   city: string;
   neighborhood: string;
+  state: string;
 }
 
 export interface Specialty {
   id: string | null;
   name: string;
-}
-
-export interface InterpreterProfessionalInfo {
-  cnpj: string | null;
-  rating: number;
-  modality: Modalities;
-  description: string;
-  min_value: number;
-  max_value: number;
-  image_rights: boolean;
 }
 
 // Enums
@@ -39,7 +29,22 @@ export enum Gender {
   OTHERS = 'OTHERS',
 }
 
-export enum Modalities {
-  PRESENTIAL = 'PRESENTIAL',
+export enum Modality {
+  PERSONALLY = 'PERSONALLY',
   ONLINE = 'ONLINE',
+  ALL = 'ALL',
 }
+
+// Types
+export type ImageRightsOptions = 'AUTHORIZE' | 'DENY';
+
+export type Day =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday';
+
+export type TimeRange = [string, string];

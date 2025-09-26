@@ -349,7 +349,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               onPress={handleCloseLogoutAlertDialog}
               size="sm"
             >
-              <ButtonText>{Strings.common.understood}</ButtonText>
+              <ButtonText>{Strings.common.buttons.understood}</ButtonText>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

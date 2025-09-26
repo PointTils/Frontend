@@ -6,9 +6,9 @@ export default function HistoryScreen() {
   return (
     <View
       className="flex-1 items-center justify-center"
-      accessibilityLabel={Strings.history.title}
+      accessibilityLabel={Strings.history.tabBar}
     >
-      <Text className="font-ifood-regular">{Strings.history.title}</Text>
+      <Text className="font-ifood-regular">{Strings.history.tabBar}</Text>
     </View>
   );
 }

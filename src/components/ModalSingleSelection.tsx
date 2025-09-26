@@ -49,7 +49,7 @@ export default function ModalSingleSelection({
   items,
   selectedValue,
   onSelectionChange,
-  placeholderText = Strings.common.select,
+  placeholderText = Strings.common.fields.select,
   hasError = false,
   scrollableHeight = 280,
 }: ModalSingleSelectionProps) {
@@ -164,7 +164,7 @@ export default function ModalSingleSelection({
                 className="text-center font-ifood-medium"
                 style={{ color: colors.disabled }}
               >
-                {Strings.common.cancel}
+                {Strings.common.buttons.cancel}
               </Text>
             </TouchableOpacity>
           </View>
