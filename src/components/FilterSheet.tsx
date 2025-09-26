@@ -170,7 +170,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              Modalidade
+              {Strings.search.modality}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="flex-row items-center justify-center gap-8">
@@ -180,7 +180,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
                 status={checkedOnline ? 'checked' : 'unchecked'}
                 onPress={() => setCheckedOnline(!checkedOnline)}
               />
-              <Text className="font-ifood-regular text-text-light">Online</Text>
+              <Text className="font-ifood-regular text-text-light">
+                {Strings.search.online}
+              </Text>
             </View>
             <View className="flex-row items-center">
               <Checkbox
@@ -189,7 +191,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
                 onPress={() => setCheckedPersonally(!checkedPersonally)}
               />
               <Text className="font-ifood-regular text-text-light">
-                Presencial
+                {Strings.search.personally}
               </Text>
             </View>
           </View>
@@ -200,7 +202,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
           <FormControl className="mb-4">
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                Localização
+                {Strings.search.localization}
               </FormControlLabelText>
             </FormControlLabel>
             <View className="flex-row justify-start space-x-2 w-full gap-3">
@@ -233,7 +235,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              Especialidade
+              {Strings.search.specialitie}
             </FormControlLabelText>
           </FormControlLabel>
           <ModalMultipleSelection
@@ -247,7 +249,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              Data
+              {Strings.search.date}
             </FormControlLabelText>
           </FormControlLabel>
           <>
@@ -283,7 +285,7 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              Gênero
+              {Strings.search.gender}
             </FormControlLabelText>
           </FormControlLabel>
           <ModalMultipleSelection
@@ -300,7 +302,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
             size="md"
             className="data-[active=true]:bg-primary-orange-press-light"
           >
-            <Text className="font-ifood-regular text-text-dark">Buscar</Text>
+            <Text className="font-ifood-regular text-text-dark">
+              {Strings.search.search}
+            </Text>
           </Button>
         </View>
       </View>

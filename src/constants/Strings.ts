@@ -129,6 +129,12 @@ export const Strings = {
     online:'Online',
     filter :' Filtro',
     modality: 'Modalidade',
+    personally: 'Presencial',
+    localization: 'Localização',
+    specialitie: 'Especialidade',
+    gender: 'Genêro',
+    date: 'Data',
+    search: 'Buscar',
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',
