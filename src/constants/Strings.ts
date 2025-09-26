@@ -128,6 +128,10 @@ export const Strings = {
     datesAvaible: 'Datas disponíveis',
     online:'Online',
     filter :' Filtro',
-    modality: 'Modalidade'
+    modality: 'Modalidade',
+    toast: {
+      errorGetTitle: 'Erro ao obter dados.',
+      errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
   }
 } as const;
