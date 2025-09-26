@@ -77,7 +77,7 @@ import {
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
-export default function EditScreen() {
+export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const colors = useColors();
 
@@ -85,7 +85,6 @@ export default function EditScreen() {
   let profile = params.data
     ? (JSON.parse(params.data as string) as UserResponseData)
     : null;
-  console.log('Params recebidos:', profile);
 
   // API hooks for different user types
   const personApi = useApiPatch<UserResponse, UserRequest>(
@@ -284,7 +283,6 @@ export default function EditScreen() {
     }
     if (!api) return;
 
-    console.log('Submitting payload:', payload);
     const result = await api.patch(payload);
 
     if (!result?.success || !result?.data) {
@@ -302,7 +300,6 @@ export default function EditScreen() {
     }
 
     // Successful update logic (e.g., navigate to login)
-    console.log('Update successful:', result.data);
     router.back();
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({

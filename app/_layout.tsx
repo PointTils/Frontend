@@ -4,7 +4,8 @@ import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { clearAsyncStorage } from '@/src/utils/helpers';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,15 +14,6 @@ import { useCallback, useState, useEffect } from 'react';
 import ToastManager from 'toastify-react-native';
 
 import 'react-native-reanimated';
-
-async function clearAsyncStorage() {
-  try {
-    await AsyncStorage.clear();
-    console.warn('AsyncStorage cleared');
-  } catch (e) {
-    console.error('Failed to clear AsyncStorage', e);
-  }
-}
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
@@ -115,7 +107,9 @@ function AppContent() {
     async function prepare() {
       try {
         // Pre-load fonts, make any API calls you need to do here
-        //clearAsyncStorage();
+
+        // Force a clean start by clearing AsyncStorage (development only) - uncomment if needed
+        //await clearAsyncStorage();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);

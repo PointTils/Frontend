@@ -10,6 +10,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { UserResponse } from '@/src/types/api';
+import type { SpecialtyResponse } from '@/src/types/api/specialty';
 import { UserType } from '@/src/types/common';
 import {
   formatDate,
@@ -37,27 +38,36 @@ export default function ProfileScreen() {
 
   // Determine API route based on user type
   let route = '';
+  let specialtyRoute = '';
   switch (user?.type) {
     case UserType.PERSON:
       route = ApiRoutes.person.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.INTERPRETER:
       route = ApiRoutes.interpreters.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.ENTERPRISE:
       route = ApiRoutes.enterprises.profile(user?.id);
+      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
   }
 
   // Integration with API to fetch profile data
   const { data, loading, error } = useApiGet<UserResponse>(route);
+  const {
+    data: userSpecialties,
+    loading: specialtiesLoading,
+    error: specialtiesError,
+  } = useApiGet<SpecialtyResponse>(specialtyRoute);
 
   // Early return if not authenticated
   if (!isAuthenticated || !user) {
     return null;
   }
 
-  if (loading) {
+  if (loading || specialtiesLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="large" />
@@ -66,14 +76,21 @@ export default function ProfileScreen() {
   }
 
   // Redirect to home if no profile data or error occurs
-  if (error || !data?.success || !data.data) {
+  if (
+    error ||
+    !data?.success ||
+    !data.data ||
+    specialtiesError ||
+    !userSpecialties?.success ||
+    !userSpecialties?.data
+  ) {
     router.push('/(tabs)');
     Toast.show({
       type: 'error',
       text1: Strings.profile.toast.errorTitle,
       text2: Strings.profile.toast.errorDescription,
       position: 'top',
-      visibilityTime: 2500,
+      visibilityTime: 2000,
       autoHide: true,
       closeIconSize: 1, // To "hide" the close icon
     });
@@ -81,11 +98,10 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  console.log('Profile:', profile);
   const chipsItems =
     profile.type === UserType.INTERPRETER
       ? (profile.specialties?.map((item) => item.name) ?? undefined)
-      : undefined;
+      : userSpecialties.data.userSpecialties.map((item) => item.specialtyName);
 
   return (
     <View className="flex-1 justify-center items-center mt-8 px-4">
@@ -101,7 +117,9 @@ export default function ProfileScreen() {
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
-              uri: 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+              uri:
+                profile.picture ||
+                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
             }}
           />
         </Avatar>
@@ -148,9 +166,9 @@ export default function ProfileScreen() {
           <InfoRow label={Strings.common.fields.email} value={profile.email} />
 
           {/* Chips section */}
-          {profile.type !== UserType.INTERPRETER && chipsItems && (
+          {profile.type !== UserType.INTERPRETER && chipsItems.length > 0 && (
             <>
-              <Text className="w-full pl-2 text-base font-ifood-medium text-left mb-1 text-primary-800">
+              <Text className="w-full pl-2 text-lg font-ifood-medium text-left mb-1 text-primary-800">
                 {Strings.common.fields.preferences}
               </Text>
               <ChipsSection items={chipsItems} />
@@ -177,7 +195,7 @@ export default function ProfileScreen() {
                 }
               />
 
-              {chipsItems && (
+              {chipsItems.length > 0 && (
                 <>
                   <Text className="w-full pl-2 text-base font-ifood-medium text-left mb-1 text-primary-800">
                     {Strings.common.fields.specialties}
@@ -217,6 +235,10 @@ export default function ProfileScreen() {
             </>
           )}
         </View>
+
+        {profile.type === UserType.ENTERPRISE && (
+          <View className="w-full h-16" />
+        )}
 
         {/* Buttons */}
         <View className="w-full">

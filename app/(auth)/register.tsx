@@ -237,7 +237,6 @@ export default function RegisterScreen() {
     }
     if (!api) return;
 
-    console.log('Submitting payload:', payload);
     const result = await api.post(payload);
 
     if (!result?.success || !result?.data) {
@@ -255,7 +254,6 @@ export default function RegisterScreen() {
     }
 
     // Successful registration (e.g., navigate to login)
-    console.log('Registration successful:', result.data);
     router.back();
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({

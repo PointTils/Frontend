@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
 import type { UserRequest } from '../types/api';
@@ -131,3 +133,12 @@ const modalityToSend = (modality: Modality[]) => {
 
   return modalityToSend;
 };
+
+export async function clearAsyncStorage() {
+  try {
+    await AsyncStorage.clear();
+    console.warn('AsyncStorage cleared');
+  } catch (e) {
+    console.error('Failed to clear AsyncStorage', e);
+  }
+}
