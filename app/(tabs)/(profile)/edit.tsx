@@ -86,6 +86,12 @@ export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const colors = useColors();
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
+    null,
+  );
+
   // Parse the profile data from params if available
   let profile = params.data
     ? (JSON.parse(params.data as string) as UserResponseData)
@@ -101,60 +107,6 @@ export default function EditProfileScreen() {
   const interpreterApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.interpreters.profile(profile?.id || ''),
   );
-
-  // Fetch all states
-  const [selectedState, setselectedState] = useState('');
-  const { data: states } = useApiGet<StateAndCityResponse>(
-    ApiRoutes.states.base,
-  );
-
-  let stateOptions: OptionItem[] = [];
-  if (states?.success && states?.data) {
-    stateOptions = states.data.map((state) => ({
-      label: state.name,
-      value: state.name,
-    }));
-  }
-
-  // Fetch cities based on selected state
-  const [selectedCities, setSelectedCities] = useState(['']);
-  const { data: cities } = useApiGet<StateAndCityResponse>(
-    ApiRoutes.states.cities(selectedState),
-  );
-
-  let cityOptions: OptionItem[] = [];
-  if (cities?.success && cities?.data) {
-    cityOptions = cities.data.map((city) => ({
-      label: city.name,
-      value: city.name,
-    }));
-  }
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const handleDateChange = (_event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDate(selectedDate);
-      setValue('birthday', formatDate(selectedDate));
-    }
-  };
-
-  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
-    null,
-  );
-  async function handlePickProfileAvatar() {
-    const image = await pickImage();
-    if (image) {
-      console.warn('Picked image:', image);
-      setSelectedImage(image);
-    }
-  }
-
-  function handleBack() {
-    clearErrors();
-    router.back();
-  }
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
@@ -239,17 +191,6 @@ export default function EditProfileScreen() {
           ? buildRequiredFieldError('specialties')
           : null,
     },
-    modality: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? getModality(profile?.professional_data?.modality)
-          : [],
-      error: '',
-      validate: (value: Modality[], ctx?: { type: string }) =>
-        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
-          ? buildRequiredFieldError('modality')
-          : null,
-    },
     description: {
       value:
         profile?.type === UserType.INTERPRETER
@@ -261,6 +202,40 @@ export default function EditProfileScreen() {
           return buildRequiredFieldError('description');
         return null;
       },
+    },
+    modality: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? getModality(profile?.professional_data?.modality)
+          : [],
+      error: '',
+      validate: (value: Modality[], ctx?: { type: string }) =>
+        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
+          ? buildRequiredFieldError('modality')
+          : null,
+    },
+    state: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.locations?.[0]?.state || ''
+          : '',
+      error: '',
+      validate: (value: string, ctx?: { type: string }) =>
+        ctx?.type === UserType.INTERPRETER && !value
+          ? buildRequiredFieldError('state')
+          : null,
+    },
+    cities: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.locations?.map((l) => l.city) || ['']
+          : [''],
+      error: '',
+      validate: (value: string[], ctx?: { type: string }) =>
+        ctx?.type === UserType.INTERPRETER &&
+        (!value || value.length === 0 || value.some((v) => !v))
+          ? buildRequiredFieldError('cities')
+          : null,
     },
     imageRight: {
       value:
@@ -302,6 +277,54 @@ export default function EditProfileScreen() {
       closeIconSize: 1, // To "hide" the close icon
     });
     return null;
+  }
+
+  // Fetch all states
+  const [selectedState, setselectedState] = useState(fields.state.value);
+  const { data: states } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.base,
+  );
+
+  let stateOptions: OptionItem[] = [];
+  if (states?.success && states?.data) {
+    stateOptions = states.data.map((state) => ({
+      label: state.name,
+      value: state.name,
+    }));
+  }
+
+  // Fetch cities based on selected state
+  const { data: cities } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.cities(selectedState),
+  );
+
+  let cityOptions: OptionItem[] = [];
+  if (cities?.success && cities?.data) {
+    cityOptions = cities.data.map((city) => ({
+      label: city.name,
+      value: city.name,
+    }));
+  }
+
+  const handleDateChange = (_event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+      setValue('birthday', formatDate(selectedDate));
+    }
+  };
+
+  const handlePickProfileAvatar = async () => {
+    const image = await pickImage();
+    if (image) {
+      console.warn('Picked image:', image);
+      setSelectedImage(image);
+    }
+  };
+
+  function handleBack() {
+    clearErrors();
+    router.back();
   }
 
   async function handleUpdate() {
@@ -696,7 +719,7 @@ export default function EditProfileScreen() {
                         {/* State */}
                         <FormControl
                           isRequired
-                          isInvalid={!selectedState}
+                          isInvalid={!!fields.state.error}
                           className="w-24"
                         >
                           <FormControlLabel>
@@ -706,12 +729,14 @@ export default function EditProfileScreen() {
                           </FormControlLabel>
                           <ModalSingleSelection
                             items={stateOptions}
-                            selectedValue={selectedState}
+                            selectedValue={fields.state.value}
                             onSelectionChange={(value) => {
+                              setValue('state', value);
                               setselectedState(value);
+                              setValue('cities', []);
                             }}
                             placeholderText={Strings.common.fields.state}
-                            hasError={false}
+                            hasError={!!fields.state.error}
                           />
                           <FormControlError>
                             <FormControlErrorIcon
@@ -719,7 +744,7 @@ export default function EditProfileScreen() {
                               className="text-red-600"
                             />
                             <FormControlErrorText>
-                              {fields.gender.error}
+                              {fields.state.error}
                             </FormControlErrorText>
                           </FormControlError>
                         </FormControl>
@@ -727,7 +752,7 @@ export default function EditProfileScreen() {
                         {/* Cities */}
                         <FormControl
                           isRequired
-                          isInvalid={!selectedState}
+                          isInvalid={!!fields.cities.error}
                           className="w-52"
                         >
                           <FormControlLabel>
@@ -737,12 +762,12 @@ export default function EditProfileScreen() {
                           </FormControlLabel>
                           <ModalMultipleSelection
                             items={cityOptions}
-                            selectedValues={selectedCities}
+                            selectedValues={fields.cities.value}
                             onSelectionChange={(value) => {
-                              setSelectedCities(value);
+                              setValue('cities', value);
                             }}
                             placeholderText={Strings.common.fields.cities}
-                            hasError={false}
+                            hasError={!!fields.cities.error}
                           />
                           <FormControlError>
                             <FormControlErrorIcon
@@ -750,7 +775,7 @@ export default function EditProfileScreen() {
                               className="text-red-600"
                             />
                             <FormControlErrorText>
-                              {fields.gender.error}
+                              {fields.cities.error}
                             </FormControlErrorText>
                           </FormControlError>
                         </FormControl>
