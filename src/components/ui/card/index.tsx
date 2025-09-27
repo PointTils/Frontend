@@ -1,131 +1,209 @@
 import React from 'react';
 import { View, Image, Pressable } from 'react-native';
 import { Text } from '@/src/components/ui/text';
-import { CalendarDays, MapPin } from 'lucide-react-native';
+import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
 import { useColors } from '@/src/hooks/useColors';
+
+type CardVariant = 'appointment' | 'search';
 
 interface CardProps {
   photoUrl: string;
   fullName: string;
-  specialty: string;
-  rating: number; // 0 a 5
-  date: string;
-  location: string;
+
+  /** Subtítulo (ex.: especialidade ou CPF/CNPJ) */
+  subtitle?: string;
+  /** Mantido p/ compat: usado se 'subtitle' não vier */
+  specialty?: string;
+
+  /** Avaliação 0..5 (mostra se showRating=true) */
+  rating?: number;
+  showRating?: boolean;
+
+  /** Card 3: badge de "pendente" */
+  pending?: boolean;
+  pendingLabel?: string;
+
+  /** Campos "Appointment" (cards 1–3) */
+  date?: string;
+  location?: string;
+
+  /** Campos "Search" (card 4) */
+  variant?: CardVariant;            // 'appointment' | 'search'
+  modality?: string;                // ex.: "Presencial/Online" ou "Online"
+  priceRange?: string;              // ex.: "R$ 100 - R$ 2.500"
+  isOnlineOnly?: boolean;           // true => oculta Localização
+
   className?: string;
+  onPress?: () => void;
 }
 
 export function Card({
   photoUrl,
   fullName,
+  subtitle,
   specialty,
-  rating,
+  rating = 0,
+  showRating = true,
+  pending = false,
+  pendingLabel = 'Pendente',
   date,
   location,
+  variant = 'appointment',
+  modality,
+  priceRange,
+  isOnlineOnly = false,
   className,
+  onPress,
 }: CardProps) {
   const colors = useColors();
-  
-  // Função para renderizar as estrelas
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
 
-    // Estrelas preenchidas
-    for (let i = 0; i < fullStars; i++) {
+  const renderStars = (value: number) => {
+    const stars = [];
+    const full = Math.floor(value);
+    const hasHalf = value % 1 !== 0;
+
+    for (let i = 0; i < full; i++) {
       stars.push(
-        <Text key={i} className="text-lg" style={{ color: colors.primaryBlue }}>
+        <Text key={`full-${i}`} className="text-lg" style={{ color: colors.primaryBlue }}>
           ★
         </Text>
       );
     }
-
-    // Meia estrela
-    if (hasHalfStar) {
+    if (hasHalf) {
       stars.push(
         <Text key="half" className="text-lg" style={{ color: colors.primaryBlue }}>
           ☆
         </Text>
       );
     }
-
-    // Estrelas vazias
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
+    const empty = 5 - Math.ceil(value);
+    for (let i = 0; i < empty; i++) {
       stars.push(
         <Text key={`empty-${i}`} className="text-gray-300 text-lg">
           ☆
         </Text>
       );
     }
-
     return stars;
   };
 
-  return (
-    <Pressable
-      className={`bg-background-0 p-6 w-full ${className || ''}`}
-    >
-      {/* Seção Superior - Perfil e Avaliação */}
-      <View className="flex-row items-center mb-4">
-        {/* Foto do Perfil */}
-        <View className="mr-4">
-          <Image
-            source={{ uri: photoUrl }}
-            className="w-16 h-16 rounded-full"
-            resizeMode="cover"
-          />
+  /** --- Bottom section renderers --- */
+  const renderAppointmentBottom = () => (
+    <View className="flex-row">
+      {/* Data */}
+      <View className="flex-1 mr-4">
+        <View className="flex-row items-center mb-1">
+          <CalendarDays size={12} color="#000000" />
+          <Text className="text-primary-800 text-xs font-medium ml-1">Data</Text>
         </View>
-
-        {/* Informações do Perfil */}
-        <View className="flex-1 items-start">
-          <Text className="text-typography-900 font-medium text-sm mb-0.5">
-            {fullName}
-          </Text>
-          <Text className="text-typography-600 font-regular text-xs">
-            {specialty}
-          </Text>
-          
-          {/* Avaliação */}
-          <View className="flex-row items-center">
-            <View className="flex-row mr-2">
-              {renderStars(rating)}
-            </View>
-            <Text className="text-typography-600 text-xs">
-              {rating.toFixed(1)}
-            </Text>
-          </View>
-        </View>
+        <Text className="text-typography-500 text-xs">{date}</Text>
       </View>
 
-      {/* Seção Inferior - Data e Localização */}
+      {/* Localização */}
+      <View className="flex-1">
+        <View className="flex-row items-center mb-1">
+          <MapPin size={12} color="#000000" />
+          <Text className="text-primary-800 text-xs font-regular ml-1">Localização</Text>
+        </View>
+        <Text className="text-typography-500 text-xs">{location}</Text>
+      </View>
+    </View>
+  );
+
+  const renderSearchBottom = () => (
+    <View>
       <View className="flex-row">
-        {/* Data */}
+        {/* Modalidade (e Localização logo abaixo, se houver) */}
         <View className="flex-1 mr-4">
           <View className="flex-row items-center mb-1">
-            <CalendarDays size={12} color="#000000"/>
-            <Text className="text-primary-800 text-xs font-medium ml-1">
-              Data
-            </Text>
+            <Info size={12} color="#000000" />
+            <Text className="text-primary-800 text-xs font-medium ml-1">Modalidade</Text>
           </View>
-          <Text className="text-typography-500 text-xs">
-            {date}
-          </Text>
+          <Text className="text-typography-500 text-xs">{modality}</Text>
+
+          {!isOnlineOnly && !!location && (
+            <View className="mt-4">
+              <View className="flex-row items-center mb-1">
+                <MapPin size={12} color="#000000" />
+                <Text className="text-primary-800 text-xs font-regular ml-1">
+                  Localização
+                </Text>
+              </View>
+              <Text className="text-typography-500 text-xs">{location}</Text>
+            </View>
+          )}
         </View>
 
-        {/* Localização */}
+        {/* Faixa de valores */}
         <View className="flex-1">
           <View className="flex-row items-center mb-1">
-            <MapPin size={12} color="#000000"/>
+            <Wallet size={12} color="#000000" />
             <Text className="text-primary-800 text-xs font-regular ml-1">
-              Localização
+              Faixa de valores
             </Text>
           </View>
-          <Text className="text-typography-500 text-xs">
-            {location}
-          </Text>
+          <Text className="text-typography-500 text-xs">{priceRange}</Text>
         </View>
       </View>
+    </View>
+  );
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className={`relative bg-background-0 p-6 w-full ${className || ''}`}
+    >
+      {/* Badge Pendente (Card 3) */}
+      {pending && (
+        <View
+          className="absolute right-6 top-6 flex-row items-center px-2.5 py-1 rounded-md"
+          style={{ backgroundColor: '#FCEFE6' }}
+        >
+          <Info size={12} color="#C96A2C" />
+          <Text className="ml-1 text-xs font-medium" style={{ color: '#C96A2C' }}>
+            {pendingLabel}
+          </Text>
+        </View>
+      )}
+
+      {/* Cabeçalho (Avatar + Título/Subtitle + Rating) */}
+      <View className="flex-row items-start mb-4 pr-20">
+        <Image
+          source={{ uri: photoUrl }}
+          className="w-16 h-16 rounded-full mr-4"
+          resizeMode="cover"
+        />
+
+        <View className="flex-1 items-start">
+          <Text
+            className="text-typography-900 font-medium text-sm mb-0.5"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {fullName}
+          </Text>
+
+          {(subtitle || specialty) && (
+            <Text
+              className="text-typography-600 font-regular text-xs"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {subtitle ?? specialty}
+            </Text>
+          )}
+
+          {showRating && typeof rating === 'number' && (
+            <View className="flex-row items-center mt-1">
+              <View className="flex-row mr-2">{renderStars(rating)}</View>
+              <Text className="text-typography-600 text-xs">{rating.toFixed(1)}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Base conforme o variant */}
+      {variant === 'search' ? renderSearchBottom() : renderAppointmentBottom()}
     </Pressable>
   );
 }

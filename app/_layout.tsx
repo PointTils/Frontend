@@ -28,12 +28,36 @@ function NavigationController({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('NavigationController - segments:', segments);
+    console.log('NavigationController - isLoading:', isLoading);
+    console.log('NavigationController - isAuthenticated:', isAuthenticated);
+
     if (isLoading) return; // Don't navigate while loading
 
+    const inCardTest = segments[0] === 'card-test';
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
 
+    console.log('NavigationController - inCardTest:', inCardTest);
+    console.log('NavigationController - inAuthGroup:', inAuthGroup);
+    console.log('NavigationController - inTabsGroup:', inTabsGroup);
+    console.log('NavigationController - inOnboarding:', inOnboarding);
+
+    // FORCE redirect to card-test as the first page - ignore auth logic
+    if (!inCardTest) {
+      console.log('NavigationController - Redirecting to /card-test');
+      router.replace('/card-test');
+      return;
+    }
+
+    // If already in card-test, stay there
+    if (inCardTest) {
+      console.log('NavigationController - Already in card-test, staying');
+      return;
+    }
+
+    // Keep original auth logic for other pages (this should not be reached)
     if (isAuthenticated && isFirstTime && !inOnboarding) {
       // First time user, show onboarding
       router.replace('/onboarding');
@@ -47,17 +71,6 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     } else if (!isAuthenticated && (inTabsGroup || inOnboarding)) {
       // Not authenticated, redirect to auth
       router.replace('/(auth)');
-    } else if (!inAuthGroup && !inTabsGroup && !inOnboarding && !isLoading) {
-      // At root level, decide where to go
-      if (isAuthenticated) {
-        if (isFirstTime) {
-          router.replace('/onboarding');
-        } else {
-          router.replace('/(tabs)');
-        }
-      } else {
-        router.replace('/(auth)');
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading, isFirstTime, segments]);
@@ -74,6 +87,7 @@ function RootNavigator() {
   return (
     <NavigationController>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="card-test" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
