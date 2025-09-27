@@ -106,14 +106,15 @@ export const Strings = {
     others: 'Outros',
   },
 
-    scheduling: {
+  scheduling: {
     title: 'AGENDAMENTO',
     tabs: {
       scheduling: 'Agendamento',
-      requester: 'Solicitante',
+      professional: 'Profissional',
     },
     sections: {
       description: 'Descrição',
+      services: 'Serviços e experiência',
       date: 'Data',
       location: 'Localização',
       phone: 'Telefone',
@@ -124,5 +125,6 @@ export const Strings = {
       whatsapp: 'WhatsApp',
     },
   },
+
 
 } as const;

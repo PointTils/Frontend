@@ -9,7 +9,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import ToastManager from 'toastify-react-native';
 
 import 'react-native-reanimated';
@@ -42,14 +42,12 @@ async function clearAllStorage(): Promise<void> {
 
 /**
  * Navigation controller that handles route changes based on auth state
- * @param {Object} props - The component props.
- * @param {React.ReactNode} props.children - The child components to render.
- * @returns {JSX.Element} The navigation controller component.
  */
 function NavigationController({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isFirstTime } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const forcedOnce = useRef(false); // garante que vamos forçar a rota apenas uma vez
 
   useEffect(() => {
     if (isLoading) return; // Don't navigate while loading
@@ -57,25 +55,29 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inDetalhesUsuario = segments[0] === 'detalhesagendamentousuario'; // /////// excluir após teste
 
-    const inDetalhes = segments[0] === 'detalhesagendamento'; /////// excluir após teste
-    if (inDetalhes) return; /////// excluir após teste
+    // Força abrir a tela de detalhes apenas UMA vez, se não estivermos nela
+    if (!inDetalhesUsuario && !forcedOnce.current) { // /////// excluir após teste
+      forcedOnce.current = true;                    // /////// excluir após teste
+      router.replace('/detalhesagendamentousuario'); // /////// excluir após teste
+      return;                                       // /////// excluir após teste
+    }                                               // /////// excluir após teste
+
+    // Se já estamos na tela de detalhes, não mexe na navegação
+    if (inDetalhesUsuario) return; // /////// excluir após teste
 
     if (isAuthenticated && isFirstTime && !inOnboarding) {
-      // First time user, show onboarding
       router.replace('/onboarding');
     } else if (
       isAuthenticated &&
       !isFirstTime &&
       (inAuthGroup || inOnboarding)
     ) {
-      // Existing user, redirect to tabs
       router.replace('/(tabs)');
     } else if (!isAuthenticated && (inTabsGroup || inOnboarding)) {
-      // Not authenticated, redirect to auth
       router.replace('/(auth)');
     } else if (!inAuthGroup && !inTabsGroup && !inOnboarding && !isLoading) {
-      // At root level, decide where to go
       if (isAuthenticated) {
         if (isFirstTime) {
           router.replace('/onboarding');
@@ -89,19 +91,17 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading, isFirstTime, segments]);
 
-  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{children}</>;
 }
 
 /**
  * Root navigator component that defines the main navigation structure.
- * @returns {JSX.Element} The root navigator component.
  */
 function RootNavigator() {
   return (
     <NavigationController>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="detalhesagendamento" /> {/* /////// excluir após teste */}
+      <Stack screenOptions={{ headerShown: false }} initialRouteName="detalhesagendamentousuario">
+        <Stack.Screen name="detalhesagendamentousuario" /> {/* /////// excluir após teste */}
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
@@ -112,7 +112,6 @@ function RootNavigator() {
 
 /**
  * App content component that uses the auth context.
- * @returns {JSX.Element} The app content component.
  */
 function AppContent() {
   const [appIsReady, setAppIsReady] = useState(false);
