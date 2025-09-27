@@ -58,6 +58,9 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
 
+    const inDetalhes = segments[0] === 'detalhesagendamento'; /////// excluir após teste
+    if (inDetalhes) return; /////// excluir após teste
+
     if (isAuthenticated && isFirstTime && !inOnboarding) {
       // First time user, show onboarding
       router.replace('/onboarding');
@@ -98,6 +101,7 @@ function RootNavigator() {
   return (
     <NavigationController>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="detalhesagendamento" /> {/* /////// excluir após teste */}
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
