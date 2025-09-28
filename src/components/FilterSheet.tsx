@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
 import { useColors } from '../hooks/useColors';
 import { Button } from './ui/button';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -21,27 +21,35 @@ import { CityResponse, StateResponse } from '../types/api/state';
 import { SpecialtiesResponse } from '../types/api/specialties';
 import { router } from 'expo-router';
 import { Toast } from 'toastify-react-native';
+import { AppliedFilters } from '../types/search-filter-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 interface FilterSheetProps {
-  onApply: (filters: any) => void;
+  onApply: (filters: AppliedFilters) => void;
   onClose: () => void;
+  filter: AppliedFilters;
+  initialFocus?: 'date' | 'modality';
 }
 
-const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
+const FilterSheet: React.FC<FilterSheetProps> = ({
+  onApply,
+  onClose,
+  filter,
+  initialFocus,
+}) => {
   const [checkedOnline, setCheckedOnline] = useState(false);
   const [checkedPersonally, setCheckedPersonally] = useState(false);
+  const [showDate, setShowDate] = useState(initialFocus === 'date');
+  const [showTime, setShowTime] = useState(false);
 
   const [specialty, setSpecialty] = useState<string[]>([]);
   const [specialtyOptions, setSpecialtyOptions] = useState<
     { label: string; value: string }[]
   >([]);
 
-  const [availableDates, setAvailableDates] = useState('');
   const [date, setDate] = useState<Date | null>(null);
-  const [show, setShow] = useState(false);
-
-  const [gender, setGender] = useState<string[]>([]);
-  const [city, setCity] = useState<string[]>([]);
+  const [gender, setGender] = useState<string>('');
+  const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
 
   const [statesOptions, setStatesOptions] = useState<
@@ -54,7 +62,6 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
   const colors = useColors();
   const { user, isAuthenticated } = useAuth();
 
-  // --- API HOOKS ---
   const { data: statesData, error: statesError } = useApiGet<StateResponse>(
     user?.id && isAuthenticated ? ApiRoutes.states.base : '',
   );
@@ -73,7 +80,22 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
       user?.id && isAuthenticated ? ApiRoutes.specialties.base : '',
     );
 
-  // --- EFFECTS ---
+  useEffect(() => {
+    if (filter) {
+      setSpecialty(filter.specialty ?? []);
+      setCity(filter.city ?? '');
+      setState(filter.state ?? '');
+      setGender(filter.gender ?? '');
+      if (filter.availableDates) {
+        const d = new Date(filter.availableDates);
+        setDate(d);
+      }
+      if (filter.modality === 'ONLINE' || filter.modality === 'ALL')
+        setCheckedOnline(true);
+      if (filter.modality === 'PERSONALLY' || filter.modality === 'ALL')
+        setCheckedPersonally(true);
+    }
+  }, [filter]);
 
   // Estados
   useEffect(() => {
@@ -125,19 +147,21 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
     }
   }, [statesError, citiesError, specialtiesError]);
 
-  // --- HANDLERS ---
   const handleApply = () => {
-    const filters = {
+    const filters: AppliedFilters = {
       specialty,
-      availableDates,
+      availableDates: date ? date.toISOString() : undefined,
       gender,
       city,
       state,
-      modality: checkedOnline
-        ? 'Online'
-        : checkedPersonally
-          ? 'Presencial'
-          : '',
+      modality:
+        checkedOnline && checkedPersonally
+          ? 'ALL'
+          : checkedOnline
+            ? 'ONLINE'
+            : checkedPersonally
+              ? 'PERSONALLY'
+              : '',
     };
 
     const cleanedFilters = Object.fromEntries(
@@ -147,17 +171,19 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
           value !== '' &&
           !(Array.isArray(value) && value.length === 0),
       ),
-    );
+    ) as AppliedFilters;
 
     onApply(cleanedFilters);
   };
 
   const genderOptions = [
-    { label: 'Masculino', value: 'M' },
-    { label: 'Feminino', value: 'F' },
+    { label: 'Masculino', value: 'MALE' },
+    { label: 'Feminino', value: 'FEMALE' },
+    { label: 'Outros', value: 'OTHERS' },
   ];
 
-  // --- RENDER ---
+  const availableDates = date ? formatDateTime(date) : '';
+
   return (
     <Modal transparent animationType="slide">
       <TouchableOpacity
@@ -166,7 +192,6 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
         onPress={onClose}
       />
       <View className="p-4 bg-white h-[550px]">
-        {/* Modalidade */}
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -216,14 +241,14 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
 
               <View className="w-[220px]">
                 {cityOptions.length > 0 ? (
-                  <ModalMultipleSelection
+                  <ModalSingleSelection
                     items={cityOptions}
-                    selectedValues={city}
+                    selectedValue={city}
                     onSelectionChange={setCity}
                   />
                 ) : (
                   <Text className="text-gray-500 mt-2">
-                    Selecione um estado primeiro
+                    {Strings.search.selectCity}
                   </Text>
                 )}
               </View>
@@ -238,11 +263,16 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
               {Strings.search.specialitie}
             </FormControlLabelText>
           </FormControlLabel>
-          <ModalMultipleSelection
-            items={specialtyOptions}
-            selectedValues={specialty}
-            onSelectionChange={setSpecialty}
-          />
+          <View className="flex-row justify-start items-center space-x-2 gap-3">
+            <Ionicons name="book-outline" size={24} color="black" />
+            <View className="w-[300px]">
+              <ModalMultipleSelection
+                items={specialtyOptions}
+                selectedValues={specialty}
+                onSelectionChange={setSpecialty}
+              />
+            </View>
+          </View>
         </FormControl>
 
         {/* Data */}
@@ -253,49 +283,94 @@ const FilterSheet: React.FC<FilterSheetProps> = ({ onApply, onClose }) => {
             </FormControlLabelText>
           </FormControlLabel>
           <>
-            <TouchableOpacity onPress={() => setShow(true)}>
-              <Input pointerEvents="none">
-                <InputField
-                  placeholder="DD/MM/AAAA"
-                  className="font-ifood-regular"
-                  value={availableDates}
-                  editable={false}
-                />
-              </Input>
-            </TouchableOpacity>
+            <View className="flex-row justify-start items-center space-x-2 gap-3">
+              <Ionicons name="calendar-outline" size={24} color="black" />
+              <View className="w-[300px]">
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowDate(true);
+                  }}
+                >
+                  <Input pointerEvents="none">
+                    <InputField
+                      placeholder="DD/MM/AAAA HH:mm"
+                      className="font-ifood-regular"
+                      value={date ? formatDateTime(date) : ''}
+                      editable={false}
+                    />
+                  </Input>
+                </TouchableOpacity>
 
-            {show && (
-              <DateTimePicker
-                value={date ?? new Date()}
-                mode="datetime"
-                display="default"
-                onChange={(event, selectedDate?: Date | undefined) => {
-                  setShow(false);
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                    setAvailableDates(formatDateTime(selectedDate));
-                  }
-                }}
-              />
-            )}
+                {/* iOS datetime */}
+                {showDate && Platform.OS === 'ios' && (
+                  <DateTimePicker
+                    value={date ?? new Date()}
+                    mode="datetime"
+                    display="spinner"
+                    minimumDate={new Date()}
+                    onChange={(event, selectedDate) => {
+                      setShowDate(false);
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Android date */}
+                {showDate && Platform.OS === 'android' && (
+                  <DateTimePicker
+                    value={date ?? new Date()}
+                    mode="date"
+                    display="default"
+                    minimumDate={new Date()}
+                    onChange={(event, selectedDate) => {
+                      setShowDate(false);
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                        setShowTime(true);
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Android time */}
+                {showTime && Platform.OS === 'android' && (
+                  <DateTimePicker
+                    value={date ?? new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      setShowTime(false);
+                      if (selectedTime) {
+                        setDate(selectedTime);
+                      }
+                    }}
+                  />
+                )}
+              </View>
+            </View>
           </>
         </FormControl>
 
-        {/* Gênero */}
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
               {Strings.search.gender}
             </FormControlLabelText>
           </FormControlLabel>
-          <ModalMultipleSelection
-            items={genderOptions}
-            selectedValues={gender}
-            onSelectionChange={setGender}
-          />
+          <View className="flex-row justify-start items-center space-x-2 gap-3">
+            <Ionicons name="male-female-outline" size={24} color="black" />
+            <View className="w-[300px]">
+              <ModalSingleSelection
+                items={genderOptions}
+                selectedValue={gender}
+                onSelectionChange={setGender}
+              />
+            </View>
+          </View>
         </FormControl>
 
-        {/* Botão */}
         <View className="mt-16 pb-3 gap-4">
           <Button
             onPress={handleApply}

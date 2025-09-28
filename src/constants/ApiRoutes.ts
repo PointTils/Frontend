@@ -21,12 +21,15 @@ export const ApiRoutes = {
     profile: (id: string) => `/enterprise-users/${id}`,
   },
   interpreters: {
-    base: '/interpreters',
+    base: (param: URLSearchParams) => `/interpreters?${param}`,
     register: '/interpreters/register',
     profile: (id: string) => `/interpreters/${id}`,
   },
   states: {
     base: '/states',
-    cities: (uf: string) => `/states/${uf}/cities`,
+    cities: (stateId: string) => `/states/${stateId}/cities`,
+  },
+  specialties: {
+    base: '/specialties',
   },
 } as const;

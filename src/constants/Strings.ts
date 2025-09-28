@@ -135,6 +135,7 @@ export const Strings = {
     gender: 'Genêro',
     date: 'Data',
     search: 'Buscar',
+    selectCity: 'Selecione um estado primeiro',
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',

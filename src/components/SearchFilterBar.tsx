@@ -1,49 +1,105 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useColors } from '../hooks/useColors';
 import { Strings } from '../constants/Strings';
 import FilterSheet from './FilterSheet';
+import { AppliedFilters } from '../types/search-filter-bar';
+import { useAuth } from '../contexts/AuthProvider';
+import { InterpreterResponse } from '../types/api/interpreter';
+import { useApiGet } from '../hooks/useApi';
+import { ApiRoutes } from '../constants/ApiRoutes';
+import { router } from 'expo-router';
+import { Toast } from 'toastify-react-native';
 
-type AppliedFilters = {
-  userId?: number;
-  modality?: string;
-  availableDates?: string;
-  online?: boolean;
-  specialty?: string[];
-  gender?: string[];
-  city?: string[];
-  state?: string;
-};
+interface SearchFilterBarProps {
+  onData: (data: InterpreterResponse) => void;
+}
 
-export default function SearchFilterBar() {
+export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   const colors = useColors();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<AppliedFilters>({});
   const [isSheetVisible, setSheetVisible] = useState(false);
+  const [initialFocus, setInitialFocus] = useState<
+    'date' | 'modality' | undefined
+  >(undefined);
 
   const handleApplyFilters = (appliedFilters: AppliedFilters) => {
-    console.log('Filtros recebidos:', appliedFilters);
     setFilters(appliedFilters);
     setSheetVisible(false);
   };
 
-  const handlerComplete = (data?: string) =>
-    data ? 'border-red-300' : 'border-gray-300';
+  const handlerOnlineButton = (data?: string) =>
+    data === 'ONLINE' || data === 'ALL' ? 'border-red-300' : 'border-gray-300';
 
-  const handlerOnline = (data?: string) =>
-    data === 'Online' ? 'border-red-300' : 'border-gray-300';
+  const handlerOnlineText = (data?: string) =>
+    data === 'ONLINE' || data === 'ALL'
+      ? 'text-primary-blue-light'
+      : 'text-gray-700';
+
+  const handlerDateText = (data?: string) =>
+    data ? 'text-primary-blue-light' : 'text-gray-700';
 
   const handlerFilterCount = () => {
     const count = Object.values(filters).filter(
       (value) => value !== undefined && value !== null && value !== '',
     ).length;
-
     return count === 0 ? '' : count;
   };
 
+  const { user, isAuthenticated } = useAuth();
+
+  const buildQuery = (filters: AppliedFilters, queryText?: string) => {
+    const query = new URLSearchParams();
+    if (queryText && queryText.trim().length > 0) {
+      query.append('search', queryText.trim());
+    }
+    if (filters.specialty?.length)
+      query.append('specialty', filters.specialty.join(','));
+    if (filters.availableDates) {
+      const date = new Date(filters.availableDates);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+
+      const formatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      query.append('date', formatted);
+    }
+    if (filters.gender?.length) query.append('gender', filters.gender);
+    if (filters.city?.length) query.append('city', filters.city);
+    if (filters.state) query.append('uf', filters.state);
+    if (filters.modality) query.append('modality', filters.modality);
+    return query;
+  };
+
+  const { data, error } = useApiGet<InterpreterResponse>(
+    user?.id && isAuthenticated
+      ? ApiRoutes.interpreters.base(buildQuery(filters, query))
+      : '',
+  );
+
+  useEffect(() => {
+    if (error) {
+      router.push('/(tabs)');
+      Toast.show({
+        type: 'error',
+        text1: Strings.search.toast.errorGetTitle,
+        text2: Strings.search.toast.errorGetText,
+        position: 'top',
+        visibilityTime: 2500,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (data && data.success && data.data) {
+      onData(data);
+    }
+  }, [data, onData]);
+
   return (
-    <View className="px-4 py-2">
+    <View className="px-4 py-2 mt-12">
       <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200">
         <Ionicons name="search" size={20} color={colors.primaryBlue} />
         <TextInput
@@ -55,29 +111,75 @@ export default function SearchFilterBar() {
         />
       </View>
 
-      <View className="flex-row justify-start space-x-2 mt-3">
+      <View className="flex-row justify-center items-center space-x-3 mt-3">
         <TouchableOpacity
-          className={`px-3 py-2 mr-2 border ${handlerComplete(
-            filters.availableDates,
-          )} rounded-md`}
+          className={`px-3 py-2 mr-2 border rounded-md`}
+          style={{
+            borderColor: filters.availableDates
+              ? colors.primaryBlue
+              : colors.fieldGray,
+          }}
+          onPress={() => {
+            setInitialFocus('date');
+            setSheetVisible(true);
+          }}
         >
-          <Text className="text-gray-700">{Strings.search.datesAvaible}</Text>
+          <Text className={`${handlerDateText(filters.availableDates)}`}>
+            {Strings.search.datesAvaible}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`px-3 py-2 mr-2 border ${handlerOnline(
+          activeOpacity={1}
+          className={`px-3 py-2 mr-2 border ${handlerOnlineButton(
             filters.modality,
           )} rounded-md`}
+          style={{
+            borderColor:
+              filters.modality === 'ONLINE' || filters.modality === 'ALL'
+                ? colors.primaryBlue
+                : colors.fieldGray,
+          }}
+          onPress={() =>
+            setFilters({
+              ...filters,
+              modality:
+                filters.modality === 'ONLINE' || filters.modality === 'ALL'
+                  ? ''
+                  : 'ONLINE',
+            })
+          }
         >
-          <Text className="text-gray-700">{Strings.search.online}</Text>
+          <Text className={`${handlerOnlineText(filters.modality)}`}>
+            {Strings.search.online}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="flex-row items-center px-3 py-2 border border-gray-400 rounded-md"
-          onPress={() => setSheetVisible(true)}
+          className="flex-row items-center px-3 py-2 border rounded-md"
+          style={{
+            borderColor:
+              handlerFilterCount() > '' ? colors.primaryBlue : colors.fieldGray,
+          }}
+          onPress={() => {
+            setInitialFocus(undefined);
+            setSheetVisible(true);
+          }}
         >
-          <Feather name="sliders" size={18} color="#374151" />
-          <Text className="ml-1 text-gray-700">
+          <Feather
+            name="sliders"
+            size={18}
+            color={
+              handlerFilterCount() > '' ? colors.primaryBlue : colors.fieldGray
+            }
+          />
+          <Text
+            className={'ml-1'}
+            style={{
+              color:
+                handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
+            }}
+          >
             {Strings.search.filter} {handlerFilterCount()}
           </Text>
         </TouchableOpacity>
@@ -85,8 +187,12 @@ export default function SearchFilterBar() {
 
       {isSheetVisible && (
         <FilterSheet
+          filter={filters}
           onApply={handleApplyFilters}
-          onClose={() => setSheetVisible(false)}
+          initialFocus={initialFocus}
+          onClose={() => {
+            setSheetVisible(false);
+          }}
         />
       )}
     </View>
