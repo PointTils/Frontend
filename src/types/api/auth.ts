@@ -4,9 +4,9 @@ import type { UserType } from '../common';
 export interface User {
   id: string;
   email: string;
-  name: string;
   type: UserType;
   status: string;
+  // name: string; // Uncomment when name is added in backend
 }
 
 export interface Tokens {

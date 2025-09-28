@@ -1,4 +1,4 @@
-import { FORCE_LIGHT_MODE } from '@/src/constants/Theme';
+import { FORCE_LIGHT_MODE } from '@/src/constants/Config';
 import { OverlayProvider } from '@gluestack-ui/overlay';
 import { ToastProvider } from '@gluestack-ui/toast';
 import { useColorScheme } from 'nativewind';

@@ -46,16 +46,18 @@ interface ModalMultipleSelectionProps {
   hasError?: boolean;
   scrollableHeight?: number;
   maxSelections?: number;
+  minWidth?: number;
 }
 
 export default function ModalMultipleSelection({
   items,
   selectedValues,
   onSelectionChange,
-  placeholderText = Strings.common.select,
+  placeholderText = Strings.common.fields.select,
   hasError = false,
   scrollableHeight = 280,
   maxSelections,
+  minWidth = 44,
 }: ModalMultipleSelectionProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const colors = useColors();
@@ -83,6 +85,7 @@ export default function ModalMultipleSelection({
     borderColor: hasError ? colors.mandatory : colors.fieldGray,
     backgroundColor: colors.background,
     borderWidth: 1,
+    minWidth: minWidth,
   };
 
   const getDisplayText = () => {
@@ -97,7 +100,10 @@ export default function ModalMultipleSelection({
       return selectedItem?.label || '';
     }
 
-    return `${selectedValues.length} selecionados`;
+    return Strings.common.fields.selected.replace(
+      '{count}',
+      `${selectedValues.length}`,
+    );
   };
 
   const getItemBackgroundColor = (itemValue: string) => {
@@ -204,7 +210,7 @@ export default function ModalMultipleSelection({
                 className="text-center font-ifood-medium"
                 style={{ color: colors.disabled }}
               >
-                {Strings.common.cancel}
+                {Strings.common.buttons.cancel}
               </Text>
             </TouchableOpacity>
           </View>

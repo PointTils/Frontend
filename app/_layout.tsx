@@ -4,6 +4,8 @@ import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { clearAsyncStorage } from '@/src/utils/helpers';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -105,6 +107,9 @@ function AppContent() {
     async function prepare() {
       try {
         // Pre-load fonts, make any API calls you need to do here
+
+        // Force a clean start by clearing AsyncStorage (development only) - uncomment if needed
+        // await clearAsyncStorage();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);
