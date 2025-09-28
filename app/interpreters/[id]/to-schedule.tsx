@@ -389,10 +389,11 @@ export default function ToScheduleScreen() {
                     <Text
                       className="font-ifood-regular"
                       style={{
-                        color:
-                          fields.modality.value === Modality.PERSONALLY
-                            ? colors.text
-                            : colors.disabled,
+                        color: fields.modality.value.includes(
+                          Modality.PERSONALLY,
+                        )
+                          ? colors.text
+                          : colors.disabled,
                       }}
                     >
                       {Strings.common.options.inPerson}
@@ -407,10 +408,9 @@ export default function ToScheduleScreen() {
                     <Text
                       className="font-ifood-regular"
                       style={{
-                        color:
-                          fields.modality.value === Modality.ONLINE
-                            ? colors.text
-                            : colors.disabled,
+                        color: fields.modality.value.includes(Modality.ONLINE)
+                          ? colors.text
+                          : colors.disabled,
                       }}
                     >
                       {Strings.common.options.online}
