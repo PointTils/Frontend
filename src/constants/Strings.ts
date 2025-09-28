@@ -197,4 +197,49 @@ export const Strings = {
         'Aconteceu um erro inesperado. Tente novamente mais tarde.',
     },
   },
+
+
+  detalhesAgendamento: {
+    header: 'Detalhes do agendamento',
+    tabs: {
+      agendamento: 'Agendamento',
+      solicitante: 'Solicitante',
+    },
+    sections: {
+      description: 'Descrição',
+      services: 'Serviços e experiência',
+      date: 'Data',
+      location: 'Localização',
+      phone: 'Telefone',
+      email: 'E-mail',
+    },
+    cta: {
+      cancel: 'Cancelar agendamento',
+      whatsapp: 'WhatsApp',
+    },
+  },
+
+  detalhesAgendamentoUsuario: {
+    header: 'Detalhes do agendamento',
+    tabs: {
+      agendamento: 'Agendamento',
+      profissional: 'Profissional',
+    },
+    sections: {
+      description: 'Descrição',
+      services: 'Serviços e experiência',
+      date: 'Data',
+      location: 'Localização',
+      phone: 'Telefone',
+      email: 'E-mail',
+    },
+    cta: {
+      cancel: 'Cancelar agendamento',
+      whatsapp: 'WhatsApp',
+    },
+  },
+
+
+
+
 } as const;
