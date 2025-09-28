@@ -51,7 +51,7 @@ export const Strings = {
       modality: 'Modalidade',
       location: 'Localização',
       state: 'UF',
-      cities: 'Cidades',
+      city: 'Cidade',
       neighborhoods: 'Bairros',
       specialties: 'Especialidades',
       preferences: 'Preferências',
@@ -184,6 +184,8 @@ export const Strings = {
   edit: {
     header: 'Editar Perfil',
     basicData: 'Dados básicos',
+    hoursDescription:
+      'Defina os horários disponíveis para atendimento em cada dia da semana.',
 
     toast: {
       errorApiTitle: 'Falha ao atualizar perfil',

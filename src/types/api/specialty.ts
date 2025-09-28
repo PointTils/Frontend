@@ -5,10 +5,15 @@ export interface UserSpecialty {
   specialtyName: string;
 }
 
-export interface SpecialtyResponse {
+export interface UserSpecialtyResponse {
   success: boolean;
   message: string;
   data: {
     userSpecialties: UserSpecialty[];
   };
+}
+
+export interface UserSpecialtyRequest {
+  specialtyIds: string[];
+  replaceExisting: boolean;
 }

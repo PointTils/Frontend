@@ -109,7 +109,7 @@ function AppContent() {
         // Pre-load fonts, make any API calls you need to do here
 
         // Force a clean start by clearing AsyncStorage (development only) - uncomment if needed
-        //await clearAsyncStorage();
+        // await clearAsyncStorage();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);

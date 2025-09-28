@@ -43,6 +43,7 @@ interface ModalSingleSelectionProps {
   placeholderText?: string;
   hasError?: boolean;
   scrollableHeight?: number;
+  minWidth?: number;
 }
 
 export default function ModalSingleSelection({
@@ -52,6 +53,7 @@ export default function ModalSingleSelection({
   placeholderText = Strings.common.fields.select,
   hasError = false,
   scrollableHeight = 280,
+  minWidth = 44,
 }: ModalSingleSelectionProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const colors = useColors();
@@ -69,6 +71,7 @@ export default function ModalSingleSelection({
     borderColor: hasError ? colors.mandatory : colors.fieldGray,
     backgroundColor: colors.background,
     borderWidth: 1,
+    minWidth: minWidth,
   };
 
   const getItemBackgroundColor = (itemValue: string) => {

@@ -2,6 +2,7 @@ import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
 import ModalMultipleSelection from '@/src/components/ModalMultipleSelection';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
+import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
 import {
   Checkbox,
@@ -28,9 +29,14 @@ import {
 } from '@/src/components/ui/radio';
 import { Text } from '@/src/components/ui/text';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
-import { specialties, genders } from '@/src/constants/ItemsSelection';
+import { MAX_NEIGHBORHOODS, SCHEDULE_ENABLED } from '@/src/constants/Config';
+import {
+  specialties,
+  genders,
+  hourOptions,
+} from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
-import { useApiPatch } from '@/src/hooks/useApi';
+import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
@@ -38,24 +44,33 @@ import type {
   UserRequest,
   UserResponse,
   UserResponseData,
+  UserSpecialtyResponse,
+  UserSpecialtyRequest,
 } from '@/src/types/api';
+import type { StateAndCityResponse } from '@/src/types/common';
 import { Modality, UserType } from '@/src/types/common';
+import type { OptionItem } from '@/src/types/ui';
 import {
   buildEditPayload,
   buildInvalidFieldError,
   buildRequiredFieldError,
   getModality,
+  pickImage,
 } from '@/src/utils/helpers';
 import {
+  formatCnpj,
   formatDate,
   formatPhone,
+  handleCnpjChange,
   handlePhoneChange,
   mapImageRights,
   validateBirthday,
+  validateCnpj,
   validateEmail,
   validatePhone,
 } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   FileText,
@@ -65,8 +80,9 @@ import {
   CheckIcon,
   XIcon,
   AlertCircleIcon,
+  Pencil,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -77,9 +93,34 @@ import {
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
+type EditProfileValidationContext = {
+  type: UserType;
+  state: string;
+  modality: Modality[];
+};
+
 export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const colors = useColors();
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
+    null,
+  );
+
+  // Temporary schedule state - backend integration pending
+  const [schedule, setSchedule] = useState<
+    Record<string, { from: string; to: string }>
+  >(
+    Object.keys(Strings.days).reduce(
+      (acc, key) => {
+        acc[key] = { from: '', to: '' };
+        return acc;
+      },
+      {} as Record<string, { from: string; to: string }>,
+    ),
+  );
 
   // Parse the profile data from params if available
   let profile = params.data
@@ -96,31 +137,23 @@ export default function EditProfileScreen() {
   const interpreterApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.interpreters.profile(profile?.id || ''),
   );
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const handleDateChange = (_event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDate(selectedDate);
-      setValue('birthday', formatDate(selectedDate));
-    }
-  };
-
-  function handleBack() {
-    clearErrors();
-    router.back();
-  }
+  const userSpecialtyApi = useApiPost<
+    UserSpecialtyResponse,
+    UserSpecialtyRequest
+  >(ApiRoutes.userSpecialties.userSpecialties(profile?.id || ''));
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
-    FormFields<{ type: string }>,
-    { type: string }
+    FormFields<EditProfileValidationContext>,
+    EditProfileValidationContext
   >({
     name: {
       value: profile?.type !== UserType.ENTERPRISE ? profile?.name : '',
       error: '',
-      validate: (value: string, ctx?: { type: string }) =>
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
         ctx?.type !== UserType.ENTERPRISE && value.trim().length < 5
           ? buildRequiredFieldError('name')
           : null,
@@ -129,10 +162,32 @@ export default function EditProfileScreen() {
       value:
         profile?.type === UserType.ENTERPRISE ? profile?.corporate_reason : '',
       error: '',
-      validate: (value: string, ctx?: { type: string }) =>
+      validate: (value: string, ctx?: { type: string }): string | null =>
         ctx?.type === UserType.ENTERPRISE && !value.trim()
           ? buildRequiredFieldError('reason')
           : null,
+    },
+    cnpj: {
+      value:
+        profile?.type === UserType.ENTERPRISE
+          ? formatCnpj(profile?.cnpj)
+          : profile?.type === UserType.INTERPRETER
+            ? formatCnpj(profile?.professional_data?.cnpj)
+            : '',
+      error: '',
+      validate: (value: string, ctx?: { type: string }): string | null => {
+        if (ctx?.type === UserType.ENTERPRISE && !value.trim())
+          return buildRequiredFieldError('cnpj');
+        if (ctx?.type === UserType.ENTERPRISE && !validateCnpj(value))
+          return buildInvalidFieldError('cnpj');
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          value.trim() &&
+          !validateCnpj(value)
+        )
+          return buildInvalidFieldError('cnpj');
+        return null;
+      },
     },
     birthday: {
       value:
@@ -140,7 +195,10 @@ export default function EditProfileScreen() {
           ? formatDate(profile?.birthday)
           : '',
       error: '',
-      validate: (value: string, ctx?: { type: string }) => {
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null => {
         if (
           (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
@@ -159,7 +217,10 @@ export default function EditProfileScreen() {
     gender: {
       value: profile?.type !== UserType.ENTERPRISE ? profile?.gender : '',
       error: '',
-      validate: (value: string, ctx?: { type: string }) =>
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
         !value.trim()
           ? buildRequiredFieldError('gender')
@@ -168,7 +229,7 @@ export default function EditProfileScreen() {
     phone: {
       value: formatPhone(profile?.phone) || '',
       error: '',
-      validate: (value: string) => {
+      validate: (value: string): string | null => {
         if (!value.trim()) return buildRequiredFieldError('phone');
         if (!validatePhone(value)) return buildInvalidFieldError('phone');
         return null;
@@ -177,33 +238,21 @@ export default function EditProfileScreen() {
     email: {
       value: profile?.email || '',
       error: '',
-      validate: (value: string) => {
+      validate: (value: string): string | null => {
         if (!value.trim()) return buildRequiredFieldError('email');
         if (!validateEmail(value)) return buildInvalidFieldError('email');
         return null;
       },
     },
     selectedSpecialties: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? (profile?.specialties?.map((item) => item.id!).filter(Boolean) ??
-            [])
-          : [],
+      value: profile?.specialties?.map((item) => item.id) ?? [],
       error: '',
-      validate: (value: string[], ctx?: { type: string }) =>
+      validate: (
+        value: string[],
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
         ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
           ? buildRequiredFieldError('specialties')
-          : null,
-    },
-    modality: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? getModality(profile?.professional_data?.modality)
-          : [],
-      error: '',
-      validate: (value: Modality[], ctx?: { type: string }) =>
-        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
-          ? buildRequiredFieldError('modality')
           : null,
     },
     description: {
@@ -212,11 +261,77 @@ export default function EditProfileScreen() {
           ? profile?.professional_data?.description
           : '',
       error: '',
-      validate: (value: string, ctx?: { type: string }) => {
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null => {
         if (ctx?.type === UserType.INTERPRETER && !value.trim())
           return buildRequiredFieldError('description');
         return null;
       },
+    },
+    modality: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? getModality(profile?.professional_data?.modality)
+          : [],
+      error: '',
+      validate: (
+        value: Modality[],
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
+        ctx?.type === UserType.INTERPRETER && (!value || value.length === 0)
+          ? buildRequiredFieldError('modality')
+          : null,
+    },
+    state: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.locations?.[0]?.uf || ''
+          : '',
+      error: '',
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null => {
+        return ctx?.type === UserType.INTERPRETER &&
+          ctx?.modality.includes(Modality.PERSONALLY) &&
+          !value.trim()
+          ? buildRequiredFieldError('state')
+          : null;
+      },
+    },
+    city: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.locations?.[0]?.city || ''
+          : '',
+      error: '',
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
+        ctx?.type === UserType.INTERPRETER &&
+        ctx?.modality.includes(Modality.PERSONALLY) &&
+        !value.trim()
+          ? buildRequiredFieldError('city')
+          : null,
+    },
+    neighborhoods: {
+      value:
+        profile?.type === UserType.INTERPRETER
+          ? profile?.locations?.map((l) => l.neighborhood) || ['']
+          : [''],
+      error: '',
+      validate: (
+        value: string[],
+        ctx?: EditProfileValidationContext,
+      ): string | null =>
+        ctx?.type === UserType.INTERPRETER &&
+        ctx?.modality.includes(Modality.PERSONALLY) &&
+        (!value || value.length === 0 || value.some((v) => !v.trim()))
+          ? buildRequiredFieldError('neighborhoods')
+          : null,
     },
     imageRight: {
       value:
@@ -224,7 +339,8 @@ export default function EditProfileScreen() {
           ? mapImageRights(profile?.professional_data?.image_rights)
           : '',
       error: '',
-      validate: (_value: string, _ctx?: { type: string }) => null,
+      validate: (_value: string, _ctx?: EditProfileValidationContext): null =>
+        null,
     },
     minPrice: {
       value:
@@ -232,7 +348,20 @@ export default function EditProfileScreen() {
           ? (profile?.professional_data?.min_value?.toString() ?? '')
           : '',
       error: '',
-      validate: (_value: string, _ctx?: { type: string }) => null,
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null => {
+        if (ctx?.type === UserType.INTERPRETER && !value.trim())
+          return buildRequiredFieldError('min');
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          fields.maxPrice.value &&
+          Number(value) > Number(fields.maxPrice.value)
+        )
+          return buildInvalidFieldError('min');
+        return null;
+      },
     },
     maxPrice: {
       value:
@@ -240,32 +369,107 @@ export default function EditProfileScreen() {
           ? (profile?.professional_data?.max_value?.toString() ?? '')
           : '',
       error: '',
-      validate: (_value: string, _ctx?: { type: string }) => null,
+      validate: (
+        value: string,
+        ctx?: EditProfileValidationContext,
+      ): string | null => {
+        if (ctx?.type === UserType.INTERPRETER && !value.trim())
+          return buildRequiredFieldError('max');
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          fields.minPrice.value &&
+          Number(fields.minPrice.value) > Number(value)
+        )
+          return buildInvalidFieldError('max');
+        return null;
+      },
     },
   });
 
   // Early return if no profile data
-  if (!profile) {
-    console.error('No profile data provided in params');
+  useEffect(() => {
+    if (!profile) {
+      console.error('No profile data provided in params');
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.errorTitle,
+        text2: Strings.edit.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      router.back();
+    }
+  }, [profile]);
+
+  // Fetch all states
+  const [selectedState, setselectedState] = useState(fields.state.value);
+  const { data: states } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.base,
+  );
+
+  let stateOptions: OptionItem[] = [];
+  if (states?.success && states?.data) {
+    stateOptions = states.data.map((state) => ({
+      label: state.name,
+      value: state.name,
+    }));
+  }
+
+  // Fetch cities based on selected state
+  const { data: cities } = useApiGet<StateAndCityResponse>(
+    ApiRoutes.states.cities(selectedState),
+  );
+
+  let cityOptions: OptionItem[] = [];
+  if (cities?.success && cities?.data) {
+    cityOptions = cities.data.map((city) => ({
+      label: city.name,
+      value: city.name,
+    }));
+  }
+
+  const handleDateChange = (_event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+      setValue('birthday', formatDate(selectedDate));
+    }
+  };
+
+  const handlePickProfileAvatar = async () => {
+    const image = await pickImage();
+    if (image) {
+      console.warn('Picked image:', image);
+      setSelectedImage(image);
+    }
+  };
+
+  function handleBack() {
+    clearErrors();
     router.back();
-    Toast.show({
-      type: 'error',
-      text1: Strings.edit.toast.errorTitle,
-      text2: Strings.edit.toast.errorDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1, // To "hide" the close icon
-    });
-    return null;
   }
 
   async function handleUpdate() {
     if (!profile) return;
-    if (!validateForm({ type: profile.type })) return;
+    if (
+      !validateForm({
+        type: profile.type,
+        state: selectedState,
+        modality: fields.modality.value,
+      })
+    )
+      return;
 
     const payload = buildEditPayload(profile.type, fields);
     if (!payload) return;
+
+    const specialtiesPayload = {
+      specialtyIds: fields.selectedSpecialties.value,
+      replaceExisting: true,
+    };
+    console.log('Submitting payload:', payload, specialtiesPayload);
 
     let api;
     switch (profile.type) {
@@ -281,11 +485,16 @@ export default function EditProfileScreen() {
       default:
         return;
     }
-    if (!api) return;
+    if (!api && !userSpecialtyApi) return;
 
-    const result = await api.patch(payload);
+    const profileResponse = await api.patch(payload);
+    // const specialtyResponse = await userSpecialtyApi.post(specialtiesPayload);
 
-    if (!result?.success || !result?.data) {
+    if (
+      !profileResponse?.success ||
+      !profileResponse?.data
+      // !specialtyResponse?.success
+    ) {
       console.error('Update error:', api.error || 'Unknown error');
       Toast.show({
         type: 'error',
@@ -300,7 +509,7 @@ export default function EditProfileScreen() {
     }
 
     // Successful update logic (e.g., navigate to login)
-    router.back();
+    router.replace('/(tabs)/(profile)');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
       type: 'success',
@@ -331,6 +540,33 @@ export default function EditProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View className="mt-8">
+            <TouchableOpacity
+              onPress={handlePickProfileAvatar}
+              className="justify-center items-center mb-4"
+            >
+              <View className="relative">
+                <Avatar size="lg" borderRadius="full" className="h-32 w-32">
+                  <AvatarImage
+                    source={{
+                      uri:
+                        selectedImage?.uri ||
+                        profile?.picture ||
+                        'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                    }}
+                  />
+                </Avatar>
+                <View className="absolute bottom-2 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
+                  <Pencil size={20} color={colors.primaryBlue} />
+                </View>
+              </View>
+              <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.edit.basicData}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View className="w-full h-px bg-gray-200 mb-6" />
+
             <View className="w-full flex-row self-start items-center gap-2 mb-4">
               <FileText />
               <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -364,6 +600,35 @@ export default function EditProfileScreen() {
                       />
                       <FormControlErrorText>
                         {fields.reason.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
+
+                  <FormControl isRequired isInvalid={!!fields.cnpj.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.cnpj}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <Input>
+                      <InputField
+                        placeholder="00.000.000/0001-00"
+                        className="font-ifood-regular"
+                        value={fields.cnpj.value}
+                        onChangeText={(v) =>
+                          setValue('cnpj', handleCnpjChange(v))
+                        }
+                        maxLength={18}
+                        keyboardType="numeric"
+                      />
+                    </Input>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.cnpj.error}
                       </FormControlErrorText>
                     </FormControlError>
                   </FormControl>
@@ -520,7 +785,7 @@ export default function EditProfileScreen() {
                 </FormControl>
               </View>
 
-              {/* Preferências ou Área Profissional */}
+              {/* Preferences or Professional Area */}
               <View className="flex-row self-start mt-10 gap-2">
                 {profile?.type === UserType.INTERPRETER ? (
                   <>
@@ -541,7 +806,7 @@ export default function EditProfileScreen() {
 
               <FormControl
                 isRequired
-                isInvalid={!!fields.gender.error}
+                isInvalid={!!fields.selectedSpecialties.error}
                 className="mt-4"
               >
                 <FormControlLabel>
@@ -555,7 +820,7 @@ export default function EditProfileScreen() {
                   onSelectionChange={(value) =>
                     setValue('selectedSpecialties', value)
                   }
-                  hasError={!!fields.gender.error}
+                  hasError={!!fields.selectedSpecialties.error}
                 />
                 <FormControlError>
                   <FormControlErrorIcon
@@ -563,31 +828,82 @@ export default function EditProfileScreen() {
                     className="text-red-600"
                   />
                   <FormControlErrorText>
-                    {fields.gender.error}
+                    {fields.selectedSpecialties.error}
                   </FormControlErrorText>
                 </FormControlError>
               </FormControl>
 
               {profile?.type === UserType.INTERPRETER && (
                 <>
-                  <View className="my-4">
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.description}
-                    </Text>
+                  <FormControl isInvalid={!!fields.cnpj.error} className="mt-4">
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.cnpj} (
+                        {Strings.common.fields.optional})
+                      </FormControlLabelText>
+                    </FormControlLabel>
+                    <Input>
+                      <InputField
+                        placeholder="00.000.000/0001-00"
+                        className="font-ifood-regular"
+                        value={fields.cnpj.value}
+                        onChangeText={(v) =>
+                          setValue('cnpj', handleCnpjChange(v))
+                        }
+                        maxLength={18}
+                        keyboardType="numeric"
+                      />
+                    </Input>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.cnpj.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
+
+                  <FormControl
+                    isRequired
+                    isInvalid={!!fields.description.error}
+                    className="mt-4 mb-6"
+                  >
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.description}
+                      </FormControlLabelText>
+                    </FormControlLabel>
                     <TextInput
-                      className="w-90 border rounded border-primary-0 focus:border-primary-950 p-2"
+                      className={`w-90 border rounded p-2 ${
+                        fields.description.error
+                          ? 'border-error-700'
+                          : 'border-primary-0 focus:border-primary-950'
+                      }`}
                       multiline
                       numberOfLines={7}
-                      placeholder=""
                       value={fields.description.value}
                       onChangeText={(text) => setValue('description', text)}
+                      inputMode="text"
                     />
-                  </View>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.description.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
 
-                  <View>
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.modality}
-                    </Text>
+                  <FormControl isRequired isInvalid={!!fields.modality.error}>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.modality}
+                      </FormControlLabelText>
+                    </FormControlLabel>
                     <CheckboxGroup
                       value={fields.modality.value}
                       onChange={(keys: string[]) => {
@@ -612,36 +928,184 @@ export default function EditProfileScreen() {
                         </CheckboxLabel>
                       </Checkbox>
                     </CheckboxGroup>
-                  </View>
+                    <FormControlError>
+                      <FormControlErrorIcon
+                        as={AlertCircleIcon}
+                        className="text-red-600"
+                      />
+                      <FormControlErrorText>
+                        {fields.modality.error}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
 
-                  {/* Localização */}
-                  <View>
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.location}
-                    </Text>
-
-                    <View className="flex-row justify-between mt-2 mb-4">
-                      {/* UF */}
+                  {/* Location */}
+                  {fields.modality.value.includes(Modality.PERSONALLY) && (
+                    <View className="mt-4">
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.state}
+                        {Strings.common.fields.location}*
                       </Text>
 
-                      {/* Cidade */}
-                      <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.cities}
-                      </Text>
+                      <View className="flex-row justify-between mt-2 mb-4">
+                        {/* State */}
+                        <FormControl
+                          isInvalid={!!fields.state.error}
+                          className="w-24"
+                        >
+                          <FormControlLabel>
+                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                              {Strings.common.fields.state}
+                            </FormControlLabelText>
+                          </FormControlLabel>
+                          <ModalSingleSelection
+                            items={stateOptions}
+                            selectedValue={fields.state.value}
+                            onSelectionChange={(value) => {
+                              setValue('state', value);
+                              setselectedState(value);
+                              setValue('city', '');
+                            }}
+                            placeholderText={Strings.common.fields.state}
+                            hasError={!!fields.state.error}
+                          />
+                          <FormControlError>
+                            <FormControlErrorIcon
+                              as={AlertCircleIcon}
+                              className="text-red-600"
+                            />
+                            <FormControlErrorText>
+                              {fields.state.error}
+                            </FormControlErrorText>
+                          </FormControlError>
+                        </FormControl>
+
+                        {/* City */}
+                        <FormControl
+                          isInvalid={!!fields.city.error}
+                          className="w-52"
+                        >
+                          <FormControlLabel>
+                            <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                              {Strings.common.fields.city}
+                            </FormControlLabelText>
+                          </FormControlLabel>
+                          <ModalSingleSelection
+                            items={cityOptions}
+                            selectedValue={fields.city.value}
+                            onSelectionChange={(value) => {
+                              setValue('city', value);
+                            }}
+                            placeholderText={Strings.common.fields.city}
+                            hasError={!!fields.city.error}
+                          />
+                          <FormControlError>
+                            <FormControlErrorIcon
+                              as={AlertCircleIcon}
+                              className="text-red-600"
+                            />
+                            <FormControlErrorText>
+                              {fields.city.error}
+                            </FormControlErrorText>
+                          </FormControlError>
+                        </FormControl>
+                      </View>
+
+                      {/* Neighborhoods */}
+                      <FormControl isInvalid={!!fields.neighborhoods.error}>
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.neighborhoods}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <View className="flex-col gap-2">
+                          {fields.neighborhoods.value.map(
+                            (neighborhood: string, idx: number) => (
+                              <View
+                                key={idx}
+                                className="flex-row items-center gap-2"
+                              >
+                                <Input className="flex-1">
+                                  <InputField
+                                    placeholder={`Bairro ${idx + 1}`}
+                                    className="font-ifood-regular"
+                                    value={neighborhood}
+                                    autoCapitalize="none"
+                                    onChangeText={(v) => {
+                                      const updated = [
+                                        ...fields.neighborhoods.value,
+                                      ];
+                                      updated[idx] = v;
+                                      setValue('neighborhoods', updated);
+                                    }}
+                                    keyboardType="default"
+                                    maxLength={100}
+                                  />
+                                </Input>
+                                {/* Only show "-" button if not the first input */}
+                                {fields.neighborhoods.value.length > 1 &&
+                                  idx !== 0 && (
+                                    <Button
+                                      size="sm"
+                                      variant="linked"
+                                      onPress={() => {
+                                        const updated: string[] =
+                                          fields.neighborhoods.value.filter(
+                                            (_: string, i: number) => i !== idx,
+                                          );
+                                        setValue(
+                                          'neighborhoods',
+                                          updated.length ? updated : [''],
+                                        );
+                                      }}
+                                      className="px-2 bg-transparent data-[active=true]:bg-primary-50/15"
+                                    >
+                                      <Text className="text-primary-800">
+                                        -
+                                      </Text>
+                                    </Button>
+                                  )}
+                                {/* "+" button only on the last input and if not reached max */}
+                                {idx ===
+                                  fields.neighborhoods.value.length - 1 &&
+                                  fields.neighborhoods.value.length <
+                                    MAX_NEIGHBORHOODS && (
+                                    <Button
+                                      size="sm"
+                                      variant="linked"
+                                      onPress={() =>
+                                        setValue('neighborhoods', [
+                                          ...fields.neighborhoods.value,
+                                          '',
+                                        ])
+                                      }
+                                      className="px-2 bg-transparent data-[active=true]:bg-primary-blue-press-light/15"
+                                    >
+                                      <Text className="text-primary-blue-light">
+                                        +
+                                      </Text>
+                                    </Button>
+                                  )}
+                              </View>
+                            ),
+                          )}
+                        </View>
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.neighborhoods.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
                     </View>
+                  )}
 
-                    {/* Bairro */}
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.neighborhoods}
-                    </Text>
-                  </View>
-
-                  {/* Direito de Imagem */}
-                  <View className="w-80 my-4">
+                  {/* Image Rights */}
+                  <View className="w-80 my-6">
                     <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
-                      {Strings.common.fields.imageRights}
+                      {Strings.common.fields.imageRights}*
                     </Text>
                     <RadioGroup
                       value={fields.imageRight.value}
@@ -689,50 +1153,121 @@ export default function EditProfileScreen() {
                     </RadioGroup>
                   </View>
 
-                  {/* Valores Max/Min */}
+                  {/* Values Max/Min */}
                   <View className="w-80">
                     <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.valueRange}
+                      {Strings.common.fields.valueRange}*
                     </Text>
-                    <View className="flex-row justify-between">
-                      <View>
-                        <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.min}
-                        </Text>
-                        <Input size="lg" className="w-36">
+                    <View className="flex-row justify-between mt-2">
+                      <FormControl isInvalid={!!fields.minPrice.error}>
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.min}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <Input className="w-36">
                           <InputField
-                            type="text"
-                            placeholder="100"
+                            className="font-ifood-regular"
+                            placeholder="0"
                             value={fields.minPrice.value}
-                            onChangeText={(text) => setValue('minPrice', text)}
+                            onChangeText={(v) => setValue('minPrice', v)}
                             keyboardType="numeric"
                           />
                         </Input>
-                      </View>
-                      <View>
-                        <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.max}
-                        </Text>
-                        <Input size="lg" className="w-36">
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.minPrice.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
+
+                      <FormControl isInvalid={!!fields.maxPrice.error}>
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.max}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <Input className="w-36">
                           <InputField
-                            type="text"
-                            placeholder="1000"
+                            className="font-ifood-regular"
+                            placeholder="100"
                             value={fields.maxPrice.value}
-                            onChangeText={(text) => setValue('maxPrice', text)}
+                            onChangeText={(v) => setValue('maxPrice', v)}
                             keyboardType="numeric"
                           />
                         </Input>
-                      </View>
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.maxPrice.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
                     </View>
                   </View>
 
-                  {/* Horários */}
-                  <View className="w-80 mt-4">
-                    <Text className="font-ifood-large text-text-light dark:text-text-dark">
-                      {Strings.hours.title}
-                    </Text>
-                    {/** TO DO: Add week hours inputs */}
-                  </View>
+                  {/* Schedule */}
+                  {SCHEDULE_ENABLED && (
+                    <View className="w-full mt-6">
+                      <Text className="font-ifood-medium text-text-light dark:text-text-dark mb-2">
+                        {Strings.hours.title}
+                      </Text>
+                      <View className="flex-col gap-2">
+                        {Object.entries(Strings.days).map(([key, label]) => (
+                          <FormControl key={key} className="mb-2">
+                            <View className="flex-row items-center gap-1">
+                              <Text className="w-32 font-ifood-regular text-text-light dark:text-text-dark">
+                                {label}
+                              </Text>
+                              <ModalSingleSelection
+                                items={hourOptions}
+                                selectedValue={schedule[key].from}
+                                onSelectionChange={(value) =>
+                                  setSchedule((prev) => ({
+                                    ...prev,
+                                    [key]: { ...prev[key], from: value },
+                                  }))
+                                }
+                                placeholderText={Strings.hours.from}
+                                scrollableHeight={220}
+                                minWidth={72}
+                              />
+                              <Text className="mx-1 text-text-light dark:text-text-dark">
+                                -
+                              </Text>
+                              <ModalSingleSelection
+                                items={hourOptions}
+                                selectedValue={schedule[key].to}
+                                onSelectionChange={(value) =>
+                                  setSchedule((prev) => ({
+                                    ...prev,
+                                    [key]: { ...prev[key], to: value },
+                                  }))
+                                }
+                                placeholderText={Strings.hours.to}
+                                scrollableHeight={220}
+                                minWidth={72}
+                              />
+                            </View>
+                            <FormControlError>
+                              <FormControlErrorIcon
+                                as={AlertCircleIcon}
+                                className="text-red-600"
+                              />
+                              <FormControlErrorText />
+                            </FormControlError>
+                          </FormControl>
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </>
               )}
             </View>

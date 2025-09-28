@@ -14,16 +14,16 @@ export interface PersonBody {
   birthday: string;
   email: string;
   phone: string;
-  picture: string;
+  picture?: string;
   password?: string;
 }
 
 export interface EnterpriseBody {
   corporate_reason: string;
-  cnpj: string;
+  cnpj?: string;
   email: string;
   phone: string;
-  picture: string;
+  picture?: string;
   password?: string;
 }
 
@@ -34,7 +34,7 @@ export interface InterpreterBody {
   phone: string;
   gender: Gender;
   birthday: string;
-  picture: string;
+  picture?: string;
   password?: string;
   locations?: Location[];
   specialties?: Specialty[];
@@ -59,6 +59,7 @@ export interface PersonResponseData {
   status: string;
   gender: Gender;
   birthday: string;
+  specialties?: Specialty[];
 }
 
 export interface EnterpriseResponseData {
@@ -70,6 +71,7 @@ export interface EnterpriseResponseData {
   status: string;
   phone: string;
   picture: string;
+  specialties?: Specialty[];
 }
 
 export interface InterpreterResponseData {
@@ -83,7 +85,7 @@ export interface InterpreterResponseData {
   picture: string;
   gender: Gender;
   birthday: string;
-  locations: Location[] | null;
+  locations: Location[];
   specialties: Specialty[];
   professional_data: {
     cnpj: string | null;

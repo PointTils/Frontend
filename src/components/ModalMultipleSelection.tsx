@@ -46,6 +46,7 @@ interface ModalMultipleSelectionProps {
   hasError?: boolean;
   scrollableHeight?: number;
   maxSelections?: number;
+  minWidth?: number;
 }
 
 export default function ModalMultipleSelection({
@@ -56,6 +57,7 @@ export default function ModalMultipleSelection({
   hasError = false,
   scrollableHeight = 280,
   maxSelections,
+  minWidth = 44,
 }: ModalMultipleSelectionProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const colors = useColors();
@@ -83,6 +85,7 @@ export default function ModalMultipleSelection({
     borderColor: hasError ? colors.mandatory : colors.fieldGray,
     backgroundColor: colors.background,
     borderWidth: 1,
+    minWidth: minWidth,
   };
 
   const getDisplayText = () => {
