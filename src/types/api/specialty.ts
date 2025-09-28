@@ -1,19 +1,17 @@
 export interface UserSpecialty {
   id: string;
-  userId: string;
-  specialtyId: string;
-  specialtyName: string;
+  user_id: string;
+  specialty_id: string;
+  specialty_name: string;
 }
 
 export interface UserSpecialtyResponse {
   success: boolean;
   message: string;
-  data: {
-    userSpecialties: UserSpecialty[];
-  };
+  data: UserSpecialty[];
 }
 
 export interface UserSpecialtyRequest {
-  specialtyIds: string[];
-  replaceExisting: boolean;
+  specialty_ids: string[];
+  replace_existing: boolean;
 }
