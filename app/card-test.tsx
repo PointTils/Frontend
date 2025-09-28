@@ -15,7 +15,7 @@ export default function CardTestScreen() {
           rating={4.4}
           showRating
           date="20/08/2025 11:30 - 12:30"
-          location="Av. Ipiranga 6681, Parte..."
+          location="Av. Ipiranga 6681, Partenon, Porto Alegre - RS"
         />
 
         {/* CARD 2 — TIL (CPF) sem estrelas */}
@@ -36,7 +36,7 @@ export default function CardTestScreen() {
           showRating={false}
           pending
           date="20/08/2025 11:30 - 12:30"
-          location="Av. Ipiranga 6681, Parte..."
+          location="Av. Ipiranga 6681, Partenon, Porto Alegre - RS"
         />
 
         {/* CARD 4 — Search (com Localização) */}
@@ -45,7 +45,7 @@ export default function CardTestScreen() {
           photoUrl="https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg"
           fullName="Nome Sobrenome"
           specialty="Intérprete de Libras"
-          rating={4.5}
+          rating={5.0}
           modality="Presencial/Online"
           priceRange="R$ 100 - R$ 2.500"
           location="Porto Alegre, Canoas & Gravataí"

@@ -14,7 +14,9 @@ export default function HomeScreen() {
       className="flex-1 items-center justify-center"
       accessibilityLabel={Strings.home.tabBar}
     >
-      <Text className="font-ifood-regular text-center mb-6">{Strings.home.tabBar}</Text>
+      <Text className="font-ifood-regular text-center mb-6">
+        {Strings.home.tabBar}
+      </Text>
       <Button action="primary" onPress={navigateToCardTest}>
         <ButtonText>Testar Componente Card</ButtonText>
       </Button>

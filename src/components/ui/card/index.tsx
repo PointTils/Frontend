@@ -3,6 +3,79 @@ import { View, Image, Pressable } from 'react-native';
 import { Text } from '@/src/components/ui/text';
 import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
 import { useColors } from '@/src/hooks/useColors';
+import { Strings } from '@/src/constants/Strings';
+
+/**
+ * A reusable card used across two variants:
+ * - 'appointment': shows date and location
+ * - 'search': shows modality, optional location, and price range
+ *
+ * Notes:
+ * - Rating is displayed with simple stars and a numeric value.
+ * - When `pending` is true, a small "Pendente" badge is shown.
+ *
+ * Usage examples:
+ *
+ * @example
+ * ```tsx
+ * import React from 'react';
+ * import { SafeAreaView } from 'react-native-safe-area-context';
+ * import { View } from '@/src/components/ui/view';
+ * import { Card } from '@/src/components/ui/card';
+ *
+ * export default function CardTestScreen() {
+ *   return (
+ *     <SafeAreaView className="flex-1 bg-background-50">
+ *       <View className="flex-1 items-center p-4 gap-y-6">
+ *         // CARD 1 — Appointment with rating
+ *         <Card
+ *           photoUrl="https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg"
+ *           fullName="Nome Sobrenome"
+ *           specialty="Intérprete de Libras"
+ *           rating={4.4}
+ *           showRating
+ *           date="20/08/2025 11:30 - 12:30"
+ *           location="Av. Ipiranga 6681, Partenon, Porto Alegre - RS"
+ *         />
+ *
+ *         // CARD 2 — TIL (CPF) without stars
+ *         <Card
+ *           photoUrl="https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg"
+ *           fullName="Nome Sobrenome"
+ *           subtitle="XXX.XXX.XXX-XX"
+ *           showRating={false}
+ *           date="20/08/2025 11:30 - 12:30"
+ *           location="Online"
+ *         />
+ *
+ *         // CARD 3 — TIL (CNPJ) without stars + Pending
+ *         <Card
+ *           photoUrl="https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg"
+ *           fullName="Razão social"
+ *           subtitle="XX.XXX.XXX/0001-XX"
+ *           showRating={false}
+ *           pending
+ *           date="20/08/2025 11:30 - 12:30"
+ *           location="Av. Ipiranga 6681, Partenon, Porto Alegre - RS"
+ *         />
+ *
+ *         // CARD 4 — Search (with Location)
+ *         <Card
+ *           variant="search"
+ *           photoUrl="https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg"
+ *           fullName="Nome Sobrenome"
+ *           specialty="Intérprete de Libras"
+ *           rating={4.5}
+ *           modality="Presencial/Online"
+ *           priceRange="R$ 100 - R$ 2.500"
+ *           location="Porto Alegre, Canoas & Gravataí"
+ *         />
+ *       </View>
+ *     </SafeAreaView>
+ *   );
+ * }
+ * ```
+ */
 
 type CardVariant = 'appointment' | 'search';
 
@@ -10,29 +83,30 @@ interface CardProps {
   photoUrl: string;
   fullName: string;
 
-  /** Subtítulo (ex.: especialidade ou CPF/CNPJ) */
+  /** Subtitle (e.g., specialty or CPF/CNPJ) */
   subtitle?: string;
-  /** Mantido p/ compat: usado se 'subtitle' não vier */
+  /** Kept for backward compatibility: used if 'subtitle' is not provided */
   specialty?: string;
 
-  /** Avaliação 0..5 (mostra se showRating=true) */
+  /** Rating 0..5 (visible when showRating=true) */
   rating?: number;
   showRating?: boolean;
 
-  /** Card 3: badge de "pendente" */
+  /** Card 3: "pending" badge */
   pending?: boolean;
   pendingLabel?: string;
 
-  /** Campos "Appointment" (cards 1–3) */
+  /** "Appointment" fields (cards 1–3) */
   date?: string;
   location?: string;
 
-  /** Campos "Search" (card 4) */
-  variant?: CardVariant;            // 'appointment' | 'search'
-  modality?: string;                // ex.: "Presencial/Online" ou "Online"
-  priceRange?: string;              // ex.: "R$ 100 - R$ 2.500"
-  isOnlineOnly?: boolean;           // true => oculta Localização
+  /** "Search" fields (card 4) */
+  variant?: CardVariant; // 'appointment' | 'search'
+  modality?: string; // e.g., "Presencial/Online" or "Online"
+  priceRange?: string; // e.g., "R$ 100 - R$ 2.500"
+  isOnlineOnly?: boolean; // true => hides Location
 
+  /** Additional Tailwind classes */
   className?: string;
   onPress?: () => void;
 }
@@ -64,24 +138,32 @@ export function Card({
 
     for (let i = 0; i < full; i++) {
       stars.push(
-        <Text key={`full-${i}`} className="text-lg" style={{ color: colors.primaryBlue }}>
+        <Text
+          key={`full-${i}`}
+          className="text-lg leading-none"
+          style={{ color: colors.primaryBlue }}
+        >
           ★
-        </Text>
+        </Text>,
       );
     }
     if (hasHalf) {
       stars.push(
-        <Text key="half" className="text-lg" style={{ color: colors.primaryBlue }}>
+        <Text
+          key="half"
+          className="text-lg leading-none"
+          style={{ color: colors.primaryBlue }}
+        >
           ☆
-        </Text>
+        </Text>,
       );
     }
     const empty = 5 - Math.ceil(value);
     for (let i = 0; i < empty; i++) {
       stars.push(
-        <Text key={`empty-${i}`} className="text-gray-300 text-lg">
+        <Text key={`empty-${i}`} className="text-gray-300 text-lg leading-none">
           ☆
-        </Text>
+        </Text>,
       );
     }
     return stars;
@@ -90,61 +172,79 @@ export function Card({
   /** --- Bottom section renderers --- */
   const renderAppointmentBottom = () => (
     <View className="flex-row">
-      {/* Data */}
-      <View className="flex-1 mr-4">
+      {/* Date */}
+      <View className="flex-1 mr-8">
         <View className="flex-row items-center mb-1">
-          <CalendarDays size={12} color="#000000" />
-          <Text className="text-primary-800 text-xs font-medium ml-1">Data</Text>
+          <CalendarDays size={12} color={colors.text} />
+          <Text className="text-primary-800 text-xs font-medium ml-1">
+            {Strings.common.fields.date}
+          </Text>
         </View>
         <Text className="text-typography-500 text-xs">{date}</Text>
       </View>
 
-      {/* Localização */}
+      {/* Location */}
       <View className="flex-1">
         <View className="flex-row items-center mb-1">
-          <MapPin size={12} color="#000000" />
-          <Text className="text-primary-800 text-xs font-regular ml-1">Localização</Text>
+          <MapPin size={12} color={colors.text} />
+          <Text className="text-primary-800 text-xs font-medium ml-1">
+            {Strings.common.fields.location}
+          </Text>
         </View>
-        <Text className="text-typography-500 text-xs">{location}</Text>
+        <Text
+          className="text-typography-500 text-xs shrink"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {location}
+        </Text>
       </View>
     </View>
   );
 
   const renderSearchBottom = () => (
     <View>
+      {/* First row: modality | price range */}
       <View className="flex-row">
-        {/* Modalidade (e Localização logo abaixo, se houver) */}
-        <View className="flex-1 mr-4">
+        <View className="flex-1 mr-8">
           <View className="flex-row items-center mb-1">
-            <Info size={12} color="#000000" />
-            <Text className="text-primary-800 text-xs font-medium ml-1">Modalidade</Text>
+            <Info size={12} color={colors.text} />
+            <Text className="text-primary-800 text-xs font-medium ml-1">
+              {Strings.common.fields.modality}
+            </Text>
           </View>
           <Text className="text-typography-500 text-xs">{modality}</Text>
-
-          {!isOnlineOnly && !!location && (
-            <View className="mt-4">
-              <View className="flex-row items-center mb-1">
-                <MapPin size={12} color="#000000" />
-                <Text className="text-primary-800 text-xs font-regular ml-1">
-                  Localização
-                </Text>
-              </View>
-              <Text className="text-typography-500 text-xs">{location}</Text>
-            </View>
-          )}
         </View>
 
-        {/* Faixa de valores */}
         <View className="flex-1">
           <View className="flex-row items-center mb-1">
-            <Wallet size={12} color="#000000" />
-            <Text className="text-primary-800 text-xs font-regular ml-1">
-              Faixa de valores
+            <Wallet size={12} color={colors.text} />
+            <Text className="text-primary-800 text-xs font-medium ml-1">
+              {Strings.common.fields.valueRange}
             </Text>
           </View>
           <Text className="text-typography-500 text-xs">{priceRange}</Text>
         </View>
       </View>
+
+      {/* Second row: location spanning full width */}
+      {!isOnlineOnly && !!location && (
+        <View className="mt-4">
+          <View className="flex-row items-center mb-1">
+            <MapPin size={12} color={colors.text} />
+            <Text className="text-primary-800 text-xs font-medium ml-1">
+              {Strings.common.fields.location}
+            </Text>
+          </View>
+          <Text
+            className="text-typography-500 text-xs shrink"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {location}
+          </Text>
+        </View>
+      )}
     </View>
   );
 
@@ -153,20 +253,23 @@ export function Card({
       onPress={onPress}
       className={`relative bg-background-0 p-6 w-full ${className || ''}`}
     >
-      {/* Badge Pendente (Card 3) */}
+      {/* Pending badge (Card 3) */}
       {pending && (
         <View
           className="absolute right-6 top-6 flex-row items-center px-2.5 py-1 rounded-md"
-          style={{ backgroundColor: '#FCEFE6' }}
+          style={{ backgroundColor: colors.pendingBadgeBackground }}
         >
-          <Info size={12} color="#C96A2C" />
-          <Text className="ml-1 text-xs font-medium" style={{ color: '#C96A2C' }}>
+          <Info size={12} color={colors.pendingBadge} />
+          <Text
+            className="ml-1 text-xs font-medium"
+            style={{ color: colors.pendingBadge }}
+          >
             {pendingLabel}
           </Text>
         </View>
       )}
 
-      {/* Cabeçalho (Avatar + Título/Subtitle + Rating) */}
+      {/* Header (Avatar + Title/Subtitle + Rating) */}
       <View className="flex-row items-start mb-4 pr-20">
         <Image
           source={{ uri: photoUrl }}
@@ -194,15 +297,17 @@ export function Card({
           )}
 
           {showRating && typeof rating === 'number' && (
-            <View className="flex-row items-center mt-1">
+            <View className="flex-row items-end mt-1">
               <View className="flex-row mr-2">{renderStars(rating)}</View>
-              <Text className="text-typography-600 text-xs">{rating.toFixed(1)}</Text>
+              <Text className="text-typography-600 text-xs leading-none">
+                {rating.toFixed(1)}
+              </Text>
             </View>
           )}
         </View>
       </View>
 
-      {/* Base conforme o variant */}
+      {/* Bottom area based on variant */}
       {variant === 'search' ? renderSearchBottom() : renderAppointmentBottom()}
     </Pressable>
   );

@@ -57,6 +57,7 @@ export const Strings = {
       preferences: 'Preferências',
       optional: 'Opcional',
       professionalArea: 'Área profissional',
+      date: 'Data',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
