@@ -4,8 +4,14 @@
  *
  * - FORCE_LIGHT_MODE: Forces the app to use light mode regardless of system preference.
  * - HIDE_TABBAR_SEGMENTS: List of route segments where the tab bar should be hidden.
+ * - SCHEDULE_ENABLED: Toggles the availability of scheduling features in the app.
+ * - MAX_NEIGHBORHOODS: Maximum number of neighborhoods a user can select in forms.
  */
 
 export const FORCE_LIGHT_MODE = true;
 
 export const HIDE_TABBAR_SEGMENTS = ['edit'];
+
+export const SCHEDULE_ENABLED = false;
+
+export const MAX_NEIGHBORHOODS = 5;

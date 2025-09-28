@@ -83,21 +83,28 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
     case UserType.PERSON:
       return {
         name: fields.name.value,
+        email: fields.email.value,
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
-        email: fields.email.value,
         phone: fields.phone.value.replace(/\D/g, ''),
         picture: '',
       };
     case UserType.ENTERPRISE:
       return {
-        cnpj: fields.cnpj.value,
+        corporate_reason: fields.reason.value,
+        cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         phone: fields.phone.value.replace(/\D/g, ''),
-        corporate_reason: fields.reason.value,
         picture: '',
       };
     case UserType.INTERPRETER:
+      const neighborhoods = (fields.neighborhoods.value ?? []) as string[];
+      const locations = neighborhoods.map((n) => ({
+        uf: fields.state.value,
+        city: fields.city.value,
+        neighborhood: n,
+      }));
+
       return {
         name: fields.name.value,
         email: fields.email.value,
@@ -105,10 +112,11 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         picture: '',
-        // locations: /* your logic */,
-        // specialties: /* your logic */,
+        ...(locations.length > 0 ? { locations } : {}),
         professional_data: {
-          cnpj: fields.cnpj.value.replace(/\D/g, ''),
+          ...(fields.cnpj.value
+            ? { cnpj: fields.cnpj.value.replace(/\D/g, '') }
+            : { cnpj: null }),
           modality: modalityToSend(fields.modality.value),
           description: fields.description.value,
           image_rights:

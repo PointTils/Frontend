@@ -1,4 +1,5 @@
 import { Strings } from '@/src/constants/Strings';
+import type { TimeRange } from '@/src/types/common';
 import { Gender, Modality } from '@/src/types/common';
 
 /**
@@ -61,11 +62,28 @@ export const handleTimeChange = (text: string) => {
 export const formatDate = (date?: string | Date | null) => {
   // Returns "DD/MM/AAAA"
   if (!date) return '';
-  const dt = typeof date === 'string' ? new Date(date) : date;
-  if (!(dt instanceof Date) || Number.isNaN(dt.getTime())) return '';
-  const day = String(dt.getDate()).padStart(2, '0');
-  const mon = String(dt.getMonth() + 1).padStart(2, '0');
-  const year = dt.getFullYear();
+  if (typeof date === 'string') {
+    // Handle "YYYY-MM-DD" or ISO "YYYY-MM-DDTHH:mm:ss..." without timezone shift
+    const isoLike = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoLike) {
+      const [, year, month, day] = isoLike;
+      return `${day}/${month}/${year}`;
+    }
+    // Already "DD/MM/AAAA"
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) return date;
+
+    // Fallback: parse and use UTC getters to avoid off-by-one
+    const dt = new Date(date);
+    if (Number.isNaN(dt.getTime())) return '';
+    const day = String(dt.getUTCDate()).padStart(2, '0');
+    const mon = String(dt.getUTCMonth() + 1).padStart(2, '0');
+    const year = dt.getUTCFullYear();
+    return `${day}/${mon}/${year}`;
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const mon = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
   return `${day}/${mon}/${year}`;
 };
 
@@ -90,6 +108,25 @@ export const formatValueRange = (min?: number, max?: number) => {
   // Returns "R$ X - R$ Y"
   if (min === undefined && max === undefined) return '-';
   return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
+};
+
+export const formatCnpj = (cnpj?: string | null) => {
+  // Returns "XX.XXX.XXX/XXXX-XX"
+  if (!cnpj) return '';
+  const cleaned = cnpj.replace(/\D/g, '').slice(0, 14);
+
+  const formatted = cleaned
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  return formatted;
+};
+
+export const formatDaySchedule = (range?: TimeRange): string => {
+  const from = range?.from?.trim();
+  const to = range?.to?.trim();
+  return from && to ? `${from} - ${to}` : Strings.common.options.notAvailable;
 };
 
 // Validation

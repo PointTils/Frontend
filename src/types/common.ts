@@ -3,16 +3,18 @@
  * Includes user roles and shared models.
  */
 
+import type { Strings } from '../constants/Strings';
+
 // Models
 export interface Location {
-  id: string | null;
+  id?: string | null;
   city: string;
   neighborhood: string;
-  state: string;
+  uf: string;
 }
 
 export interface Specialty {
-  id: string | null;
+  id?: string | null;
   name: string;
 }
 
@@ -47,15 +49,6 @@ export enum Modality {
 }
 
 // Types
-export type ImageRightsOptions = 'AUTHORIZE' | 'DENY';
+export type Day = keyof typeof Strings.days;
 
-export type Day =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday';
-
-export type TimeRange = [string, string];
+export type TimeRange = { from?: string | null; to?: string | null };

@@ -32,3 +32,8 @@ export const genders: OptionItem[] = [
   { label: Strings.gender.female, value: Gender.FEMALE },
   { label: Strings.gender.others, value: Gender.OTHERS },
 ] as const;
+
+export const hourOptions: OptionItem[] = Array.from({ length: 24 }, (_, i) => {
+  const hour = i.toString().padStart(2, '0');
+  return { label: `${hour}:00`, value: `${hour}:00` };
+});

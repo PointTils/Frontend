@@ -5,15 +5,17 @@ import { InfoRow } from '@/src/components/ui/infoRow';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { SCHEDULE_ENABLED } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { UserResponse } from '@/src/types/api';
-import type { SpecialtyResponse } from '@/src/types/api/specialty';
-import { UserType } from '@/src/types/common';
+import { Modality, UserType } from '@/src/types/common';
+import type { Day } from '@/src/types/common';
 import {
   formatDate,
+  formatDaySchedule,
   formatValueRange,
   handleCnpjChange,
   handlePhoneChange,
@@ -38,36 +40,27 @@ export default function ProfileScreen() {
 
   // Determine API route based on user type
   let route = '';
-  let specialtyRoute = '';
   switch (user?.type) {
     case UserType.PERSON:
       route = ApiRoutes.person.profile(user?.id);
-      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.INTERPRETER:
       route = ApiRoutes.interpreters.profile(user?.id);
-      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
     case UserType.ENTERPRISE:
       route = ApiRoutes.enterprises.profile(user?.id);
-      specialtyRoute = ApiRoutes.userSpecialties.userSpecialties(user?.id);
       break;
   }
 
   // Integration with API to fetch profile data
   const { data, loading, error } = useApiGet<UserResponse>(route);
-  const {
-    data: userSpecialties,
-    loading: specialtiesLoading,
-    error: specialtiesError,
-  } = useApiGet<SpecialtyResponse>(specialtyRoute);
 
   // Early return if not authenticated
   if (!isAuthenticated || !user) {
     return null;
   }
 
-  if (loading || specialtiesLoading) {
+  if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="large" />
@@ -76,14 +69,7 @@ export default function ProfileScreen() {
   }
 
   // Redirect to home if no profile data or error occurs
-  if (
-    error ||
-    !data?.success ||
-    !data.data ||
-    specialtiesError ||
-    !userSpecialties?.success ||
-    !userSpecialties?.data
-  ) {
+  if (error || !data?.success || !data.data) {
     router.push('/(tabs)');
     Toast.show({
       type: 'error',
@@ -98,10 +84,36 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  const chipsItems =
+  const chipsItems = profile.specialties?.map((item) => item.name) ?? [];
+
+  const showLocation =
     profile.type === UserType.INTERPRETER
-      ? (profile.specialties?.map((item) => item.name) ?? undefined)
-      : userSpecialties.data.userSpecialties.map((item) => item.specialtyName);
+      ? profile.professional_data.modality === Modality.ALL ||
+        profile.professional_data.modality === Modality.PERSONALLY
+      : false;
+  const firstLocation =
+    profile.type === UserType.INTERPRETER ? profile.locations?.[0] : undefined;
+  const neighborhoods =
+    profile.type === UserType.INTERPRETER
+      ? Array.from(
+          new Set(
+            (profile.locations || [])
+              .map((l) => l.neighborhood)
+              .filter((n): n is string => !!n && n.trim().length > 0),
+          ),
+        )
+      : [];
+
+  // Simple schedule mock - remove when API supports it
+  const scheduleMock: Record<string, { from?: string; to?: string }> = {
+    monday: { from: '08:00', to: '12:00' },
+    tuesday: { from: '09:00', to: '17:00' },
+    wednesday: { from: '09:00', to: '17:00' },
+    thursday: { from: '09:00', to: '17:00' },
+    friday: { from: '09:00', to: '16:00' },
+    saturday: { from: '', to: '' },
+    sunday: { from: '', to: '' },
+  };
 
   return (
     <View className="flex-1 justify-center items-center mt-8 px-4">
@@ -205,11 +217,6 @@ export default function ProfileScreen() {
               )}
 
               <InfoRow
-                label={Strings.common.fields.modality}
-                value={mapModality(profile.professional_data?.modality)}
-              />
-
-              <InfoRow
                 label={Strings.common.fields.description}
                 value={
                   profile.professional_data?.description
@@ -217,6 +224,33 @@ export default function ProfileScreen() {
                     : undefined
                 }
               />
+
+              <InfoRow
+                label={Strings.common.fields.modality}
+                value={mapModality(profile.professional_data?.modality)}
+              />
+
+              {/* Locations (only if ALL or PERSONALLY) */}
+              {showLocation &&
+                (firstLocation?.city ||
+                  firstLocation?.uf ||
+                  neighborhoods.length > 0) && (
+                  <>
+                    <InfoRow
+                      label={Strings.common.fields.location}
+                      value={
+                        firstLocation?.city && firstLocation?.uf
+                          ? `${firstLocation.city} - ${firstLocation.uf}`
+                          : undefined
+                      }
+                    />
+                    {neighborhoods.length > 0 && (
+                      <Text className="font-ifood-regular text-primary-800 px-2 mb-4 -mt-2">
+                        - {`${neighborhoods.join(', ')}`}
+                      </Text>
+                    )}
+                  </>
+                )}
 
               <InfoRow
                 label={Strings.common.fields.imageRights}
@@ -231,7 +265,31 @@ export default function ProfileScreen() {
                 )}
               />
 
-              {/* TO DO: Show schedule */}
+              {/* Schedule */}
+              {SCHEDULE_ENABLED && (
+                <>
+                  <Text className="w-full pl-2 mt-2 font-ifood-medium text-left mb-1 text-primary-800">
+                    {Strings.hours.title}
+                  </Text>
+
+                  {Object.entries(Strings.days).map(([day, label]) => {
+                    const value = formatDaySchedule(scheduleMock[day as Day]);
+                    return (
+                      <View
+                        key={day}
+                        className="w-full flex-row items-center justify-between px-2 py-1"
+                      >
+                        <Text className="font-ifood-regular text-primary-800">
+                          {label}
+                        </Text>
+                        <Text className="font-ifood-regular text-primary-800">
+                          {value}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </>
+              )}
             </>
           )}
         </View>
