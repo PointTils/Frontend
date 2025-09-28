@@ -325,6 +325,12 @@ export default function ProfileScreen() {
           <Button
             size="md"
             variant={'linked'}
+            onPress={() =>
+              router.replace({
+                pathname: '/interpreters/[id]/to-schedule',
+                params: { id: profile.id },
+              })
+            }
             className="w-[330px] bg-transparent data-[active=true]:bg-primary-gray-press-light items-center justify-start p-2"
           >
             <ButtonIcon as={HelpCircle} className="text-primary-200" />

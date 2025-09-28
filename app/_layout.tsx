@@ -35,6 +35,7 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inInterpreters = segments[0] === 'interpreters';
 
     if (isAuthenticated && isFirstTime && !inOnboarding) {
       // First time user, show onboarding
@@ -46,17 +47,22 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     ) {
       // Existing user, redirect to tabs
       router.replace('/(tabs)');
-    } else if (!isAuthenticated && (inTabsGroup || inOnboarding)) {
+    } else if (
+      !isAuthenticated &&
+      (inTabsGroup || inOnboarding || inInterpreters)
+    ) {
       // Not authenticated, redirect to auth
       router.replace('/(auth)');
-    } else if (!inAuthGroup && !inTabsGroup && !inOnboarding && !isLoading) {
+    } else if (
+      !inAuthGroup &&
+      !inTabsGroup &&
+      !inOnboarding &&
+      !inInterpreters &&
+      !isLoading
+    ) {
       // At root level, decide where to go
       if (isAuthenticated) {
-        if (isFirstTime) {
-          router.replace('/onboarding');
-        } else {
-          router.replace('/(tabs)');
-        }
+        router.replace(isFirstTime ? '/onboarding' : '/(tabs)');
       } else {
         router.replace('/(auth)');
       }
@@ -79,6 +85,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
+        <Stack.Screen name="interpreters" />
       </Stack>
     </NavigationController>
   );

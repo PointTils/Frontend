@@ -53,10 +53,16 @@ export const Strings = {
       state: 'UF',
       city: 'Cidade',
       neighborhoods: 'Bairros',
+      neighborhood: 'Bairro',
+      street: 'Logradouro',
+      number: 'Número',
+      floor: 'Complemento',
       specialties: 'Especialidades',
       preferences: 'Preferências',
       optional: 'Opcional',
       professionalArea: 'Área profissional',
+      date: 'Data',
+      time: 'Hora',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
@@ -160,17 +166,17 @@ export const Strings = {
   appointment_solicitation: {
     location: {
       location: 'Localização',
-        uf: 'UF',
-        city: 'Cidade',
-        neighborhood: 'Bairro',
-        street: 'Logradouro',
-        number: 'Número',
-        floor: 'Complemento'
+      uf: 'UF',
+      city: 'Cidade',
+      neighborhood: 'Bairro',
+      street: 'Logradouro',
+      number: 'Número',
+      floor: 'Complemento',
     },
     modality: 'Modalidade',
     presencial: 'Presencial',
     online: 'Online',
-    date: 'Data e Hora'
+    date: 'Data e Hora',
   },
 
   days: {
