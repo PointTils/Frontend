@@ -39,24 +39,33 @@ export default function DetalhesAgendamentoUsuario() {
   const [tab, setTab] = React.useState<TabKey>('agendamento');
 
   // helper p/ escolher 1ª cor disponível sem hardcode
-  const pickColor = (...vals: (string | undefined)[]) => vals.find(Boolean) as string;
+  const pickColor = (...vals: (string | undefined)[]) =>
+    vals.find(Boolean) as string;
 
   const { user } = useAuth();
   const prefer = <T,>(...vals: (T | undefined | null)[]) =>
-    vals.find(v => v !== undefined && v !== null) as T | undefined;
+    vals.find((v) => v !== undefined && v !== null) as T | undefined;
 
   const nome =
-    prefer<string>(user?.name as any, (user as any)?.fullName, params.nome as string) ||
-    'Nome Sobrenome';
+    prefer<string>(
+      user?.name as any,
+      (user as any)?.fullName,
+      params.nome as string,
+    ) || 'Nome Sobrenome';
 
   const ocupacao = (params.ocupacao as string) || 'Intérprete de Libras';
   const nota: number = params.nota ? Number(params.nota) : 5.0;
   const notaTxt = nota.toFixed(1).replace('.', ',');
 
-  const email = prefer<string>(user?.email as any, params.email as string) || 'exemplo@.com';
+  const email =
+    prefer<string>(user?.email as any, params.email as string) ||
+    'exemplo@.com';
   const telefone =
-    prefer<string>(user?.phone as any, (user as any)?.telephone, params.telefone as string) ||
-    '(00) 00000-0000';
+    prefer<string>(
+      user?.phone as any,
+      (user as any)?.telephone,
+      params.telefone as string,
+    ) || '(00) 00000-0000';
 
   // URL vinda do back (ou param) + fallback
   const avatarUrl =
@@ -64,12 +73,22 @@ export default function DetalhesAgendamentoUsuario() {
       (user as any)?.avatarUrl,
       (user as any)?.photo,
       (user as any)?.image,
-      params.avatar as string
+      params.avatar as string,
     ) ||
     // sem hardcode de cor aqui; a imagem é um link estático (ok)
     'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5f4bd7a6-f763-4518-9b81-bdfd40ce3fc9/d26yer1-421bb5b8-9fc2-4d5a-b2d1-1e1f81b26b82.png/v1/fill/w_150,h_150,q_80,strp/spongebob_4_150x150_png_by_somemilk_d26yer1-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTUwIiwicGF0aCI6Ii9mLzVmNGJkN2E2LWY3NjMtNDUxOC05YjgxLWJkZmQ0MGNlM2ZjOS9kMjZ5ZXIxLTQyMWJiNWI4LTlmYzItNGQ1YS1iMmQxLTFlMWY4MWIyNmI4Mi5wbmciLCJ3aWR0aCI6Ijw9MTUwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.1eltXyAyclTf_FLrqWbmNpW8lYkmgSbeK3qMoLvY0YI';
 
-  const [avatarSrc, setAvatarSrc] = React.useState<{ uri: string }>({ uri: avatarUrl });
+  
+  /*
+    const [avatarSrc, setAvatarSrc] = React.useState<{ uri: string }>({
+    uri: avatarUrl,
+  });
+    */
+
+  const [avatarSrc, _setAvatarSrc] = React.useState<{ uri: string }>({ uri: avatarUrl });
+
+
+
 
   const descricao =
     (params.descricao as string) ||
@@ -77,7 +96,9 @@ export default function DetalhesAgendamentoUsuario() {
 
   const dataInicio = (params.dataInicio as string) || '2025-08-20T11:30:00';
   const dataFim = (params.dataFim as string) || '2025-08-20T12:30:00';
-  const endereco = (params.endereco as string) || 'Av. Ipiranga 6681, Partenon - Porto Alegre/RS';
+  const endereco =
+    (params.endereco as string) ||
+    'Av. Ipiranga 6681, Partenon - Porto Alegre/RS';
 
   const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
   function formatRange(iniISO: string, fimISO: string) {
@@ -89,8 +110,14 @@ export default function DetalhesAgendamentoUsuario() {
         month: '2-digit',
         year: 'numeric',
       });
-      const hi = ini.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-      const hf = fim.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      const hi = ini.toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const hf = fim.toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
       return `${dia} ${hi} – ${hf}`;
     } catch {
       return `${iniISO} – ${fimISO}`;
@@ -98,16 +125,19 @@ export default function DetalhesAgendamentoUsuario() {
   }
   const openWhatsApp = () =>
     Linking.openURL(
-      `https://wa.me/${onlyDigits(telefone)}?text=${encodeURIComponent(`Olá, ${nome}.`)}`
+      `https://wa.me/${onlyDigits(telefone)}?text=${encodeURIComponent(`Olá, ${nome}.`)}`,
     );
   const handleCancelar = () => router.back();
 
   const lbl = {
     tituloTopo: Strings.scheduling.title,
     agendamento: Strings.scheduling.tabs.scheduling,
-    profissional: (Strings as any)?.scheduling?.tabs?.professional ?? 'Profissional',
+    profissional:
+      (Strings as any)?.scheduling?.tabs?.professional ?? 'Profissional',
     descricao: Strings.scheduling.sections.description,
-    servicos: (Strings as any)?.scheduling?.sections?.services ?? 'Serviços e experiência',
+    servicos:
+      (Strings as any)?.scheduling?.sections?.services ??
+      'Serviços e experiência',
     data: Strings.scheduling.sections.date,
     localizacao: Strings.scheduling.sections.location,
     telefone: Strings.scheduling.sections.phone,
@@ -118,19 +148,21 @@ export default function DetalhesAgendamentoUsuario() {
 
   const isAgendamento = tab === 'agendamento';
   const agendamentoColor = isAgendamento ? colors.primaryBlue : colors.disabled;
-  const profissionalColor = !isAgendamento ? colors.primaryBlue : colors.disabled;
+  const profissionalColor = !isAgendamento
+    ? colors.primaryBlue
+    : colors.disabled;
 
   // cores derivadas SEM hardcode
   const avatarBg = pickColor(
     (colors as any).surface,
     (colors as any).card,
     (colors as any).muted,
-    colors.white
+    colors.white,
   );
   const avatarBorder = pickColor(
     (colors as any).border,
     (colors as any).muted,
-    colors.disabled
+    colors.disabled,
   );
 
   return (
@@ -156,7 +188,10 @@ export default function DetalhesAgendamentoUsuario() {
             <ChevronLeft size={22} color={colors.primaryBlue} />
           </Pressable>
 
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.title, { color: colors.text }]}
+            numberOfLines={1}
+          >
             {lbl.tituloTopo}
           </Text>
 
@@ -165,21 +200,27 @@ export default function DetalhesAgendamentoUsuario() {
 
         {/* Cabeçalho com avatar, ocupação e estrelas */}
         <View style={styles.header}>
-         <Image
-          source={avatarSrc}
-          style={[
-            styles.avatar,
-            styles.avatarDecor,                  // <- novo
-            { backgroundColor: avatarBg, borderColor: avatarBorder },
-          ]}
-        />
+          <Image
+            source={avatarSrc}
+            style={[
+              styles.avatar,
+              styles.avatarDecor, // <- novo
+              { backgroundColor: avatarBg, borderColor: avatarBorder },
+            ]}
+          />
 
           <View style={styles.grow}>
-            <Text style={[styles.nome, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.nome, { color: colors.text }]}
+              numberOfLines={1}
+            >
               {nome}
             </Text>
 
-            <Text style={[styles.ocupacao, { color: colors.disabled }]} numberOfLines={1}>
+            <Text
+              style={[styles.ocupacao, { color: colors.disabled }]}
+              numberOfLines={1}
+            >
               {ocupacao}
             </Text>
 
@@ -196,7 +237,9 @@ export default function DetalhesAgendamentoUsuario() {
                   />
                 );
               })}
-              <Text style={[styles.rating, { color: colors.primaryBlue }]}>{notaTxt}</Text>
+              <Text style={[styles.rating, { color: colors.primaryBlue }]}>
+                {notaTxt}
+              </Text>
             </View>
           </View>
         </View>
@@ -209,8 +252,14 @@ export default function DetalhesAgendamentoUsuario() {
             accessibilityLabel={lbl.agendamento}
           >
             <View style={styles.tabContent}>
-              <CalendarIcon size={16} color={agendamentoColor} style={styles.tabIcon} />
-              <Text style={[styles.tabLabel, { color: agendamentoColor }]}>{lbl.agendamento}</Text>
+              <CalendarIcon
+                size={16}
+                color={agendamentoColor}
+                style={styles.tabIcon}
+              />
+              <Text style={[styles.tabLabel, { color: agendamentoColor }]}>
+                {lbl.agendamento}
+              </Text>
             </View>
             <View
               style={[
@@ -227,8 +276,14 @@ export default function DetalhesAgendamentoUsuario() {
             accessibilityLabel={lbl.profissional}
           >
             <View style={styles.tabContent}>
-              <UserIcon size={16} color={profissionalColor} style={styles.tabIcon} />
-              <Text style={[styles.tabLabel, { color: profissionalColor }]}>{lbl.profissional}</Text>
+              <UserIcon
+                size={16}
+                color={profissionalColor}
+                style={styles.tabIcon}
+              />
+              <Text style={[styles.tabLabel, { color: profissionalColor }]}>
+                {lbl.profissional}
+              </Text>
             </View>
             <View
               style={[
@@ -241,21 +296,30 @@ export default function DetalhesAgendamentoUsuario() {
         </View>
 
         {/* Conteúdo */}
-        <ScrollView contentContainerStyle={styles.scrollInner} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollInner}
+          showsVerticalScrollIndicator={false}
+        >
           {isAgendamento ? (
             <View style={styles.section}>
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <FileText size={18} color={colors.primaryBlue} />
-                  <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.descricao}</Text>
+                  <Text style={[styles.blockTitle, { color: colors.text }]}>
+                    {lbl.descricao}
+                  </Text>
                 </View>
-                <Text style={[styles.blockText, { color: colors.text }]}>{descricao}</Text>
+                <Text style={[styles.blockText, { color: colors.text }]}>
+                  {descricao}
+                </Text>
               </View>
 
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <CalendarIcon size={18} color={colors.primaryBlue} />
-                  <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.data}</Text>
+                  <Text style={[styles.blockTitle, { color: colors.text }]}>
+                    {lbl.data}
+                  </Text>
                 </View>
                 <Text style={[styles.blockText, { color: colors.text }]}>
                   {formatRange(dataInicio, dataFim)}
@@ -265,9 +329,13 @@ export default function DetalhesAgendamentoUsuario() {
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <MapPin size={18} color={colors.primaryBlue} />
-                  <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.localizacao}</Text>
+                  <Text style={[styles.blockTitle, { color: colors.text }]}>
+                    {lbl.localizacao}
+                  </Text>
                 </View>
-                <Text style={[styles.blockText, { color: colors.text }]}>{endereco}</Text>
+                <Text style={[styles.blockText, { color: colors.text }]}>
+                  {endereco}
+                </Text>
               </View>
             </View>
           ) : (
@@ -276,9 +344,13 @@ export default function DetalhesAgendamentoUsuario() {
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <FileText size={18} color={colors.primaryBlue} />
-                  <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.servicos}</Text>
+                  <Text style={[styles.blockTitle, { color: colors.text }]}>
+                    {lbl.servicos}
+                  </Text>
                 </View>
-                <Text style={[styles.blockText, { color: colors.text }]}>{descricao}</Text>
+                <Text style={[styles.blockText, { color: colors.text }]}>
+                  {descricao}
+                </Text>
               </View>
 
               {/* Telefone + WhatsApp */}
@@ -286,9 +358,13 @@ export default function DetalhesAgendamentoUsuario() {
                 <View style={styles.grow}>
                   <View style={styles.rowAlign}>
                     <Phone size={18} color={colors.primaryBlue} />
-                    <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.telefone}</Text>
+                    <Text style={[styles.blockTitle, { color: colors.text }]}>
+                      {lbl.telefone}
+                    </Text>
                   </View>
-                  <Text style={[styles.blockText, { color: colors.text }]}>{telefone}</Text>
+                  <Text style={[styles.blockText, { color: colors.text }]}>
+                    {telefone}
+                  </Text>
                 </View>
 
                 <Pressable
@@ -296,7 +372,11 @@ export default function DetalhesAgendamentoUsuario() {
                   style={[styles.whatsBtn, { borderColor: colors.primaryBlue }]}
                   accessibilityLabel={lbl.whatsapp}
                 >
-                  <Text style={[styles.whatsText, { color: colors.primaryBlue }]}>{lbl.whatsapp}</Text>
+                  <Text
+                    style={[styles.whatsText, { color: colors.primaryBlue }]}
+                  >
+                    {lbl.whatsapp}
+                  </Text>
                 </Pressable>
               </View>
 
@@ -304,9 +384,13 @@ export default function DetalhesAgendamentoUsuario() {
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <AtSign size={18} color={colors.primaryBlue} />
-                  <Text style={[styles.blockTitle, { color: colors.text }]}>{lbl.email}</Text>
+                  <Text style={[styles.blockTitle, { color: colors.text }]}>
+                    {lbl.email}
+                  </Text>
                 </View>
-                <Text style={[styles.blockText, { color: colors.text }]}>{email}</Text>
+                <Text style={[styles.blockText, { color: colors.text }]}>
+                  {email}
+                </Text>
               </View>
             </View>
           )}
@@ -315,8 +399,15 @@ export default function DetalhesAgendamentoUsuario() {
 
       {/* CTA */}
       <View style={styles.ctaWrap}>
-        <Button className="w-full" onPress={handleCancelar} size="lg" accessibilityLabel={lbl.cancelar}>
-          <Text style={[styles.ctaText, { color: colors.white }]}>{lbl.cancelar}</Text>
+        <Button
+          className="w-full"
+          onPress={handleCancelar}
+          size="lg"
+          accessibilityLabel={lbl.cancelar}
+        >
+          <Text style={[styles.ctaText, { color: colors.white }]}>
+            {lbl.cancelar}
+          </Text>
         </Button>
       </View>
     </View>
@@ -364,7 +455,7 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
   },
-  avatarDecor: { borderWidth: 1 }, 
+  avatarDecor: { borderWidth: 1 },
   nome: { fontSize: 18, lineHeight: 22, fontFamily: 'iFoodRC-Medium' },
   ocupacao: {
     marginTop: 2,
@@ -391,9 +482,20 @@ const styles = StyleSheet.create({
   tabContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   tabIcon: { marginTop: 1 },
   tabLabel: { fontSize: 16, fontFamily: 'iFoodRC-Medium' },
-  tabUnderlineBase: { width: '100%', height: 0, borderRadius: 999, marginTop: 6 },
+  tabUnderlineBase: {
+    width: '100%',
+    height: 0,
+    borderRadius: 999,
+    marginTop: 6,
+  },
   tabUnderlineActive: { height: 2, borderRadius: 999 },
-  scrollInner: { width: '100%', maxWidth: 360, paddingTop: 12, paddingBottom: 24, gap: 20 },
+  scrollInner: {
+    width: '100%',
+    maxWidth: 360,
+    paddingTop: 12,
+    paddingBottom: 24,
+    gap: 20,
+  },
   section: { gap: 20 },
   block: { gap: 6, width: '100%' },
   blockTitle: { fontSize: 16, fontFamily: 'iFoodRC-Medium' },
@@ -416,6 +518,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   whatsText: { fontSize: 14, fontFamily: 'iFoodRC-Medium' },
-  ctaWrap: { position: 'absolute', bottom: 40, left: 0, right: 0, paddingHorizontal: 24 },
+  ctaWrap: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+  },
   ctaText: { fontSize: 16, fontFamily: 'iFoodRC-Medium' },
 });

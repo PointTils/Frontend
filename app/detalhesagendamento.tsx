@@ -39,17 +39,19 @@ export default function DetalhesAgendamento() {
 
   const { user } = useAuth();
   const prefer = <T,>(...vals: (T | undefined | null)[]) =>
-    vals.find(v => v !== undefined && v !== null) as T | undefined;
+    vals.find((v) => v !== undefined && v !== null) as T | undefined;
 
   // INFORMAÇÃO VINDA DO BACKEND: nome completo do usuário (user.name | user.fullName). Fallback: params.nome | 'Nome Sobrenome'
   const nome =
-    prefer<string>(user?.name as any, (user as any)?.fullName, params.nome as string) ||
-    'Nome Sobrenome';
+    prefer<string>(
+      user?.name as any,
+      (user as any)?.fullName,
+      params.nome as string,
+    ) || 'Nome Sobrenome';
 
   // INFORMAÇÃO VINDA DO BACKEND: CPF do usuário (user.cpf). Fallback: params.cpf | '00000000000'
   const cpf =
-    prefer<string>(user?.cpf as any, params.cpf as string) ||
-    '00000000000';
+    prefer<string>(user?.cpf as any, params.cpf as string) || '00000000000';
 
   // INFORMAÇÃO VINDA DO BACKEND: e-mail do usuário (user.email). Fallback: params.email | 'exemplo@.com'
   const email =
@@ -58,8 +60,11 @@ export default function DetalhesAgendamento() {
 
   // INFORMAÇÃO VINDA DO BACKEND: telefone do usuário (user.phone | user.telephone). Fallback: params.telefone | '(00) 00000-0000'
   const telefone =
-    prefer<string>(user?.phone as any, (user as any)?.telephone, params.telefone as string) ||
-    '(00) 00000-0000';
+    prefer<string>(
+      user?.phone as any,
+      (user as any)?.telephone,
+      params.telefone as string,
+    ) || '(00) 00000-0000';
 
   // INFORMAÇÃO VINDA DO BACKEND: URL do avatar/foto do usuário (user.avatarUrl | user.photo | user.image). Fallback: params.avatar | URL padrão
   const avatarUrl =
@@ -67,7 +72,7 @@ export default function DetalhesAgendamento() {
       (user as any)?.avatarUrl,
       (user as any)?.photo,
       (user as any)?.image,
-      params.avatar as string
+      params.avatar as string,
     ) ||
     'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5f4bd7a6-f763-4518-9b81-bdfd40ce3fc9/d26yer1-421bb5b8-9fc2-4d5a-b2d1-1e1f81b26b82.png/v1/fill/w_150,h_150,q_80,strp/spongebob_4_150x150_png_by_somemilk_d26yer1-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTUwIiwicGF0aCI6Ii9mLzVmNGJkN2E2LWY3NjMtNDUxOC05YjgxLWJkZmQ0MGNlM2ZjOS9kMjZ5ZXIxLTQyMWJiNWI4LTlmYzItNGQ1YS1iMmQxLTFlMWY4MWIyNmI4Mi5wbmciLCJ3aWR0aCI6Ijw9MTUwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.1eltXyAyclTf_FLrqWbmNpW8lYkmgSbeK3qMoLvY0YI';
 

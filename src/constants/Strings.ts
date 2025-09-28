@@ -198,7 +198,6 @@ export const Strings = {
     },
   },
 
-
   detalhesAgendamento: {
     header: 'Detalhes do agendamento',
     tabs: {
@@ -238,8 +237,4 @@ export const Strings = {
       whatsapp: 'WhatsApp',
     },
   },
-
-
-
-
 } as const;
