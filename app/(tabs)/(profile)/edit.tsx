@@ -81,6 +81,8 @@ import {
   XIcon,
   AlertCircleIcon,
   Pencil,
+  PlusIcon,
+  MinusIcon,
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
@@ -462,14 +464,9 @@ export default function EditProfileScreen() {
     )
       return;
 
+    // Build payloads based on user type
     const payload = buildEditPayload(profile.type, fields);
     if (!payload) return;
-
-    const specialtiesPayload = {
-      specialtyIds: fields.selectedSpecialties.value,
-      replaceExisting: true,
-    };
-    console.log('Submitting payload:', payload, specialtiesPayload);
 
     let api;
     switch (profile.type) {
@@ -485,17 +482,26 @@ export default function EditProfileScreen() {
       default:
         return;
     }
+
+    const specialtiesPayload = {
+      specialty_ids: fields.selectedSpecialties.value,
+      replace_existing: true, // Always replace existing specialties - similar to PUT behavior
+    };
+
     if (!api && !userSpecialtyApi) return;
 
+    // Submit updates
     const profileResponse = await api.patch(payload);
-    // const specialtyResponse = await userSpecialtyApi.post(specialtiesPayload);
+    const specialtyResponse = await userSpecialtyApi.post(specialtiesPayload);
 
     if (
       !profileResponse?.success ||
-      !profileResponse?.data
-      // !specialtyResponse?.success
+      !profileResponse?.data ||
+      !specialtyResponse?.success
     ) {
       console.error('Update error:', api.error || 'Unknown error');
+      router.replace('/(tabs)/(profile)');
+      await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
         type: 'error',
         text1: Strings.edit.toast.errorApiTitle,
@@ -503,7 +509,7 @@ export default function EditProfileScreen() {
         position: 'top',
         visibilityTime: 2000,
         autoHide: true,
-        closeIconSize: 1, // To "hide" the close icon
+        closeIconSize: 1,
       });
       return;
     }
@@ -518,7 +524,7 @@ export default function EditProfileScreen() {
       position: 'top',
       visibilityTime: 2000,
       autoHide: true,
-      closeIconSize: 1, // To "hide" the close icon
+      closeIconSize: 1,
     });
   }
 
@@ -1059,9 +1065,10 @@ export default function EditProfileScreen() {
                                       }}
                                       className="px-2 bg-transparent data-[active=true]:bg-primary-50/15"
                                     >
-                                      <Text className="text-primary-800">
-                                        -
-                                      </Text>
+                                      <ButtonIcon
+                                        as={MinusIcon}
+                                        className="text-primary-800"
+                                      />
                                     </Button>
                                   )}
                                 {/* "+" button only on the last input and if not reached max */}
@@ -1080,9 +1087,10 @@ export default function EditProfileScreen() {
                                       }
                                       className="px-2 bg-transparent data-[active=true]:bg-primary-blue-press-light/15"
                                     >
-                                      <Text className="text-primary-blue-light">
-                                        +
-                                      </Text>
+                                      <ButtonIcon
+                                        as={PlusIcon}
+                                        className="text-primary-blue-light"
+                                      />
                                     </Button>
                                   )}
                               </View>
