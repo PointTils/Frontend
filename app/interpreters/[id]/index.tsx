@@ -18,7 +18,7 @@ export default function InterpreterDetailsScreen() {
       <KeyboardAvoidingView
         className="flex-1 px-6"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      ></KeyboardAvoidingView>
+      />
     </View>
   );
 }

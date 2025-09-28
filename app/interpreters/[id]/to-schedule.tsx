@@ -1,16 +1,7 @@
+import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
-import { Button, ButtonIcon } from '@/src/components/ui/button';
-import { Text } from '@/src/components/ui/text';
-import { View } from '@/src/components/ui/view';
-import { useColors } from '@/src/hooks/useColors';
-import { router, useLocalSearchParams } from 'expo-router';
-import { XIcon, CheckIcon, CircleIcon } from 'lucide-react-native';
-import { Strings } from '@/src/constants/Strings';
-import React, { useMemo, useState } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Modality, StateAndCityResponse, UserType } from '@/src/types/common';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
-import type { OptionItem } from '@/src/types/ui';
+import { Button, ButtonIcon } from '@/src/components/ui/button';
 import {
   FormControl,
   FormControlError,
@@ -21,32 +12,43 @@ import {
 } from '@/src/components/ui/form-control';
 import { Input, InputField } from '@/src/components/ui/input';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
-import HapticTab from '@/src/components/HapticTab';
-import {
-  type FormFields,
-  useFormValidation,
-} from '@/src/hooks/useFormValidation';
-import { AlertCircleIcon } from 'lucide-react-native';
-import { formatDate, formatTime } from '@/src/utils/masks';
-import { ApiRoutes } from '@/src/constants/ApiRoutes';
-import { useApiGet } from '@/src/hooks/useApi';
-import {
-  buildInvalidFieldError,
-  buildRequiredFieldError,
-} from '@/src/utils/helpers';
-import {
   Radio,
   RadioGroup,
   RadioIcon,
   RadioIndicator,
   RadioLabel,
 } from '@/src/components/ui/radio';
+import { Text } from '@/src/components/ui/text';
+import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { Strings } from '@/src/constants/Strings';
+import { useApiGet } from '@/src/hooks/useApi';
+import { useColors } from '@/src/hooks/useColors';
+import {
+  type FormFields,
+  useFormValidation,
+} from '@/src/hooks/useFormValidation';
+import type { StateAndCityResponse } from '@/src/types/common';
+import { Modality } from '@/src/types/common';
+import type { OptionItem } from '@/src/types/ui';
+import { buildRequiredFieldError } from '@/src/utils/helpers';
+import { formatDate, formatTime } from '@/src/utils/masks';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { router, useLocalSearchParams } from 'expo-router';
+import {
+  XIcon,
+  CheckIcon,
+  CircleIcon,
+  AlertCircleIcon,
+} from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 
 type ScheduleValidationContext = {
   state: string;
@@ -54,6 +56,7 @@ type ScheduleValidationContext = {
 };
 
 export default function ToScheduleScreen() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
   const colors = useColors();
 
@@ -238,7 +241,7 @@ export default function ToScheduleScreen() {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+          contentContainerClassName="grow pb-4"
         >
           <View className="mt-4 py-4 px-4">
             <Text className="font-ifood-medium mb-3 text-[18px] text-left text-primary-800">

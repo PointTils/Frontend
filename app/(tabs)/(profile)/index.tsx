@@ -119,9 +119,8 @@ export default function ProfileScreen() {
     <View className="flex-1 justify-center items-center mt-8 px-4">
       <ScrollView
         className="w-full"
-        contentContainerClassName="items-center"
+        contentContainerClassName="items-center grow pb-4"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
       >
         {/* For alignment purposes */}
         <View className="w-full mb-24" />
