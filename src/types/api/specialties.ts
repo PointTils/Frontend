@@ -1,4 +1,3 @@
-
 // Models
 export type Specialties = {
   id: string;
@@ -10,6 +9,4 @@ export interface SpecialtiesResponse {
   success: boolean;
   message: string;
   data: Specialties[];
-  
 }
-

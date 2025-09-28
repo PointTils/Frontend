@@ -13,7 +13,6 @@ import { useColors } from '../hooks/useColors';
 import type { InterpreterResponse } from '../types/api/interpreter';
 import type { AppliedFilters } from '../types/search-filter-bar';
 
-
 interface SearchFilterBarProps {
   onData: (data: InterpreterResponse) => void;
 }

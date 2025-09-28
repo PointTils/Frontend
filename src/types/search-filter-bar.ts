@@ -1,4 +1,3 @@
-
 export type AppliedFilters = {
   modality?: string;
   availableDates?: string;

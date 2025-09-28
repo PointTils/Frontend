@@ -13,7 +13,7 @@ export interface InterpreterSpecialty {
 export interface InterpreterProfessionalData {
   cnpj: string | null;
   rating: number;
-  modality: 'ONLINE' | 'PERSONALLY' | 'ALL'; 
+  modality: 'ONLINE' | 'PERSONALLY' | 'ALL';
   description: string;
   min_value: number;
   max_value: number;
@@ -29,7 +29,7 @@ export interface Interpreter {
   picture: string | null;
   name: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER' | string;
-  birthday: string; 
+  birthday: string;
   cpf: string;
   locations: InterpreterLocation[];
   specialties: InterpreterSpecialty[];

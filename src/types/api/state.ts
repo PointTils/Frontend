@@ -1,4 +1,3 @@
-
 // Models
 export type State = {
   name: string;

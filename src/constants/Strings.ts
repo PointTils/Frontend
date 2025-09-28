@@ -173,10 +173,10 @@ export const Strings = {
     others: 'Outros',
   },
 
-  search:{
+  search: {
     datesAvaible: 'Datas disponíveis',
-    online:'Online',
-    filter :' Filtro',
+    online: 'Online',
+    filter: ' Filtro',
     modality: 'Modalidade',
     personally: 'Presencial',
     localization: 'Localização',
