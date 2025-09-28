@@ -1,16 +1,18 @@
+import { Ionicons, Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
-import { useColors } from '../hooks/useColors';
-import { Strings } from '../constants/Strings';
-import FilterSheet from './FilterSheet';
-import { AppliedFilters } from '../types/search-filter-bar';
-import { useAuth } from '../contexts/AuthProvider';
-import { InterpreterResponse } from '../types/api/interpreter';
-import { useApiGet } from '../hooks/useApi';
-import { ApiRoutes } from '../constants/ApiRoutes';
-import { router } from 'expo-router';
 import { Toast } from 'toastify-react-native';
+
+import FilterSheet from './FilterSheet';
+import { ApiRoutes } from '../constants/ApiRoutes';
+import { Strings } from '../constants/Strings';
+import { useAuth } from '../contexts/AuthProvider';
+import { useApiGet } from '../hooks/useApi';
+import { useColors } from '../hooks/useColors';
+import type { InterpreterResponse } from '../types/api/interpreter';
+import type { AppliedFilters } from '../types/search-filter-bar';
+
 
 interface SearchFilterBarProps {
   onData: (data: InterpreterResponse) => void;

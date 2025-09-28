@@ -1,28 +1,29 @@
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { router } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
-import { useColors } from '../hooks/useColors';
-import { Button } from './ui/button';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Checkbox } from 'react-native-paper';
-import { formatDateTime } from '../utils/masks';
+import { Toast } from 'toastify-react-native';
+
 import ModalMultipleSelection from './ModalMultipleSelection';
+import ModalSingleSelection from './ModalSingleSelection';
+import { Button } from './ui/button';
 import {
   FormControl,
   FormControlLabel,
   FormControlLabelText,
 } from './ui/form-control';
 import { Input, InputField } from './ui/input';
-import { Strings } from '../constants/Strings';
-import ModalSingleSelection from './ModalSingleSelection';
-import { useApiGet } from '../hooks/useApi';
-import { useAuth } from '../contexts/AuthProvider';
 import { ApiRoutes } from '../constants/ApiRoutes';
-import { CityResponse, StateResponse } from '../types/api/state';
-import { SpecialtiesResponse } from '../types/api/specialties';
-import { router } from 'expo-router';
-import { Toast } from 'toastify-react-native';
-import { AppliedFilters } from '../types/search-filter-bar';
-import { Ionicons } from '@expo/vector-icons';
+import { Strings } from '../constants/Strings';
+import { useAuth } from '../contexts/AuthProvider';
+import { useApiGet } from '../hooks/useApi';
+import { useColors } from '../hooks/useColors';
+import type { SpecialtiesResponse } from '../types/api/specialties';
+import type { CityResponse, StateResponse } from '../types/api/state';
+import type { AppliedFilters } from '../types/search-filter-bar';
+import { formatDateTime } from '../utils/masks';
 
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
@@ -31,12 +32,12 @@ interface FilterSheetProps {
   initialFocus?: 'date' | 'modality';
 }
 
-const FilterSheet: React.FC<FilterSheetProps> = ({
+function FilterSheet({
   onApply,
   onClose,
   filter,
   initialFocus,
-}) => {
+}: FilterSheetProps) {
   const [checkedOnline, setCheckedOnline] = useState(false);
   const [checkedPersonally, setCheckedPersonally] = useState(false);
   const [showDate, setShowDate] = useState(initialFocus === 'date');
@@ -181,8 +182,6 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
     { label: 'Feminino', value: 'FEMALE' },
     { label: 'Outros', value: 'OTHERS' },
   ];
-
-  const availableDates = date ? formatDateTime(date) : '';
 
   return (
     <Modal transparent animationType="slide">
@@ -385,6 +384,6 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
       </View>
     </Modal>
   );
-};
+}
 
 export default FilterSheet;
