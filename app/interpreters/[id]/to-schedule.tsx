@@ -4,26 +4,13 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams } from 'expo-router';
-import {
-  PlusIcon,
-  XIcon,
-  CheckIcon,
-  SquareIcon,
-  CircleIcon,
-} from 'lucide-react-native';
+import { XIcon, CheckIcon, CircleIcon } from 'lucide-react-native';
 import { Strings } from '@/src/constants/Strings';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Modality, StateAndCityResponse, UserType } from '@/src/types/common';
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
 import type { OptionItem } from '@/src/types/ui';
-import {
-  Checkbox,
-  CheckboxGroup,
-  CheckboxIndicator,
-  CheckboxIcon,
-  CheckboxLabel,
-} from '@/src/components/ui/checkbox';
 import {
   FormControl,
   FormControlError,
@@ -35,7 +22,6 @@ import {
 import { Input, InputField } from '@/src/components/ui/input';
 import {
   KeyboardAvoidingView,
-  Modal,
   Platform,
   ScrollView,
   TextInput,
@@ -47,10 +33,13 @@ import {
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
 import { AlertCircleIcon } from 'lucide-react-native';
-import { formatDate } from '@/src/utils/masks';
+import { formatDate, formatTime } from '@/src/utils/masks';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { useApiGet } from '@/src/hooks/useApi';
-import { buildRequiredFieldError } from '@/src/utils/helpers';
+import {
+  buildInvalidFieldError,
+  buildRequiredFieldError,
+} from '@/src/utils/helpers';
 import {
   Radio,
   RadioGroup,
@@ -66,11 +55,20 @@ type ScheduleValidationContext = {
 
 export default function ToScheduleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
+  const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
-  const colors = useColors();
-  const [type, setType] = useState(Modality.PERSONALLY);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  // Disallow today and past dates
+  const minDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, []);
 
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
     FormFields<ScheduleValidationContext>,
@@ -198,6 +196,14 @@ export default function ToScheduleScreen() {
     }
   };
 
+  const handleTimeChange = (_event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      setTime(selectedTime);
+      setValue('time', formatTime(selectedTime));
+    }
+  };
+
   function handleBack() {
     clearErrors();
     router.back();
@@ -212,26 +218,17 @@ export default function ToScheduleScreen() {
     )
       return;
 
-    console.log('Form is valid, proceed with submission');
+    console.warn('Form is valid, proceed with submission');
   }
-
-  // Mock para localização - ajustar na integração
-  const ufChoices: OptionItem[] = [
-    { label: 'RS', value: 'RS' },
-    { label: 'SP', value: 'SP' },
-    { label: 'MG', value: 'MG' },
-  ];
-
-  const cityChoices: OptionItem[] = [
-    { label: 'Porto Alegre', value: 'PORTO_ALEGRE' },
-    { label: 'Canoas', value: 'CANOAS' },
-    { label: 'Cachoeirinha', value: 'CACHOEIRINHA' },
-  ];
 
   return (
     <View className="flex-1">
       <View className="mt-12 pb-2">
-        <Header title="AGENDAR" showBackButton={true} handleBack={handleBack} />
+        <Header
+          title={Strings.toSchedule.header}
+          showBackButton={true}
+          handleBack={handleBack}
+        />
       </View>
 
       <KeyboardAvoidingView
@@ -241,18 +238,19 @@ export default function ToScheduleScreen() {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
         >
           <View className="mt-4 py-4 px-4">
             <Text className="font-ifood-medium mb-3 text-[18px] text-left text-primary-800">
-              Solicitação de agendamento
+              {Strings.toSchedule.title}
             </Text>
             <Text className="font-ifood-regular text-left text-primary-800">
-              Informar uma descrição detalhada aumenta as chances do intérprete
-              aceitar a sua solicitação.
+              {Strings.toSchedule.subtitle}
             </Text>
           </View>
 
           <View className="flex-1 px-4 mt-4">
+            {/* Description */}
             <FormControl
               isRequired
               isInvalid={!!fields.description.error}
@@ -274,6 +272,7 @@ export default function ToScheduleScreen() {
                 value={fields.description.value}
                 onChangeText={(text) => setValue('description', text)}
                 inputMode="text"
+                maxLength={400}
               />
               <FormControlError>
                 <FormControlErrorIcon
@@ -286,51 +285,97 @@ export default function ToScheduleScreen() {
               </FormControlError>
             </FormControl>
 
-            <FormControl
-              isRequired
-              isInvalid={!!fields.date.error}
-              className="mb-4"
-            >
-              <FormControlLabel>
-                <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.common.fields.date}
-                </FormControlLabelText>
-              </FormControlLabel>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <Input pointerEvents="none">
-                  <InputField
-                    placeholder="DD/MM/AAAA"
-                    className="font-ifood-regular"
-                    value={fields.date.value}
-                    editable={false}
+            <View className="flex-row justify-between gap-2 mb-4">
+              {/* Date */}
+              <FormControl
+                isRequired
+                isInvalid={!!fields.date.error}
+                className="flex-1"
+              >
+                <FormControlLabel>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.date}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                  <Input pointerEvents="none">
+                    <InputField
+                      placeholder="DD/MM/AAAA"
+                      className="font-ifood-regular"
+                      value={fields.date.value}
+                      editable={false}
+                    />
+                  </Input>
+                </TouchableOpacity>
+                <FormControlError>
+                  <FormControlErrorIcon
+                    as={AlertCircleIcon}
+                    className="text-red-600"
                   />
-                </Input>
-              </TouchableOpacity>
-              <FormControlError>
-                <FormControlErrorIcon
-                  as={AlertCircleIcon}
-                  className="text-red-600"
-                />
-                <FormControlErrorText>{fields.date.error}</FormControlErrorText>
-              </FormControlError>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                />
-              )}
-            </FormControl>
+                  <FormControlErrorText>
+                    {fields.date.error}
+                  </FormControlErrorText>
+                </FormControlError>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="calendar"
+                    minimumDate={minDate}
+                    onChange={handleDateChange}
+                  />
+                )}
+              </FormControl>
+
+              {/* Time */}
+              <FormControl
+                isRequired
+                isInvalid={!!fields.time.error}
+                className="w-28"
+              >
+                <FormControlLabel>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.time}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+                  <Input pointerEvents="none">
+                    <InputField
+                      placeholder="HH:MM"
+                      className="font-ifood-regular"
+                      value={fields.time.value}
+                      editable={false}
+                    />
+                  </Input>
+                </TouchableOpacity>
+                <FormControlError>
+                  <FormControlErrorIcon
+                    as={AlertCircleIcon}
+                    className="text-red-600"
+                  />
+                  <FormControlErrorText>
+                    {fields.time.error}
+                  </FormControlErrorText>
+                </FormControlError>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={time}
+                    mode="time"
+                    display="spinner"
+                    onChange={handleTimeChange}
+                  />
+                )}
+              </FormControl>
+            </View>
 
             {/* Modality */}
-            <View className="w-80 my-2">
+            <View className="w-80 mt-2 mb-6">
               <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
                 {Strings.common.fields.modality}*
               </Text>
               <RadioGroup
-                value={fields.modality.value}
-                onChange={(value) => setValue('modality', value)}
+                value={fields.modality.value[0] || Modality.PERSONALLY}
+                onChange={(value) => setValue('modality', [value as Modality])}
                 className="flex-row items-center justify-around"
               >
                 <Radio value={Modality.PERSONALLY}>
@@ -374,7 +419,7 @@ export default function ToScheduleScreen() {
 
             {/* Location */}
             {fields.modality.value.includes(Modality.PERSONALLY) && (
-              <View>
+              <View className="mb-12">
                 <Text className="mb-2 font-ifood-medium text-text-light dark:text-text-dark">
                   {Strings.common.fields.location}*
                 </Text>
@@ -416,7 +461,7 @@ export default function ToScheduleScreen() {
                     {/* City */}
                     <FormControl
                       isInvalid={!!fields.city.error}
-                      className="w-52"
+                      className="w-56"
                     >
                       <FormControlLabel>
                         <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -520,8 +565,8 @@ export default function ToScheduleScreen() {
                           value={fields.number.value}
                           autoCapitalize="none"
                           onChangeText={(v) => setValue('number', v)}
-                          keyboardType="default"
-                          maxLength={100}
+                          keyboardType="numeric"
+                          maxLength={50}
                         />
                       </Input>
                       <FormControlError>
@@ -573,7 +618,7 @@ export default function ToScheduleScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-14 pb-4 gap-4">
+          <View className="mt-auto pb-2 gap-4 px-4">
             <Button
               size="md"
               onPress={handleSubmit}
@@ -581,7 +626,7 @@ export default function ToScheduleScreen() {
             >
               <ButtonIcon as={CheckIcon} className="text-white" />
               <Text className="font-ifood-regular text-text-dark">
-                {Strings.common.buttons.save}
+                {Strings.common.buttons.confirm}
               </Text>
             </Button>
 

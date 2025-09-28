@@ -11,6 +11,7 @@ export const Strings = {
       delete: 'Excluir',
       back: 'Voltar',
       understood: 'Entendi',
+      confirm: 'Confirmar',
     },
 
     options: {
@@ -68,6 +69,7 @@ export const Strings = {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
         required: 'obrigatório',
         invalid: 'inválido',
+        futureDate: 'Selecione uma data posterior a hoje',
       },
     },
 
@@ -78,6 +80,7 @@ export const Strings = {
     noResults: 'Nenhum resultado encontrado',
   },
 
+  // Screens
   register: {
     header: 'Cadastro',
     title: 'Boas-vindas!',
@@ -158,25 +161,35 @@ export const Strings = {
     },
   },
 
+  toSchedule: {
+    header: 'Agendar',
+    title: 'Solicitação de agendamento',
+    subtitle:
+      'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
+  },
+
+  edit: {
+    header: 'Editar Perfil',
+    basicData: 'Dados básicos',
+    hoursDescription:
+      'Defina os horários disponíveis para atendimento em cada dia da semana.',
+
+    toast: {
+      errorApiTitle: 'Falha ao atualizar perfil',
+      errorApiDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Perfil atualizado com sucesso!',
+      successDescription: 'As alterações foram salvas.',
+      errorTitle: 'Erro',
+      errorDescription:
+        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
+    },
+  },
+
+  // Enums and fixed options
   gender: {
     male: 'Masculino',
     female: 'Feminino',
     others: 'Outros',
-  },
-  appointment_solicitation: {
-    location: {
-      location: 'Localização',
-      uf: 'UF',
-      city: 'Cidade',
-      neighborhood: 'Bairro',
-      street: 'Logradouro',
-      number: 'Número',
-      floor: 'Complemento',
-    },
-    modality: 'Modalidade',
-    presencial: 'Presencial',
-    online: 'Online',
-    date: 'Data e Hora',
   },
 
   days: {
@@ -200,22 +213,5 @@ export const Strings = {
     guideInterpreterOfLibras: 'Guia-intérprete de Libras',
     tactileInterpreter: 'Intérprete Tátil',
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
-  },
-
-  edit: {
-    header: 'Editar Perfil',
-    basicData: 'Dados básicos',
-    hoursDescription:
-      'Defina os horários disponíveis para atendimento em cada dia da semana.',
-
-    toast: {
-      errorApiTitle: 'Falha ao atualizar perfil',
-      errorApiDescription: 'Verifique os campos preenchidos. Tente novamente.',
-      successTitle: 'Perfil atualizado com sucesso!',
-      successDescription: 'As alterações foram salvas.',
-      errorTitle: 'Erro',
-      errorDescription:
-        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
-    },
   },
 } as const;
