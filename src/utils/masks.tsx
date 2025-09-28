@@ -1,5 +1,6 @@
 import { Strings } from '@/src/constants/Strings';
-import { Gender } from '@/src/types/common';
+import type { TimeRange } from '@/src/types/common';
+import { Gender, Modality } from '@/src/types/common';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.
@@ -52,14 +53,80 @@ export const handleCpfChange = (text: string) => {
   return formatted;
 };
 
+export const handleTimeChange = (text: string) => {
+  const cleaned = text.replace(/\D/g, '').slice(0, 4);
+  const formatted = cleaned.replace(/^(\d{2})(\d{0,2})$/, '$1:$2');
+  return formatted;
+};
+
 export const formatDate = (date?: string | Date | null) => {
-  if (!date) return undefined;
-  const dt = typeof date === 'string' ? new Date(date) : date;
-  if (!(dt instanceof Date) || Number.isNaN(dt.getTime())) return undefined;
-  const day = String(dt.getDate()).padStart(2, '0');
-  const mon = String(dt.getMonth() + 1).padStart(2, '0');
-  const year = dt.getFullYear();
+  // Returns "DD/MM/AAAA"
+  if (!date) return '';
+  if (typeof date === 'string') {
+    // Handle "YYYY-MM-DD" or ISO "YYYY-MM-DDTHH:mm:ss..." without timezone shift
+    const isoLike = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoLike) {
+      const [, year, month, day] = isoLike;
+      return `${day}/${month}/${year}`;
+    }
+    // Already "DD/MM/AAAA"
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) return date;
+
+    // Fallback: parse and use UTC getters to avoid off-by-one
+    const dt = new Date(date);
+    if (Number.isNaN(dt.getTime())) return '';
+    const day = String(dt.getUTCDate()).padStart(2, '0');
+    const mon = String(dt.getUTCMonth() + 1).padStart(2, '0');
+    const year = dt.getUTCFullYear();
+    return `${day}/${mon}/${year}`;
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const mon = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
   return `${day}/${mon}/${year}`;
+};
+
+export const formatDateToISO = (dateString: string): string => {
+  // Expects "DD/MM/AAAA" and returns "AAAA-MM-DD"
+  const [day, month, year] = dateString.split('/');
+  if (!day || !month || !year) return '';
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
+export const formatPhone = (phone?: string | null) => {
+  // Returns "(XX) XXXXX-XXXX"
+  if (!phone) return '';
+  const cleaned = phone.replace(/\D/g, '').slice(0, 11);
+  const formatted = cleaned
+    .replace(/^(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+  return formatted;
+};
+
+export const formatValueRange = (min?: number, max?: number) => {
+  // Returns "R$ X - R$ Y"
+  if (min === undefined && max === undefined) return '-';
+  return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
+};
+
+export const formatCnpj = (cnpj?: string | null) => {
+  // Returns "XX.XXX.XXX/XXXX-XX"
+  if (!cnpj) return '';
+  const cleaned = cnpj.replace(/\D/g, '').slice(0, 14);
+
+  const formatted = cleaned
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  return formatted;
+};
+
+export const formatDaySchedule = (range?: TimeRange): string => {
+  const from = range?.from?.trim();
+  const to = range?.to?.trim();
+  return from && to ? `${from} - ${to}` : Strings.common.options.notAvailable;
 };
 
 // Validation
@@ -97,8 +164,14 @@ export const validateBirthday = (birthday: string) => {
   );
 };
 
+export const validateTime = (time: string) => {
+  const regex = /^$|^([01]\d|2[0-3]):([0-5]\d)$/;
+  return regex.test(time);
+};
+
 // Mapping
-export const mapGender = (gender: Gender | string): string => {
+export const mapGender = (gender: Gender | string | undefined): string => {
+  if (!gender) return '-';
   switch (gender) {
     case Gender.MALE:
       return Strings.gender.male;
@@ -106,6 +179,27 @@ export const mapGender = (gender: Gender | string): string => {
       return Strings.gender.female;
     case Gender.OTHERS:
       return Strings.gender.others;
+    default:
+      return '-';
+  }
+};
+
+export const mapImageRights = (value: boolean | undefined): string => {
+  if (value === undefined) return '-';
+  return value ? Strings.common.options.authorize : Strings.common.options.deny;
+};
+
+export const mapModality = (
+  modality: Modality | string | undefined,
+): string => {
+  if (!modality) return '-';
+  switch (modality) {
+    case Modality.ONLINE:
+      return Strings.common.options.online;
+    case Modality.PERSONALLY:
+      return Strings.common.options.inPerson;
+    case Modality.ALL:
+      return `${Strings.common.options.online} e ${Strings.common.options.inPerson}`;
     default:
       return '-';
   }

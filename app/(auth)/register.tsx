@@ -21,6 +21,7 @@ import {
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { genders } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
@@ -28,16 +29,13 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
+import type { UserRequest, UserResponse } from '@/src/types/api';
+import { UserType } from '@/src/types/common';
 import {
-  type InterpreterRegisterResponse,
-  type EnterpriseRegisterResponse,
-  type EnterpriseRegisterData,
-  type InterpreterRegisterData,
-  type PersonRegisterResponse,
-  type PersonRegisterData,
-} from '@/src/types/api';
-import { Gender, UserType } from '@/src/types/common';
-import type { OptionItem } from '@/src/types/ui';
+  buildInvalidFieldError,
+  buildRegisterPayload,
+  buildRequiredFieldError,
+} from '@/src/utils/helpers';
 import {
   formatDate,
   handleCnpjChange,
@@ -69,14 +67,19 @@ import { Toast } from 'toastify-react-native';
 export default function RegisterScreen() {
   const colors = useColors();
   const [type, setType] = useState(UserType.PERSON);
-  const [show, setShow] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
 
-  const genderChoices: OptionItem[] = [
-    { label: Strings.gender.male, value: Gender.MALE },
-    { label: Strings.gender.female, value: Gender.FEMALE },
-    { label: Strings.gender.others, value: Gender.OTHERS },
-  ];
+  // API hooks for different user types
+  const personApi = useApiPost<UserResponse, UserRequest>(
+    ApiRoutes.person.register,
+  );
+  const enterpriseApi = useApiPost<UserResponse, UserRequest>(
+    ApiRoutes.enterprises.register,
+  );
+  const interpreterApi = useApiPost<UserResponse, UserRequest>(
+    ApiRoutes.interpreters.register,
+  );
 
   const handleChangeType = (newType: UserType) => {
     setType(newType);
@@ -89,8 +92,9 @@ export default function RegisterScreen() {
     setDate(new Date());
   };
 
+  // Forms validation - verify each field based on user type
   const handleDateChange = (_event: any, selectedDate?: Date) => {
-    setShow(false);
+    setShowDatePicker(false);
     if (selectedDate) {
       setDate(selectedDate);
       setValue('birthday', formatDate(selectedDate));
@@ -106,7 +110,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         ctx?.type !== UserType.ENTERPRISE && value.trim().length < 5
-          ? Strings.register.name + ' ' + Strings.common.required
+          ? buildRequiredFieldError('name')
           : null,
     },
     reason: {
@@ -114,7 +118,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         ctx?.type === UserType.ENTERPRISE && !value.trim()
-          ? Strings.register.socialReason + ' ' + Strings.common.required
+          ? buildRequiredFieldError('reason')
           : null,
     },
     cpf: {
@@ -126,13 +130,13 @@ export default function RegisterScreen() {
             ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
-          return Strings.register.cpf + ' ' + Strings.common.required;
+          return buildRequiredFieldError('cpf');
         if (
           (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !validateCpf(value)
         )
-          return Strings.register.cpf + ' ' + Strings.common.invalid;
+          return buildInvalidFieldError('cpf');
         return null;
       },
     },
@@ -141,15 +145,15 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
         if (ctx?.type === UserType.ENTERPRISE && !value.trim())
-          return Strings.register.cnpj + ' ' + Strings.common.required;
+          return buildRequiredFieldError('cnpj');
         if (ctx?.type === UserType.ENTERPRISE && !validateCnpj(value))
-          return Strings.register.cnpj + ' ' + Strings.common.invalid;
+          return buildInvalidFieldError('cnpj');
         if (
           ctx?.type === UserType.INTERPRETER &&
           value.trim() &&
           !validateCnpj(value)
         )
-          return Strings.register.cnpj + ' ' + Strings.common.invalid;
+          return buildInvalidFieldError('cnpj');
         return null;
       },
     },
@@ -162,13 +166,13 @@ export default function RegisterScreen() {
             ctx?.type === UserType.INTERPRETER) &&
           !value.trim()
         )
-          return Strings.register.birthday + ' ' + Strings.common.required;
+          return buildRequiredFieldError('birthday');
         if (
           (ctx?.type === UserType.PERSON ||
             ctx?.type === UserType.INTERPRETER) &&
           !validateBirthday(value)
         )
-          return Strings.register.birthday + ' ' + Strings.common.invalid;
+          return buildInvalidFieldError('birthday');
         return null;
       },
     },
@@ -178,17 +182,15 @@ export default function RegisterScreen() {
       validate: (value: string, ctx?: { type: string }) =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
         !value.trim()
-          ? Strings.register.gender + ' ' + Strings.common.required
+          ? buildRequiredFieldError('gender')
           : null,
     },
     phone: {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.register.phone + ' ' + Strings.common.required;
-        if (!validatePhone(value))
-          return Strings.register.phone + ' ' + Strings.common.invalid;
+        if (!value.trim()) return buildRequiredFieldError('phone');
+        if (!validatePhone(value)) return buildInvalidFieldError('phone');
         return null;
       },
     },
@@ -196,10 +198,8 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.common.email + ' ' + Strings.common.required;
-        if (!validateEmail(value))
-          return Strings.common.email + ' ' + Strings.common.invalid;
+        if (!value.trim()) return buildRequiredFieldError('email');
+        if (!validateEmail(value)) return buildInvalidFieldError('email');
         return null;
       },
     },
@@ -207,76 +207,21 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.common.password + ' ' + Strings.common.required;
-        if (value.length < 8) return Strings.common.minPassword;
+        if (!value.trim()) return buildRequiredFieldError('password');
+        if (value.length < 8) return Strings.common.fields.errors.minPassword;
         return null;
       },
     },
   });
 
-  // Helper to build payload based on user type
-  const buildRegisterPayload = () => {
-    switch (type) {
-      case UserType.PERSON:
-        return {
-          name: fields.name.value,
-          email: fields.email.value,
-          password: fields.password.value,
-          phone: fields.phone.value.replace(/\D/g, ''),
-          gender: fields.gender.value,
-          birthday: fields.birthday.value,
-          cpf: fields.cpf.value.replace(/\D/g, ''),
-        } as PersonRegisterData;
-      case UserType.ENTERPRISE:
-        return {
-          corporate_reason: fields.reason.value,
-          cnpj: fields.cnpj.value.replace(/\D/g, ''),
-          email: fields.email.value,
-          password: fields.password.value,
-          phone: fields.phone.value.replace(/\D/g, ''),
-        } as EnterpriseRegisterData;
-      case UserType.INTERPRETER:
-        return {
-          name: fields.name.value,
-          email: fields.email.value,
-          password: fields.password.value,
-          phone: fields.phone.value.replace(/\D/g, ''),
-          gender: fields.gender.value,
-          birthday: fields.birthday.value,
-          cpf: fields.cpf.value.replace(/\D/g, ''),
-          professional_info: {
-            cnpj: fields.cnpj.value
-              ? fields.cnpj.value.replace(/\D/g, '')
-              : null,
-          },
-        } as InterpreterRegisterData;
-      default:
-        return null; // Unknown type
-    }
-  };
-
-  // UseApiPost hooks for each type of registration
-  const personApi = useApiPost<PersonRegisterResponse, PersonRegisterData>(
-    ApiRoutes.persons.register,
-  );
-  const enterpriseApi = useApiPost<
-    EnterpriseRegisterResponse,
-    EnterpriseRegisterData
-  >(ApiRoutes.enterprises.register);
-  const interpreterApi = useApiPost<
-    InterpreterRegisterResponse,
-    InterpreterRegisterData
-  >(ApiRoutes.interpreters.register);
-
   // Handle form submission - API call and response handling
   async function handleRegister() {
     if (!validateForm({ type })) return;
 
-    const payload = buildRegisterPayload();
+    const payload = buildRegisterPayload(type, fields);
     if (!payload) return;
 
-    let api: any;
+    let api;
     switch (type) {
       case UserType.PERSON:
         api = personApi;
@@ -290,28 +235,25 @@ export default function RegisterScreen() {
       default:
         return;
     }
+    if (!api) return;
 
-    console.warn('Submitting payload:', payload);
-    await api.post(payload);
+    const result = await api.post(payload);
 
-    if (api.loading) return;
-
-    if (api.error || !api.data?.success || !api.data.data) {
+    if (!result?.success || !result?.data) {
       console.error('Registration error:', api.error || 'Unknown error');
       Toast.show({
         type: 'error',
         text1: Strings.register.toast.errorTitle,
         text2: Strings.register.toast.errorDescription,
         position: 'top',
-        visibilityTime: 2500,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1, // To "hide" the close icon
       });
       return;
     }
 
-    // Successful registration logic (e.g., navigate to login)
-    console.warn('Registration successful:', api.data.data);
+    // Successful registration (e.g., navigate to login)
     router.back();
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
@@ -319,7 +261,7 @@ export default function RegisterScreen() {
       text1: Strings.register.toast.successTitle,
       text2: Strings.register.toast.successDescription,
       position: 'top',
-      visibilityTime: 2500,
+      visibilityTime: 2000,
       autoHide: true,
       closeIconSize: 1, // To "hide" the close icon
     });
@@ -372,7 +314,7 @@ export default function RegisterScreen() {
                     }}
                     className="font-ifood-regular"
                   >
-                    {Strings.register.client}
+                    {Strings.common.options.person}
                   </Text>
                 </RadioLabel>
               </Radio>
@@ -390,7 +332,7 @@ export default function RegisterScreen() {
                     }}
                     className="font-ifood-regular"
                   >
-                    {Strings.register.enterprise}
+                    {Strings.common.options.enterprise}
                   </Text>
                 </RadioLabel>
               </Radio>
@@ -408,7 +350,7 @@ export default function RegisterScreen() {
                     }}
                     className="font-ifood-regular"
                   >
-                    {Strings.register.interpreter}
+                    {Strings.common.options.interpreter}
                   </Text>
                 </RadioLabel>
               </Radio>
@@ -422,7 +364,7 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.reason.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.socialReason}
+                      {Strings.common.fields.reason}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -448,7 +390,7 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.cnpj}
+                      {Strings.common.fields.cnpj}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -482,7 +424,7 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.name.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.name}
+                      {Strings.common.fields.name}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -508,7 +450,7 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.cpf.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.cpf}
+                      {Strings.common.fields.cpf}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -535,10 +477,10 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.birthday.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.birthday}
+                      {Strings.common.fields.birthday}
                     </FormControlLabelText>
                   </FormControlLabel>
-                  <TouchableOpacity onPress={() => setShow(true)}>
+                  <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <Input pointerEvents="none">
                       <InputField
                         placeholder="DD/MM/AAAA"
@@ -557,7 +499,7 @@ export default function RegisterScreen() {
                       {fields.birthday.error}
                     </FormControlErrorText>
                   </FormControlError>
-                  {show && (
+                  {showDatePicker && (
                     <DateTimePicker
                       value={date}
                       mode="date"
@@ -570,11 +512,11 @@ export default function RegisterScreen() {
                 <FormControl isRequired isInvalid={!!fields.gender.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.gender}
+                      {Strings.common.fields.gender}
                     </FormControlLabelText>
                   </FormControlLabel>
                   <ModalSingleSelection
-                    items={genderChoices}
+                    items={genders}
                     selectedValue={fields.gender.value}
                     onSelectionChange={(value) => setValue('gender', value)}
                     hasError={!!fields.gender.error}
@@ -598,7 +540,8 @@ export default function RegisterScreen() {
                 <FormControl isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.register.cnpj} ({Strings.common.optional})
+                      {Strings.common.fields.cnpj} (
+                      {Strings.common.fields.optional})
                     </FormControlLabelText>
                   </FormControlLabel>
                   <Input>
@@ -631,7 +574,7 @@ export default function RegisterScreen() {
               <FormControl isRequired isInvalid={!!fields.phone.error}>
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.register.phone}
+                    {Strings.common.fields.phone}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
@@ -660,7 +603,7 @@ export default function RegisterScreen() {
               <FormControl isRequired isInvalid={!!fields.email.error}>
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.email}
+                    {Strings.common.fields.email}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
@@ -688,7 +631,7 @@ export default function RegisterScreen() {
               <FormControl isRequired isInvalid={!!fields.password.error}>
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.password}
+                    {Strings.common.fields.password}
                   </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
@@ -736,7 +679,7 @@ export default function RegisterScreen() {
               >
                 <XIcon color={colors.primaryOrange} />
                 <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                  {Strings.common.cancel}
+                  {Strings.common.buttons.cancel}
                 </Text>
               </HapticTab>
             </View>

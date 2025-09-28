@@ -17,6 +17,10 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { LoginCredentials } from '@/src/types/api';
+import {
+  buildInvalidFieldError,
+  buildRequiredFieldError,
+} from '@/src/utils/helpers';
 import { validateEmail } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
@@ -36,8 +40,8 @@ export default function LoginScreen() {
     if (loginError) {
       Toast.show({
         type: 'error',
-        text1: Strings.auth.loginFailed,
-        text2: Strings.auth.invalidCredentials,
+        text1: Strings.auth.toast.errorTitle,
+        text2: Strings.auth.toast.errorDescription,
         position: 'top',
         visibilityTime: 2500,
         autoHide: true,
@@ -52,10 +56,8 @@ export default function LoginScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.common.email + ' ' + Strings.common.required;
-        if (!validateEmail(value))
-          return Strings.common.email + ' ' + Strings.common.invalid;
+        if (!value.trim()) return buildRequiredFieldError('email');
+        if (!validateEmail(value)) return buildInvalidFieldError('email');
         return null;
       },
     },
@@ -63,8 +65,7 @@ export default function LoginScreen() {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim())
-          return Strings.common.password + ' ' + Strings.common.required;
+        if (!value.trim()) return buildRequiredFieldError('password');
         return null;
       },
     },
@@ -96,7 +97,7 @@ export default function LoginScreen() {
         <View className=" mb-12 items-center justify-center">
           <DarkBlueLogo />
           <Text className="mt-2 font-ifood-regular text-text-light dark:text-text-dark">
-            {Strings.common.slogan}
+            {Strings.auth.slogan}
           </Text>
         </View>
 
@@ -104,13 +105,13 @@ export default function LoginScreen() {
         <View className="py-4 gap-4">
           <FormControl
             size="md"
-            accessibilityLabel={Strings.common.email}
+            accessibilityLabel={Strings.common.fields.email}
             isRequired={true}
             isInvalid={!!fields.email.error}
           >
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                {Strings.common.email}
+                {Strings.common.fields.email}
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
@@ -138,13 +139,13 @@ export default function LoginScreen() {
 
           <FormControl
             size="md"
-            accessibilityLabel={Strings.common.password}
+            accessibilityLabel={Strings.common.fields.password}
             isRequired={true}
             isInvalid={!!fields.password.error}
           >
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                {Strings.common.password}
+                {Strings.common.fields.password}
               </FormControlLabelText>
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
