@@ -11,7 +11,7 @@ type ApiState<T> = {
 /**
  * Usage example:
  *
- *   const { data, loading, error } = useApiGet<User[]>('/users', { active: true });
+ *   const { data, loading, error } = useApiGet<UserResponse[]>('/users', { active: true });
  */
 export const useApiGet = <T>(endpoint: string, params?: object) => {
   const [state, setState] = useState<ApiState<T>>({
@@ -53,7 +53,7 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
 /**
  * Usage example:
  *
- *   const { data, loading, error, post } = useApiPost<User, NewUser>('/users');
+ *   const { data, loading, error, post } = useApiPost<UserResponse, UserRequest>('/users');
  *   const result =await post({ name: 'John' });
  */
 export const useApiPost = <T, U>(endpoint: string, body?: U) => {
@@ -84,7 +84,7 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
 /**
  * Usage example:
  *
- *   const { data, loading, error, patch } = useApiPatch<User, PartialUser>('/users/1');
+ *   const { data, loading, error, patch } = useApiPatch<UserResponse, UserRequest>('/users/1');
  *   const result = await patch({ name: 'Jane' });
  */
 export const useApiPatch = <T, U>(endpoint: string, body?: U) => {
