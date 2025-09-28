@@ -1,6 +1,6 @@
+import { Button, ButtonText } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import { Button, ButtonText } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { router } from 'expo-router';
 

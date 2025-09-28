@@ -1,7 +1,7 @@
+import { Card } from '@/src/components/ui/card';
+import { View } from '@/src/components/ui/view';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View } from '@/src/components/ui/view';
-import { Card } from '@/src/components/ui/card';
 
 export default function CardTestScreen() {
   return (
