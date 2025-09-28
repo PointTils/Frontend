@@ -488,12 +488,12 @@ export default function EditProfileScreen() {
     if (!api && !userSpecialtyApi) return;
 
     const profileResponse = await api.patch(payload);
-    // const specialtyRespose = await userSpecialtyApi.post(specialtiesPayload);
+    // const specialtyResponse = await userSpecialtyApi.post(specialtiesPayload);
 
     if (
       !profileResponse?.success ||
       !profileResponse?.data
-      // !specialtyRespose?.success
+      // !specialtyResponse?.success
     ) {
       console.error('Update error:', api.error || 'Unknown error');
       Toast.show({
