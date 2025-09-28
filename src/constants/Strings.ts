@@ -157,6 +157,21 @@ export const Strings = {
     female: 'Feminino',
     others: 'Outros',
   },
+  appointment_solicitation: {
+    location: {
+      location: 'Localização',
+        uf: 'UF',
+        city: 'Cidade',
+        neighborhood: 'Bairro',
+        street: 'Logradouro',
+        number: 'Número',
+        floor: 'Complemento'
+    },
+    modality: 'Modalidade',
+    presencial: 'Presencial',
+    online: 'Online',
+    date: 'Data e Hora'
+  },
 
   days: {
     monday: 'Segunda-Feira',
