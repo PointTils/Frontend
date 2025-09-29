@@ -3,27 +3,30 @@
  * Includes user roles and shared models.
  */
 
+import type { Strings } from '../constants/Strings';
+
 // Models
 export interface Location {
-  id: string | null;
-  uf: string;
+  id?: string | null;
   city: string;
   neighborhood: string;
+  uf: string;
 }
 
 export interface Specialty {
-  id: string | null;
+  id?: string | null;
   name: string;
 }
 
-export interface InterpreterProfessionalInfo {
-  cnpj: string | null;
-  rating: number;
-  modality: Modalities;
-  description: string;
-  min_value: number;
-  max_value: number;
-  image_rights: boolean;
+// API types
+export interface StateAndCityResponse {
+  success: boolean;
+  message: string;
+  data: [
+    {
+      name: string;
+    },
+  ];
 }
 
 // Enums
@@ -39,7 +42,13 @@ export enum Gender {
   OTHERS = 'OTHERS',
 }
 
-export enum Modalities {
-  PRESENTIAL = 'PRESENTIAL',
+export enum Modality {
+  PERSONALLY = 'PERSONALLY',
   ONLINE = 'ONLINE',
+  ALL = 'ALL',
 }
+
+// Types
+export type Day = keyof typeof Strings.days;
+
+export type TimeRange = { from?: string | null; to?: string | null };

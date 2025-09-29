@@ -1,6 +1,6 @@
 import { GluestackUIProvider } from '@/src/components/ui/gluestack-ui-provider';
 import { Colors } from '@/src/constants/Colors';
-import { FORCE_LIGHT_MODE } from '@/src/constants/Theme';
+import { FORCE_LIGHT_MODE } from '@/src/constants/Config';
 import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,

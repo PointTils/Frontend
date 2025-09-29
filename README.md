@@ -52,7 +52,8 @@ npm run start
 
 ## Scripts úteis
 
-- Lint: `npm run lint`
+- Lint (checar): `npm run lint`
+- Lint (corrigir): `npx eslint --fix .`
 - Formatação (checar): `npm run format:check`
 - Formatação (corrigir): `npm run format:write`
 - Verificação de dependencias: `depcheck`

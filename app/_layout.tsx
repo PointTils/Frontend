@@ -4,6 +4,8 @@ import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { clearAsyncStorage } from '@/src/utils/helpers';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -33,6 +35,7 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inInterpreters = segments[0] === 'interpreters';
 
     if (isAuthenticated && isFirstTime && !inOnboarding) {
       // First time user, show onboarding
@@ -44,17 +47,22 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     ) {
       // Existing user, redirect to tabs
       router.replace('/(tabs)');
-    } else if (!isAuthenticated && (inTabsGroup || inOnboarding)) {
+    } else if (
+      !isAuthenticated &&
+      (inTabsGroup || inOnboarding || inInterpreters)
+    ) {
       // Not authenticated, redirect to auth
       router.replace('/(auth)');
-    } else if (!inAuthGroup && !inTabsGroup && !inOnboarding && !isLoading) {
+    } else if (
+      !inAuthGroup &&
+      !inTabsGroup &&
+      !inOnboarding &&
+      !inInterpreters &&
+      !isLoading
+    ) {
       // At root level, decide where to go
       if (isAuthenticated) {
-        if (isFirstTime) {
-          router.replace('/onboarding');
-        } else {
-          router.replace('/(tabs)');
-        }
+        router.replace(isFirstTime ? '/onboarding' : '/(tabs)');
       } else {
         router.replace('/(auth)');
       }
@@ -77,6 +85,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
+        <Stack.Screen name="interpreters" />
       </Stack>
     </NavigationController>
   );
@@ -105,6 +114,9 @@ function AppContent() {
     async function prepare() {
       try {
         // Pre-load fonts, make any API calls you need to do here
+
+        // Force a clean start by clearing AsyncStorage (development only) - uncomment if needed
+        // await clearAsyncStorage();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (e) {
         console.warn(e);
