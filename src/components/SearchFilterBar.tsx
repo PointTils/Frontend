@@ -11,8 +11,8 @@ import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
 import type { UserResponse } from '../types/api';
-import type { AppliedFilters } from '../types/search-filter-bar';
 import { Modality } from '../types/common';
+import type { AppliedFilters } from '../types/search-filter-bar';
 
 interface SearchFilterBarProps {
   onData: (data: UserResponse) => void;

@@ -1,4 +1,4 @@
-import { Gender, Modality } from "./common";
+import type { Gender, Modality } from './common';
 
 export type AppliedFilters = {
   modality?: Modality | null;
