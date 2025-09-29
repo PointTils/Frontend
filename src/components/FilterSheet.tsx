@@ -16,15 +16,15 @@ import {
 } from './ui/form-control';
 import { Input, InputField } from './ui/input';
 import { ApiRoutes } from '../constants/ApiRoutes';
+import { genders, specialties } from '../constants/ItemsSelection';
 import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
+import type { SpecialtyResponse } from '../types/api';
+import type { StateAndCityResponse } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
-import { SpecialtyResponse } from '../types/api';
-import { StateAndCityResponse } from '../types/common';
-import { genders, specialties } from '../constants/ItemsSelection';
 
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
