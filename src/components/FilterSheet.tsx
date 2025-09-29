@@ -20,10 +20,11 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { SpecialtiesResponse } from '../types/api/specialties';
-import type { CityResponse, StateResponse } from '../types/api/state';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
+import { SpecialtyResponse } from '../types/api';
+import { StateAndCityResponse } from '../types/common';
+import { genders, specialties } from '../constants/ItemsSelection';
 
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
@@ -44,9 +45,6 @@ function FilterSheet({
   const [showTime, setShowTime] = useState(false);
 
   const [specialty, setSpecialty] = useState<string[]>([]);
-  const [specialtyOptions, setSpecialtyOptions] = useState<
-    { label: string; value: string }[]
-  >([]);
 
   const [date, setDate] = useState<Date | null>(null);
   const [gender, setGender] = useState<string>('');
@@ -63,21 +61,21 @@ function FilterSheet({
   const colors = useColors();
   const { user, isAuthenticated } = useAuth();
 
-  const { data: statesData, error: statesError } = useApiGet<StateResponse>(
-    user?.id && isAuthenticated ? ApiRoutes.states.base : '',
-  );
+  const { data: statesData, error: statesError } =
+    useApiGet<StateAndCityResponse>(
+      user?.id && isAuthenticated ? ApiRoutes.states.base : '',
+    );
 
   const citiesApiUrl =
     user?.id && isAuthenticated && state
       ? ApiRoutes.states.cities(state)
       : null;
 
-  const { data: citiesData, error: citiesError } = useApiGet<CityResponse>(
-    citiesApiUrl || '',
-  );
+  const { data: citiesData, error: citiesError } =
+    useApiGet<StateAndCityResponse>(citiesApiUrl || '');
 
   const { data: specialtiesData, error: specialtiesError } =
-    useApiGet<SpecialtiesResponse>(
+    useApiGet<SpecialtyResponse>(
       user?.id && isAuthenticated ? ApiRoutes.specialties.base : '',
     );
 
@@ -119,18 +117,6 @@ function FilterSheet({
     }));
     setCityOptions(mapped);
   }, [citiesData, citiesError]);
-
-  // Especialidades
-  useEffect(() => {
-    if (specialtiesError || !specialtiesData?.success || !specialtiesData?.data)
-      return;
-
-    const mapped = specialtiesData.data.map((item) => ({
-      label: item.name,
-      value: item.id,
-    }));
-    setSpecialtyOptions(mapped);
-  }, [specialtiesData, specialtiesError]);
 
   // Tratamento de erro global
   useEffect(() => {
@@ -176,12 +162,6 @@ function FilterSheet({
 
     onApply(cleanedFilters);
   };
-
-  const genderOptions = [
-    { label: 'Masculino', value: 'MALE' },
-    { label: 'Feminino', value: 'FEMALE' },
-    { label: 'Outros', value: 'OTHERS' },
-  ];
 
   return (
     <Modal transparent animationType="slide">
@@ -266,7 +246,7 @@ function FilterSheet({
             <Ionicons name="book-outline" size={24} color="black" />
             <View className="w-[300px]">
               <ModalMultipleSelection
-                items={specialtyOptions}
+                items={specialties}
                 selectedValues={specialty}
                 onSelectionChange={setSpecialty}
               />
@@ -362,7 +342,7 @@ function FilterSheet({
             <Ionicons name="male-female-outline" size={24} color="black" />
             <View className="w-[300px]">
               <ModalSingleSelection
-                items={genderOptions}
+                items={genders}
                 selectedValue={gender}
                 onSelectionChange={setGender}
               />

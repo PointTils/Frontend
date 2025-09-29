@@ -10,11 +10,11 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { InterpreterResponse } from '../types/api/interpreter';
 import type { AppliedFilters } from '../types/search-filter-bar';
+import { UserResponse } from '../types/api';
 
 interface SearchFilterBarProps {
-  onData: (data: InterpreterResponse) => void;
+  onData: (data: UserResponse) => void;
 }
 
 export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
@@ -72,7 +72,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     return query;
   };
 
-  const { data, error } = useApiGet<InterpreterResponse>(
+  const { data, error } = useApiGet<UserResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
