@@ -74,11 +74,6 @@ function FilterSheet({
   const { data: citiesData, error: citiesError } =
     useApiGet<StateAndCityResponse>(citiesApiUrl || '');
 
-  const { data: specialtiesData, error: specialtiesError } =
-    useApiGet<SpecialtyResponse>(
-      user?.id && isAuthenticated ? ApiRoutes.specialties.base : '',
-    );
-
   useEffect(() => {
     if (filter) {
       setSpecialty(filter.specialty ?? []);
@@ -120,7 +115,7 @@ function FilterSheet({
 
   // Tratamento de erro global
   useEffect(() => {
-    if (statesError || citiesError || specialtiesError) {
+    if (statesError || citiesError) {
       router.push('/(tabs)');
       Toast.show({
         type: 'error',
@@ -132,7 +127,7 @@ function FilterSheet({
         closeIconSize: 1,
       });
     }
-  }, [statesError, citiesError, specialtiesError]);
+  }, [statesError, citiesError]);
 
   const handleApply = () => {
     const filters: AppliedFilters = {
