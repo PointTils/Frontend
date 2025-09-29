@@ -19,6 +19,8 @@ export const Colors = {
     fieldGray: '#D3D3D3', // border300 - Gluestack
     detailsGray: '#737373', // typography600 - Gluestack
     modalOverlay: 'rgba(0, 0, 0, 0.5)', // Modal backdrop
+    pendingBadge: '#C96A2C',
+    pendingBadgeBackground: '#FCEFE6',
   },
   dark: {
     text: '#fff',
@@ -34,5 +36,7 @@ export const Colors = {
     fieldGray: '#374151', // border600 - Gluestack
     detailsGray: '#9CA3AF', // typography400 - Gluestack
     modalOverlay: 'rgba(0, 0, 0, 0.6)', // Modal backdrop - slightly darker for dark mode
+    pendingBadge: '#C96A2C',
+    pendingBadgeBackground: '#FCEFE6',
   },
 } as const;
