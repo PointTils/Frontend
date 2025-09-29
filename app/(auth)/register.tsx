@@ -55,7 +55,7 @@ import {
   PlusIcon,
   CircleIcon,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -213,6 +213,13 @@ export default function RegisterScreen() {
       },
     },
   });
+
+  const maxDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    return d;
+  }, []);
 
   // Handle form submission - API call and response handling
   async function handleRegister() {
@@ -503,7 +510,8 @@ export default function RegisterScreen() {
                     <DateTimePicker
                       value={date}
                       mode="date"
-                      display="default"
+                      display="calendar"
+                      maximumDate={maxDate}
                       onChange={handleDateChange}
                     />
                   )}

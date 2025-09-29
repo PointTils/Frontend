@@ -119,7 +119,7 @@ export default function ProfileScreen() {
     <View className="flex-1 justify-center items-center mt-8 px-4">
       <ScrollView
         className="w-full"
-        contentContainerClassName="items-center pb-4"
+        contentContainerClassName="items-center grow pb-4"
         showsVerticalScrollIndicator={false}
       >
         {/* For alignment purposes */}
@@ -294,12 +294,8 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {profile.type === UserType.ENTERPRISE && (
-          <View className="w-full h-16" />
-        )}
-
         {/* Buttons */}
-        <View className="w-full">
+        <View className="w-full mt-auto">
           <Button
             size="md"
             onPress={() =>

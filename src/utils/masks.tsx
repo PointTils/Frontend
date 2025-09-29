@@ -129,6 +129,12 @@ export const formatDaySchedule = (range?: TimeRange): string => {
   return from && to ? `${from} - ${to}` : Strings.common.options.notAvailable;
 };
 
+export const formatTime = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 // Validation
 export const validatePhone = (phone: string) => {
   return phone.replace(/\D/g, '').length === 11;

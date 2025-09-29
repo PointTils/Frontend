@@ -84,7 +84,7 @@ import {
   PlusIcon,
   MinusIcon,
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -387,6 +387,13 @@ export default function EditProfileScreen() {
       },
     },
   });
+
+  const maxDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    return d;
+  }, []);
 
   // Early return if no profile data
   useEffect(() => {
@@ -700,7 +707,8 @@ export default function EditProfileScreen() {
                       <DateTimePicker
                         value={date}
                         mode="date"
-                        display="default"
+                        maximumDate={maxDate}
+                        display="calendar"
                         onChange={handleDateChange}
                       />
                     )}
@@ -1282,7 +1290,7 @@ export default function EditProfileScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-14 pb-4 gap-4">
+          <View className="mt-14 pb-6 gap-4">
             <Button
               size="md"
               onPress={handleUpdate}
