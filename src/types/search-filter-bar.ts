@@ -1,10 +1,12 @@
+import { Gender, Modality } from "./common";
+
 export type AppliedFilters = {
-  modality?: string;
+  modality?: Modality | null;
   availableDates?: string;
   online?: boolean;
   personally?: boolean;
   specialty?: string[];
-  gender?: string;
+  gender?: Gender | null;
   city?: string;
   state?: string;
 };

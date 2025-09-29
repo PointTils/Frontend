@@ -27,6 +27,9 @@ export const Strings = {
       back: 'Voltar',
       understood: 'Entendi',
       confirm: 'Confirmar',
+      filter: 'Filtro',
+      datesAvaible: 'Datas disponíveis',
+      online: 'Online'
     },
 
     options: {
@@ -208,16 +211,6 @@ export const Strings = {
   },
 
   search: {
-    datesAvaible: 'Datas disponíveis',
-    online: 'Online',
-    filter: ' Filtro',
-    modality: 'Modalidade',
-    personally: 'Presencial',
-    localization: 'Localização',
-    specialitie: 'Especialidade',
-    gender: 'Genêro',
-    date: 'Data',
-    search: 'Buscar',
     selectCity: 'Selecione um estado primeiro',
     toast: {
       errorGetTitle: 'Erro ao obter dados.',

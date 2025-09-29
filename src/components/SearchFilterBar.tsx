@@ -12,6 +12,7 @@ import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
 import type { UserResponse } from '../types/api';
 import type { AppliedFilters } from '../types/search-filter-bar';
+import { Modality } from '../types/common';
 
 interface SearchFilterBarProps {
   onData: (data: UserResponse) => void;
@@ -31,11 +32,13 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     setSheetVisible(false);
   };
 
-  const handlerOnlineButton = (data?: string) =>
-    data === 'ONLINE' || data === 'ALL' ? 'border-red-300' : 'border-gray-300';
+  const handlerOnlineButton = (data?: Modality) =>
+    data === Modality.ONLINE || data === Modality.ALL
+      ? 'border-red-300'
+      : 'border-gray-300';
 
-  const handlerOnlineText = (data?: string) =>
-    data === 'ONLINE' || data === 'ALL'
+  const handlerOnlineText = (data?: Modality) =>
+    data === Modality.ONLINE || data === Modality.ALL
       ? 'text-primary-blue-light'
       : 'text-gray-700';
 
@@ -126,18 +129,19 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           }}
         >
           <Text className={`${handlerDateText(filters.availableDates)}`}>
-            {Strings.search.datesAvaible}
+            {Strings.common.buttons.datesAvaible}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={1}
           className={`px-3 py-2 mr-2 border ${handlerOnlineButton(
-            filters.modality,
+            filters.modality ?? undefined,
           )} rounded-md`}
           style={{
             borderColor:
-              filters.modality === 'ONLINE' || filters.modality === 'ALL'
+              filters.modality === Modality.ONLINE ||
+              filters.modality === Modality.ALL
                 ? colors.primaryBlue
                 : colors.fieldGray,
           }}
@@ -145,14 +149,17 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
             setFilters({
               ...filters,
               modality:
-                filters.modality === 'ONLINE' || filters.modality === 'ALL'
-                  ? ''
-                  : 'ONLINE',
+                filters.modality === Modality.ONLINE ||
+                filters.modality === Modality.ALL
+                  ? null
+                  : Modality.ONLINE,
             })
           }
         >
-          <Text className={`${handlerOnlineText(filters.modality)}`}>
-            {Strings.search.online}
+          <Text
+            className={`${handlerOnlineText(filters.modality ?? undefined)}`}
+          >
+            {Strings.common.buttons.online}
           </Text>
         </TouchableOpacity>
 
@@ -181,7 +188,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
                 handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
             }}
           >
-            {Strings.search.filter} {handlerFilterCount()}
+            {Strings.common.buttons.filter} {handlerFilterCount()}
           </Text>
         </TouchableOpacity>
       </View>

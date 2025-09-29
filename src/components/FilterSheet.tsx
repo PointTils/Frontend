@@ -21,7 +21,7 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { StateAndCityResponse } from '../types/common';
+import { Gender, Modality, type StateAndCityResponse } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
 
@@ -46,7 +46,7 @@ function FilterSheet({
   const [specialty, setSpecialty] = useState<string[]>([]);
 
   const [date, setDate] = useState<Date | null>(null);
-  const [gender, setGender] = useState<string>('');
+  const [gender, setGender] = useState<Gender | null>(null);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
 
@@ -78,14 +78,20 @@ function FilterSheet({
       setSpecialty(filter.specialty ?? []);
       setCity(filter.city ?? '');
       setState(filter.state ?? '');
-      setGender(filter.gender ?? '');
+      setGender(filter.gender ?? null);
       if (filter.availableDates) {
         const d = new Date(filter.availableDates);
         setDate(d);
       }
-      if (filter.modality === 'ONLINE' || filter.modality === 'ALL')
+      if (
+        filter.modality === Modality.ONLINE ||
+        filter.modality === Modality.ALL
+      )
         setCheckedOnline(true);
-      if (filter.modality === 'PERSONALLY' || filter.modality === 'ALL')
+      if (
+        filter.modality === Modality.PERSONALLY ||
+        filter.modality === Modality.ALL
+      )
         setCheckedPersonally(true);
     }
   }, [filter]);
@@ -137,12 +143,12 @@ function FilterSheet({
       state,
       modality:
         checkedOnline && checkedPersonally
-          ? 'ALL'
+          ? Modality.ALL
           : checkedOnline
-            ? 'ONLINE'
+            ? Modality.ONLINE
             : checkedPersonally
-              ? 'PERSONALLY'
-              : '',
+              ? Modality.PERSONALLY
+              : undefined,
     };
 
     const cleanedFilters = Object.fromEntries(
@@ -168,7 +174,7 @@ function FilterSheet({
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              {Strings.search.modality}
+              {Strings.common.fields.modality}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="flex-row items-center justify-center gap-8">
@@ -179,7 +185,7 @@ function FilterSheet({
                 onPress={() => setCheckedOnline(!checkedOnline)}
               />
               <Text className="font-ifood-regular text-text-light">
-                {Strings.search.online}
+                {Strings.common.options.online}
               </Text>
             </View>
             <View className="flex-row items-center">
@@ -189,7 +195,7 @@ function FilterSheet({
                 onPress={() => setCheckedPersonally(!checkedPersonally)}
               />
               <Text className="font-ifood-regular text-text-light">
-                {Strings.search.personally}
+                {Strings.common.options.inPerson}
               </Text>
             </View>
           </View>
@@ -200,7 +206,7 @@ function FilterSheet({
           <FormControl className="mb-4">
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                {Strings.search.localization}
+                {Strings.common.fields.location}
               </FormControlLabelText>
             </FormControlLabel>
             <View className="flex-row justify-start space-x-2 w-full gap-3">
@@ -233,7 +239,7 @@ function FilterSheet({
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              {Strings.search.specialitie}
+              {Strings.common.fields.specialties}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="flex-row justify-start items-center space-x-2 gap-3">
@@ -252,7 +258,7 @@ function FilterSheet({
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              {Strings.search.date}
+              {Strings.common.fields.date}
             </FormControlLabelText>
           </FormControlLabel>
           <>
@@ -329,7 +335,7 @@ function FilterSheet({
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-              {Strings.search.gender}
+              {Strings.common.fields.gender}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="flex-row justify-start items-center space-x-2 gap-3">
@@ -337,8 +343,10 @@ function FilterSheet({
             <View className="w-[300px]">
               <ModalSingleSelection
                 items={genders}
-                selectedValue={gender}
-                onSelectionChange={setGender}
+                selectedValue={gender ?? ''}
+                onSelectionChange={(value: string) =>
+                  setGender(value as Gender)
+                }
               />
             </View>
           </View>
@@ -351,7 +359,7 @@ function FilterSheet({
             className="data-[active=true]:bg-primary-orange-press-light"
           >
             <Text className="font-ifood-regular text-text-dark">
-              {Strings.search.search}
+              {Strings.common.search}
             </Text>
           </Button>
         </View>
