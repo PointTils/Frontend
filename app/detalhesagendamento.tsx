@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -34,7 +34,9 @@ type TabKey = 'agendamento' | 'solicitante';
 export default function DetalhesAgendamento() {
   const colors = useColors();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
+  const SAFE_TOP = height * 0.12;
+  const SAFE_BOTTOM = height * 0.15;
+
   const [tab, setTab] = React.useState<TabKey>('agendamento');
 
   const { user } = useAuth();
@@ -155,8 +157,8 @@ export default function DetalhesAgendamento() {
         styles.screen,
         {
           backgroundColor: colors.white,
-          paddingTop: Math.max(insets.top, height * 0.08),
-          paddingBottom: height * 0.15,
+          paddingTop: SAFE_TOP,
+          paddingBottom: SAFE_BOTTOM,
         },
       ]}
     >

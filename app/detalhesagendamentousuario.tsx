@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -35,7 +35,9 @@ type TabKey = 'agendamento' | 'profissional';
 export default function DetalhesAgendamentoUsuario() {
   const colors = useColors();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
+  const SAFE_TOP = height * 0.12;
+  const SAFE_BOTTOM = height * 0.15;
+
   const [tab, setTab] = React.useState<TabKey>('agendamento');
 
   // helper p/ escolher 1ª cor disponível sem hardcode
@@ -78,17 +80,15 @@ export default function DetalhesAgendamentoUsuario() {
     // sem hardcode de cor aqui; a imagem é um link estático (ok)
     'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5f4bd7a6-f763-4518-9b81-bdfd40ce3fc9/d26yer1-421bb5b8-9fc2-4d5a-b2d1-1e1f81b26b82.png/v1/fill/w_150,h_150,q_80,strp/spongebob_4_150x150_png_by_somemilk_d26yer1-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTUwIiwicGF0aCI6Ii9mLzVmNGJkN2E2LWY3NjMtNDUxOC05YjgxLWJkZmQ0MGNlM2ZjOS9kMjZ5ZXIxLTQyMWJiNWI4LTlmYzItNGQ1YS1iMmQxLTFlMWY4MWIyNmI4Mi5wbmciLCJ3aWR0aCI6Ijw9MTUwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.1eltXyAyclTf_FLrqWbmNpW8lYkmgSbeK3qMoLvY0YI';
 
-  
   /*
     const [avatarSrc, setAvatarSrc] = React.useState<{ uri: string }>({
     uri: avatarUrl,
   });
     */
 
-  const [avatarSrc, _setAvatarSrc] = React.useState<{ uri: string }>({ uri: avatarUrl });
-
-
-
+  const [avatarSrc, _setAvatarSrc] = React.useState<{ uri: string }>({
+    uri: avatarUrl,
+  });
 
   const descricao =
     (params.descricao as string) ||
@@ -171,8 +171,9 @@ export default function DetalhesAgendamentoUsuario() {
         styles.screen,
         {
           backgroundColor: colors.white,
-          paddingTop: Math.max(insets.top, height * 0.08),
-          paddingBottom: height * 0.15,
+
+          paddingTop: SAFE_TOP,
+          paddingBottom: SAFE_BOTTOM,
         },
       ]}
     >
