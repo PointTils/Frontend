@@ -29,7 +29,7 @@ export const Strings = {
       confirm: 'Confirmar',
       filter: 'Filtro',
       datesAvaible: 'Datas disponíveis',
-      online: 'Online'
+      online: 'Online',
     },
 
     options: {
