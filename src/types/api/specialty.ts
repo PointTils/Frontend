@@ -1,4 +1,4 @@
-import type { Specialty } from "../common";
+import type { Specialty } from '../common';
 
 export interface UserSpecialty {
   id: string;
