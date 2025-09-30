@@ -215,23 +215,6 @@ export const Strings = {
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
   },
 
-  edit: {
-    header: 'Editar Perfil',
-    basicData: 'Dados básicos',
-    hoursDescription:
-      'Defina os horários disponíveis para atendimento em cada dia da semana.',
-
-    toast: {
-      errorApiTitle: 'Falha ao atualizar perfil',
-      errorApiDescription: 'Verifique os campos preenchidos. Tente novamente.',
-      successTitle: 'Perfil atualizado com sucesso!',
-      successDescription: 'As alterações foram salvas.',
-      errorTitle: 'Erro',
-      errorDescription:
-        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
-    },
-  },
-
   detalhesAgendamento: {
     header: 'Detalhes do agendamento',
     tabs: {
