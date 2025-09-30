@@ -32,4 +32,8 @@ export const ApiRoutes = {
   userSpecialties: {
     userSpecialties: (userId: string) => `/users/${userId}/specialties`,
   },
+  appointments: {
+    base: '/appointments',
+    filter: '/appointments/filter',
+  },
 } as const;

@@ -79,7 +79,7 @@ import { Strings } from '@/src/constants/Strings';
 
 type CardVariant = 'appointment' | 'search';
 
-interface CardProps {
+export interface CardProps {
   photoUrl: string;
   fullName: string;
 

@@ -116,6 +116,8 @@ export const Strings = {
 
   home: {
     tabBar: 'Início',
+    welcome: 'Olá, {User}!',
+    nextAppointments: 'Próximos agendamentos',
   },
 
   history: {
