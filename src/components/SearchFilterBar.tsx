@@ -14,6 +14,24 @@ import type { UserResponse } from '../types/api';
 import { Modality } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 
+/**
+ * A search bar component with integrated filters for querying interpreters.
+ * Provides a text input for free-text search and quick-access filter buttons
+ * (date availability, online modality, and advanced filters via modal).
+ *
+ * @param onData - Callback function called with API response data (UserResponse)
+ *
+ * @returns A search bar with input field, filter controls, and modal integration.
+ *
+ * @example
+ * <SearchFilterBar
+ *   onData={(data) => {
+ *     console.log('Fetched interpreters:', data);
+ *   }}
+ * />
+ *
+ */
+
 interface SearchFilterBarProps {
   onData: (data: UserResponse) => void;
 }
