@@ -214,7 +214,7 @@ export const Strings = {
     tactileInterpreter: 'Intérprete Tátil',
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
   },
-  
+
   edit: {
     header: 'Editar Perfil',
     basicData: 'Dados básicos',
