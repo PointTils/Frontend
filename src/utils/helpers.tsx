@@ -4,8 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
-import type { UserRequest } from '../types/api';
-import { Modality, UserType } from '../types/common';
+import { type UserRequest, Modality, UserType } from '../types/api';
 
 /**
  * Contains utility functions used across the application.

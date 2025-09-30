@@ -118,10 +118,6 @@ export const Strings = {
     tabBar: 'Início',
   },
 
-  history: {
-    tabBar: 'Histórico',
-  },
-
   profile: {
     tabBar: 'Perfil',
     editProfile: 'Editar Perfil',
@@ -183,6 +179,22 @@ export const Strings = {
       errorDescription:
         'Aconteceu um erro inesperado. Tente novamente mais tarde.',
     },
+  },
+
+  requests: {
+    request: 'Solicitação',
+    requests: 'Solicitações',
+    title: 'Gerencie suas solicitações',
+    subtitle:
+      'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+  },
+
+  appointments: {
+    tabBar: 'Histórico',
+    appointment: 'Agendamento',
+    active: 'Ativos',
+    completed: 'Encerrados',
+    canceled: 'Cancelados',
   },
 
   // Enums and fixed options

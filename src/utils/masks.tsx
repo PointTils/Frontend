@@ -1,6 +1,5 @@
 import { Strings } from '@/src/constants/Strings';
-import type { TimeRange } from '@/src/types/common';
-import { Gender, Modality } from '@/src/types/common';
+import { type TimeRange, Gender, Modality } from '@/src/types/api';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.
@@ -129,10 +128,29 @@ export const formatDaySchedule = (range?: TimeRange): string => {
   return from && to ? `${from} - ${to}` : Strings.common.options.notAvailable;
 };
 
-export const formatTime = (date: Date): string => {
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+export const formatTime = (input: string | Date): string => {
+  if (input instanceof Date) {
+    const hours = String(input.getHours()).padStart(2, '0');
+    const minutes = String(input.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+  const s = String(input).trim();
+  if (/^\d{2}:\d{2}$/.test(s)) return s;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0, 5);
+  return '';
+};
+
+export const formatAppointmentLocation = (appt: any): string => {
+  if ((appt?.modality || '').toUpperCase() === Modality.ONLINE) {
+    return Strings.common.options.online;
+  }
+
+  const cityUf = [appt?.city, appt?.uf].filter(Boolean).join(' - ');
+  const streetNum = [appt?.street, appt?.street_number]
+    .filter(Boolean)
+    .join(', ');
+  const parts = [streetNum, appt?.neighborhood, cityUf].filter(Boolean);
+  return parts.length ? parts.join(', ') : Strings.common.options.inPerson;
 };
 
 // Validation

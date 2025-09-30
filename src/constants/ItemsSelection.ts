@@ -1,7 +1,7 @@
 import type { OptionItem } from '@/src/types/ui';
 
 import { Strings } from './Strings';
-import { Gender } from '../types/common';
+import { Gender } from '../types/api';
 
 /**
  * Centralized option lists for select/dropdown components.
