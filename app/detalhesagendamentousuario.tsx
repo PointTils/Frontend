@@ -1,14 +1,7 @@
-import {
-  Dimensions,
-  Image,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { Button } from '@/src/components/ui/button';
+import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
+import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -20,13 +13,17 @@ import {
   User as UserIcon,
   Star as StarIcon,
 } from 'lucide-react-native';
-
-import { useColors } from '@/src/hooks/useColors';
-import { Button } from '@/src/components/ui/button';
-import { Strings } from '@/src/constants/Strings';
-import { useAuth } from '@/src/contexts/AuthProvider';
-
 import React from 'react';
+import {
+  Dimensions,
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 const { height } = Dimensions.get('window');
 
