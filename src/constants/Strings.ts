@@ -214,4 +214,13 @@ export const Strings = {
     tactileInterpreter: 'Intérprete Tátil',
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
   },
+
+  appointments: {
+    toast: {
+      errorTitle: 'Erro ao criar agendamento',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Solicitação enviada!',
+      successDescription: 'O intérprete vai analisar sua solicitação e você receberá uma notificação assim que houver resposta.',
+    },
+  },
 } as const;
