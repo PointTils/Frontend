@@ -1,8 +1,8 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react-native";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { Colors } from "../constants/Colors";
-import { Schedule } from "../types/api/schedule";
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react-native';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Colors } from '../constants/Colors';
+import { Schedule } from '../types/api/schedule';
 
 type TimeSelection = { date: string; time: string } | null;
 
@@ -12,13 +12,12 @@ type InterpreterCalendarProps = {
   onTimeSelect: (selection: TimeSelection) => void;
 };
 
-
 /**
  * Componente utilizado para mostrar os horários disponíveis da agenda de um intérprete
- * 
+ *
  * @param schedules Array de schedules contendo horários disponíveis
  * @param selectedTime Horário selecionado
- * @param onTimeSelect Função utilizada para informar o componente pai o horário selecionado 
+ * @param onTimeSelect Função utilizada para informar o componente pai o horário selecionado
  * @returns um calendário com a agenda de disponibilidade renderizada
  */
 export default function InterpreterCalendar({
@@ -35,43 +34,59 @@ export default function InterpreterCalendar({
 
   const days = useMemo(() => {
     if (!schedules) return [];
-    const daysMap = schedules.reduce((acc, currentSchedule) => {
+    const daysMap = schedules.reduce(
+      (acc, currentSchedule) => {
         const dateStr = currentSchedule.date;
-        if (!acc[dateStr]) { acc[dateStr] = { date: dateStr, times: new Set<string>() }; }
+        if (!acc[dateStr]) {
+          acc[dateStr] = { date: dateStr, times: new Set<string>() };
+        }
         currentSchedule.time_slots.forEach((slot) => {
-            let start = new Date(`1970-01-01T${slot.start_time}Z`);
-            const end = new Date(`1970-01-01T${slot.end_time}Z`);
-            while (start < end) {
-                const hours = start.getUTCHours().toString().padStart(2, '0');
-                const minutes = start.getUTCMinutes().toString().padStart(2, '0');
-                acc[dateStr].times.add(`${hours}:${minutes}`);
-                start.setUTCMinutes(start.getUTCMinutes() + 30);
-            }
+          let start = new Date(`1970-01-01T${slot.start_time}Z`);
+          const end = new Date(`1970-01-01T${slot.end_time}Z`);
+          while (start < end) {
+            const hours = start.getUTCHours().toString().padStart(2, '0');
+            const minutes = start.getUTCMinutes().toString().padStart(2, '0');
+            acc[dateStr].times.add(`${hours}:${minutes}`);
+            start.setUTCMinutes(start.getUTCMinutes() + 30);
+          }
         });
         return acc;
-    }, {} as Record<string, { date: string; times: Set<string> }>);
-    return Object.values(daysMap).map(day => ({...day, times: Array.from(day.times).sort()})).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      },
+      {} as Record<string, { date: string; times: Set<string> }>,
+    );
+    return Object.values(daysMap)
+      .map((day) => ({ ...day, times: Array.from(day.times).sort() }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [schedules]);
 
-  const currentDays = useMemo(() => days.slice(startIndex, startIndex + 3), [days, startIndex]);
-  
+  const currentDays = useMemo(
+    () => days.slice(startIndex, startIndex + 3),
+    [days, startIndex],
+  );
+
   // Cria um array de exibição que SEMPRE tem 3 posições para um layout estável.
   const displayDays = useMemo(() => {
-    const daysToDisplay: (typeof days[0] | null)[] = Array(3).fill(null);
+    const daysToDisplay: ((typeof days)[0] | null)[] = Array(3).fill(null);
     currentDays.forEach((day, index) => {
-        daysToDisplay[index] = day;
+      daysToDisplay[index] = day;
     });
     return daysToDisplay;
   }, [currentDays]);
 
   const allPossibleTimes = useMemo(
     () => Array.from(new Set(currentDays.flatMap((day) => day.times))).sort(),
-    [currentDays]
+    [currentDays],
   );
 
   // Funções para troca de página no calendário
-  const handlePrev = useCallback(() => setStartIndex((prev) => Math.max(prev - 3, 0)), []);
-  const handleNext = useCallback(() => setStartIndex((prev) => (prev + 3 >= days.length ? prev : prev + 3)), [days.length]);
+  const handlePrev = useCallback(
+    () => setStartIndex((prev) => Math.max(prev - 3, 0)),
+    [],
+  );
+  const handleNext = useCallback(
+    () => setStartIndex((prev) => (prev + 3 >= days.length ? prev : prev + 3)),
+    [days.length],
+  );
 
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + 3 >= days.length;
@@ -79,15 +94,25 @@ export default function InterpreterCalendar({
   if (!days || days.length === 0) {
     return (
       <View className="h-24 justify-center items-center">
-        <Text className="text-gray-400 text-base">Nenhum horário disponível.</Text>
+        <Text className="text-gray-400 text-base">
+          Nenhum horário disponível.
+        </Text>
       </View>
     );
   }
 
   return (
     <View className="flex-row items-start justify-center">
-      <TouchableOpacity disabled={isPrevDisabled} onPress={handlePrev} className="p-2 mt-12">
-        <ChevronLeftIcon color={isPrevDisabled ? Colors.light.disabled : Colors.light.primaryBlue} />
+      <TouchableOpacity
+        disabled={isPrevDisabled}
+        onPress={handlePrev}
+        className="p-2 mt-12"
+      >
+        <ChevronLeftIcon
+          color={
+            isPrevDisabled ? Colors.light.disabled : Colors.light.primaryBlue
+          }
+        />
       </TouchableOpacity>
 
       <View className="flex-1">
@@ -97,15 +122,23 @@ export default function InterpreterCalendar({
             day ? (
               <View key={day.date} className="items-center flex-1 px-1">
                 <Text className="font-ifood-medium text-center mb-2">
-                  {(new Date(`${day.date}T00:00:00Z`)).toLocaleDateString("pt-BR", { weekday: "short", timeZone: "UTC" }).replace(/^\w/, c => c.toUpperCase())}
+                  {new Date(`${day.date}T00:00:00Z`)
+                    .toLocaleDateString('pt-BR', {
+                      weekday: 'short',
+                      timeZone: 'UTC',
+                    })
+                    .replace(/^\w/, (c) => c.toUpperCase())}
                 </Text>
                 <Text className="text-center mb-4">
-                  {(new Date(`${day.date}T00:00:00Z`)).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "UTC" })}
+                  {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(
+                    'pt-BR',
+                    { day: '2-digit', month: '2-digit', timeZone: 'UTC' },
+                  )}
                 </Text>
               </View>
             ) : (
-              <View key={`header-empty-${index}`} className="flex-1 px-1" /> 
-            )
+              <View key={`header-empty-${index}`} className="flex-1 px-1" />
+            ),
           )}
         </View>
 
@@ -115,33 +148,45 @@ export default function InterpreterCalendar({
               {displayDays.map((day, index) => {
                 if (!day) {
                   // Célula vazia
-                  return <View key={`slot-empty-${index}`} className="flex-1" />;
+                  return (
+                    <View key={`slot-empty-${index}`} className="flex-1" />
+                  );
                 }
 
                 const isAvailable = day.times.includes(time);
-                const isSelected = isAvailable && selectedTime?.date === day.date && selectedTime?.time === time;
+                const isSelected =
+                  isAvailable &&
+                  selectedTime?.date === day.date &&
+                  selectedTime?.time === time;
 
                 return isAvailable ? (
                   <TouchableOpacity
                     key={`${day.date}-${time}`}
                     className={`flex-1 items-center p-3 mb-2 mx-1 rounded-md ${
-                      isSelected ? 'bg-primary-blue-light' : 'bg-primary-blue-light/30'
+                      isSelected
+                        ? 'bg-primary-blue-light'
+                        : 'bg-primary-blue-light/30'
                     }`}
                     onPress={() => {
-                        // Seleção de horário
-                        if (isSelected) {
-                            onTimeSelect(null); // Desmarca se clicar no mesmo
-                        } else {
-                            onTimeSelect({ date: day.date, time }); // Marca um novo
-                        }
+                      // Seleção de horário
+                      if (isSelected) {
+                        onTimeSelect(null); // Desmarca se clicar no mesmo
+                      } else {
+                        onTimeSelect({ date: day.date, time }); // Marca um novo
+                      }
                     }}
                   >
-                    <Text className={`font-ifood-medium ${ isSelected ? 'text-white' : 'text-primary-blue-light' }`}>
+                    <Text
+                      className={`font-ifood-medium ${isSelected ? 'text-white' : 'text-primary-blue-light'}`}
+                    >
                       {time}
                     </Text>
                   </TouchableOpacity>
                 ) : (
-                  <View key={`${day.date}-${time}`} className="flex-1 items-center p-3 mb-2 mx-1 rounded-md bg-gray-100">
+                  <View
+                    key={`${day.date}-${time}`}
+                    className="flex-1 items-center p-3 mb-2 mx-1 rounded-md bg-gray-100"
+                  >
                     <Text className="text-gray-400">-</Text>
                   </View>
                 );
@@ -151,8 +196,16 @@ export default function InterpreterCalendar({
         </View>
       </View>
 
-      <TouchableOpacity disabled={isNextDisabled} onPress={handleNext} className="p-2 mt-12">
-        <ChevronRightIcon color={isNextDisabled ? Colors.light.disabled : Colors.light.primaryBlue} />
+      <TouchableOpacity
+        disabled={isNextDisabled}
+        onPress={handleNext}
+        className="p-2 mt-12"
+      >
+        <ChevronRightIcon
+          color={
+            isNextDisabled ? Colors.light.disabled : Colors.light.primaryBlue
+          }
+        />
       </TouchableOpacity>
     </View>
   );

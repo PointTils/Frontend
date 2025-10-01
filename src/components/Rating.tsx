@@ -8,13 +8,13 @@ interface StarRatingProps {
   size?: number;
   color?: string;
 }
-/** 
+/**
  * Componente de renderização de rating com estrelas
- * 
- * @param rating Valor numérico referente à nota do intérprete 
+ *
+ * @param rating Valor numérico referente à nota do intérprete
  * @param size Tamanho da estrela, não obrigatório.
- * @param color Cor das estrelas, não obrigatório. 
- * @returns 
+ * @param color Cor das estrelas, não obrigatório.
+ * @returns
  */
 export function StarRating({
   rating,
