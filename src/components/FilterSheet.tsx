@@ -34,8 +34,6 @@ import type { StateAndCityResponse, Gender } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
 
-
-
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
   onClose: () => void;
@@ -66,7 +64,6 @@ function FilterSheet({
     { label: string; value: string }[]
   >([]);
 
-  const colors = useColors();
   const { user, isAuthenticated } = useAuth();
 
   const { data: statesData, error: statesError } =
