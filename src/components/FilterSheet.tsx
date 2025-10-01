@@ -28,7 +28,6 @@ import { genders, specialties } from '../constants/ItemsSelection';
 import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
-import { useColors } from '../hooks/useColors';
 import { Modality } from '../types/common';
 import type { StateAndCityResponse, Gender } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
