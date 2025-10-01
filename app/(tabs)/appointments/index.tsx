@@ -11,6 +11,7 @@ import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import {
   formatAppointmentLocation,
+  formatCpfOrCnpj,
   formatDate,
   formatTime,
 } from '@/src/utils/masks';
@@ -83,10 +84,19 @@ export default function AppointmentsScreen() {
     <Fragment key={appt.id}>
       <View className="w-full h-px bg-gray-200" />
       <Card
-        photoUrl="https://placehold.co/128x128/png"
-        fullName={Strings.common.options.person}
-        subtitle="XXX.XXX.XXX-XX"
+        photoUrl={appt.contact_data?.picture || ''}
+        fullName={appt.contact_data?.name}
+        subtitle={
+          user?.type !== UserType.INTERPRETER
+            ? appt.contact_data?.specialties?.map((s) => s.name).join(', ')
+            : formatCpfOrCnpj(appt.contact_data?.document)
+        }
         showRating={user?.type !== UserType.INTERPRETER}
+        rating={
+          user?.type !== UserType.INTERPRETER
+            ? appt.contact_data?.rating || 0
+            : 0
+        }
         date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
         location={formatAppointmentLocation(appt)}
         onPress={() =>

@@ -11,6 +11,7 @@ import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import {
   formatAppointmentLocation,
+  formatCpfOrCnpj,
   formatDate,
   formatTime,
 } from '@/src/utils/masks';
@@ -88,17 +89,24 @@ export default function PendingRequestsScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerClassName="flex-1 mt-2"
           >
-            <View className="gap-y-4">
+            <View className="pb-4">
               {requests.map((req) => (
                 <Fragment key={req.id}>
                   <View className="w-full h-px bg-gray-200" />
                   <Card
-                    photoUrl="https://placehold.co/128x128/png"
-                    fullName={Strings.common.options.person}
-                    subtitle="XXX.XXX.XXX-XX"
+                    photoUrl={req.contact_data?.picture || ''}
+                    fullName={req.contact_data?.name}
+                    subtitle={
+                      user?.type !== UserType.INTERPRETER
+                        ? req.contact_data?.specialties
+                            ?.map((s) => s.name)
+                            .join(', ')
+                        : formatCpfOrCnpj(req.contact_data?.document)
+                    }
                     showRating={false}
                     date={`${formatDate(req.date)}  ${formatTime(req.start_time)} - ${formatTime(req.end_time)}`}
                     location={formatAppointmentLocation(req)}
+                    pending={true}
                     onPress={() =>
                       router.push({
                         pathname: '/requests/[id]',

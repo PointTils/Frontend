@@ -1,4 +1,4 @@
-import type { AppointmentStatus, Modality } from './common';
+import type { AppointmentStatus, Modality, Specialty } from './common';
 
 export interface Appointment {
   id: string;
@@ -22,7 +22,7 @@ export interface Appointment {
     picture: string | null;
     document?: string; // CPF or CNPJ
     rating?: number;
-    specialty?: string;
+    specialties?: Specialty[];
   };
 }
 
