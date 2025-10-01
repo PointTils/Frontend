@@ -155,6 +155,18 @@ export const formatTime = (input: string | Date): string => {
   return '';
 };
 
+export const formatDateTime = (date: Date) => {
+  // Returns "DD/MM/AAAA HH:MM:SS"
+  return `${String(date.getDate()).padStart(2, '0')}/${String(
+    date.getMonth() + 1,
+  ).padStart(
+    2,
+    '0',
+  )}/${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes(),
+  ).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+};
+
 export const formatAppointmentLocation = (appt: any): string => {
   // Returns formatted location string, like "Street, 123, Neighborhood, City - State"
   if ((appt?.modality || '').toUpperCase() === Modality.ONLINE) {
@@ -193,17 +205,6 @@ export const validateCnpj = (cnpj: string) => {
 
 export const validateCpf = (cpf: string) => {
   return cpf.replace(/\D/g, '').length === 11;
-};
-
-export const formatDateTime = (date: Date) => {
-  return `${String(date.getDate()).padStart(2, '0')}/${String(
-    date.getMonth() + 1,
-  ).padStart(
-    2,
-    '0',
-  )}/${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(
-    date.getMinutes(),
-  ).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 };
 
 export const validateBirthday = (birthday: string) => {

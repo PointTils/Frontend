@@ -29,7 +29,7 @@ export type BaseSvgProps = {
 export type OptionItem = {
   label: string;
   value: string;
-}
+};
 
 export type AppliedFilters = {
   modality?: Modality | null;

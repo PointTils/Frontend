@@ -17,7 +17,7 @@ import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
 import type { UserResponse } from '../types/api';
-import { Modality } from '../types/common';
+import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
 /**
