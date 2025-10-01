@@ -3,14 +3,21 @@
  * Centralizes UI-related prop types for maintainability and type safety.
  */
 
-import type { Gender, Modality } from './common';
+import type { Gender, Modality } from './api/common';
 
-export interface PointTilsLogoProps {
+export type PointTilsLogoProps = {
   width?: number;
   height?: number;
   primaryColor?: string;
   accentColor?: string;
-}
+};
+
+export type AvatarProps = {
+  width?: number;
+  height?: number;
+  skinColor?: string;
+  shirtColor?: string;
+};
 
 export type BaseSvgProps = {
   width?: number;
@@ -19,10 +26,10 @@ export type BaseSvgProps = {
   accessibilityLabel?: string;
 };
 
-export interface OptionItem {
+export type OptionItem = {
   label: string;
   value: string;
-}
+};
 
 export type AppliedFilters = {
   modality?: Modality | null;

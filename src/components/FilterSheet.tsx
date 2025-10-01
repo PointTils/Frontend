@@ -28,8 +28,11 @@ import { genders, specialties } from '../constants/ItemsSelection';
 import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
-import { Modality } from '../types/common';
-import type { StateAndCityResponse, Gender } from '../types/common';
+import {
+  type StateAndCityResponse,
+  type Gender,
+  Modality,
+} from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 import { formatDateTime } from '../utils/masks';
 
