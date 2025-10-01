@@ -135,18 +135,22 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
 
       <View className="flex-row justify-center items-center space-x-3 mt-3">
         <TouchableOpacity
-          className={`px-3 py-2 mr-2 border rounded-md`}
+          className="px-3 py-2 mr-2 border rounded-md"
           style={{
             borderColor: filters.availableDates
               ? colors.primaryBlue
               : colors.fieldGray,
           }}
           onPress={() => {
-            setInitialFocus('date');
-            setSheetVisible(true);
+            if (filters.availableDates) {
+              setFilters({ ...filters, availableDates: undefined });
+            } else {
+              setInitialFocus('date');
+              setSheetVisible(true);
+            }
           }}
         >
-          <Text className={`${handlerDateText(filters.availableDates)}`}>
+          <Text className={handlerDateText(filters.availableDates)}>
             {Strings.common.buttons.datesAvaible}
           </Text>
         </TouchableOpacity>

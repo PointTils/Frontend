@@ -28,6 +28,8 @@ export const Strings = {
       understood: 'Entendi',
       confirm: 'Confirmar',
       filter: 'Filtro',
+      search: 'Buscar',
+      clean: 'Limpar',
       datesAvaible: 'Datas disponíveis',
       online: 'Online',
     },

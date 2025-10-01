@@ -3,9 +3,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
-import { Checkbox } from 'react-native-paper';
 import { Toast } from 'toastify-react-native';
-
+import {
+  Checkbox,
+  CheckboxGroup,
+  CheckboxIndicator,
+  CheckboxIcon,
+  CheckboxLabel,
+} from '@/src/components/ui/checkbox';
 import ModalMultipleSelection from './ModalMultipleSelection';
 import ModalSingleSelection from './ModalSingleSelection';
 import { Button } from './ui/button';
@@ -25,6 +30,8 @@ import { Modality } from '../types/common';
 import type { StateAndCityResponse, Gender } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
+import { CheckIcon } from 'lucide-react-native';
+import HapticTab from './HapticTab';
 
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
@@ -39,15 +46,13 @@ function FilterSheet({
   filter,
   initialFocus,
 }: FilterSheetProps) {
-  const [checkedOnline, setCheckedOnline] = useState(false);
-  const [checkedPersonally, setCheckedPersonally] = useState(false);
   const [showDate, setShowDate] = useState(initialFocus === 'date');
   const [showTime, setShowTime] = useState(false);
 
   const [specialty, setSpecialty] = useState<string[]>([]);
-
   const [date, setDate] = useState<Date | null>(null);
   const [gender, setGender] = useState<Gender | null>(null);
+  const [modality, setModality] = useState<Modality[]>([]);
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
 
@@ -80,20 +85,19 @@ function FilterSheet({
       setCity(filter.city ?? '');
       setState(filter.state ?? '');
       setGender(filter.gender ?? null);
+
       if (filter.availableDates) {
         const d = new Date(filter.availableDates);
         setDate(d);
       }
-      if (
-        filter.modality === Modality.ONLINE ||
-        filter.modality === Modality.ALL
-      )
-        setCheckedOnline(true);
-      if (
-        filter.modality === Modality.PERSONALLY ||
-        filter.modality === Modality.ALL
-      )
-        setCheckedPersonally(true);
+
+      if (filter.modality) {
+        if (filter.modality === Modality.ALL) {
+          setModality([Modality.ONLINE, Modality.PERSONALLY]);
+        } else {
+          setModality([filter.modality]);
+        }
+      }
     }
   }, [filter]);
 
@@ -143,13 +147,11 @@ function FilterSheet({
       city,
       state,
       modality:
-        checkedOnline && checkedPersonally
+        modality.length === 2
           ? Modality.ALL
-          : checkedOnline
-            ? Modality.ONLINE
-            : checkedPersonally
-              ? Modality.PERSONALLY
-              : undefined,
+          : modality.length === 1
+            ? modality[0]
+            : undefined,
     };
 
     const cleanedFilters = Object.fromEntries(
@@ -179,31 +181,31 @@ function FilterSheet({
             </FormControlLabelText>
           </FormControlLabel>
           <View className="flex-row items-center justify-center gap-8">
-            <View className="flex-row items-center">
-              <Checkbox
-                color={colors.primaryBlue}
-                status={checkedOnline ? 'checked' : 'unchecked'}
-                onPress={() => setCheckedOnline(!checkedOnline)}
-              />
-              <Text className="font-ifood-regular text-text-light">
-                {Strings.common.options.online}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Checkbox
-                color={colors.primaryBlue}
-                status={checkedPersonally ? 'checked' : 'unchecked'}
-                onPress={() => setCheckedPersonally(!checkedPersonally)}
-              />
-              <Text className="font-ifood-regular text-text-light">
-                {Strings.common.options.inPerson}
-              </Text>
-            </View>
+            <CheckboxGroup
+              value={modality}
+              onChange={(keys: string[]) => {
+                setModality(keys as Modality[]);
+              }}
+              className="flex-row justify-around w-80 py-2"
+            >
+              <Checkbox value={Modality.PERSONALLY}>
+                <CheckboxIndicator className="border w-6 h-6">
+                  <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                </CheckboxIndicator>
+                <CheckboxLabel>{Strings.common.options.inPerson}</CheckboxLabel>
+              </Checkbox>
+              <Checkbox value={Modality.ONLINE}>
+                <CheckboxIndicator className="border w-6 h-6">
+                  <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
+                </CheckboxIndicator>
+                <CheckboxLabel>{Strings.common.options.online}</CheckboxLabel>
+              </Checkbox>
+            </CheckboxGroup>
           </View>
         </FormControl>
 
         {/* Localização */}
-        {checkedPersonally && (
+        {modality.includes(Modality.PERSONALLY) && (
           <FormControl className="mb-4">
             <FormControlLabel>
               <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -360,9 +362,25 @@ function FilterSheet({
             className="data-[active=true]:bg-primary-orange-press-light"
           >
             <Text className="font-ifood-regular text-text-dark">
-              {Strings.common.search}
+              {Strings.common.buttons.search}
             </Text>
           </Button>
+          <HapticTab
+            onPress={() => {
+              setModality([]);
+              setCity('');
+              setState('');
+              setSpecialty([]);
+              setDate(null);
+              setGender(null);
+              onApply({});
+            }}
+            className="flex-row justify-center gap-2 py-2"
+          >
+            <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+              {Strings.common.buttons.clean}
+            </Text>
+          </HapticTab>
         </View>
       </View>
     </Modal>
