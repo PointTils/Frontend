@@ -12,6 +12,8 @@ export const Strings = {
       back: 'Voltar',
       understood: 'Entendi',
       confirm: 'Confirmar',
+      search: 'Buscar',
+      clean: 'Limpar',
     },
 
     options: {
@@ -204,6 +206,17 @@ export const Strings = {
     others: 'Outros',
   },
 
+  search: {
+    selectCity: 'Selecione um estado primeiro',
+    filter: 'Filtro',
+    datesAvailable: 'Datas disponíveis',
+    online: 'Online',
+
+    toast: {
+      errorGetTitle: 'Erro ao obter dados.',
+      errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
   days: {
     monday: 'Segunda-Feira',
     tuesday: 'Terça-Feira',

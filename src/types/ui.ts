@@ -3,6 +3,8 @@
  * Centralizes UI-related prop types for maintainability and type safety.
  */
 
+import type { Gender, Modality } from './api/common';
+
 export type PointTilsLogoProps = {
   width?: number;
   height?: number;
@@ -27,4 +29,15 @@ export type BaseSvgProps = {
 export type OptionItem = {
   label: string;
   value: string;
+}
+
+export type AppliedFilters = {
+  modality?: Modality | null;
+  availableDates?: string;
+  online?: boolean;
+  personally?: boolean;
+  specialty?: string[];
+  gender?: Gender | null;
+  city?: string;
+  state?: string;
 };
