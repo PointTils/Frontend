@@ -22,16 +22,23 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
-import { useApiGet } from '@/src/hooks/useApi';
+import { useApiGet, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
+import type {
+  AppointmentRequest,
+  AppointmentResponse,
+} from '@/src/types/api/appointment';
 import type { StateAndCityResponse } from '@/src/types/common';
 import { Modality } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
-import { buildRequiredFieldError } from '@/src/utils/helpers';
+import {
+  buildAppointmentPayload,
+  buildRequiredFieldError,
+} from '@/src/utils/helpers';
 import { formatDate, formatTime } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -49,6 +56,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 type ScheduleValidationContext = {
   state: string;
@@ -64,6 +72,10 @@ export default function ToScheduleScreen() {
   const [date, setDate] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [time, setTime] = useState(new Date());
+
+  const appointmentApi = useApiPost<AppointmentResponse, AppointmentRequest>(
+    ApiRoutes.appointments.create,
+  );
 
   // Disallow today and past dates
   const minDate = useMemo(() => {
@@ -212,7 +224,7 @@ export default function ToScheduleScreen() {
     router.back();
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (
       !validateForm({
         state: selectedState,
@@ -222,6 +234,35 @@ export default function ToScheduleScreen() {
       return;
 
     console.warn('Form is valid, proceed with submission');
+
+    const payload = buildAppointmentPayload(fields, id, 'currentUserId');
+
+    const result = await appointmentApi.post(payload);
+
+    if (!result?.success || !result?.data) {
+      console.error('Error creating appointment:', result?.message);
+      Toast.show({
+        type: 'error',
+        text1: Strings.appointments.toast.errorTitle,
+        text2: Strings.appointments.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
+    }
+
+    router.replace('/onboarding');
+    Toast.show({
+      type: 'success',
+      text1: Strings.appointments.toast.successTitle,
+      text2: Strings.appointments.toast.successDescription,
+      position: 'center',
+      visibilityTime: 4000,
+      autoHide: false,
+      topOffset: 50,
+    });
   }
 
   return (
