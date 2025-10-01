@@ -62,7 +62,6 @@ export default function PendingRequestsScreen() {
   }
 
   const requests = (Array.isArray(data.data) ? data.data : []) as Appointment[];
-  console.log('Requests:', requests);
 
   return (
     <View className="flex-1 justify-center">
