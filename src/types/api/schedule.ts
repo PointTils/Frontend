@@ -1,3 +1,7 @@
+export interface ScheduleResponse {
+  data: Schedule[]
+}
+
 export interface Schedule {
   date: string; 
   interpreter_id: string;
