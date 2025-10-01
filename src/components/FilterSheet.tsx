@@ -1,9 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { router } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
-import { Toast } from 'toastify-react-native';
 import {
   Checkbox,
   CheckboxGroup,
@@ -11,6 +5,15 @@ import {
   CheckboxIcon,
   CheckboxLabel,
 } from '@/src/components/ui/checkbox';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { router } from 'expo-router';
+import { CheckIcon } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
+import { Toast } from 'toastify-react-native';
+
+import HapticTab from './HapticTab';
 import ModalMultipleSelection from './ModalMultipleSelection';
 import ModalSingleSelection from './ModalSingleSelection';
 import { Button } from './ui/button';
@@ -30,8 +33,8 @@ import { Modality } from '../types/common';
 import type { StateAndCityResponse, Gender } from '../types/common';
 import type { AppliedFilters } from '../types/search-filter-bar';
 import { formatDateTime } from '../utils/masks';
-import { CheckIcon } from 'lucide-react-native';
-import HapticTab from './HapticTab';
+
+
 
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
