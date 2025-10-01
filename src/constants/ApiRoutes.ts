@@ -21,7 +21,7 @@ export const ApiRoutes = {
     profile: (id: string) => `/enterprises/${id}`,
   },
   interpreters: {
-    base: '/interpreters',
+    base: (param: URLSearchParams) => `/interpreters?${param}`,
     register: '/interpreters/register',
     profile: (id: string) => `/interpreters/${id}`,
   },
