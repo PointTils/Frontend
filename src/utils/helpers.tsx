@@ -193,3 +193,31 @@ export const pickFile = async () => {
     return null;
   }
 };
+
+export const buildAppointmentPayload = (
+  fields: any,
+  interpreterId: string,
+  userId: string,
+) => {
+  const isOnline = fields.modality.value === Modality.ONLINE;
+
+  return {
+    modality: fields.modality.value,
+    UF: isOnline ? null : fields.state.value || null,
+    city: isOnline ? null : fields.city.value || null,
+    neighborhood: isOnline ? null : fields.neighborhood.value || null,
+    street: isOnline ? null : fields.street.value || null,
+    streetNumber: isOnline
+      ? null
+      : fields.streetNumber.value
+      ? Number(fields.streetNumber.value)
+      : null,
+    addressDetails: isOnline ? null : fields.addressDetails.value || null,
+    date: formatDateToISO(fields.date.value),
+    description: fields.description.value,
+    interpreterId,
+    userId,
+    startTime: fields.startTime.value,
+    endTime: fields.endTime.value,
+  };
+};
