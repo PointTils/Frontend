@@ -5,22 +5,6 @@
 
 export const Strings = {
   common: {
-    cancel: 'Cancelar',
-    save: 'Salvar',
-    delete: 'Excluir',
-    back: 'Voltar',
-    search: 'Pesquisar',
-    error: 'Ocorreu um erro. Tente novamente.',
-    understood: 'Entendi',
-    slogan: 'Interpretando o mundo, aproximando pessoas',
-    optional: 'Opcional',
-    required: 'obrigatório',
-    invalid: 'inválido',
-    minPassword: 'Senha deve ter no mínimo 8 caracteres',
-    select: 'Selecione',
-    email: 'Email',
-    password: 'Senha',
-
     buttons: {
       cancel: 'Cancelar',
       save: 'Salvar',

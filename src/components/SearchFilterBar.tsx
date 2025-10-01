@@ -153,7 +153,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           <TouchableOpacity
             onPress={handleClearSearch}
             accessibilityRole="button"
-            accessibilityLabel={Strings.common.back}
+            accessibilityLabel={Strings.common.buttons.back}
           >
             <Ionicons name="arrow-back" size={20} color={colors.primaryBlue} />
           </TouchableOpacity>
@@ -161,7 +161,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           <Ionicons name="search" size={20} color={colors.primaryBlue} />
         )}
         <TextInput
-          placeholder={Strings.common.search}
+          placeholder={Strings.common.buttons.search}
           className="ml-2 font-ifood-regular flex-1"
           placeholderTextColor={colors.disabled}
           value={query}
