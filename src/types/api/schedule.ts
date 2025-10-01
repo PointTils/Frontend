@@ -1,14 +1,10 @@
-export interface ScheduleResponseDTO {
-  id: number;
-  interpreterId: number;
-  day: string;
-  startTime: string;
-  endTime: string;
+export interface Schedule {
+  date: string; 
+  interpreter_id: string;
+  time_slots: TimeSlot[];
 }
 
-export interface PaginatedScheduleResponseDTO {
-  page: number;
-  size: number;
-  total: number;
-  items: ScheduleResponseDTO[];
+export interface TimeSlot {
+  start_time: string; 
+  end_time: string;   
 }

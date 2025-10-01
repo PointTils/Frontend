@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, Image, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, Image, View, ActivityIndicator } from 'react-native';
 import {
   ChevronLeftIcon,
   BriefcaseBusinessIcon,
@@ -17,13 +17,13 @@ import { useRouter } from 'expo-router';
 import { StarRating } from '@/src/components/Rating';
 import { useApiGet } from '@/src/hooks/useApi';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
-import { PaginatedScheduleResponseDTO } from '@/src/types/api/schedule';
+import { Schedule, TimeSlot } from '@/src/types/api/schedule';
 import { InterpreterResponseDTO } from '@/src/types/api/interpreter';
 import { useSearchParams } from 'expo-router/build/hooks';
-
+import { SCHEDULE_ENABLED } from '@/src/constants/Config'
 
 export const mockInterpreter: InterpreterResponseDTO = {
-  id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  id: "70010538-7b5e-40b2-981d-4ad65a14a225",
   email: "jefinho.silva@example.com",
   type: "professional",
   status: "active",
@@ -68,32 +68,15 @@ export const mockInterpreter: InterpreterResponseDTO = {
   },
 };
 
-export const mockSchedules: PaginatedScheduleResponseDTO = {
-  page: 1,
-  size: 30,
-  total: 30,
-  items: Array.from({ length: 30 }, (_, i) => {
-    const today = new Date();
-    today.setDate(today.getDate() + i);
 
-    const day = today.toISOString().split("T")[0];
 
-    return {
-      id: i + 1,
-      interpreterId: 1,
-      day,
-      startTime: "09:00",
-      endTime: "18:00",
-    };
-  }),
-};
-
+type TimeSelection = { date: string; time: string } | null;
 
 export default function InterpreterDetails() {
   const [section, setSection] = useState<'Avaliações' | 'Dados'>(
     Strings.search.details,
   );
-
+  const [selectTime, setSelectedTime] = useState<TimeSelection>(null);
   const colors = useColors();
   const router = useRouter();
   const params = useSearchParams();
@@ -101,19 +84,19 @@ export default function InterpreterDetails() {
   const now = new Date();
   const then = new Date(now);
   then.setDate(now.getDate() + 30);
-  const interpreterString = params.get('interpreter'); 
+  const interpreterString = params.get('interpreter');
 
   // Mock pra teste caso não receba o parâmetro
   const interpreter: InterpreterResponseDTO = interpreterString
     ? JSON.parse(interpreterString) as InterpreterResponseDTO
-    : mockInterpreter; 
+    : mockInterpreter;
+
 
   // Request dos schedules
-  const { data: schedules, loading, error } = useApiGet<PaginatedScheduleResponseDTO>(
-    '/schedules',
+  const { data: schedules, loading, error } = useApiGet<any>(
+    '/schedules/available',
     {
-      interpreterId: interpreter.id,
-      status: 'available',
+      interpreterId: "9b135ab3-5a12-4649-8cd2-93e8cdf16ff3",
       dateFrom: now.toISOString().split('T')[0],
       dateTo: then.toISOString().split('T')[0],
     }
@@ -254,18 +237,19 @@ export default function InterpreterDetails() {
             </View>
             <Text className="px-7">{'R$' + interpreter.professional_data.min_value + '-'
               + interpreter.professional_data.max_value}</Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <CalendarIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.search.calendar}
-              </Text>
-            </View>
 
 
-            {
-              // @TODO: loading and error states
-              <InterpreterCalendar schedules={mockSchedules?.items ?? []} />
-            }
+            {loading ? (
+              <View className="h-40 items-center justify-center">
+                <ActivityIndicator size="large" color={colors.primaryBlue} />
+              </View>
+            ) : (
+              <InterpreterCalendar
+                schedules={schedules?.data ?? []}
+                selectedTime={selectTime}
+                onTimeSelect={setSelectedTime}
+              />
+            )}
 
           </>
         )}
@@ -280,6 +264,8 @@ export default function InterpreterDetails() {
             {Strings.search.createAppointment}
           </Text>
         </TouchableOpacity>
+
+
       </View>
     </>
   );
