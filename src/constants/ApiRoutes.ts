@@ -29,9 +29,6 @@ export const ApiRoutes = {
     base: '/states',
     cities: (stateId: string) => `/states/${stateId}/cities`,
   },
-  specialties: {
-    base: '/specialties',
-  },
   userSpecialties: {
     userSpecialties: (userId: string) => `/users/${userId}/specialties`,
   },

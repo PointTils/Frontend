@@ -3,6 +3,8 @@
  * Centralizes UI-related prop types for maintainability and type safety.
  */
 
+import type { Gender, Modality } from './common';
+
 export interface PointTilsLogoProps {
   width?: number;
   height?: number;
@@ -21,3 +23,14 @@ export interface OptionItem {
   label: string;
   value: string;
 }
+
+export type AppliedFilters = {
+  modality?: Modality | null;
+  availableDates?: string;
+  online?: boolean;
+  personally?: boolean;
+  specialty?: string[];
+  gender?: Gender | null;
+  city?: string;
+  state?: string;
+};

@@ -18,7 +18,7 @@ import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
 import type { UserResponse } from '../types/api';
 import { Modality } from '../types/common';
-import type { AppliedFilters } from '../types/search-filter-bar';
+import type { AppliedFilters } from '../types/ui';
 
 /**
  * A search bar component with integrated filters for querying interpreters.
@@ -193,7 +193,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           <Text
             className={`${handlerDateText(filters.availableDates)} font-ifood-regular`}
           >
-            {Strings.common.buttons.datesAvaible}
+            {Strings.search.datesAvailable}
           </Text>
         </TouchableOpacity>
 
@@ -223,7 +223,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           <Text
             className={`${handlerOnlineText(filters.modality ?? undefined)} font-ifood-regular`}
           >
-            {Strings.common.buttons.online}
+            {Strings.search.online}
           </Text>
         </TouchableOpacity>
 
@@ -252,7 +252,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
                 handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
             }}
           >
-            {Strings.common.buttons.filter} {handlerFilterCount()}
+            {Strings.search.filter} {handlerFilterCount()}
           </Text>
         </TouchableOpacity>
       </View>

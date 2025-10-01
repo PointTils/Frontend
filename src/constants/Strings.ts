@@ -20,6 +20,7 @@ export const Strings = {
     select: 'Selecione',
     email: 'Email',
     password: 'Senha',
+
     buttons: {
       cancel: 'Cancelar',
       save: 'Salvar',
@@ -27,11 +28,8 @@ export const Strings = {
       back: 'Voltar',
       understood: 'Entendi',
       confirm: 'Confirmar',
-      filter: 'Filtro',
       search: 'Buscar',
       clean: 'Limpar',
-      datesAvaible: 'Datas disponíveis',
-      online: 'Online',
     },
 
     options: {
@@ -214,6 +212,10 @@ export const Strings = {
 
   search: {
     selectCity: 'Selecione um estado primeiro',
+    filter: 'Filtro',
+    datesAvailable: 'Datas disponíveis',
+    online: 'Online',
+
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',

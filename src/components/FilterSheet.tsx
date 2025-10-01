@@ -30,7 +30,7 @@ import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { Modality } from '../types/common';
 import type { StateAndCityResponse, Gender } from '../types/common';
-import type { AppliedFilters } from '../types/search-filter-bar';
+import type { AppliedFilters } from '../types/ui';
 import { formatDateTime } from '../utils/masks';
 
 interface FilterSheetProps {
