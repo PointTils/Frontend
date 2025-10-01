@@ -4,8 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
-import type { UserRequest, UserResponseData, AppointmentResponseDTO } from '../types/api';
-import { Modality, UserType } from '../types/common';
+import { type UserRequest, type UserResponseData, Modality, UserType, type Appointment } from '../types/api';
 
 /**
  * Contains utility functions used across the application.
@@ -206,7 +205,7 @@ export const getUserDisplayName = (userData: UserResponseData): string => {
   }
 };
 
-export const transformAppointmentToCard = (appointment: AppointmentResponseDTO) => {
+export const transformAppointmentToCard = (appointment: Appointment) => {
   const formatDateTime = (date: string, startTime: string, endTime: string) => {
     try {
       const [year, month, day] = date.split('-');
@@ -220,7 +219,7 @@ export const transformAppointmentToCard = (appointment: AppointmentResponseDTO) 
     }
   };
 
-  const formatLocation = (appointment: AppointmentResponseDTO) => {
+  const formatLocation = (appointment: Appointment) => {
     if (appointment.modality === 'ONLINE') {
       return 'Online';
     }

@@ -9,8 +9,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { UserResponse, AppointmentFilterResponse } from '@/src/types/api';
-import { UserType } from '@/src/types/common';
+import { type UserResponse, type AppointmentsResponse, UserType } from '@/src/types/api';
 import { getUserDisplayName, transformAppointmentToCard } from '@/src/utils/helpers';
 import { CalendarDays } from 'lucide-react-native';
 import { useMemo, useEffect, useState } from 'react';
@@ -57,7 +56,7 @@ export default function HomeScreen() {
     return `${baseUrl}?${params.toString()}`;
   }, [user?.id, user?.type]);
 
-  const { data: appointmentsData, loading: appointmentsLoading } = useApiGet<AppointmentFilterResponse>(appointmentsRoute);
+  const { data: appointmentsData, loading: appointmentsLoading } = useApiGet<AppointmentsResponse>(appointmentsRoute);
 
   useEffect(() => {
     if (!appointmentsData?.data?.length || !user?.type) {
