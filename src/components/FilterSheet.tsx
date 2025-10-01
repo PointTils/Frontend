@@ -40,7 +40,7 @@ interface FilterSheetProps {
   initialFocus?: 'date' | 'modality';
 }
 
-function FilterSheet({
+export default function FilterSheet({
   onApply,
   onClose,
   filter,
@@ -100,7 +100,7 @@ function FilterSheet({
     }
   }, [filter]);
 
-  // Estados
+  // Fetch states
   useEffect(() => {
     if (statesError || !statesData?.success || !statesData?.data) return;
 
@@ -111,7 +111,7 @@ function FilterSheet({
     setStatesOptions(mapped);
   }, [statesData, statesError]);
 
-  // Cidades
+  // Fetch cities when state changes
   useEffect(() => {
     if (citiesError || !citiesData?.success || !citiesData?.data) return;
 
@@ -122,7 +122,7 @@ function FilterSheet({
     setCityOptions(mapped);
   }, [citiesData, citiesError]);
 
-  // Tratamento de erro global
+  // Global error handling
   useEffect(() => {
     if (statesError || citiesError) {
       router.push('/(tabs)');
@@ -172,7 +172,7 @@ function FilterSheet({
         activeOpacity={1}
         onPress={onClose}
       />
-      <View className="p-4 bg-white h-[550px]">
+      <View className="p-4 bg-white py-8">
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -191,19 +191,23 @@ function FilterSheet({
                 <CheckboxIndicator className="border w-6 h-6">
                   <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
                 </CheckboxIndicator>
-                <CheckboxLabel>{Strings.common.options.inPerson}</CheckboxLabel>
+                <CheckboxLabel className="font-ifood-regular">
+                  {Strings.common.options.inPerson}
+                </CheckboxLabel>
               </Checkbox>
               <Checkbox value={Modality.ONLINE}>
                 <CheckboxIndicator className="border w-6 h-6">
                   <CheckboxIcon className="w-6 h-6" as={CheckIcon} />
                 </CheckboxIndicator>
-                <CheckboxLabel>{Strings.common.options.online}</CheckboxLabel>
+                <CheckboxLabel className="font-ifood-regular">
+                  {Strings.common.options.online}
+                </CheckboxLabel>
               </Checkbox>
             </CheckboxGroup>
           </View>
         </FormControl>
 
-        {/* Localização */}
+        {/* Location */}
         {modality.includes(Modality.PERSONALLY) && (
           <FormControl className="mb-4">
             <FormControlLabel>
@@ -237,7 +241,7 @@ function FilterSheet({
           </FormControl>
         )}
 
-        {/* Especialidade */}
+        {/* Specialties */}
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -256,82 +260,80 @@ function FilterSheet({
           </View>
         </FormControl>
 
-        {/* Data */}
+        {/* Date */}
         <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
               {Strings.common.fields.date}
             </FormControlLabelText>
           </FormControlLabel>
-          <>
-            <View className="flex-row justify-start items-center space-x-2 gap-3">
-              <Ionicons name="calendar-outline" size={24} color="black" />
-              <View className="w-[300px]">
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowDate(true);
+          <View className="flex-row justify-start items-center space-x-2 gap-3">
+            <Ionicons name="calendar-outline" size={24} color="black" />
+            <View className="w-[300px]">
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDate(true);
+                }}
+              >
+                <Input pointerEvents="none">
+                  <InputField
+                    placeholder="DD/MM/AAAA HH:mm"
+                    className="font-ifood-regular"
+                    value={date ? formatDateTime(date) : ''}
+                    editable={false}
+                  />
+                </Input>
+              </TouchableOpacity>
+
+              {/* iOS datetime */}
+              {showDate && Platform.OS === 'ios' && (
+                <DateTimePicker
+                  value={date ?? new Date()}
+                  mode="datetime"
+                  display="spinner"
+                  minimumDate={new Date()}
+                  onChange={(event, selectedDate) => {
+                    setShowDate(false);
+                    if (selectedDate) {
+                      setDate(selectedDate);
+                    }
                   }}
-                >
-                  <Input pointerEvents="none">
-                    <InputField
-                      placeholder="DD/MM/AAAA HH:mm"
-                      className="font-ifood-regular"
-                      value={date ? formatDateTime(date) : ''}
-                      editable={false}
-                    />
-                  </Input>
-                </TouchableOpacity>
+                />
+              )}
 
-                {/* iOS datetime */}
-                {showDate && Platform.OS === 'ios' && (
-                  <DateTimePicker
-                    value={date ?? new Date()}
-                    mode="datetime"
-                    display="spinner"
-                    minimumDate={new Date()}
-                    onChange={(event, selectedDate) => {
-                      setShowDate(false);
-                      if (selectedDate) {
-                        setDate(selectedDate);
-                      }
-                    }}
-                  />
-                )}
+              {/* Android date */}
+              {showDate && Platform.OS === 'android' && (
+                <DateTimePicker
+                  value={date ?? new Date()}
+                  mode="date"
+                  display="default"
+                  minimumDate={new Date()}
+                  onChange={(event, selectedDate) => {
+                    setShowDate(false);
+                    if (selectedDate) {
+                      setDate(selectedDate);
+                      setShowTime(true);
+                    }
+                  }}
+                />
+              )}
 
-                {/* Android date */}
-                {showDate && Platform.OS === 'android' && (
-                  <DateTimePicker
-                    value={date ?? new Date()}
-                    mode="date"
-                    display="default"
-                    minimumDate={new Date()}
-                    onChange={(event, selectedDate) => {
-                      setShowDate(false);
-                      if (selectedDate) {
-                        setDate(selectedDate);
-                        setShowTime(true);
-                      }
-                    }}
-                  />
-                )}
-
-                {/* Android time */}
-                {showTime && Platform.OS === 'android' && (
-                  <DateTimePicker
-                    value={date ?? new Date()}
-                    mode="time"
-                    display="default"
-                    onChange={(event, selectedTime) => {
-                      setShowTime(false);
-                      if (selectedTime) {
-                        setDate(selectedTime);
-                      }
-                    }}
-                  />
-                )}
-              </View>
+              {/* Android time */}
+              {showTime && Platform.OS === 'android' && (
+                <DateTimePicker
+                  value={date ?? new Date()}
+                  mode="time"
+                  display="default"
+                  onChange={(event, selectedTime) => {
+                    setShowTime(false);
+                    if (selectedTime) {
+                      setDate(selectedTime);
+                    }
+                  }}
+                />
+              )}
             </View>
-          </>
+          </View>
         </FormControl>
 
         <FormControl className="mb-4">
@@ -354,7 +356,7 @@ function FilterSheet({
           </View>
         </FormControl>
 
-        <View className="mt-16 pb-3 gap-4">
+        <View className="mt-24 gap-4">
           <Button
             onPress={handleApply}
             size="md"
@@ -374,7 +376,7 @@ function FilterSheet({
               setGender(null);
               onApply({});
             }}
-            className="flex-row justify-center gap-2 py-2"
+            className="flex-row justify-center py-2"
           >
             <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
               {Strings.common.buttons.clean}
@@ -385,5 +387,3 @@ function FilterSheet({
     </Modal>
   );
 }
-
-export default FilterSheet;

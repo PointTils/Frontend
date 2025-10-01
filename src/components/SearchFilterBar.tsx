@@ -1,7 +1,13 @@
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity } from 'react-native';
+import {
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Keyboard,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 import FilterSheet from './FilterSheet';
@@ -44,6 +50,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   const [initialFocus, setInitialFocus] = useState<
     'date' | 'modality' | undefined
   >(undefined);
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
 
   const handleApplyFilters = (appliedFilters: AppliedFilters) => {
     setFilters(appliedFilters);
@@ -120,16 +127,49 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     }
   }, [data, onData]);
 
+  useEffect(() => {
+    if (query.trim().length === 0) {
+      setIsSearchSubmitted(false);
+    }
+  }, [query]);
+
+  const handleSubmitSearch = () => {
+    if (query.trim().length > 0) {
+      setIsSearchSubmitted(true);
+      Keyboard.dismiss();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setQuery('');
+    setIsSearchSubmitted(false);
+    Keyboard.dismiss();
+  };
+
   return (
     <View className="px-4 py-2 mt-12">
-      <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200">
-        <Ionicons name="search" size={20} color={colors.primaryBlue} />
+      <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
+        {isSearchSubmitted ? (
+          <TouchableOpacity
+            onPress={handleClearSearch}
+            accessibilityRole="button"
+            accessibilityLabel={Strings.common.back}
+          >
+            <Ionicons name="arrow-back" size={20} color={colors.primaryBlue} />
+          </TouchableOpacity>
+        ) : (
+          <Ionicons name="search" size={20} color={colors.primaryBlue} />
+        )}
         <TextInput
           placeholder={Strings.common.search}
-          className="ml-2 flex-1 text-base"
+          className="ml-2 font-ifood-regular flex-1"
           placeholderTextColor={colors.disabled}
           value={query}
           onChangeText={setQuery}
+          onSubmitEditing={handleSubmitSearch}
+          returnKeyType="search"
+          maxLength={80}
+          submitBehavior="blurAndSubmit"
         />
       </View>
 
@@ -150,7 +190,9 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
             }
           }}
         >
-          <Text className={handlerDateText(filters.availableDates)}>
+          <Text
+            className={`${handlerDateText(filters.availableDates)} font-ifood-regular`}
+          >
             {Strings.common.buttons.datesAvaible}
           </Text>
         </TouchableOpacity>
@@ -179,7 +221,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           }
         >
           <Text
-            className={`${handlerOnlineText(filters.modality ?? undefined)}`}
+            className={`${handlerOnlineText(filters.modality ?? undefined)} font-ifood-regular`}
           >
             {Strings.common.buttons.online}
           </Text>
@@ -204,7 +246,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
             }
           />
           <Text
-            className={'ml-1'}
+            className="ml-1 font-ifood-regular"
             style={{
               color:
                 handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
