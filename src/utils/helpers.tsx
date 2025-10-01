@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 
-import { formatDateToISO } from './masks';
+import { formatDateToISO, formatTime } from './masks';
 import { Strings } from '../constants/Strings';
 import type { UserRequest } from '../types/api';
 import { Modality, UserType } from '../types/common';
@@ -199,25 +199,34 @@ export const buildAppointmentPayload = (
   interpreterId: string,
   userId: string,
 ) => {
-  const isOnline = fields.modality.value === Modality.ONLINE;
+  const isOnline = fields.modality.value.includes(Modality.ONLINE);
+
+  // Combinar data e hora para criar o objeto Date
+  const appointmentDate = new Date(fields.date.value);
+  const [hours, minutes] = fields.time.value.split(':');
+  appointmentDate.setHours(parseInt(hours), parseInt(minutes));
+
+  // Calcular end_time (assumindo 1 hora de duração)
+  const endTime = new Date(appointmentDate);
+  endTime.setHours(endTime.getHours() + 1);
 
   return {
-    modality: fields.modality.value,
+    modality: fields.modality.value[0], // Pegar a primeira modalidade selecionada
     UF: isOnline ? null : fields.state.value || null,
     city: isOnline ? null : fields.city.value || null,
     neighborhood: isOnline ? null : fields.neighborhood.value || null,
     street: isOnline ? null : fields.street.value || null,
     streetNumber: isOnline
       ? null
-      : fields.streetNumber.value
-      ? Number(fields.streetNumber.value)
+      : fields.number.value
+      ? Number(fields.number.value)
       : null,
-    addressDetails: isOnline ? null : fields.addressDetails.value || null,
+    addressDetails: isOnline ? null : fields.floor.value || null,
     date: formatDateToISO(fields.date.value),
     description: fields.description.value,
-    interpreterId,
-    userId,
-    startTime: fields.startTime.value,
-    endTime: fields.endTime.value,
+    interpreterId: interpreterId,
+    userId: userId,
+    startTime: fields.time.value,
+    endTime: formatTime(endTime),
   };
 };
