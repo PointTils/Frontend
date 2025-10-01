@@ -1,14 +1,14 @@
 export interface ScheduleResponse {
-  data: Schedule[]
+  data: Schedule[];
 }
 
 export interface Schedule {
-  date: string; 
+  date: string;
   interpreter_id: string;
   time_slots: TimeSlot[];
 }
 
 export interface TimeSlot {
-  start_time: string; 
-  end_time: string;   
+  start_time: string;
+  end_time: string;
 }
