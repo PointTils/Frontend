@@ -5,8 +5,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type {AppointmentResponse} from '@/src/types/api/appointments';
-import type { UserResponseData } from '@/src/types/api/user';
-import { UserType } from '@/src/types/common';
+import type { InterpreterResponseData, UserResponseData } from '@/src/types/api/user';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -28,6 +27,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 const { height } = Dimensions.get('window');
 
@@ -35,7 +35,6 @@ type TabKey = 'agendamento' | 'solicitante';
 
 export default function DetalhesAgendamento() {
   const colors = useColors();
-  const params = useLocalSearchParams();
   const SAFE_TOP = height * 0.12;
   const SAFE_BOTTOM = height * 0.15;
 
@@ -47,26 +46,72 @@ export default function DetalhesAgendamento() {
   //Obter o ID do appointment e valide: Use useLocalSearchParams para extrair o id do appointment (passado na navegação). Adicione uma verificação precoce.
   const { id } = useLocalSearchParams<{ id: string }>();
   
-  useEffect(() => {
+ useEffect(() => {
     if (!id) {
-      console.log("Id não encontrado")
+      Toast.show({
+        type: 'error',
+        text1: Strings.detalhesAgendamento.toast.errorNoIdTitle,
+        text2: Strings.detalhesAgendamento.toast.errorNoIdDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+      });
       router.back();
     }
   }, [id]);
   
-  const { data: appointmentData } = useApiGet<AppointmentResponse>(
+  // Fetch appointment data
+  const { data: appointmentData, loading: loadingAppointment, error: errorAppointment } = useApiGet<AppointmentResponse>(
     ApiRoutes.appointments.detail(id || ''),
   );
-  
-  // Campos do solicitante (user)
-  const nome = data.type === UserType.ENTERPRISE ? data.corporate_reason : data.name;
-  const email = data.email;
-  const telefone = data.phone;
-  const avatarUrl = data.picture;
 
-  const dataInicio = appointmentData?.data.startTime
-  const dataFim = appointmentData?.data.endTime
-  const endereco = formatEndereco(params as any) || 'Endereço não informado';
+  // Fetch interpreter data
+  const { data: interpreterData, loading: loadingInterpreter, error: errorInterpreter } = useApiGet<InterpreterResponseData>(
+    appointmentData?.success ? ApiRoutes.interpreters.profile((appointmentData.data.interpreterId ?? '').toString()) : '',
+    { enabled: !!appointmentData?.success },
+  );
+
+  // Handle loading state
+  if (loadingAppointment || loadingInterpreter) {
+    return (
+      <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.white }}>
+        <Text className="font-ifood-regular text-text-light dark:text-text-dark">
+          Carregando
+        </Text>
+      </View>
+    );
+  }
+
+  // Handle error state
+  if (errorAppointment || !appointmentData?.success || errorInterpreter || interpreterData === null) {
+    Toast.show({
+      type: 'error',
+      text1: Strings.detalhesAgendamento.toast.errorLoadTitle,
+      text2: errorAppointment || errorInterpreter || Strings.detalhesAgendamento.toast.errorLoadDescription,
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: true,
+    });
+    router.back();
+    return null;
+  }
+
+ // Extract data
+  const appointment = appointmentData.data;
+  const interpreter = interpreterData;
+
+  // Campos do intérprete (solicitante)
+  const nome = interpreter.name ?? 'Nome não informado';
+  const email = interpreter.email ?? 'E-mail não informado';
+  const telefone = interpreter.phone ?? '';
+  const avatarUrl = interpreter.picture ?? '';
+  const cpf = interpreter.cpf ?? interpreter.professional_data?.cnpj ?? 'cpf não informado';
+
+  // Campos do appointment
+  const descricao = appointment.description ?? 'Descrição não informada';
+  const dataInicio = `${appointment.date ?? ''}T${appointment.startTime ?? ''}`;
+  const dataFim = `${appointment.date ?? ''}T${appointment.endTime ?? ''}`;
+  const endereco = appointment.modality === 'ONLINE'|| formatEndereco(appointment);
 
   type Endereco = {
     uf?: string | null;

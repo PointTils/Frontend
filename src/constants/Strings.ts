@@ -233,6 +233,18 @@ export const Strings = {
       cancel: 'Cancelar agendamento',
       whatsapp: 'WhatsApp',
     },
+    toast: {
+      errorNoIdTitle: 'Erro',
+      errorNoIdDescription: 'ID do agendamento não fornecido',
+      errorLoadTitle: 'Erro ao carregar',
+      errorLoadDescription: 'Não foi possível carregar os detalhes',
+      successCancelTitle: 'Cancelado',
+      successCancelDescription: 'Agendamento cancelado com sucesso',
+      errorCancelTitle: 'Erro ao cancelar',
+      errorCancelDescription: 'Não foi possível cancelar o agendamento',
+      noPhoneTitle: 'Erro',
+      noPhoneDescription: 'Telefone não disponível para contato',
+    },
   },
 
   detalhesAgendamentoUsuario: {
