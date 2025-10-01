@@ -1,43 +1,39 @@
-export enum AppointmentStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED', 
-  COMPLETED = 'COMPLETED',
-  CANCELED = 'CANCELED',
-}
+import type { AppointmentStatus, Modality, Specialty } from './common';
 
-export enum AppointmentModality {
-  ONLINE = 'ONLINE',
-  PERSONALLY = 'PERSONALLY',
-}
-
-export interface AppointmentResponseDTO {
+export interface Appointment {
   id: string;
   uf: string;
   city: string;
   neighborhood: string;
   street: string;
-  modality: AppointmentModality;
+  street_number: number | null;
+  address_details: string | null;
+  modality: Modality;
   date: string;
-  description?: string;
+  description: string | null;
   status: AppointmentStatus;
-  street_number: number;
-  address_details?: string;
   interpreter_id: string;
   user_id: string;
   start_time: string;
   end_time: string;
+  contact_data: {
+    id: string;
+    name: string;
+    picture: string | null;
+    document?: string; // CPF or CNPJ
+    rating?: number;
+    specialties?: Specialty[];
+  };
 }
 
-export interface AppointmentFilterResponse {
+export interface AppointmentResponse {
   success: boolean;
   message: string;
-  data: AppointmentResponseDTO[];
+  data: Appointment;
 }
 
-export interface AppointmentFilterParams {
-  interpreterId?: string;
-  userId?: string;
-  status?: AppointmentStatus;
-  modality?: AppointmentModality;
-  fromDateTime?: string;
+export interface AppointmentsResponse {
+  success: boolean;
+  message: string;
+  data: Appointment[];
 }
