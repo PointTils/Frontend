@@ -30,6 +30,7 @@ export default function SearchScreen() {
       setLoading(false);
     }, 1000);
   };
+
   return (
     <View className="flex-1 w-full">
       <View className="mt-12 pb-2">
@@ -42,7 +43,7 @@ export default function SearchScreen() {
 
       <SearchFilterBar onData={handleData} />
 
-      <View className="flex-1 px-6 mt-4">
+      <View className="mt-4 border-t-[2px] border-gray-200">
         {loading ? (
           <>
             <SkeletonCard />
@@ -56,26 +57,28 @@ export default function SearchScreen() {
             renderItem={({ item }) => {
               const interpreter = isInterpreter(item) ? item : null;
               return (
-                <Card
-                  variant="search"
-                  photoUrl={item.picture}
-                  fullName={interpreter?.name || ''}
-                  specialty={
-                    item.specialties?.map((s) => s.name).join(', ') ?? ''
-                  }
-                  rating={interpreter?.professional_data?.rating || 0}
-                  modality={interpreter?.professional_data?.modality || ''}
-                  priceRange={
-                    interpreter
-                      ? `R$ ${interpreter.professional_data?.min_value ?? '0,00'} - R$ ${interpreter.professional_data?.max_value ?? '0,00'}`
-                      : ''
-                  }
-                  location={
-                    interpreter?.locations?.[0]
-                      ? `${interpreter.locations[0].city}, ${interpreter.locations[0].uf}`
-                      : ''
-                  }
-                />
+                <View className="bg-white border-b-[4px] border-gray-100">
+                  <Card
+                    variant="search"
+                    photoUrl={item.picture}
+                    fullName={interpreter?.name || ''}
+                    specialty={
+                      item.specialties?.map((s) => s.name).join(', ') ?? ''
+                    }
+                    rating={interpreter?.professional_data?.rating || 0}
+                    modality={interpreter?.professional_data?.modality || ''}
+                    priceRange={
+                      interpreter
+                        ? `R$ ${interpreter.professional_data?.min_value ?? '0,00'} - R$ ${interpreter.professional_data?.max_value ?? '0,00'}`
+                        : ''
+                    }
+                    location={
+                      interpreter?.locations?.[0]
+                        ? `${interpreter.locations[0].city}, ${interpreter.locations[0].uf}`
+                        : ''
+                    }
+                  />
+                </View>
               );
             }}
           />
