@@ -99,9 +99,6 @@ export default function LoginScreen() {
           <Text className="mt-2 font-ifood-regular text-text-light dark:text-text-dark">
             {Strings.auth.slogan}
           </Text>
-          <Text className="mt-2 font-ifood-regular">
-            Env - {process.env.EXPO_PUBLIC_API_URL}
-          </Text>
         </View>
 
         {/* Forms */}
