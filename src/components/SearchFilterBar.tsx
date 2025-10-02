@@ -16,7 +16,7 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { UserResponse } from '../types/api';
+import type { UserListResponse, UserResponse } from '../types/api';
 import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
@@ -39,7 +39,7 @@ import type { AppliedFilters } from '../types/ui';
  */
 
 interface SearchFilterBarProps {
-  onData: (data: UserResponse) => void;
+  onData: (data: UserListResponse) => void;
 }
 
 export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
@@ -100,7 +100,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     return query;
   };
 
-  const { data, error } = useApiGet<UserResponse>(
+  const { data, error } = useApiGet<UserListResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
@@ -125,7 +125,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     if (data && data.success && data.data) {
       onData(data);
     }
-  }, [data, onData]);
+  }, [data]);
 
   useEffect(() => {
     if (query.trim().length === 0) {
