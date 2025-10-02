@@ -121,6 +121,7 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
           max_value: Number(fields.maxPrice.value),
+          min_value: Number(fields.minPrice.value),
         },
       };
     default:
