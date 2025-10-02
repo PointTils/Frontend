@@ -29,10 +29,6 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import type {
-  AppointmentRequest,
-  AppointmentResponse,
-} from '@/src/types/api/appointment';
 import type { StateAndCityResponse } from '@/src/types/common';
 import { Modality } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
@@ -59,6 +55,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
+import { AppointmentRequest, AppointmentResponse } from '@/src/types/api/appointment';
 
 type ScheduleValidationContext = {
   state: string;
@@ -369,7 +366,7 @@ export default function ToScheduleScreen() {
               </FormControlError>
             </FormControl>
 
-            <View className="flex-row justify-between gap-2 mb-4">
+            <View className="justify-between gap-2 mb-4">
               {/* Date */}
               <FormControl
                 isRequired
@@ -415,7 +412,6 @@ export default function ToScheduleScreen() {
               <FormControl
                 isRequired
                 isInvalid={!!fields.time.error}
-                className="w-28"
               >
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
