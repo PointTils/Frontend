@@ -25,7 +25,7 @@ import type { AppliedFilters } from '../types/ui';
  * Provides a text input for free-text search and quick-access filter buttons
  * (date availability, online modality, and advanced filters via modal).
  *
- * @param onData - Callback function called with API response data (UserResponse)
+ * @param onData - Callback function called with API response data (UserListResponse)
  *
  * @returns A search bar with input field, filter controls, and modal integration.
  *
