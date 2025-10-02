@@ -201,14 +201,11 @@ export const buildAppointmentPayload = (
 ) => {
   const isOnline = fields.modality.value.includes(Modality.ONLINE);
 
-  // Combinar data e hora para criar o objeto Date
-  const appointmentDate = new Date(fields.date.value);
-  const [hours, minutes] = fields.time.value.split(':');
-  appointmentDate.setHours(parseInt(hours), parseInt(minutes));
-
   // Calcular end_time (assumindo 1 hora de duração)
-  const endTime = new Date(appointmentDate);
-  endTime.setHours(endTime.getHours() + 1);
+  const [hours, minutes] = fields.time.value.split(':');
+  const startTime = `${fields.time.value}:00`; // Adicionar segundos
+  const endHour = parseInt(hours) + 1;
+  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
 
   return {
     modality: fields.modality.value[0], // Pegar a primeira modalidade selecionada
@@ -226,7 +223,42 @@ export const buildAppointmentPayload = (
     description: fields.description.value,
     interpreterId: interpreterId,
     userId: userId,
-    startTime: fields.time.value,
-    endTime: formatTime(endTime),
+    startTime: startTime,
+    endTime: endTime,
+  };
+};
+
+// Função específica para o backend
+export const buildBackendAppointmentPayload = (
+  fields: any,
+  interpreterId: string,
+  userId: string,
+) => {
+  const isOnline = fields.modality.value.includes(Modality.ONLINE);
+
+  // Calcular end_time (assumindo 1 hora de duração)
+  const [hours, minutes] = fields.time.value.split(':');
+  const startTime = `${fields.time.value}:00`; // Adicionar segundos
+  const endHour = parseInt(hours) + 1;
+  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
+
+  return {
+    uf: isOnline ? null : fields.state.value || null,
+    city: isOnline ? null : fields.city.value || null,
+    neighborhood: isOnline ? null : fields.neighborhood.value || null,
+    street: isOnline ? null : fields.street.value || null,
+    street_number: isOnline
+      ? null
+      : fields.number.value
+      ? Number(fields.number.value)
+      : null,
+    address_details: isOnline ? null : fields.floor.value || null,
+    modality: fields.modality.value[0], // Pegar a primeira modalidade selecionada
+    date: formatDateToISO(fields.date.value),
+    description: fields.description.value,
+    interpreter_id: interpreterId,
+    user_id: userId,
+    start_time: startTime,
+    end_time: endTime,
   };
 };

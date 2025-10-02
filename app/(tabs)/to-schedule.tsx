@@ -24,6 +24,7 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import {
   type FormFields,
   useFormValidation,
@@ -37,6 +38,7 @@ import { Modality } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
 import {
   buildAppointmentPayload,
+  buildBackendAppointmentPayload,
   buildRequiredFieldError,
 } from '@/src/utils/helpers';
 import { formatDate, formatTime } from '@/src/utils/masks';
@@ -64,8 +66,8 @@ type ScheduleValidationContext = {
 };
 
 export default function ToScheduleScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
+  const { user } = useAuth(); // Get current user
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -235,18 +237,56 @@ export default function ToScheduleScreen() {
 
     console.warn('Form is valid, proceed with submission');
 
-    const payload = buildAppointmentPayload(fields, id, 'currentUserId');
-
-    const result = await appointmentApi.post(payload);
-
-    if (!result?.success || !result?.data) {
-      console.error('Error creating appointment:', result?.message);
+    if (!user?.id) {
+      console.error('❌ Usuário não autenticado');
       Toast.show({
         type: 'error',
-        text1: Strings.appointments.toast.errorTitle,
-        text2: Strings.appointments.toast.errorDescription,
+        text1: 'Erro de Autenticação',
+        text2: 'Usuário não está logado',
         position: 'top',
-        visibilityTime: 2000,
+        visibilityTime: 3000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
+    }
+
+    const payload = buildBackendAppointmentPayload(fields, '8441dd32-f8d8-4da8-ac49-4363b530b1bc', user.id);
+    
+    console.log('📤 Payload sendo enviado:', JSON.stringify(payload, null, 2));
+
+    try {
+      const result = await appointmentApi.post(payload as any);
+      
+      console.log('📥 Resposta da API:', JSON.stringify(result, null, 2));
+
+      if (!result?.success || !result?.data) {
+        console.error('❌ Erro na resposta:', {
+          success: result?.success,
+          message: result?.message,
+          data: result?.data,
+          fullResult: result
+        });
+        
+        Toast.show({
+          type: 'error',
+          text1: Strings.appointments.toast.errorTitle,
+          text2: result?.message || Strings.appointments.toast.errorDescription,
+          position: 'top',
+          visibilityTime: 3000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+    } catch (error: any) {
+      console.error('💥 Erro na requisição:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro de Conexão',
+        text2: error?.message || 'Não foi possível conectar com o servidor',
+        position: 'top',
+        visibilityTime: 3000,
         autoHide: true,
         closeIconSize: 1,
       });
@@ -364,7 +404,7 @@ export default function ToScheduleScreen() {
                   <DateTimePicker
                     value={date}
                     mode="date"
-                    display="calendar"
+                    display={Platform.OS === 'ios' ? 'default' : 'calendar'}
                     minimumDate={minDate}
                     onChange={handleDateChange}
                   />
