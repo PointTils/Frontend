@@ -5,16 +5,17 @@ import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import type {
   InterpreterResponseData,
-  UserListResponse} from '@/src/types/api';
-import {
-  UserType,
+  UserListResponse,
 } from '@/src/types/api';
+import { UserType } from '@/src/types/api';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, FlatList, Text } from 'react-native';
 
 function SkeletonCard() {
-  return <View className="w-full h-40 bg-gray-200 rounded-2xl mb-4 animate-pulse" />
+  return (
+    <View className="w-full h-40 bg-gray-200 rounded-2xl mb-4 animate-pulse" />
+  );
 }
 
 const isInterpreter = (item: any): item is InterpreterResponseData =>
