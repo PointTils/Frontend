@@ -36,6 +36,7 @@
     "axios": "^1.11.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "expo": "54.0.12",
+    "expo-build-properties": "~1.0.9",
     "expo-constants": "~18.0.8",
     "expo-dev-client": "~6.0.13",
     "expo-document-picker": "~14.0.7",
@@ -92,7 +93,8 @@
       "expo-dev-client",
       "expo-splash-screen",
       "eslint-plugin-import",
-      "tailwind-variants"
+      "tailwind-variants",
+      "expo-build-properties"
     ]
   },
   "overrides": {
