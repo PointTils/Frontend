@@ -3,18 +3,19 @@ import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
-import {
+import type {
   InterpreterResponseData,
-  UserListResponse,
+  UserListResponse} from '@/src/types/api';
+import {
   UserType,
 } from '@/src/types/api';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, FlatList, Text } from 'react-native';
 
-const SkeletonCard = () => (
-  <View className="w-full h-40 bg-gray-200 rounded-2xl mb-4 animate-pulse" />
-);
+function SkeletonCard() {
+  return <View className="w-full h-40 bg-gray-200 rounded-2xl mb-4 animate-pulse" />
+}
 
 const isInterpreter = (item: any): item is InterpreterResponseData =>
   item.type === UserType.INTERPRETER;

@@ -15,8 +15,8 @@ export const Strings = {
       search: 'Buscar',
       clean: 'Limpar',
     },
-    headers:{
-      search: 'PESQUISA'
+    headers: {
+      search: 'PESQUISA',
     },
     options: {
       authorize: 'Autoriza',
