@@ -13,12 +13,13 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.pointtils.pointtils",
+      "usesCleartextTraffic": true,
+      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/apk-logo.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.pointtils.pointtils"
+      }
     },
     "web": {
       "bundler": "metro",
