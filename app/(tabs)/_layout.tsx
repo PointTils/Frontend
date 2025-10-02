@@ -38,11 +38,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="appointments"
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
-              {Strings.history.tabBar}
+              {Strings.appointments.tabBar}
             </Text>
           ),
           tabBarIcon: ({ color }) => (

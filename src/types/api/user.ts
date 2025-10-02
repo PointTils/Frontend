@@ -1,10 +1,4 @@
-import type {
-  Gender,
-  Location,
-  Modality,
-  Specialty,
-  UserType,
-} from '../common';
+import type { Gender, Location, Modality, Specialty, UserType } from './common';
 
 // Models
 export interface PersonBody {

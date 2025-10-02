@@ -10,7 +10,7 @@
 
 export const FORCE_LIGHT_MODE = true;
 
-export const HIDE_TABBAR_SEGMENTS = ['edit'];
+export const HIDE_TABBAR_SEGMENTS = ['edit', '[id]'];
 
 export const SCHEDULE_ENABLED = false;
 

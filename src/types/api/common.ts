@@ -3,7 +3,7 @@
  * Includes user roles and shared models.
  */
 
-import type { Strings } from '../constants/Strings';
+import type { Strings } from '../../constants/Strings';
 
 // Models
 export interface Location {
@@ -46,6 +46,13 @@ export enum Modality {
   PERSONALLY = 'PERSONALLY',
   ONLINE = 'ONLINE',
   ALL = 'ALL',
+}
+
+export enum AppointmentStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
 }
 
 // Types

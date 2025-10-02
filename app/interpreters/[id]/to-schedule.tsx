@@ -29,8 +29,7 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import type { StateAndCityResponse } from '@/src/types/common';
-import { Modality } from '@/src/types/common';
+import { type StateAndCityResponse, Modality } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
   buildAppointmentPayload,
@@ -73,7 +72,7 @@ export default function ToScheduleScreen() {
   const [time, setTime] = useState(new Date());
 
   const appointmentApi = useApiPost<AppointmentResponse, AppointmentRequest>(
-    ApiRoutes.appointments.create,
+    ApiRoutes.appointments.base,
   );
 
   // Disallow today and past dates

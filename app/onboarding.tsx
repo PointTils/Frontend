@@ -6,7 +6,7 @@ import { Button } from '@/src/components/ui/button';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
-import { UserType } from '@/src/types/common';
+import { UserType } from '@/src/types/api';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';

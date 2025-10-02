@@ -40,15 +40,16 @@ import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
-import type {
-  UserRequest,
-  UserResponse,
-  UserResponseData,
-  UserSpecialtyResponse,
-  UserSpecialtyRequest,
+import {
+  type UserRequest,
+  type UserResponse,
+  type UserResponseData,
+  type UserSpecialtyResponse,
+  type UserSpecialtyRequest,
+  type StateAndCityResponse,
+  Modality,
+  UserType,
 } from '@/src/types/api';
-import type { StateAndCityResponse } from '@/src/types/common';
-import { Modality, UserType } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
 import {
   buildEditPayload,

@@ -12,6 +12,8 @@ export const Strings = {
       back: 'Voltar',
       understood: 'Entendi',
       confirm: 'Confirmar',
+      search: 'Buscar',
+      clean: 'Limpar',
     },
 
     options: {
@@ -118,10 +120,6 @@ export const Strings = {
     tabBar: 'Início',
   },
 
-  history: {
-    tabBar: 'Histórico',
-  },
-
   profile: {
     tabBar: 'Perfil',
     editProfile: 'Editar Perfil',
@@ -185,6 +183,22 @@ export const Strings = {
     },
   },
 
+  requests: {
+    request: 'Solicitação',
+    requests: 'Solicitações',
+    title: 'Gerencie suas solicitações',
+    subtitle:
+      'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+  },
+
+  appointments: {
+    tabBar: 'Histórico',
+    appointment: 'Agendamento',
+    active: 'Ativos',
+    completed: 'Encerrados',
+    canceled: 'Cancelados',
+  },
+
   // Enums and fixed options
   gender: {
     male: 'Masculino',
@@ -192,6 +206,17 @@ export const Strings = {
     others: 'Outros',
   },
 
+  search: {
+    selectCity: 'Selecione um estado primeiro',
+    filter: 'Filtro',
+    datesAvailable: 'Datas disponíveis',
+    online: 'Online',
+
+    toast: {
+      errorGetTitle: 'Erro ao obter dados.',
+      errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
   days: {
     monday: 'Segunda-Feira',
     tuesday: 'Terça-Feira',

@@ -4,6 +4,7 @@ import { Text } from '@/src/components/ui/text';
 import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
 import { useColors } from '@/src/hooks/useColors';
 import { Strings } from '@/src/constants/Strings';
+import { Avatar, AvatarImage } from '../avatar';
 
 /**
  * A reusable card used across two variants:
@@ -271,11 +272,15 @@ export function Card({
 
       {/* Header (Avatar + Title/Subtitle + Rating) */}
       <View className="flex-row items-start mb-4 pr-20">
-        <Image
-          source={{ uri: photoUrl }}
-          className="w-16 h-16 rounded-full mr-4"
-          resizeMode="cover"
-        />
+        <Avatar size="xl" borderRadius="full" className="mr-4">
+          <AvatarImage
+            source={{
+              uri:
+                photoUrl ||
+                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+            }}
+          />
+        </Avatar>
 
         <View className="flex-1 items-start">
           <Text

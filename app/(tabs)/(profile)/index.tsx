@@ -10,9 +10,12 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { UserResponse } from '@/src/types/api';
-import { Modality, UserType } from '@/src/types/common';
-import type { Day } from '@/src/types/common';
+import {
+  type UserResponse,
+  type Day,
+  Modality,
+  UserType,
+} from '@/src/types/api';
 import {
   formatDate,
   formatDaySchedule,

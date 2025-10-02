@@ -1,4 +1,4 @@
-import type { UserType } from '../common';
+import type { UserType } from './common';
 
 // Models
 export interface User {

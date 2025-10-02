@@ -3,6 +3,8 @@
  * Update here if any route changes.
  */
 
+import { UserType } from '../types/api';
+
 export const ApiRoutes = {
   auth: {
     base: '/auth/',
@@ -21,7 +23,7 @@ export const ApiRoutes = {
     profile: (id: string) => `/enterprises/${id}`,
   },
   interpreters: {
-    base: '/interpreters',
+    base: (param: URLSearchParams) => `/interpreters?${param}`,
     register: '/interpreters/register',
     profile: (id: string) => `/interpreters/${id}`,
   },
@@ -33,6 +35,8 @@ export const ApiRoutes = {
     userSpecialties: (userId: string) => `/users/${userId}/specialties`,
   },
   appointments: {
-    create: '/appointments',
+    base: '/appointments',
+    byStatus: (id: string, type: UserType, status: string) =>
+      `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
   },
 } as const;
