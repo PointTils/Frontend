@@ -8,7 +8,9 @@ export default function HomeScreen() {
       className="flex-1 items-center justify-center py-8"
       accessibilityLabel={Strings.home.tabBar}
     >
-      <Text className="font-ifood-regular">{Strings.home.tabBar}</Text>
+      <Text className="font-ifood-regular">
+        {process.env.EXPO_PUBLIC_API_URL}
+      </Text>
     </View>
   );
 }
