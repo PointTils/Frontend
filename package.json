@@ -45,7 +45,6 @@
     "expo-image-picker": "~17.0.8",
     "expo-linking": "~8.0.7",
     "expo-router": "~6.0.10",
-    "expo-router": "~6.0.10",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.7",
     "lottie-react-native": "~7.3.1",
@@ -94,7 +93,8 @@
       "expo-dev-client",
       "expo-splash-screen",
       "eslint-plugin-import",
-      "tailwind-variants"
+      "tailwind-variants",
+      "expo-build-properties"
     ]
   },
   "overrides": {
