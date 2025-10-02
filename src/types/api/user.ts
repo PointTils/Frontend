@@ -105,3 +105,9 @@ export interface UserResponse {
   message: string;
   data: UserResponseData;
 }
+
+export interface UserListResponse {
+  success: boolean;
+  message: string;
+  data: UserResponseData[];
+}
