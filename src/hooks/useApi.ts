@@ -1,5 +1,5 @@
 import api from '@/src/api';
-import type { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 
 type ApiState<T> = {
@@ -94,12 +94,22 @@ export const useApiPatch = <T, U>(endpoint: string, body?: U) => {
     error: null,
   });
 
-  const patch = async (payload?: U) => {
+  const patch = async (payload?: U, config?: AxiosRequestConfig) => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
+      const dataToSend = (payload ?? body) as unknown as U;
+      const isFormData =
+        typeof FormData !== 'undefined' && dataToSend instanceof FormData;
+
+      // RN/Axios requires headers to be set this way for FormData
+      const axiosConfig: AxiosRequestConfig | undefined = isFormData
+        ? { ...(config ?? {}), headers: { ...(config?.headers ?? {}) } }
+        : config;
+
       const res: AxiosResponse<T> = await api.patch<T>(
         endpoint,
-        payload ?? body,
+        dataToSend,
+        axiosConfig,
       );
       setState({ data: res.data, loading: false, error: null });
       return res.data;

@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
 import { type UserRequest, Modality, UserType } from '../types/api';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 /**
  * Contains utility functions used across the application.
@@ -86,7 +87,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.ENTERPRISE:
       return {
@@ -94,7 +94,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.INTERPRETER:
       const neighborhoods = (fields.neighborhoods.value ?? []) as string[];
@@ -110,7 +109,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
-        picture: '',
         ...(locations.length > 0 ? { locations } : {}),
         professional_data: {
           ...(fields.cnpj.value
@@ -120,12 +118,33 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
+          min_value: Number(fields.minPrice.value),
           max_value: Number(fields.maxPrice.value),
         },
       };
     default:
       throw new Error('Invalid profile type');
   }
+};
+
+export const buildAvatarFormData = (image: ImagePickerAsset) => {
+  const form = new FormData();
+  const inferredExt = image.mimeType?.split('/')?.[1] || 'jpg';
+  const name = image.fileName || `profile_${Date.now()}.${inferredExt}`;
+  const type = `image/${inferredExt}`;
+
+  form.append('file', {
+    uri: image.uri,
+    name,
+    type,
+  } as any);
+
+  console.log('Avatar form data built:', {
+    name,
+    type,
+    uri: image.uri,
+  });
+  return form;
 };
 
 const modalityToSend = (modality: Modality[]) => {
@@ -191,4 +210,24 @@ export const pickFile = async () => {
     console.error(error);
     return null;
   }
+};
+
+export const getSafeAvatarUri = ({
+  selectedUri,
+  remoteUrl,
+  fallback = 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+}: {
+  selectedUri?: string | null;
+  remoteUrl?: string | null;
+  fallback?: string;
+}): string => {
+  if (selectedUri && selectedUri.trim()) return selectedUri;
+  if (remoteUrl && remoteUrl.trim()) {
+    try {
+      return encodeURI(remoteUrl);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
 };

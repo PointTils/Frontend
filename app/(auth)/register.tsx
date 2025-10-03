@@ -283,10 +283,10 @@ export default function RegisterScreen() {
         />
       </View>
       <KeyboardAvoidingView
-        className="flex-1 px-6"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
+          className="px-6"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -665,7 +665,7 @@ export default function RegisterScreen() {
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-14 pb-4 gap-4">
+            <View className="mt-14 gap-4">
               <Button
                 onPress={handleRegister}
                 size="md"

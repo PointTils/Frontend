@@ -16,6 +16,7 @@ import {
   Modality,
   UserType,
 } from '@/src/types/api';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import {
   formatDate,
   formatDaySchedule,
@@ -34,7 +35,7 @@ import {
   LogOut,
 } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, ActivityIndicator } from 'react-native';
+import { ScrollView, ActivityIndicator, Image } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function ProfileScreen() {
@@ -132,9 +133,9 @@ export default function ProfileScreen() {
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
-              uri:
-                profile.picture ||
-                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+              uri: getSafeAvatarUri({
+                remoteUrl: profile?.picture,
+              }),
             }}
           />
         </Avatar>
