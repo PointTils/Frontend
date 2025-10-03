@@ -80,7 +80,7 @@ import { Avatar, AvatarImage } from '../avatar';
 
 type CardVariant = 'appointment' | 'search';
 
-interface CardProps {
+export interface CardProps {
   photoUrl: string;
   fullName: string;
 

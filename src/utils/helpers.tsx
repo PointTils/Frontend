@@ -232,3 +232,62 @@ export const pickFile = async () => {
     return null;
   }
 };
+
+export const getUserDisplayName = (userData: UserResponseData): string => {
+  switch (userData.type) {
+    case UserType.PERSON:
+    case UserType.INTERPRETER:
+      return (userData as any).name || '';
+    case UserType.ENTERPRISE:
+      return (userData as any).corporate_reason || '';
+    default:
+      return '';
+  }
+};
+
+export const transformAppointmentToCard = (appointment: Appointment) => {
+  const formatDateTime = (date: string, startTime: string, endTime: string) => {
+    try {
+      const [year, month, day] = date.split('-');
+      const formattedDate = `${day}/${month}/${year}`;
+      
+      const formatTime = (time: string) => time.substring(0, 5);
+      
+      return `${formattedDate} ${formatTime(startTime)} - ${formatTime(endTime)}`;
+    } catch {
+      return `${date} ${startTime} - ${endTime}`;
+    }
+  };
+
+  const formatLocation = (appointment: Appointment) => {
+    if (appointment.modality === 'ONLINE') {
+      return 'Online';
+    }
+    
+    const addressParts = [
+      appointment.street,
+      appointment.street_number,
+      appointment.neighborhood,
+      appointment.city,
+      appointment.uf,
+    ].filter(Boolean);
+    
+    const address = addressParts.join(', ');
+    return appointment.address_details 
+      ? `${address} - ${appointment.address_details}`
+      : address;
+  };
+
+  return {
+    fullName: 'Carregando...',
+    specialty: 'Intérprete de Libras',
+    rating: 0,
+    pending: appointment.status === 'PENDING',
+    date: formatDateTime(appointment.date, appointment.start_time, appointment.end_time),
+    location: formatLocation(appointment),
+    photoUrl: 'https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg',
+    appointmentId: appointment.id,
+    interpreterId: appointment.interpreter_id,
+    userId: appointment.user_id,
+  };
+};

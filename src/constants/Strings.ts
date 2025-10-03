@@ -120,11 +120,8 @@ export const Strings = {
 
   home: {
     tabBar: 'Início',
-    welcome: 'Olá, {name}!',
+    welcome: 'Olá, {User}!',
     nextAppointments: 'Próximos agendamentos',
-    completeRegistration:
-      'Complete seu cadastro para aproveitar todos os recursos.',
-    completeNow: 'Completar agora',
   },
 
   profile: {
