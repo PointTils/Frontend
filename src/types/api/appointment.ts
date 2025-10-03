@@ -1,13 +1,13 @@
 import type { AppointmentStatus, Modality, Specialty } from './common';
 
 export interface Appointment {
-  id: string;
-  uf: string;
-  city: string;
-  neighborhood: string;
-  street: string;
-  street_number: number | null;
-  address_details: string | null;
+  id?: string;
+  uf?: string;
+  city?: string;
+  neighborhood?: string;
+  street?: string;
+  street_number?: number | null;
+  address_details?: string | null;
   modality: Modality;
   date: string;
   description: string | null;
@@ -16,7 +16,7 @@ export interface Appointment {
   user_id: string;
   start_time: string;
   end_time: string;
-  contact_data: {
+  contact_data?: {
     id: string;
     name: string;
     picture: string | null;
@@ -25,6 +25,8 @@ export interface Appointment {
     specialties?: Specialty[];
   };
 }
+
+export type AppointmentRequest = Appointment;
 
 export interface AppointmentResponse {
   success: boolean;

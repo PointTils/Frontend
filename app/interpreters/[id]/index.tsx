@@ -17,6 +17,9 @@ import {
   CameraIcon,
   MapPinIcon,
   BanknoteIcon,
+  CheckIcon,
+  PlusIcon,
+  Clock,
 } from 'lucide-react-native';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
@@ -28,10 +31,16 @@ import { InterpreterResponseData, UserResponse } from '@/src/types/api/user';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import Header from '@/src/components/Header';
 import { Schedule, ScheduleResponse } from '@/src/types/api/schedule';
+import { mapModality } from '@/src/utils/masks';
+import { Modality } from '@/src/types/api';
+import { Button, ButtonIcon } from '@/src/components/ui/button';
 
 type TimeSelection = { date: string; time: string } | null;
 
 export default function InterpreterDetails() {
+  const params = useLocalSearchParams<{ id: string }>();
+  const interpreterId = params.id;
+
   const [section, setSection] = useState<'Avaliações' | 'Dados'>(
     Strings.search.details,
   );
@@ -42,13 +51,9 @@ export default function InterpreterDetails() {
   const then = new Date(now);
   then.setDate(now.getDate() + 30);
 
-  const params = useLocalSearchParams<{ id: string }>();
-
-  const interpreterId = params.id;
-
   // Request do intérprete
   const {
-    data: interpreter,
+    data: data,
     loading: loadingInterpreter,
     error: errorInterpreter,
   } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
@@ -64,12 +69,7 @@ export default function InterpreterDetails() {
     dateTo: then.toISOString().split('T')[0],
   });
 
-  // Handler para criar agendamento
-  const handleAppointmentCreate = () => {
-    // @TODO: router.push('/(app)/appointment/create');
-  };
-
-  if (loadingInterpreter) {
+  if (loadingInterpreter || loadingSchedule) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color={colors.primaryBlue} />
@@ -77,7 +77,7 @@ export default function InterpreterDetails() {
     );
   }
 
-  if (errorInterpreter || !interpreter) {
+  if (errorInterpreter || errorSchedule || !data || !data.success) {
     return (
       <View className="flex-1 items-center justify-center">
         <Text className="text-red-500">
@@ -87,10 +87,13 @@ export default function InterpreterDetails() {
     );
   }
 
+  const interpreter = data.data as InterpreterResponseData;
+  console.log(interpreter);
+
   return (
     <>
       {/* Header */}
-      <View className="mt-12">
+      <View className="mt-12 pb-2">
         <Header
           title={Strings.search.title}
           showBackButton={true}
@@ -100,25 +103,34 @@ export default function InterpreterDetails() {
 
       {/* Name and photo section */}
       <ScrollView className="px-8">
+        {/* For alignment purposes */}
+        <View className="w-full h-6" />
+
         <View className="items-center flex-row w-full justify-center gap-4">
           <Image
             className="w-24 h-24 rounded-full"
             source={{
               uri:
-                interpreter.data.picture ??
+                interpreter.picture ??
                 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
             }}
           />
 
           <View className="flex-col gap-1">
             <Text className="font-ifood-bold text-lg text-text-light dark:text-text-dark">
-              {interpreter.data.name}
+              {interpreter.name}
             </Text>
-            <Text className="font-ifood-normal text-lg text-text-light dark:text-text-dark">
-              {interpreter.data.specialties[0].name}
+            <Text
+              className="font-ifood-normal text-lg text-text-light dark:text-text-dark max-w-[180px]"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
+              {interpreter.specialties.length > 0
+                ? interpreter.specialties.map((s) => s.name).join(', ')
+                : ''}
             </Text>
             <StarRating
-              rating={interpreter.data.professional_data.rating}
+              rating={interpreter.professional_data.rating}
               size={20}
             />
           </View>
@@ -180,7 +192,7 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {interpreter.data.professional_data.description}
+              {interpreter.professional_data.description}
             </Text>
             <View className="flex-row items-center gap-2 mt-6">
               <InfoIcon width={16} height={16} />
@@ -189,19 +201,23 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {interpreter.data.professional_data.modality}
+              {mapModality(interpreter.professional_data.modality)}
             </Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <MapPinIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.search.localization}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {interpreter.data.locations
-                .map((loc) => loc.neighborhood)
-                .join(', ')}
-            </Text>
+            {interpreter.professional_data.modality !== Modality.ONLINE && (
+              <>
+                <View className="flex-row items-center gap-2 mt-6">
+                  <MapPinIcon width={16} height={16} />
+                  <Text className="font-ifood-medium text-lg">
+                    {Strings.search.localization}
+                  </Text>
+                </View>
+                <Text className="px-7">
+                  {interpreter.locations
+                    .map((loc) => loc.neighborhood)
+                    .join(', ')}
+                </Text>
+              </>
+            )}
 
             <View className="flex-row items-center gap-2 mt-6">
               <CameraIcon width={16} height={16} />
@@ -210,7 +226,7 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {interpreter.data.professional_data.image_rights
+              {interpreter.professional_data.image_rights
                 ? Strings.search.imageRightsAuthorize
                 : Strings.search.imageRightsNotAuthorize}
             </Text>
@@ -222,10 +238,17 @@ export default function InterpreterDetails() {
             </View>
             <Text className="px-7">
               {'R$' +
-                interpreter.data.professional_data.min_value +
+                interpreter.professional_data.min_value +
                 '-' +
-                interpreter.data.professional_data.max_value}
+                interpreter.professional_data.max_value}
             </Text>
+
+            <View className="flex-row items-center gap-2 mt-6">
+              <Clock width={16} height={16} />
+              <Text className="font-ifood-medium text-lg">
+                {Strings.hours.title}
+              </Text>
+            </View>
 
             {loadingSchedule ? (
               <View className="h-12 items-center justify-center">
@@ -242,15 +265,22 @@ export default function InterpreterDetails() {
         )}
       </ScrollView>
 
-      <View className="items-center w-full p-6">
-        <TouchableOpacity
-          className="w-4/5 bg-primary-orange-light rounded-md py-3 px-6 "
-          onPress={handleAppointmentCreate}
+      <View className="w-full mb-6 pt-6 border-t border-typography-200 dark:border-typography-700 pt-4 px-8">
+        <Button
+          size="md"
+          onPress={() => {
+            router.push({
+              pathname: '/interpreters/[id]/to-schedule',
+              params: { id: 'b30c02b1-f6cb-4b36-aac3-7ef4f81f11b3' },
+            });
+          }}
+          className="data-[active=true]:bg-primary-orange-press-light"
         >
-          <Text className="font-ifood-bold text-white text-lg text-center">
+          <ButtonIcon as={PlusIcon} className="text-white" />
+          <Text className="font-ifood-regular text-text-dark">
             {Strings.search.createAppointment}
           </Text>
-        </TouchableOpacity>
+        </Button>
       </View>
     </>
   );

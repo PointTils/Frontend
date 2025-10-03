@@ -120,6 +120,11 @@ export const Strings = {
 
   home: {
     tabBar: 'Início',
+    welcome: 'Olá, {name}!',
+    nextAppointments: 'Próximos agendamentos',
+    completeRegistration:
+      'Complete seu cadastro para aproveitar todos os recursos.',
+    completeNow: 'Completar agora',
   },
 
   profile: {
@@ -166,6 +171,14 @@ export const Strings = {
     title: 'Solicitação de agendamento',
     subtitle:
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
+
+    toast: {
+      errorTitle: 'Erro ao criar agendamento',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Solicitação enviada!',
+      successDescription:
+        'O intérprete vai analisar sua solicitação e você receberá uma notificação assim que houver resposta.',
+    },
   },
 
   edit: {
@@ -212,7 +225,7 @@ export const Strings = {
     title: 'PESQUISA',
     details: 'Dados',
     reviews: 'Avaliações',
-    createAppointment: '+ Fazer solicitação',
+    createAppointment: 'Fazer solicitação',
     description: 'Serviços e experiência',
     modality: 'Modalidade',
     localization: 'Localização',

@@ -4,7 +4,12 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { formatDateToISO } from './masks';
 import { Strings } from '../constants/Strings';
-import { type UserRequest, Modality, UserType } from '../types/api';
+import {
+  type UserRequest,
+  AppointmentRequest,
+  Modality,
+  UserType,
+} from '../types/api';
 
 /**
  * Contains utility functions used across the application.
@@ -127,6 +132,40 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
     default:
       throw new Error('Invalid profile type');
   }
+};
+
+export const buildAppointmentPayload = (
+  fields: any,
+  interpreterId: string,
+  userId: string,
+): AppointmentRequest => {
+  const isOnline = fields.modality.value.includes(Modality.ONLINE);
+
+  // Calculate end time as one hour after start time
+  const [hours, minutes] = fields.time.value.split(':');
+  const startTime = `${fields.time.value}:00`;
+  const endHour = parseInt(hours) + 1;
+  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
+
+  return {
+    interpreter_id: interpreterId,
+    user_id: userId,
+    modality: modalityToSend(fields.modality.value),
+    date: formatDateToISO(fields.date.value),
+    description: fields.description.value,
+    start_time: startTime,
+    end_time: endTime,
+    uf: isOnline ? null : fields.state.value || null,
+    city: isOnline ? null : fields.city.value || null,
+    neighborhood: isOnline ? null : fields.neighborhood.value || null,
+    street: isOnline ? null : fields.street.value || null,
+    street_number: isOnline
+      ? null
+      : fields.number.value
+        ? Number(fields.number.value)
+        : null,
+    address_details: isOnline ? null : fields.floor.value || null,
+  } as AppointmentRequest;
 };
 
 const modalityToSend = (modality: Modality[]) => {

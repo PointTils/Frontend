@@ -94,7 +94,7 @@ export default function PendingRequestsScreen() {
                   <View className="w-full h-px bg-gray-200" />
                   <Card
                     photoUrl={req.contact_data?.picture || ''}
-                    fullName={req.contact_data?.name}
+                    fullName={req.contact_data?.name || ''}
                     subtitle={
                       user?.type !== UserType.INTERPRETER
                         ? req.contact_data?.specialties
@@ -109,7 +109,7 @@ export default function PendingRequestsScreen() {
                     onPress={() =>
                       router.push({
                         pathname: '/requests/[id]',
-                        params: { id: req.id },
+                        params: { id: req.id || '' },
                       })
                     }
                   />

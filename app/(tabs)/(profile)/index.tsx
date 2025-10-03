@@ -126,7 +126,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* For alignment purposes */}
-        <View className="w-full mb-24" />
+        <View className="w-full h-24" />
 
         {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
