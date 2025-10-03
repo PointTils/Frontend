@@ -244,7 +244,7 @@ export default function ToScheduleScreen() {
       const result = await appointmentApi.post(payload);
 
       if (!result?.success || !result?.data) {
-        console.error('❌ Erro na resposta:', {
+        console.error('Response error:', {
           success: result?.success,
           message: result?.message,
           data: result?.data,
@@ -254,9 +254,9 @@ export default function ToScheduleScreen() {
         Toast.show({
           type: 'error',
           text1: Strings.toSchedule.toast.errorTitle,
-          text2: result?.message || Strings.toSchedule.toast.errorDescription,
+          text2: Strings.toSchedule.toast.errorDescription,
           position: 'top',
-          visibilityTime: 3000,
+          visibilityTime: 2000,
           autoHide: true,
           closeIconSize: 1,
         });
@@ -266,25 +266,25 @@ export default function ToScheduleScreen() {
       console.error('Failed to submit appointment:', error);
       Toast.show({
         type: 'error',
-        text1: 'Erro de Conexão',
-        text2: error?.message || 'Não foi possível conectar com o servidor',
+        text1: Strings.common.toast.errorUnknownTitle,
+        text2: Strings.common.toast.errorUnknownDescription,
         position: 'top',
-        visibilityTime: 3000,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1,
       });
       return;
     }
 
-    router.replace('/onboarding');
+    router.replace('/');
     Toast.show({
       type: 'success',
       text1: Strings.toSchedule.toast.successTitle,
       text2: Strings.toSchedule.toast.successDescription,
-      position: 'center',
-      visibilityTime: 4000,
+      position: 'top',
+      visibilityTime: 2000,
       autoHide: false,
-      topOffset: 50,
+      closeIconSize: 1,
     });
   }
 

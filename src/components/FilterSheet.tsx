@@ -134,7 +134,7 @@ export default function FilterSheet({
         text1: Strings.search.toast.errorGetTitle,
         text2: Strings.search.toast.errorGetText,
         position: 'top',
-        visibilityTime: 2500,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1,
       });

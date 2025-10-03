@@ -43,7 +43,7 @@ export default function LoginScreen() {
         text1: Strings.auth.toast.errorTitle,
         text2: Strings.auth.toast.errorDescription,
         position: 'top',
-        visibilityTime: 2500,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1, // To "hide" the close icon
         onHide: () => setLoginError(null),

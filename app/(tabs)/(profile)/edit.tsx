@@ -515,8 +515,8 @@ export default function EditProfileScreen() {
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
         type: 'error',
-        text1: Strings.edit.toast.errorApiTitle,
-        text2: Strings.edit.toast.errorApiDescription,
+        text1: Strings.edit.toast.errorTitle,
+        text2: Strings.edit.toast.errorDescription,
         position: 'top',
         visibilityTime: 2000,
         autoHide: true,

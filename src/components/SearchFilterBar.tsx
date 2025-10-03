@@ -118,7 +118,7 @@ export default function SearchFilterBar({
         text1: Strings.search.toast.errorGetTitle,
         text2: Strings.search.toast.errorGetText,
         position: 'top',
-        visibilityTime: 2500,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1,
       });
@@ -228,7 +228,7 @@ export default function SearchFilterBar({
           <Text
             className={`${handlerOnlineText(filters.modality ?? undefined)} font-ifood-regular`}
           >
-            {Strings.search.online}
+            {Strings.common.options.online}
           </Text>
         </TouchableOpacity>
 

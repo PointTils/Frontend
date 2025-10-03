@@ -43,7 +43,7 @@ export default function PendingRequestsScreen() {
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="small" />
         <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.Loading}
+          {Strings.common.loading}
         </Text>
       </View>
     );

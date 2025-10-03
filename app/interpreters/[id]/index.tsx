@@ -14,7 +14,7 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api/user';
-import { mapModality } from '@/src/utils/masks';
+import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import {
@@ -76,7 +76,7 @@ export default function InterpreterDetails() {
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="small" color={colors.primaryBlue} />
         <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.Loading}
+          {Strings.common.loading}
         </Text>
       </View>
     );
@@ -99,7 +99,7 @@ export default function InterpreterDetails() {
       {/* Header */}
       <View className="mt-12 pb-2">
         <Header
-          title={Strings.search.title}
+          title={Strings.search.header}
           showBackButton={true}
           handleBack={() => router.back()}
         />
@@ -201,7 +201,7 @@ export default function InterpreterDetails() {
             <View className="flex-row items-center gap-2 mt-6">
               <InfoIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
-                {Strings.search.modality}
+                {Strings.common.fields.modality}
               </Text>
             </View>
             <Text className="px-7">
@@ -212,7 +212,7 @@ export default function InterpreterDetails() {
                 <View className="flex-row items-center gap-2 mt-6">
                   <MapPinIcon width={16} height={16} />
                   <Text className="font-ifood-medium text-lg">
-                    {Strings.search.localization}
+                    {Strings.common.fields.location}
                   </Text>
                 </View>
                 <Text className="px-7">
@@ -226,18 +226,16 @@ export default function InterpreterDetails() {
             <View className="flex-row items-center gap-2 mt-6">
               <CameraIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
-                {Strings.search.imageRights}
+                {Strings.common.fields.imageRights}
               </Text>
             </View>
             <Text className="px-7">
-              {interpreter.professional_data.image_rights
-                ? Strings.search.imageRightsAuthorize
-                : Strings.search.imageRightsNotAuthorize}
+              {mapImageRights(interpreter.professional_data.image_rights)}
             </Text>
             <View className="flex-row items-center gap-2 mt-6">
               <BanknoteIcon width={16} height={16} />
               <Text className="font-ifood-medium text-lg">
-                {Strings.search.valueRange}
+                {Strings.common.fields.valueRange}
               </Text>
             </View>
             <Text className="px-7">
