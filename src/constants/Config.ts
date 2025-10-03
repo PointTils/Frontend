@@ -17,4 +17,4 @@ export const SCHEDULE_ENABLED = true;
 
 export const MAX_NEIGHBORHOODS = 5;
 
-export const IMAGE_UPLOAD_ENABLED = true;
+export const IMAGE_UPLOAD_ENABLED = false;
