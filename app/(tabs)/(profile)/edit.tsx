@@ -40,15 +40,16 @@ import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
-import type {
-  UserRequest,
-  UserResponse,
-  UserResponseData,
-  UserSpecialtyResponse,
-  UserSpecialtyRequest,
+import {
+  type UserRequest,
+  type UserResponse,
+  type UserResponseData,
+  type UserSpecialtyResponse,
+  type UserSpecialtyRequest,
+  type StateAndCityResponse,
+  Modality,
+  UserType,
 } from '@/src/types/api';
-import type { StateAndCityResponse } from '@/src/types/common';
-import { Modality, UserType } from '@/src/types/common';
 import type { OptionItem } from '@/src/types/ui';
 import {
   buildEditPayload,
@@ -464,7 +465,7 @@ export default function EditProfileScreen() {
     if (!profile) return;
     if (
       !validateForm({
-        type: profile.type,
+        type: profile.type as UserType,
         state: selectedState,
         modality: fields.modality.value,
       })
@@ -472,7 +473,7 @@ export default function EditProfileScreen() {
       return;
 
     // Build payloads based on user type
-    const payload = buildEditPayload(profile.type, fields);
+    const payload = buildEditPayload(profile.type as UserType, fields);
     if (!payload) return;
 
     let api;

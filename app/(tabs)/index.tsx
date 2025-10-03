@@ -5,7 +5,7 @@ import { Strings } from '@/src/constants/Strings';
 export default function HomeScreen() {
   return (
     <View
-      className="flex-1 items-center justify-center"
+      className="flex-1 items-center justify-center py-8"
       accessibilityLabel={Strings.home.tabBar}
     >
       <Text className="font-ifood-regular">{Strings.home.tabBar}</Text>
