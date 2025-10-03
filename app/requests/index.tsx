@@ -41,14 +41,17 @@ export default function PendingRequestsScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="large" />
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.Loading}
+        </Text>
       </View>
     );
   }
 
   // Redirect to home if no appointments data or error occurs
   if (error || !data?.success || !data.data) {
-    router.replace('/(tabs)');
+    router.replace('/');
     Toast.show({
       type: 'error',
       text1: Strings.profile.toast.errorTitle,

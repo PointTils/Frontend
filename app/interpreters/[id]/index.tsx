@@ -1,39 +1,41 @@
+import Header from '@/src/components/Header';
+import InterpreterCalendar from '@/src/components/InterpreterCalendar';
+import { StarRating } from '@/src/components/Rating';
+import { Avatar } from '@/src/components/ui/avatar';
+import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
+import { Button, ButtonIcon } from '@/src/components/ui/button';
+import { SCHEDULE_ENABLED } from '@/src/constants/Config';
+import { Strings } from '@/src/constants/Strings';
+import { useApiGet } from '@/src/hooks/useApi';
+import { useColors } from '@/src/hooks/useColors';
+import { Modality } from '@/src/types/api';
+import type { ScheduleResponse } from '@/src/types/api/schedule';
+import type {
+  InterpreterResponseData,
+  UserResponse,
+} from '@/src/types/api/user';
+import { mapModality } from '@/src/utils/masks';
+import { useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router/build/hooks';
+import {
+  BriefcaseBusinessIcon,
+  SquarePenIcon,
+  StarIcon,
+  InfoIcon,
+  CameraIcon,
+  MapPinIcon,
+  BanknoteIcon,
+  PlusIcon,
+  Clock,
+} from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   ScrollView,
   Text,
   TouchableOpacity,
-  Image,
   View,
   ActivityIndicator,
 } from 'react-native';
-import {
-  ChevronLeftIcon,
-  BriefcaseBusinessIcon,
-  SquarePenIcon,
-  StarIcon,
-  CalendarIcon,
-  InfoIcon,
-  CameraIcon,
-  MapPinIcon,
-  BanknoteIcon,
-  CheckIcon,
-  PlusIcon,
-  Clock,
-} from 'lucide-react-native';
-import { Strings } from '@/src/constants/Strings';
-import { useColors } from '@/src/hooks/useColors';
-import { useRouter } from 'expo-router';
-import { StarRating } from '@/src/components/Rating';
-import { useApiGet } from '@/src/hooks/useApi';
-import InterpreterCalendar from '@/src/components/InterpreterCalendar';
-import { InterpreterResponseData, UserResponse } from '@/src/types/api/user';
-import { useLocalSearchParams } from 'expo-router/build/hooks';
-import Header from '@/src/components/Header';
-import { Schedule, ScheduleResponse } from '@/src/types/api/schedule';
-import { mapModality } from '@/src/utils/masks';
-import { Modality } from '@/src/types/api';
-import { Button, ButtonIcon } from '@/src/components/ui/button';
 
 type TimeSelection = { date: string; time: string } | null;
 
@@ -72,7 +74,10 @@ export default function InterpreterDetails() {
   if (loadingInterpreter || loadingSchedule) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color={colors.primaryBlue} />
+        <ActivityIndicator size="small" color={colors.primaryBlue} />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.Loading}
+        </Text>
       </View>
     );
   }
@@ -88,7 +93,6 @@ export default function InterpreterDetails() {
   }
 
   const interpreter = data.data as InterpreterResponseData;
-  console.log(interpreter);
 
   return (
     <>
@@ -107,14 +111,16 @@ export default function InterpreterDetails() {
         <View className="w-full h-6" />
 
         <View className="items-center flex-row w-full justify-center gap-4">
-          <Image
-            className="w-24 h-24 rounded-full"
-            source={{
-              uri:
-                interpreter.picture ??
-                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-            }}
-          />
+          {/* Avatar */}
+          <Avatar size="lg" borderRadius="full" className="h-28 w-28">
+            <AvatarImage
+              source={{
+                uri:
+                  interpreter.picture ||
+                  'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+              }}
+            />
+          </Avatar>
 
           <View className="flex-col gap-1">
             <Text className="font-ifood-bold text-lg text-text-light dark:text-text-dark">
@@ -139,9 +145,8 @@ export default function InterpreterDetails() {
         {/* Section selector */}
         <View className="flex-row w-full mt-6">
           <TouchableOpacity
-            style={{ flex: 0.5 }}
             activeOpacity={1}
-            className={`pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
+            className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
             onPress={() => setSection(Strings.search.details)}
           >
             <View className="flex-row items-center gap-2">
@@ -161,8 +166,7 @@ export default function InterpreterDetails() {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={1}
-            style={{ flex: 0.5 }}
-            className={`pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
+            className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
             onPress={() => setSection(Strings.search.reviews)}
           >
             <View className="flex-row items-center gap-2">
@@ -243,35 +247,42 @@ export default function InterpreterDetails() {
                 interpreter.professional_data.max_value}
             </Text>
 
-            <View className="flex-row items-center gap-2 mt-6">
-              <Clock width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.hours.title}
-              </Text>
-            </View>
+            {SCHEDULE_ENABLED && (
+              <>
+                <View className="flex-row items-center gap-2 mt-6">
+                  <Clock width={16} height={16} />
+                  <Text className="font-ifood-medium text-lg">
+                    {Strings.hours.title}
+                  </Text>
+                </View>
 
-            {loadingSchedule ? (
-              <View className="h-12 items-center justify-center">
-                <ActivityIndicator size="large" color={colors.primaryBlue} />
-              </View>
-            ) : (
-              <InterpreterCalendar
-                schedules={schedules?.data ?? []}
-                selectedTime={selectTime}
-                onTimeSelect={setSelectedTime}
-              />
+                {loadingSchedule ? (
+                  <View className="h-12 items-center justify-center">
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.primaryBlue}
+                    />
+                  </View>
+                ) : (
+                  <InterpreterCalendar
+                    schedules={schedules?.data ?? []}
+                    selectedTime={selectTime}
+                    onTimeSelect={setSelectedTime}
+                  />
+                )}
+              </>
             )}
           </>
         )}
       </ScrollView>
 
-      <View className="w-full mb-6 pt-6 border-t border-typography-200 dark:border-typography-700 pt-4 px-8">
+      <View className="w-full mb-8 pt-6 px-8 border-t border-typography-200 dark:border-typography-700">
         <Button
           size="md"
           onPress={() => {
             router.push({
               pathname: '/interpreters/[id]/to-schedule',
-              params: { id: 'b30c02b1-f6cb-4b36-aac3-7ef4f81f11b3' },
+              params: { id: interpreterId },
             });
           }}
           className="data-[active=true]:bg-primary-orange-press-light"

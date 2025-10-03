@@ -1,7 +1,7 @@
+import { useColors } from '@/src/hooks/useColors';
+import { StarIcon } from 'lucide-react-native';
 import React from 'react';
 import { View, Text } from 'react-native';
-import { StarIcon } from 'lucide-react-native';
-import { useColors } from '@/src/hooks/useColors';
 
 interface StarRatingProps {
   rating: number;
@@ -16,42 +16,35 @@ interface StarRatingProps {
  * @param color Cor das estrelas, não obrigatório.
  * @returns
  */
-export function StarRating({
-  rating,
-  size = 24,
-  color = useColors().primaryBlue,
-}: StarRatingProps) {
+export function StarRating({ rating, size = 24, color }: StarRatingProps) {
+  const colors = useColors();
   const totalStars = 5;
+  const starColor = color ?? colors.primaryBlue;
 
   return (
     <View className="flex-row relative items-center">
-      {/* Estrelas de fundo cinza */}
       {Array.from({ length: totalStars }).map((_, i) => (
         <StarIcon
-          stroke={useColors().disabled}
           key={i}
+          stroke={colors.disabled}
           fill="none"
           width={size}
           height={size}
         />
       ))}
 
-      {/* Estrelas preenchidas proporcionalmente */}
       <View
+        className="absolute top-0 left-0 overflow-hidden flex-row"
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          overflow: 'hidden',
+          // dynamic width must stay inline
           width: (rating / totalStars) * size * totalStars,
-          flexDirection: 'row',
         }}
       >
         {Array.from({ length: totalStars }).map((_, i) => (
           <StarIcon
             key={i}
-            stroke={color}
-            fill={color}
+            stroke={starColor}
+            fill={starColor}
             width={size}
             height={size}
           />

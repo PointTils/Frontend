@@ -1,8 +1,9 @@
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react-native';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+
 import { Colors } from '../constants/Colors';
-import { Schedule } from '../types/api/schedule';
+import type { Schedule } from '../types/api/schedule';
 
 type TimeSelection = { date: string; time: string } | null;
 

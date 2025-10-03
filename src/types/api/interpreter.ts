@@ -6,7 +6,7 @@ export type InterpreterResponseDTO = {
   phone: string;
   picture: string;
   name: string;
-  gender: "MALE" | "FEMALE" | "OTHERS";
+  gender: 'MALE' | 'FEMALE' | 'OTHERS';
   birthday: string;
   cpf: string;
   locations: LocationDTO[];

@@ -40,9 +40,13 @@ import type { AppliedFilters } from '../types/ui';
 
 interface SearchFilterBarProps {
   onData: (data: InterpreterListResponse) => void;
+  interactive?: boolean;
 }
 
-export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
+export default function SearchFilterBar({
+  onData,
+  interactive = true,
+}: SearchFilterBarProps) {
   const colors = useColors();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<AppliedFilters>({});
@@ -108,7 +112,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
 
   useEffect(() => {
     if (error) {
-      router.push('/(tabs)');
+      router.push('/');
       Toast.show({
         type: 'error',
         text1: Strings.search.toast.errorGetTitle,
@@ -148,7 +152,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   };
 
   return (
-    <View className="px-4 py-2 mt-12">
+    <View className="px-4 py-2" pointerEvents={interactive ? 'auto' : 'none'}>
       <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
         {isSearchSubmitted ? (
           <TouchableOpacity

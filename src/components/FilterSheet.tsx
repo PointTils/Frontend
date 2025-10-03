@@ -128,7 +128,7 @@ export default function FilterSheet({
   // Global error handling
   useEffect(() => {
     if (statesError || citiesError) {
-      router.push('/(tabs)');
+      router.push('/');
       Toast.show({
         type: 'error',
         text1: Strings.search.toast.errorGetTitle,

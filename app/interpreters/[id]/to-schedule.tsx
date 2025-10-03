@@ -30,9 +30,9 @@ import {
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
 import {
+  type AppointmentRequest,
+  type AppointmentResponse,
   type StateAndCityResponse,
-  AppointmentRequest,
-  AppointmentResponse,
   Modality,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
@@ -68,8 +68,6 @@ export default function ToScheduleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
   const { user } = useAuth();
   const colors = useColors();
-
-  console.log('Interpreter ID:', id);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -243,10 +241,7 @@ export default function ToScheduleScreen() {
         user?.id || '', // Use the authenticated user's ID
       );
 
-      console.log('📤 Enviando payload:', JSON.stringify(payload, null, 2));
       const result = await appointmentApi.post(payload);
-
-      console.log('📥 Resposta da API:', JSON.stringify(result, null, 2));
 
       if (!result?.success || !result?.data) {
         console.error('❌ Erro na resposta:', {

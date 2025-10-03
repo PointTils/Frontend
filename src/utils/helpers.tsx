@@ -1,12 +1,23 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
+import { Fragment } from 'react';
+import { View } from 'react-native';
 
-import { formatDateToISO } from './masks';
+import {
+  formatAppointmentLocation,
+  formatCpfOrCnpj,
+  formatDate,
+  formatDateToISO,
+  formatTime,
+} from './masks';
+import { Card } from '../components/ui/card';
 import { Strings } from '../constants/Strings';
 import {
+  type Appointment,
+  type AppointmentRequest,
   type UserRequest,
-  AppointmentRequest,
   Modality,
   UserType,
 } from '../types/api';
@@ -233,61 +244,53 @@ export const pickFile = async () => {
   }
 };
 
-export const getUserDisplayName = (userData: UserResponseData): string => {
-  switch (userData.type) {
-    case UserType.PERSON:
-    case UserType.INTERPRETER:
-      return (userData as any).name || '';
-    case UserType.ENTERPRISE:
-      return (userData as any).corporate_reason || '';
-    default:
-      return '';
-  }
+type RenderApptItemOptions = {
+  userType?: UserType;
+  returnTo?: string;
+  onPress?: (appt: Appointment) => void;
+  showRating?: boolean;
 };
 
-export const transformAppointmentToCard = (appointment: Appointment) => {
-  const formatDateTime = (date: string, startTime: string, endTime: string) => {
-    try {
-      const [year, month, day] = date.split('-');
-      const formattedDate = `${day}/${month}/${year}`;
-      
-      const formatTime = (time: string) => time.substring(0, 5);
-      
-      return `${formattedDate} ${formatTime(startTime)} - ${formatTime(endTime)}`;
-    } catch {
-      return `${date} ${startTime} - ${endTime}`;
-    }
-  };
+export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
+  function RenderApptItem({ item: appt }: { item: Appointment }) {
+    const isInterpreter = opts.userType === UserType.INTERPRETER;
 
-  const formatLocation = (appointment: Appointment) => {
-    if (appointment.modality === 'ONLINE') {
-      return 'Online';
-    }
-    
-    const addressParts = [
-      appointment.street,
-      appointment.street_number,
-      appointment.neighborhood,
-      appointment.city,
-      appointment.uf,
-    ].filter(Boolean);
-    
-    const address = addressParts.join(', ');
-    return appointment.address_details 
-      ? `${address} - ${appointment.address_details}`
-      : address;
-  };
+    const handlePress = () => {
+      if (opts.onPress) {
+        opts.onPress(appt);
+        return;
+      }
+      const params: { id: string | number; returnTo?: string } = {
+        id: appt.id || '',
+      };
+      if (opts.returnTo) params.returnTo = opts.returnTo;
+      router.push({ pathname: '/appointments/[id]', params });
+    };
 
-  return {
-    fullName: 'Carregando...',
-    specialty: 'Intérprete de Libras',
-    rating: 0,
-    pending: appointment.status === 'PENDING',
-    date: formatDateTime(appointment.date, appointment.start_time, appointment.end_time),
-    location: formatLocation(appointment),
-    photoUrl: 'https://img.freepik.com/free-photo/front-view-smiley-woman-with-earbuds_23-2148613052.jpg',
-    appointmentId: appointment.id,
-    interpreterId: appointment.interpreter_id,
-    userId: appointment.user_id,
-  };
+    return (
+      <Fragment>
+        <View className="w-full h-px bg-gray-200" />
+        <Card
+          photoUrl={appt.contact_data?.picture || ''}
+          fullName={appt.contact_data?.name || ''}
+          subtitle={
+            !isInterpreter
+              ? appt.contact_data?.specialties?.map((s) => s.name).join(', ')
+              : formatCpfOrCnpj(appt.contact_data?.document)
+          }
+          showRating={opts.showRating ?? !isInterpreter}
+          rating={!isInterpreter ? appt.contact_data?.rating || 0 : 0}
+          date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
+          location={formatAppointmentLocation(appt)}
+          onPress={handlePress}
+        />
+        <View className="w-full h-px bg-gray-200" />
+      </Fragment>
+    );
+  }
+
+  // For eslint react/display-name
+  (RenderApptItem as unknown as { displayName?: string }).displayName =
+    'RenderApptItem';
+  return RenderApptItem;
 };
