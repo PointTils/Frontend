@@ -16,7 +16,7 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { UserListResponse } from '../types/api';
+import type { InterpreterListResponse } from '../types/api';
 import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
@@ -39,7 +39,7 @@ import type { AppliedFilters } from '../types/ui';
  */
 
 interface SearchFilterBarProps {
-  onData: (data: UserListResponse) => void;
+  onData: (data: InterpreterListResponse) => void;
 }
 
 export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
@@ -82,7 +82,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   const buildQuery = (filters: AppliedFilters, queryText?: string) => {
     const query = new URLSearchParams();
     if (queryText && queryText.trim().length > 0) {
-      query.append('search', queryText.trim());
+      query.append('name', queryText.trim());
     }
     if (filters.specialty?.length)
       query.append('specialty', filters.specialty.join(','));
@@ -100,7 +100,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     return query;
   };
 
-  const { data, error } = useApiGet<UserListResponse>(
+  const { data, error } = useApiGet<InterpreterListResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
@@ -125,6 +125,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     if (data && data.success && data.data) {
       onData(data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {

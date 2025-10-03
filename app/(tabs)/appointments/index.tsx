@@ -28,8 +28,17 @@ export default function AppointmentsScreen() {
   const { user, isAuthenticated } = useAuth();
   const [tab, setTab] = React.useState<TabKey>('active');
 
-  // TODO: add "active" fetch when backend statuses are defined (e.g., CONFIRMED/APPROVED)
-  // const { data: apptActive } = useApiGet<AppointmentsResponse>(...)
+  const {
+    data: apptActive,
+    loading: loadActive,
+    error: errorActive,
+  } = useApiGet<AppointmentsResponse>(
+    ApiRoutes.appointments.byStatus(
+      user?.id || '',
+      user?.type || UserType.PERSON,
+      AppointmentStatus.ACCEPTED,
+    ),
+  );
 
   const {
     data: apptCompleted,
@@ -66,7 +75,9 @@ export default function AppointmentsScreen() {
     return Array.isArray(apptCanceled?.data) ? apptCanceled.data : empty;
   }, [apptCanceled?.data, empty]);
 
-  const active = useMemo<Appointment[]>(() => [], []); // populate when active fetch is available
+  const active = useMemo<Appointment[]>(() => {
+    return Array.isArray(apptActive?.data) ? apptActive.data : empty;
+  }, [apptActive?.data, empty]);
 
   // Combine and sort appointments based on selected tab
   // Sorted by date descending, then by start_time descending
@@ -131,7 +142,7 @@ export default function AppointmentsScreen() {
   // Early return if not authenticated or user not loaded
   if (!isAuthenticated || !user) return null;
 
-  if (loadCompleted || loadCanceled) {
+  if (loadCompleted || loadCanceled || loadActive) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="large" />
@@ -143,10 +154,13 @@ export default function AppointmentsScreen() {
   if (
     errorCompleted ||
     errorCanceled ||
+    errorActive ||
     !apptCompleted?.success ||
     !apptCompleted.data ||
     !apptCanceled?.success ||
-    !apptCanceled.data
+    !apptCanceled.data ||
+    !apptActive?.success ||
+    !apptActive.data
   ) {
     router.replace('/(tabs)');
     Toast.show({

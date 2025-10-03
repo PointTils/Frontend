@@ -3,14 +3,11 @@ import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
-import type {
-  InterpreterResponseData,
-  UserListResponse,
-} from '@/src/types/api';
-import { UserType } from '@/src/types/api';
+import type { InterpreterListResponse } from '@/src/types/api';
+import { mapModality } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, FlatList, Text } from 'react-native';
+import { FlatList, Text } from 'react-native';
 
 function SkeletonCard() {
   return (
@@ -18,14 +15,12 @@ function SkeletonCard() {
   );
 }
 
-const isInterpreter = (item: any): item is InterpreterResponseData =>
-  item.type === UserType.INTERPRETER;
-
 export default function SearchScreen() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<UserListResponse | null>(null);
+  const [result, setResult] = useState<InterpreterListResponse | null>(null);
 
-  const handleData = (data: UserListResponse) => {
+  const handleData = (data: InterpreterListResponse) => {
+    console.warn('[Search] results:', data);
     setLoading(true);
     setTimeout(() => {
       setResult(data);
@@ -57,27 +52,34 @@ export default function SearchScreen() {
             data={result.data}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
-              const interpreter = isInterpreter(item) ? item : null;
               return (
                 <View className="bg-white border-b-[4px] border-gray-100">
                   <Card
                     variant="search"
                     photoUrl={item.picture}
-                    fullName={interpreter?.name || ''}
+                    fullName={item?.name || ''}
                     specialty={
                       item.specialties?.map((s) => s.name).join(', ') ?? ''
                     }
-                    rating={interpreter?.professional_data?.rating || 0}
-                    modality={interpreter?.professional_data?.modality || ''}
+                    rating={item?.professional_data?.rating || 0}
+                    modality={
+                      mapModality(item?.professional_data?.modality) || ''
+                    }
                     priceRange={
-                      interpreter
-                        ? `R$ ${interpreter.professional_data?.min_value ?? '0,00'} - R$ ${interpreter.professional_data?.max_value ?? '0,00'}`
+                      item?.professional_data
+                        ? `R$ ${item.professional_data?.min_value ?? '0,00'} - R$ ${item.professional_data?.max_value ?? '0,00'}`
                         : ''
                     }
                     location={
-                      interpreter?.locations?.[0]
-                        ? `${interpreter.locations[0].city}, ${interpreter.locations[0].uf}`
+                      item?.locations?.[0]
+                        ? `${item.locations[0].city}, ${item.locations[0].uf}`
                         : ''
+                    }
+                    onPress={() =>
+                      router.push({
+                        pathname: '/interpreters/[id]',
+                        params: { id: item.id },
+                      })
                     }
                   />
                 </View>
@@ -90,11 +92,6 @@ export default function SearchScreen() {
           </Text>
         )}
       </View>
-
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      />
     </View>
   );
 }
