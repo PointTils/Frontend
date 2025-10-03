@@ -94,7 +94,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Logo */}
-        <View className=" mb-12 items-center justify-center">
+        <View className="mb-12 items-center justify-center">
           <DarkBlueLogo />
           <Text className="mt-2 font-ifood-regular text-text-light dark:text-text-dark">
             {Strings.auth.slogan}
