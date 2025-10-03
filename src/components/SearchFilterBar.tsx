@@ -16,7 +16,7 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { UserResponse } from '../types/api';
+import type { InterpreterListResponse } from '../types/api';
 import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
@@ -25,7 +25,7 @@ import type { AppliedFilters } from '../types/ui';
  * Provides a text input for free-text search and quick-access filter buttons
  * (date availability, online modality, and advanced filters via modal).
  *
- * @param onData - Callback function called with API response data (UserResponse)
+ * @param onData - Callback function called with API response data (UserListResponse)
  *
  * @returns A search bar with input field, filter controls, and modal integration.
  *
@@ -39,7 +39,7 @@ import type { AppliedFilters } from '../types/ui';
  */
 
 interface SearchFilterBarProps {
-  onData: (data: UserResponse) => void;
+  onData: (data: InterpreterListResponse) => void;
 }
 
 export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
@@ -82,7 +82,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   const buildQuery = (filters: AppliedFilters, queryText?: string) => {
     const query = new URLSearchParams();
     if (queryText && queryText.trim().length > 0) {
-      query.append('search', queryText.trim());
+      query.append('name', queryText.trim());
     }
     if (filters.specialty?.length)
       query.append('specialty', filters.specialty.join(','));
@@ -100,7 +100,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     return query;
   };
 
-  const { data, error } = useApiGet<UserResponse>(
+  const { data, error } = useApiGet<InterpreterListResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
@@ -125,7 +125,8 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
     if (data && data.success && data.data) {
       onData(data);
     }
-  }, [data, onData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   useEffect(() => {
     if (query.trim().length === 0) {
