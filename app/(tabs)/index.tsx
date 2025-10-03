@@ -1,5 +1,6 @@
 import api from '@/src/api';
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
+import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Card } from '@/src/components/ui/card';
 import type { CardProps } from '@/src/components/ui/card';
 import { Text } from '@/src/components/ui/text';
@@ -190,7 +191,14 @@ export default function HomeScreen() {
             {welcomeMessage}
           </Text>
         </View>
-        {/* Search Bar component */}
+        <SearchFilterBar onData={(data) => {
+          if (data && data.success && Array.isArray(data.data)) {
+            const cards = data.data.map(transformAppointmentToCard);
+            setAppointmentCards(cards);
+          } else {
+            setAppointmentCards([]);
+          }
+        }} />
         <View 
           className="h-px w-full mt-4"
           style={{ backgroundColor: colors.fieldGray }}
