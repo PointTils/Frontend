@@ -465,7 +465,7 @@ export default function EditProfileScreen() {
     if (!profile) return;
     if (
       !validateForm({
-        type: profile.type,
+        type: profile.type as UserType,
         state: selectedState,
         modality: fields.modality.value,
       })
@@ -473,7 +473,7 @@ export default function EditProfileScreen() {
       return;
 
     // Build payloads based on user type
-    const payload = buildEditPayload(profile.type, fields);
+    const payload = buildEditPayload(profile.type as UserType, fields);
     if (!payload) return;
 
     let api;

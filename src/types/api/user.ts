@@ -73,7 +73,7 @@ export interface InterpreterResponseData {
   name: string;
   cpf: string;
   email: string;
-  type: UserType.INTERPRETER;
+  type?: UserType.INTERPRETER;
   status: string;
   phone: string;
   picture: string;
@@ -106,8 +106,8 @@ export interface UserResponse {
   data: UserResponseData;
 }
 
-export interface UserListResponse {
+export interface InterpreterListResponse {
   success: boolean;
   message: string;
-  data: UserResponseData[];
+  data: InterpreterResponseData[];
 }

@@ -120,6 +120,7 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
+          min_value: Number(fields.minPrice.value),
           max_value: Number(fields.maxPrice.value),
         },
       };
