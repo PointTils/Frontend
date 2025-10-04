@@ -1,5 +1,4 @@
 import Header from '@/src/components/Header';
-import { Card } from '@/src/components/ui/card';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
@@ -9,15 +8,10 @@ import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
-import {
-  formatAppointmentLocation,
-  formatCpfOrCnpj,
-  formatDate,
-  formatTime,
-} from '@/src/utils/masks';
+import { renderApptItem } from '@/src/utils/helpers';
 import { router } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useMemo, Fragment } from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
@@ -27,6 +21,15 @@ export default function AppointmentsScreen() {
   const colors = useColors();
   const { user, isAuthenticated } = useAuth();
   const [tab, setTab] = React.useState<TabKey>('active');
+
+  const renderItem = useMemo(
+    () =>
+      renderApptItem({
+        userType: user?.type,
+        returnTo: '/appointments',
+      }),
+    [user?.type],
+  );
 
   const {
     data: apptActive,
@@ -91,36 +94,6 @@ export default function AppointmentsScreen() {
     });
   }, [tab, active, completed, canceled]);
 
-  const renderItem = ({ item: appt }: { item: Appointment }) => (
-    <Fragment key={appt.id}>
-      <View className="w-full h-px bg-gray-200" />
-      <Card
-        photoUrl={appt.contact_data?.picture || ''}
-        fullName={appt.contact_data?.name}
-        subtitle={
-          user?.type !== UserType.INTERPRETER
-            ? appt.contact_data?.specialties?.map((s) => s.name).join(', ')
-            : formatCpfOrCnpj(appt.contact_data?.document)
-        }
-        showRating={user?.type !== UserType.INTERPRETER}
-        rating={
-          user?.type !== UserType.INTERPRETER
-            ? appt.contact_data?.rating || 0
-            : 0
-        }
-        date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
-        location={formatAppointmentLocation(appt)}
-        onPress={() =>
-          router.push({
-            pathname: '/appointments/[id]',
-            params: { id: appt.id },
-          })
-        }
-      />
-      <View className="w-full h-px bg-gray-200" />
-    </Fragment>
-  );
-
   function TabButton({ k, label }: { k: TabKey; label: string }) {
     const selected = tab === k;
     return (
@@ -145,7 +118,10 @@ export default function AppointmentsScreen() {
   if (loadCompleted || loadCanceled || loadActive) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="large" />
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.loading}
+        </Text>
       </View>
     );
   }
@@ -162,7 +138,7 @@ export default function AppointmentsScreen() {
     !apptActive?.success ||
     !apptActive.data
   ) {
-    router.replace('/(tabs)');
+    router.replace('/');
     Toast.show({
       type: 'error',
       text1: Strings.profile.toast.errorTitle,
@@ -202,7 +178,7 @@ export default function AppointmentsScreen() {
         ) : (
           <FlatList
             data={current}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id || Math.random().toString()}
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"

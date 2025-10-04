@@ -6,7 +6,7 @@ export interface User {
   email: string;
   type: UserType;
   status: string;
-  // name: string; // Uncomment when name is added in backend
+  name: string;
 }
 
 export interface Tokens {

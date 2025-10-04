@@ -7,7 +7,25 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 
 export default function AppointmentDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>(); // Appointment ID from route params
+  const { id, returnTo } = useLocalSearchParams<{
+    id: string;
+    returnTo?: string;
+  }>(); // Appointment ID from route params
+
+  const handleBack = (returnTo: string) => {
+    const target =
+      typeof returnTo === 'string' && returnTo.length > 0
+        ? returnTo === '/(tabs)'
+          ? '/'
+          : returnTo
+        : '';
+
+    if (target) {
+      router.replace(target as any);
+      return;
+    }
+    router.back();
+  };
 
   return (
     <View className="flex-1">
@@ -15,7 +33,7 @@ export default function AppointmentDetailsScreen() {
         <Header
           title={Strings.appointments.appointment}
           showBackButton={true}
-          handleBack={() => router.back()}
+          handleBack={() => handleBack(returnTo || '')}
         />
       </View>
 

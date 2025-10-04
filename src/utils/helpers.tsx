@@ -1,10 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
+import { Fragment } from 'react';
+import { View } from 'react-native';
 
-import { formatDateToISO } from './masks';
+import {
+  formatAppointmentLocation,
+  formatCpfOrCnpj,
+  formatDate,
+  formatDateToISO,
+  formatTime,
+} from './masks';
+import { Card } from '../components/ui/card';
 import { Strings } from '../constants/Strings';
-import { type UserRequest, Modality, UserType } from '../types/api';
+import {
+  type Appointment,
+  type AppointmentRequest,
+  type UserRequest,
+  Modality,
+  UserType,
+} from '../types/api';
 
 /**
  * Contains utility functions used across the application.
@@ -129,6 +145,40 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
   }
 };
 
+export const buildAppointmentPayload = (
+  fields: any,
+  interpreterId: string,
+  userId: string,
+): AppointmentRequest => {
+  const isOnline = fields.modality.value.includes(Modality.ONLINE);
+
+  // Calculate end time as one hour after start time
+  const [hours, minutes] = fields.time.value.split(':');
+  const startTime = `${fields.time.value}:00`;
+  const endHour = parseInt(hours) + 1;
+  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
+
+  return {
+    interpreter_id: interpreterId,
+    user_id: userId,
+    modality: modalityToSend(fields.modality.value),
+    date: formatDateToISO(fields.date.value),
+    description: fields.description.value,
+    start_time: startTime,
+    end_time: endTime,
+    uf: isOnline ? null : fields.state.value || null,
+    city: isOnline ? null : fields.city.value || null,
+    neighborhood: isOnline ? null : fields.neighborhood.value || null,
+    street: isOnline ? null : fields.street.value || null,
+    street_number: isOnline
+      ? null
+      : fields.number.value
+        ? Number(fields.number.value)
+        : null,
+    address_details: isOnline ? null : fields.floor.value || null,
+  } as AppointmentRequest;
+};
+
 const modalityToSend = (modality: Modality[]) => {
   // If both are checked, send 'ALL', else send the single value
   let modalityToSend: Modality;
@@ -192,4 +242,55 @@ export const pickFile = async () => {
     console.error(error);
     return null;
   }
+};
+
+type RenderApptItemOptions = {
+  userType?: UserType;
+  returnTo?: string;
+  onPress?: (appt: Appointment) => void;
+  showRating?: boolean;
+};
+
+export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
+  function RenderApptItem({ item: appt }: { item: Appointment }) {
+    const isInterpreter = opts.userType === UserType.INTERPRETER;
+
+    const handlePress = () => {
+      if (opts.onPress) {
+        opts.onPress(appt);
+        return;
+      }
+      const params: { id: string | number; returnTo?: string } = {
+        id: appt.id || '',
+      };
+      if (opts.returnTo) params.returnTo = opts.returnTo;
+      router.push({ pathname: '/appointments/[id]', params });
+    };
+
+    return (
+      <Fragment>
+        <View className="w-full h-px bg-gray-200" />
+        <Card
+          photoUrl={appt.contact_data?.picture || ''}
+          fullName={appt.contact_data?.name || ''}
+          subtitle={
+            !isInterpreter
+              ? appt.contact_data?.specialties?.map((s) => s.name).join(', ')
+              : formatCpfOrCnpj(appt.contact_data?.document)
+          }
+          showRating={opts.showRating ?? !isInterpreter}
+          rating={!isInterpreter ? appt.contact_data?.rating || 0 : 0}
+          date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
+          location={formatAppointmentLocation(appt)}
+          onPress={handlePress}
+        />
+        <View className="w-full h-px bg-gray-200" />
+      </Fragment>
+    );
+  }
+
+  // For eslint react/display-name
+  (RenderApptItem as unknown as { displayName?: string }).displayName =
+    'RenderApptItem';
+  return RenderApptItem;
 };

@@ -66,14 +66,17 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="large" />
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.loading}
+        </Text>
       </View>
     );
   }
 
   // Redirect to home if no profile data or error occurs
   if (error || !data?.success || !data.data) {
-    router.push('/(tabs)');
+    router.push('/');
     Toast.show({
       type: 'error',
       text1: Strings.profile.toast.errorTitle,
@@ -126,7 +129,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* For alignment purposes */}
-        <View className="w-full mb-24" />
+        <View className="w-full h-24" />
 
         {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">

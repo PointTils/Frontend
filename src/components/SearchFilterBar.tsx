@@ -20,6 +20,11 @@ import type { InterpreterListResponse } from '../types/api';
 import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
+interface SearchFilterBarProps {
+  onData: (data: InterpreterListResponse) => void;
+  interactive?: boolean;
+}
+
 /**
  * A search bar component with integrated filters for querying interpreters.
  * Provides a text input for free-text search and quick-access filter buttons
@@ -35,14 +40,11 @@ import type { AppliedFilters } from '../types/ui';
  *     console.log('Fetched interpreters:', data);
  *   }}
  * />
- *
  */
-
-interface SearchFilterBarProps {
-  onData: (data: InterpreterListResponse) => void;
-}
-
-export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
+export default function SearchFilterBar({
+  onData,
+  interactive = true,
+}: SearchFilterBarProps) {
   const colors = useColors();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<AppliedFilters>({});
@@ -108,13 +110,13 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
 
   useEffect(() => {
     if (error) {
-      router.push('/(tabs)');
+      router.push('/');
       Toast.show({
         type: 'error',
         text1: Strings.search.toast.errorGetTitle,
         text2: Strings.search.toast.errorGetText,
         position: 'top',
-        visibilityTime: 2500,
+        visibilityTime: 2000,
         autoHide: true,
         closeIconSize: 1,
       });
@@ -148,7 +150,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
   };
 
   return (
-    <View className="px-4 py-2 mt-12">
+    <View className="px-4 py-2" pointerEvents={interactive ? 'auto' : 'none'}>
       <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
         {isSearchSubmitted ? (
           <TouchableOpacity
@@ -224,7 +226,7 @@ export default function SearchFilterBar({ onData }: SearchFilterBarProps) {
           <Text
             className={`${handlerOnlineText(filters.modality ?? undefined)} font-ifood-regular`}
           >
-            {Strings.search.online}
+            {Strings.common.options.online}
           </Text>
         </TouchableOpacity>
 

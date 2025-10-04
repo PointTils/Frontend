@@ -673,7 +673,7 @@ export default function RegisterScreen() {
               >
                 <ButtonIcon as={PlusIcon} className="text-white" />
                 <Text className="font-ifood-regular text-text-dark">
-                  {Strings.register.create}
+                  {Strings.auth.signUpAction}
                 </Text>
               </Button>
 

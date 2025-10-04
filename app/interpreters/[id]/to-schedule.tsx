@@ -22,15 +22,24 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
-import { useApiGet } from '@/src/hooks/useApi';
+import { useAuth } from '@/src/contexts/AuthProvider';
+import { useApiGet, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import { type StateAndCityResponse, Modality } from '@/src/types/api';
+import {
+  type AppointmentRequest,
+  type AppointmentResponse,
+  type StateAndCityResponse,
+  Modality,
+} from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
-import { buildRequiredFieldError } from '@/src/utils/helpers';
+import {
+  buildAppointmentPayload,
+  buildRequiredFieldError,
+} from '@/src/utils/helpers';
 import { formatDate, formatTime } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -48,6 +57,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 type ScheduleValidationContext = {
   state: string;
@@ -55,14 +65,18 @@ type ScheduleValidationContext = {
 };
 
 export default function ToScheduleScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
+  const { user } = useAuth();
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [time, setTime] = useState(new Date());
+
+  const appointmentApi = useApiPost<AppointmentResponse, AppointmentRequest>(
+    ApiRoutes.appointments.base,
+  );
 
   // Disallow today and past dates
   const minDate = useMemo(() => {
@@ -211,7 +225,7 @@ export default function ToScheduleScreen() {
     router.back();
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (
       !validateForm({
         state: selectedState,
@@ -220,7 +234,58 @@ export default function ToScheduleScreen() {
     )
       return;
 
-    console.warn('Form is valid, proceed with submission');
+    try {
+      const payload = buildAppointmentPayload(
+        fields,
+        id,
+        user?.id || '', // Use the authenticated user's ID
+      );
+
+      const result = await appointmentApi.post(payload);
+
+      if (!result?.success || !result?.data) {
+        console.error('Response error:', {
+          success: result?.success,
+          message: result?.message,
+          data: result?.data,
+          fullResult: result,
+        });
+
+        Toast.show({
+          type: 'error',
+          text1: Strings.toSchedule.toast.errorTitle,
+          text2: Strings.toSchedule.toast.errorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+    } catch (error: any) {
+      console.error('Failed to submit appointment:', error);
+      Toast.show({
+        type: 'error',
+        text1: Strings.common.toast.errorUnknownTitle,
+        text2: Strings.common.toast.errorUnknownDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
+    }
+
+    router.replace('/');
+    Toast.show({
+      type: 'success',
+      text1: Strings.toSchedule.toast.successTitle,
+      text2: Strings.toSchedule.toast.successDescription,
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: false,
+      closeIconSize: 1,
+    });
   }
 
   return (

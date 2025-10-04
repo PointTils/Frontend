@@ -41,14 +41,17 @@ export default function PendingRequestsScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="large" />
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.loading}
+        </Text>
       </View>
     );
   }
 
   // Redirect to home if no appointments data or error occurs
   if (error || !data?.success || !data.data) {
-    router.replace('/(tabs)');
+    router.replace('/');
     Toast.show({
       type: 'error',
       text1: Strings.profile.toast.errorTitle,
@@ -94,7 +97,7 @@ export default function PendingRequestsScreen() {
                   <View className="w-full h-px bg-gray-200" />
                   <Card
                     photoUrl={req.contact_data?.picture || ''}
-                    fullName={req.contact_data?.name}
+                    fullName={req.contact_data?.name || ''}
                     subtitle={
                       user?.type !== UserType.INTERPRETER
                         ? req.contact_data?.specialties
@@ -109,7 +112,7 @@ export default function PendingRequestsScreen() {
                     onPress={() =>
                       router.push({
                         pathname: '/requests/[id]',
-                        params: { id: req.id },
+                        params: { id: req.id || '' },
                       })
                     }
                   />

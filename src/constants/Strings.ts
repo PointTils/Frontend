@@ -15,9 +15,7 @@ export const Strings = {
       search: 'Buscar',
       clean: 'Limpar',
     },
-    headers: {
-      search: 'PESQUISA',
-    },
+
     options: {
       authorize: 'Autoriza',
       deny: 'Não autoriza',
@@ -77,11 +75,15 @@ export const Strings = {
       },
     },
 
-    errorTitle: 'Ocorreu um erro',
-    errorDescription: 'Ocorreu um erro. Tente novamente.',
-    Loading: 'Carregando...',
+    loading: 'Carregando',
     noData: 'Nenhum dado disponível',
     noResults: 'Nenhum resultado encontrado',
+
+    toast: {
+      errorUnknownTitle: 'Erro',
+      errorUnknownDescription:
+        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
+    },
   },
 
   // Screens
@@ -90,7 +92,6 @@ export const Strings = {
     title: 'Boas-vindas!',
     subtitle: 'Precisamos de algumas informações básicas para criar sua conta.',
     typeSelect: 'Quem é você?',
-    create: 'Criar conta',
 
     toast: {
       errorTitle: 'Falha no cadastro',
@@ -120,6 +121,8 @@ export const Strings = {
 
   home: {
     tabBar: 'Início',
+    welcome: 'Olá, {User}!',
+    nextAppointments: 'Próximos agendamentos',
   },
 
   profile: {
@@ -166,6 +169,16 @@ export const Strings = {
     title: 'Solicitação de agendamento',
     subtitle:
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
+
+    calendarNoAvailable: 'Nenhum horário disponível.',
+
+    toast: {
+      errorTitle: 'Erro ao criar agendamento',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Solicitação enviada!',
+      successDescription:
+        'O intérprete vai analisar sua solicitação e você receberá uma notificação assim que houver resposta.',
+    },
   },
 
   edit: {
@@ -175,13 +188,10 @@ export const Strings = {
       'Defina os horários disponíveis para atendimento em cada dia da semana.',
 
     toast: {
-      errorApiTitle: 'Falha ao atualizar perfil',
-      errorApiDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      errorTitle: 'Falha ao atualizar perfil',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
       successTitle: 'Perfil atualizado com sucesso!',
       successDescription: 'As alterações foram salvas.',
-      errorTitle: 'Erro',
-      errorDescription:
-        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
     },
   },
 
@@ -201,6 +211,24 @@ export const Strings = {
     canceled: 'Cancelados',
   },
 
+  search: {
+    header: 'PESQUISA',
+    details: 'Dados',
+    reviews: 'Avaliações',
+    createAppointment: 'Fazer solicitação',
+    description: 'Serviços e experiência',
+    calendar: 'Calendário',
+    noSchedulesFound: 'Nenhum agendamento encontrado.',
+    selectCity: 'Selecione um estado primeiro',
+    filter: 'Filtro',
+    datesAvailable: 'Datas disponíveis',
+
+    toast: {
+      errorGetTitle: 'Erro ao obter dados.',
+      errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
   // Enums and fixed options
   gender: {
     male: 'Masculino',
@@ -208,17 +236,6 @@ export const Strings = {
     others: 'Outros',
   },
 
-  search: {
-    selectCity: 'Selecione um estado primeiro',
-    filter: 'Filtro',
-    datesAvailable: 'Datas disponíveis',
-    online: 'Online',
-
-    toast: {
-      errorGetTitle: 'Erro ao obter dados.',
-      errorGetText: 'Verifique sua conexão e tente novamente.',
-    },
-  },
   days: {
     monday: 'Segunda-Feira',
     tuesday: 'Terça-Feira',

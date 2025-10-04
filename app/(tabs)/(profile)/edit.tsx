@@ -29,7 +29,11 @@ import {
 } from '@/src/components/ui/radio';
 import { Text } from '@/src/components/ui/text';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
-import { MAX_NEIGHBORHOODS, SCHEDULE_ENABLED } from '@/src/constants/Config';
+import {
+  IMAGE_UPLOAD_ENABLED,
+  MAX_NEIGHBORHOODS,
+  SCHEDULE_ENABLED,
+} from '@/src/constants/Config';
 import {
   specialties,
   genders,
@@ -451,7 +455,6 @@ export default function EditProfileScreen() {
   const handlePickProfileAvatar = async () => {
     const image = await pickImage();
     if (image) {
-      console.warn('Picked image:', image);
       setSelectedImage(image);
     }
   };
@@ -512,8 +515,8 @@ export default function EditProfileScreen() {
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
         type: 'error',
-        text1: Strings.edit.toast.errorApiTitle,
-        text2: Strings.edit.toast.errorApiDescription,
+        text1: Strings.edit.toast.errorTitle,
+        text2: Strings.edit.toast.errorDescription,
         position: 'top',
         visibilityTime: 2000,
         autoHide: true,
@@ -555,7 +558,10 @@ export default function EditProfileScreen() {
         >
           <View className="mt-8">
             <TouchableOpacity
-              onPress={handlePickProfileAvatar}
+              onPress={
+                IMAGE_UPLOAD_ENABLED ? handlePickProfileAvatar : undefined
+              }
+              disabled={!IMAGE_UPLOAD_ENABLED}
               className="justify-center items-center mb-4"
             >
               <View className="relative">
@@ -569,9 +575,11 @@ export default function EditProfileScreen() {
                     }}
                   />
                 </Avatar>
-                <View className="absolute bottom-2 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
-                  <Pencil size={20} color={colors.primaryBlue} />
-                </View>
+                {IMAGE_UPLOAD_ENABLED && (
+                  <View className="absolute bottom-2 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
+                    <Pencil size={20} color={colors.primaryBlue} />
+                  </View>
+                )}
               </View>
               <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
                 {Strings.edit.basicData}
