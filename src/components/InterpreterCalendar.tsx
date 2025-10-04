@@ -3,8 +3,8 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
 import { Colors } from '../constants/Colors';
-import type { Schedule } from '../types/api/schedule';
 import { Strings } from '../constants/Strings';
+import type { Schedule } from '../types/api/schedule';
 
 type TimeSelection = { date: string; time: string } | null;
 
