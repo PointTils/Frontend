@@ -8,12 +8,38 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /(bg|border|text|stroke|fill)-(primary|secondary|tertiary|error|success|warning|info|typography|outline|background|indicator)-(0|50|100|200|300|400|500|600|700|800|900|950|white|gray|black|error|warning|muted|success|info|light|dark|primary)/,
+        /(bg|border|text|stroke|fill)-(primary|secondary|tertiary|error|success|warning|info|typography|outline|background|indicator|primary-orange|primary-blue|primary-orange-press|primary-blue-press|text)-(0|50|100|200|300|400|500|600|700|800|900|950|white|gray|black|error|warning|muted|success|info|light|dark|primary)/,
     },
   ],
   theme: {
     extend: {
       colors: {
+        // Point Tils custom colors
+        'primary-orange': {
+          light: '#F28D22',
+          dark: '#FF9F3A',
+        },
+        'primary-orange-press': {
+          light: '#FF9F3A',
+          dark: '#F28D22',
+        },
+        'primary-blue': {
+          light: '#43A2DB',
+          dark: '#5CB3E8',
+        },
+        'primary-blue-press': {
+          light: '#5CB3E8',
+          dark: '#43A2DB',
+        },
+        'primary-gray-press': {
+          light: '#e4e4e4ff',
+          dark: '#374151',
+        },
+        text: {
+          light: '#0D0D0D',
+          dark: '#fff',
+        },
+        // default
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
           50: 'rgb(var(--color-primary-50)/<alpha-value>)',

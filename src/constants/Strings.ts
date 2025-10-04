@@ -5,28 +5,257 @@
 
 export const Strings = {
   common: {
-    cancel: 'Cancelar',
-    save: 'Salvar',
-    delete: 'Excluir',
-    back: 'Voltar',
-    error: 'Ocorreu um erro. Tente novamente.',
+    buttons: {
+      cancel: 'Cancelar',
+      save: 'Salvar',
+      delete: 'Excluir',
+      back: 'Voltar',
+      understood: 'Entendi',
+      confirm: 'Confirmar',
+      search: 'Buscar',
+      clean: 'Limpar',
+    },
+
+    options: {
+      authorize: 'Autoriza',
+      deny: 'Não autoriza',
+
+      person: 'Solicitante',
+      enterprise: 'Empresa',
+      interpreter: 'Intérprete',
+
+      yes: 'Sim',
+      no: 'Não',
+
+      available: 'Atende',
+      notAvailable: 'Não atende',
+
+      online: 'Online',
+      inPerson: 'Presencial',
+    },
+
+    fields: {
+      select: 'Selecione',
+      selected: '{count} selecionados',
+      name: 'Nome',
+      reason: 'Razão social',
+      cpf: 'CPF',
+      cnpj: 'CNPJ',
+      birthday: 'Data de nascimento',
+      gender: 'Gênero',
+      phone: 'Telefone',
+      email: 'Email',
+      password: 'Senha',
+      description: 'Descrição',
+      imageRights: 'Direito de uso de imagem',
+      valueRange: 'Faixa de valores',
+      min: 'Mínimo',
+      max: 'Máximo',
+      modality: 'Modalidade',
+      location: 'Localização',
+      state: 'UF',
+      city: 'Cidade',
+      neighborhoods: 'Bairros',
+      neighborhood: 'Bairro',
+      street: 'Logradouro',
+      number: 'Número',
+      floor: 'Complemento',
+      specialties: 'Especialidades',
+      preferences: 'Preferências',
+      optional: 'Opcional',
+      professionalArea: 'Área profissional',
+      date: 'Data',
+      time: 'Hora',
+
+      errors: {
+        minPassword: 'Senha deve ter no mínimo 8 caracteres',
+        required: 'obrigatório',
+        invalid: 'inválido',
+        futureDate: 'Selecione uma data posterior a hoje',
+      },
+    },
+
+    loading: 'Carregando',
+    noData: 'Nenhum dado disponível',
+    noResults: 'Nenhum resultado encontrado',
+
+    toast: {
+      errorUnknownTitle: 'Erro',
+      errorUnknownDescription:
+        'Aconteceu um erro inesperado. Tente novamente mais tarde.',
+    },
+  },
+
+  // Screens
+  register: {
+    header: 'Cadastro',
+    title: 'Boas-vindas!',
+    subtitle: 'Precisamos de algumas informações básicas para criar sua conta.',
+    typeSelect: 'Quem é você?',
+
+    toast: {
+      errorTitle: 'Falha no cadastro',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Cadastro realizado com sucesso!',
+      successDescription: 'Faça login para continuar.',
+    },
   },
 
   auth: {
-    login: 'Entrar',
+    login: 'Login',
+    slogan: 'Interpretando o mundo, aproximando pessoas',
+    signIn: 'Entrar',
     register: 'Cadastrar',
-    forgotPassword: 'Esqueceu a senha?',
+    forgotPassword: 'Esqueci a senha',
+    signUpPrefix: 'Ainda não possui conta?',
+    signUpAction: 'Criar conta',
+    sessionExpired: 'Sessão Expirada',
+    sessionExpiredMessage:
+      'Sua sessão expirou. Você será redirecionado para o login.',
+
+    toast: {
+      errorTitle: 'Falha no login',
+      errorDescription: 'Credenciais inválidas. Tente novamente.',
+    },
   },
 
   home: {
-    title: 'Início',
-  },
-
-  history: {
-    title: 'Histórico',
+    tabBar: 'Início',
+    welcome: 'Olá, {User}!',
+    nextAppointments: 'Próximos agendamentos',
   },
 
   profile: {
-    title: 'Perfil',
+    tabBar: 'Perfil',
+    editProfile: 'Editar Perfil',
+    help: 'Ajuda',
+    logout: 'Sair',
+
+    toast: {
+      errorTitle: 'Erro ao obter dados do perfil.',
+      errorDescription: 'Verifique sua conexão e tente novamente.',
+    },
   },
-};
+
+  onboarding: {
+    INTERPRETER: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de boas-vindas',
+      title: 'Mostre seu trabalho para quem precisa',
+      subtitle:
+        'No Point Tils, você cadastra suas áreas de atuação, horários disponíveis e recebe solicitações de empresas e pessoas surdas. Gerencie sua agenda e amplie seu alcance profissional.',
+      cta: 'Começar agora',
+    },
+    ENTERPRISE: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de busca de intérpretes',
+      title: 'Intérpretes certos para a sua necessidade',
+      subtitle:
+        'Pesquise e filtre intérpretes qualificados por especialidade, localização e disponibilidade, e garanta atendimento para reuniões, eventos e muito mais.',
+      cta: 'Buscar intérprete',
+    },
+    PERSON: {
+      logoAlt: 'Logotipo do Point Tils',
+      illoAlt: 'Ilustração da tela de cadastro de intérprete',
+      title: 'Conecte-se a intérpretes de forma rápida e simples',
+      subtitle:
+        'Encontre intérpretes próximos, verifique disponibilidade e agende atendimentos para situações urgentes ou momentos importantes',
+      cta: 'Encontrar intérprete agora',
+    },
+  },
+
+  toSchedule: {
+    header: 'Agendar',
+    title: 'Solicitação de agendamento',
+    subtitle:
+      'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
+
+    calendarNoAvailable: 'Nenhum horário disponível.',
+
+    toast: {
+      errorTitle: 'Erro ao criar agendamento',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Solicitação enviada!',
+      successDescription:
+        'O intérprete vai analisar sua solicitação e você receberá uma notificação assim que houver resposta.',
+    },
+  },
+
+  edit: {
+    header: 'Editar Perfil',
+    basicData: 'Dados básicos',
+    hoursDescription:
+      'Defina os horários disponíveis para atendimento em cada dia da semana.',
+
+    toast: {
+      errorTitle: 'Falha ao atualizar perfil',
+      errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
+      successTitle: 'Perfil atualizado com sucesso!',
+      successDescription: 'As alterações foram salvas.',
+    },
+  },
+
+  requests: {
+    request: 'Solicitação',
+    requests: 'Solicitações',
+    title: 'Gerencie suas solicitações',
+    subtitle:
+      'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+  },
+
+  appointments: {
+    tabBar: 'Histórico',
+    appointment: 'Agendamento',
+    active: 'Ativos',
+    completed: 'Encerrados',
+    canceled: 'Cancelados',
+  },
+
+  search: {
+    header: 'PESQUISA',
+    details: 'Dados',
+    reviews: 'Avaliações',
+    createAppointment: 'Fazer solicitação',
+    description: 'Serviços e experiência',
+    calendar: 'Calendário',
+    noSchedulesFound: 'Nenhum agendamento encontrado.',
+    selectCity: 'Selecione um estado primeiro',
+    filter: 'Filtro',
+    datesAvailable: 'Datas disponíveis',
+
+    toast: {
+      errorGetTitle: 'Erro ao obter dados.',
+      errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
+  // Enums and fixed options
+  gender: {
+    male: 'Masculino',
+    female: 'Feminino',
+    others: 'Outros',
+  },
+
+  days: {
+    monday: 'Segunda-Feira',
+    tuesday: 'Terça-Feira',
+    wednesday: 'Quarta-Feira',
+    thursday: 'Quinta-Feira',
+    friday: 'Sexta-Feira',
+    saturday: 'Sábado',
+    sunday: 'Domingo',
+  },
+
+  hours: {
+    title: 'Horários',
+    from: 'De',
+    to: 'Até',
+  },
+
+  specialties: {
+    interpreterOfLibras: 'Intérprete de Libras',
+    guideInterpreterOfLibras: 'Guia-intérprete de Libras',
+    tactileInterpreter: 'Intérprete Tátil',
+    internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
+  },
+} as const;

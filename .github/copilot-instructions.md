@@ -13,6 +13,8 @@ This project, **Point Tils**, is a mobile application built with React Native an
 - `/src/contexts`: Providers and global contexts.
 - `/src/hooks`: Custom React hooks for shared logic, including utilities for theming, color schemes and API calls.
 - `/src/types`: TypeScript type definitions.
+  - `/api`: Type definitions for API responses and requests.
+- `/src/utils`: Utility functions and helpers.
 - `app.json`: Expo configuration file.
 - `eas.json`: Configuration for Expo Application Services (EAS).
 
@@ -48,6 +50,7 @@ This project, **Point Tils**, is a mobile application built with React Native an
 - Use animations sparingly and only when they enhance the user experience.
 - Centralize colors in [constants/Colors.ts](../src/constants/Colors.ts).
 - Centralize texts/copies in [constants/Strings.ts](../src/constants/Strings.ts).
+- Centralize API routes in [constants/ApiRoutes.ts](../src/constants/ApiRoutes.ts).
 - Extend Tailwind with CSS variables in [tailwind.config.js](../tailwind.config.js).
 
 ## CI/CD
