@@ -20,6 +20,11 @@ import type { InterpreterListResponse } from '../types/api';
 import { Modality } from '../types/api/common';
 import type { AppliedFilters } from '../types/ui';
 
+interface SearchFilterBarProps {
+  onData: (data: InterpreterListResponse) => void;
+  interactive?: boolean;
+}
+
 /**
  * A search bar component with integrated filters for querying interpreters.
  * Provides a text input for free-text search and quick-access filter buttons
@@ -35,14 +40,7 @@ import type { AppliedFilters } from '../types/ui';
  *     console.log('Fetched interpreters:', data);
  *   }}
  * />
- *
  */
-
-interface SearchFilterBarProps {
-  onData: (data: InterpreterListResponse) => void;
-  interactive?: boolean;
-}
-
 export default function SearchFilterBar({
   onData,
   interactive = true,

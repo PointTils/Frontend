@@ -170,6 +170,8 @@ export const Strings = {
     subtitle:
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
 
+    calendarNoAvailable: 'Nenhum horário disponível.',
+
     toast: {
       errorTitle: 'Erro ao criar agendamento',
       errorDescription: 'Verifique os campos preenchidos. Tente novamente.',

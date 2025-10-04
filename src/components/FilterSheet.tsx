@@ -43,6 +43,27 @@ interface FilterSheetProps {
   initialFocus?: 'date' | 'modality';
 }
 
+/**
+ * A modal component that provides advanced filtering options for searching interpreters.
+ *
+ * @param onApply - Callback function called with applied filters
+ * @param onClose - Callback function to close the modal
+ * @param filter - Initial filter values to populate the form
+ * @param initialFocus - Optional parameter to set initial focus on 'date' or 'modality' section
+ *
+ * @returns A modal component for advanced filtering options
+ *
+ * @example
+ * const [filters, setFilters] = useState<AppliedFilters>({});
+ * const [isFilterSheetVisible, setFilterSheetVisible] = useState(false);
+ *
+ * <FilterSheet
+ *  onApply={(appliedFilters) => setFilters(appliedFilters)}
+ *  onClose={() => setFilterSheetVisible(false)}
+ *  filter={filters}
+ *  initialFocus={isFilterSheetVisible ? 'date' : undefined}
+ * />
+ */
 export default function FilterSheet({
   onApply,
   onClose,

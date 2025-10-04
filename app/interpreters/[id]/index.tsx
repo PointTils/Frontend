@@ -53,14 +53,14 @@ export default function InterpreterDetails() {
   const then = new Date(now);
   then.setDate(now.getDate() + 30);
 
-  // Request do intérprete
+  // Interpreter request
   const {
     data: data,
     loading: loadingInterpreter,
     error: errorInterpreter,
   } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
 
-  // Request dos schedules
+  // Schedule request
   const {
     data: schedules,
     loading: loadingSchedule,

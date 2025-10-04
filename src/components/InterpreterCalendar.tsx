@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 
 import { Colors } from '../constants/Colors';
 import type { Schedule } from '../types/api/schedule';
+import { Strings } from '../constants/Strings';
 
 type TimeSelection = { date: string; time: string } | null;
 
@@ -14,12 +15,13 @@ type InterpreterCalendarProps = {
 };
 
 /**
- * Componente utilizado para mostrar os horários disponíveis da agenda de um intérprete
+ * Component to display a calendar with available time slots for interpreters.
  *
- * @param schedules Array de schedules contendo horários disponíveis
- * @param selectedTime Horário selecionado
- * @param onTimeSelect Função utilizada para informar o componente pai o horário selecionado
- * @returns um calendário com a agenda de disponibilidade renderizada
+ * @param schedules Array of schedules containing available time slots
+ * @param selectedTime Selected time slot
+ * @param onTimeSelect Function to inform the parent component of the selected time slot
+ *
+ * @returns A calendar with the availability schedule rendered
  */
 export default function InterpreterCalendar({
   schedules,
@@ -28,7 +30,7 @@ export default function InterpreterCalendar({
 }: InterpreterCalendarProps) {
   const [startIndex, setStartIndex] = useState(0);
 
-  // Limpa a seleção de horário sempre que o usuário navega para uma nova página de dias.
+  // Reset selected time if schedules or startIndex change
   useEffect(() => {
     onTimeSelect(null);
   }, [startIndex, onTimeSelect]);
@@ -65,7 +67,8 @@ export default function InterpreterCalendar({
     [days, startIndex],
   );
 
-  // Cria um array de exibição que SEMPRE tem 3 posições para um layout estável.
+  // Creates an array of exactly 3 elements, filling with null if there are less than 3 days available
+  // This ensures the calendar always has 3 columns
   const displayDays = useMemo(() => {
     const daysToDisplay: ((typeof days)[0] | null)[] = Array(3).fill(null);
     currentDays.forEach((day, index) => {
@@ -79,7 +82,7 @@ export default function InterpreterCalendar({
     [currentDays],
   );
 
-  // Funções para troca de página no calendário
+  // Handlers for navigation buttons
   const handlePrev = useCallback(
     () => setStartIndex((prev) => Math.max(prev - 3, 0)),
     [],
@@ -96,7 +99,7 @@ export default function InterpreterCalendar({
     return (
       <View className="h-24 justify-center items-center">
         <Text className="text-gray-400 text-base">
-          Nenhum horário disponível.
+          {Strings.toSchedule.calendarNoAvailable}
         </Text>
       </View>
     );
@@ -118,7 +121,7 @@ export default function InterpreterCalendar({
 
       <View className="flex-1">
         <View className="flex-row justify-around mt-4">
-          {/* Mapeamento das 3 colunas do calendário */}
+          {/* Map the 3 columns of the calendar */}
           {displayDays.map((day, index) =>
             day ? (
               <View key={day.date} className="items-center flex-1 px-1">
@@ -148,7 +151,7 @@ export default function InterpreterCalendar({
             <View key={time} className="flex-row justify-around items-center">
               {displayDays.map((day, index) => {
                 if (!day) {
-                  // Célula vazia
+                  // Empty cell
                   return (
                     <View key={`slot-empty-${index}`} className="flex-1" />
                   );
@@ -169,11 +172,11 @@ export default function InterpreterCalendar({
                         : 'bg-primary-blue-light/30'
                     }`}
                     onPress={() => {
-                      // Seleção de horário
+                      // Time selection logic
                       if (isSelected) {
-                        onTimeSelect(null); // Desmarca se clicar no mesmo
+                        onTimeSelect(null); // Deselect if clicking the same time
                       } else {
-                        onTimeSelect({ date: day.date, time }); // Marca um novo
+                        onTimeSelect({ date: day.date, time }); // Select a new time
                       }
                     }}
                   >

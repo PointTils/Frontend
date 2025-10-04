@@ -9,12 +9,13 @@ interface StarRatingProps {
   color?: string;
 }
 /**
- * Componente de renderização de rating com estrelas
+ * Component to display a star rating system.
  *
- * @param rating Valor numérico referente à nota do intérprete
- * @param size Tamanho da estrela, não obrigatório.
- * @param color Cor das estrelas, não obrigatório.
- * @returns
+ * @param rating value between 0 and 5.
+ * @param size size of the stars, default is 24.
+ * @param color color of the stars, optional.
+ *
+ * @returns A React component that visually represents the rating with stars.
  */
 export function StarRating({ rating, size = 24, color }: StarRatingProps) {
   const colors = useColors();
