@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, TextInput } from 'react-native';
 import { Paperclip, Upload, X } from 'lucide-react-native';
-import { pickFile } from '../utils/helpers';
-import { useColors } from '../hooks/useColors';
+import React, { useState } from 'react';
+import { View, Text, Pressable, TextInput } from 'react-native';
+
 import { Strings } from '../constants/Strings';
+import { useColors } from '../hooks/useColors';
+import { pickFile } from '../utils/helpers';
 
 /**
  * A file upload component that allows selecting one or multiple files
