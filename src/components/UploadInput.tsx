@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, TextInput } from 'react-native';
 import { Paperclip, Upload, X } from 'lucide-react-native';
 import { pickFile } from '../utils/helpers';
@@ -6,22 +6,23 @@ import { useColors } from '../hooks/useColors';
 
 type FileUploadBoxProps = {
   multiple?: boolean;
+  onChange: (files: string[]) => void;
 };
 
 export default function FileUploadBox({
   multiple = false,
+  onChange,
 }: FileUploadBoxProps) {
   const [files, setFiles] = useState<any[]>([]);
   const colors = useColors();
+
   const handlePickFile = async () => {
     try {
       const result = await pickFile();
       if (result) {
-        if (multiple) {
-          setFiles((prev) => [...prev, result]);
-        } else {
-          setFiles([result]);
-        }
+        const newFiles = multiple ? [...files, result] : [result];
+        setFiles(newFiles);
+        onChange(newFiles);
       }
     } catch (error) {
       console.error('Erro ao selecionar arquivo', error);
@@ -29,7 +30,9 @@ export default function FileUploadBox({
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+    onChange(newFiles);
   };
 
   return (
@@ -41,7 +44,6 @@ export default function FileUploadBox({
         </Text>
       </Pressable>
 
-      {/* Lista de arquivos */}
       {files.map((file, index) => (
         <View
           key={index}
