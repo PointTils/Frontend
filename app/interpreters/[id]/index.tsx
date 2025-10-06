@@ -1,5 +1,6 @@
 import Header from '@/src/components/Header';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
+import InterpreterReviewCard from '@/src/components/InterpreterReviewCard';
 import { StarRating } from '@/src/components/Rating';
 import { Avatar } from '@/src/components/ui/avatar';
 import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
@@ -38,6 +39,21 @@ import {
 } from 'react-native';
 
 type TimeSelection = { date: string; time: string } | null;
+
+type Review = {
+  id: number;
+  stars: number;
+  description: string;
+  date: string;
+}
+
+type ReviewResponse = {
+  status: boolean;
+  message: string;
+  data: Review[]
+}
+
+
 
 export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -93,6 +109,74 @@ export default function InterpreterDetails() {
   }
 
   const interpreter = data.data as InterpreterResponseData;
+
+  const mockReviewResponse: ReviewResponse = {
+    status: true,
+    message: "Avaliações carregadas com sucesso.",
+    data: [
+      {
+        id: 1,
+        stars: 5,
+        description: "Excelente produto! Superou todas as minhas expectativas. A qualidade do material é incrível.",
+        date: "2025-10-04",
+      },
+      {
+        id: 2,
+        stars: 4,
+        description: "Muito bom, cumpre o que promete. A entrega demorou um pouco mais que o esperado, mas o produto vale a pena.",
+        date: "2025-10-02",
+      },
+      {
+        id: 3,
+        stars: 3,
+        description: "É um produto razoável. Pelo preço, eu esperava um pouco mais de qualidade nos acabamentos.",
+        date: "2025-09-30",
+      },
+      {
+        id: 4,
+        stars: 5,
+        description: "Atendimento impecável e o produto chegou antes do prazo. Recomendo fortemente a loja!",
+        date: "2025-09-28",
+      },
+      {
+        id: 5,
+        stars: 1,
+        description: "Péssima experiência. O produto veio com defeito e o processo de devolução foi muito complicado.",
+        date: "2025-09-25",
+      },
+      {
+        id: 6,
+        stars: 4,
+        description: "Gostei bastante, ótima relação custo-benefício. Ideal para o uso diário.",
+        date: "2025-09-22",
+      },
+      {
+        id: 7,
+        stars: 2,
+        description: "A descrição não condiz com a realidade. O produto é muito menor do que parece nas fotos.",
+        date: "2025-09-20",
+      },
+      {
+        id: 8,
+        stars: 5,
+        description: "Simplesmente perfeito! Já é a minha segunda compra e a qualidade continua excelente. Virou minha marca favorita.",
+        date: "2025-09-18",
+      },
+      {
+        id: 9,
+        stars: 4,
+        description: "Ótimo, só achei a embalagem um pouco frágil para um produto tão delicado. Felizmente, não houve danos.",
+        date: "2025-09-15",
+      },
+      {
+        id: 10,
+        stars: 3,
+        description: "Funciona, mas o manual de instruções é muito confuso. Levei um tempo para conseguir montar.",
+        date: "2025-09-11",
+      },
+    ],
+  };
+
 
   return (
     <>
@@ -262,6 +346,7 @@ export default function InterpreterDetails() {
                     />
                   </View>
                 ) : (
+
                   <InterpreterCalendar
                     schedules={schedules?.data ?? []}
                     selectedTime={selectTime}
@@ -272,6 +357,23 @@ export default function InterpreterDetails() {
             )}
           </>
         )}
+
+        {
+  section === Strings.search.reviews && (
+    <>
+      {mockReviewResponse.data.map((review) => (
+        <InterpreterReviewCard
+          key={review.id} 
+          rating={review.stars}
+          reviewDate={review.date}
+          userName="Nome Sobrenome" 
+          reviewText={review.description}
+          userPhoto={null} 
+        />
+      ))}
+    </>
+  )
+}
       </ScrollView>
 
       <View className="w-full mb-8 pt-6 px-8 border-t border-typography-200 dark:border-typography-700">
