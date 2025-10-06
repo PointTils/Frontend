@@ -3,16 +3,34 @@ import { View, Text, Pressable, TextInput } from 'react-native';
 import { Paperclip, Upload, X } from 'lucide-react-native';
 import { pickFile } from '../utils/helpers';
 import { useColors } from '../hooks/useColors';
+import { Strings } from '../constants/Strings';
 
-type FileUploadBoxProps = {
+/**
+ * A file upload component that allows selecting one or multiple files
+ * from the device. Displays a list of selected files with name and
+ * removal option.
+ *
+ * @param multiple - Enables selection of multiple files (default: false)
+ * @param onChange - Callback function called with the current list of selected files
+ *
+ * @returns A file upload inpute with add and remove file controls.
+ *
+ * @example
+ * <UploadInput
+ *   multiple={true}
+ *   onChange={(files) => console.log('Selected files:', files)}
+ * />
+ */
+
+type UploadInputProps = {
   multiple?: boolean;
   onChange: (files: string[]) => void;
 };
 
-export default function FileUploadBox({
+export default function UploadInput({
   multiple = false,
   onChange,
-}: FileUploadBoxProps) {
+}: UploadInputProps) {
   const [files, setFiles] = useState<any[]>([]);
   const colors = useColors();
 
@@ -40,7 +58,7 @@ export default function FileUploadBox({
       <Pressable onPress={handlePickFile} className="items-center mt-2 mb-2">
         <Upload size={20} color={colors.primaryBlue} />
         <Text className="font-ifood-medium text-primary-blue-light">
-          Adicionar arquivo
+          {Strings.common.fields.uploadFile}
         </Text>
       </Pressable>
 

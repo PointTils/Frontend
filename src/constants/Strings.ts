@@ -66,6 +66,7 @@ export const Strings = {
       professionalArea: 'Área profissional',
       date: 'Data',
       time: 'Hora',
+      uploadFile: 'Adicionar arquivo',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
