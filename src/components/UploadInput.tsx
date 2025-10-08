@@ -5,6 +5,7 @@ import { View, Text, Pressable, TextInput } from 'react-native';
 import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
 import { pickFile } from '../utils/helpers';
+import { Toast } from 'toastify-react-native';
 
 /**
  * A file upload component that allows selecting one or multiple files
@@ -39,11 +40,38 @@ export default function UploadInput({
     try {
       const result = await pickFile();
       if (result) {
+        const exists = files.some((file) => file.name === result.name);
+
+        if (exists) {
+          const updatedFiles = files.filter(
+            (file) => file.name !== result.name,
+          );
+
+          Toast.show({
+            type: 'info',
+            text1: Strings.upload.toast.duplicatedTitle,
+            text2: Strings.upload.toast.duplicatedDescription,
+            position: 'top',
+            visibilityTime: 2000,
+            autoHide: true,
+          });
+          return;
+        }
+
         const newFiles = multiple ? [...files, result] : [result];
         setFiles(newFiles);
         onChange(newFiles);
       }
     } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: Strings.upload.toast.errorTitle,
+        text2: Strings.upload.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
       console.error('Erro ao selecionar arquivo', error);
     }
   };
@@ -55,7 +83,7 @@ export default function UploadInput({
   };
 
   return (
-    <View className="border-2 border-dashed border-primary-orange-press-light rounded-lg p-3">
+    <View className="p-3">
       <Pressable onPress={handlePickFile} className="items-center mt-2 mb-2">
         <Upload size={20} color={colors.primaryBlue} />
         <Text className="font-ifood-medium text-primary-blue-light">

@@ -229,7 +229,14 @@ export const Strings = {
       errorGetText: 'Verifique sua conexão e tente novamente.',
     },
   },
-
+  upload: {
+    toast: {
+      errorTitle: 'Falha no upload',
+      errorDescription: 'Erro ao adicionar arquivo. Tente novamente',
+      duplicatedTitle: 'Arquivo duplicado',
+      duplicatedDescription: 'Este arquivo já foi adicionado.',
+    },
+  },
   // Enums and fixed options
   gender: {
     male: 'Masculino',
