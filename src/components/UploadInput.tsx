@@ -13,6 +13,7 @@ import { pickFile } from '../utils/helpers';
  * removal option.
  *
  * @param multiple - Enables selection of multiple files (default: false)
+ * @param maxFiles - Maximum number of files allowed when multiple is true (default: 3)
  * @param onChange - Callback function called with the current list of selected files
  *
  * @returns A file upload inpute with add and remove file controls.
