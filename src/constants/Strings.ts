@@ -229,7 +229,7 @@ export const Strings = {
       errorGetText: 'Verifique sua conexão e tente novamente.',
     },
   },
-  
+
   upload: {
     toast: {
       errorTitle: 'Falha no upload',
