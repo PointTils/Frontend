@@ -50,7 +50,7 @@ function NavigationController({ children }: { children: React.ReactNode }) {
       router.replace('/(tabs)');
     } else if (
       !isAuthenticated &&
-      (inTabsGroup || inOnboarding || inInterpreters || inRequests)
+      (inTabsGroup || inOnboarding || inInterpreters)
     ) {
       // Not authenticated, redirect to auth
       router.replace('/(auth)');

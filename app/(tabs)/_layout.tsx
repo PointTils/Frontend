@@ -4,7 +4,7 @@ import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { router, Tabs, useSegments } from 'expo-router';
-import { FileClock, House, User } from 'lucide-react-native';
+import { FileClock, House, User, MessageSquare } from 'lucide-react-native';
 import React from 'react';
 
 export default function TabLayout() {
@@ -53,6 +53,25 @@ export default function TabLayout() {
           ),
           tabBarIcon: ({ color }) => (
             <FileClock width={24} height={24} stroke={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="requests"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.navigate('/requests/1');
+          },
+        }}
+        options={{
+          tabBarLabel: ({ color }) => (
+            <Text className="font-ifood-regular text-xs" style={{ color }}>
+              Solicitações
+            </Text>
+          ),
+          tabBarIcon: ({ color }) => (
+            <MessageSquare width={24} height={24} stroke={color} />
           ),
         }}
       />
