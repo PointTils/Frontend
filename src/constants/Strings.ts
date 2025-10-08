@@ -230,14 +230,18 @@ export const Strings = {
     },
   },
 
+  // Components
   upload: {
     toast: {
       errorTitle: 'Falha no upload',
       errorDescription: 'Erro ao adicionar arquivo. Tente novamente',
       duplicatedTitle: 'Arquivo duplicado',
       duplicatedDescription: 'Este arquivo já foi adicionado.',
+      limitTitle: 'Limite de arquivos atingido',
+      limitDescription: 'Você pode adicionar até {max} arquivos.',
     },
   },
+
   // Enums and fixed options
   gender: {
     male: 'Masculino',

@@ -26,11 +26,13 @@ import { pickFile } from '../utils/helpers';
 
 type UploadInputProps = {
   multiple?: boolean;
+  maxFiles?: number;
   onChange: (files: string[]) => void;
 };
 
 export default function UploadInput({
   multiple = false,
+  maxFiles = 3,
   onChange,
 }: UploadInputProps) {
   const [files, setFiles] = useState<any[]>([]);
@@ -38,6 +40,27 @@ export default function UploadInput({
 
   const handlePickFile = async () => {
     try {
+      // Block when max reached (only relevant for multiple)
+      if (
+        multiple &&
+        typeof maxFiles === 'number' &&
+        files.length >= maxFiles
+      ) {
+        Toast.show({
+          type: 'info',
+          text1: Strings.upload.toast.limitTitle,
+          text2: Strings.upload.toast.limitDescription.replace(
+            '{max}',
+            String(maxFiles),
+          ),
+          position: 'top',
+          visibilityTime: 2500,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+
       const result = await pickFile();
       if (result) {
         const exists = files.some((file) => file.name === result.name);
@@ -50,6 +73,7 @@ export default function UploadInput({
             position: 'top',
             visibilityTime: 2000,
             autoHide: true,
+            closeIconSize: 1,
           });
           return;
         }
@@ -80,7 +104,7 @@ export default function UploadInput({
 
   return (
     <View className="p-3">
-      <Pressable onPress={handlePickFile} className="items-center mt-2 mb-2">
+      <Pressable onPress={handlePickFile} className="items-center mt-2 mb-8">
         <Upload size={20} color={colors.primaryBlue} />
         <Text className="font-ifood-medium text-primary-blue-light">
           {Strings.common.fields.uploadFile}
@@ -90,15 +114,17 @@ export default function UploadInput({
       {files.map((file, index) => (
         <View
           key={index}
-          className="flex-row items-center border border-gray-300 bg-white rounded px-2 py-1 mt-6"
+          className="flex-row items-center border border-gray-300 bg-white rounded px-2 py-4 mb-4"
         >
           <Paperclip size={16} color={colors.detailsGray} />
-          <TextInput
-            value={file.name}
-            editable={false}
+          <Text
             className="flex-1 ml-2 font-ifood-regular text-text-light dark:text-text-dark"
-          />
-          <Pressable onPress={() => removeFile(index)}>
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {file.name}
+          </Text>
+          <Pressable onPress={() => removeFile(index)} className="pl-2">
             <X size={18} color={colors.text} />
           </Pressable>
         </View>
