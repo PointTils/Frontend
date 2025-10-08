@@ -1,11 +1,11 @@
 import { Paperclip, Upload, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
 import { pickFile } from '../utils/helpers';
-import { Toast } from 'toastify-react-native';
 
 /**
  * A file upload component that allows selecting one or multiple files
@@ -43,10 +43,6 @@ export default function UploadInput({
         const exists = files.some((file) => file.name === result.name);
 
         if (exists) {
-          const updatedFiles = files.filter(
-            (file) => file.name !== result.name,
-          );
-
           Toast.show({
             type: 'info',
             text1: Strings.upload.toast.duplicatedTitle,
