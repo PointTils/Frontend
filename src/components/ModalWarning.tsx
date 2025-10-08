@@ -1,7 +1,9 @@
 import React from 'react';
-import { Modal, View, Text } from 'react-native';
+import { Modal } from 'react-native';
 
 import { Button } from './ui/button';
+import { Text } from './ui/text';
+import { View } from './ui/view';
 
 /**
  * A confirmation modal displayed after interpreter registration.
