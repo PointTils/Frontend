@@ -66,6 +66,7 @@ export const Strings = {
       professionalArea: 'Área profissional',
       date: 'Data',
       time: 'Hora',
+      uploadFile: 'Adicionar arquivo',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
@@ -226,6 +227,18 @@ export const Strings = {
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
+  // Components
+  upload: {
+    toast: {
+      errorTitle: 'Falha no upload',
+      errorDescription: 'Erro ao adicionar arquivo. Tente novamente',
+      duplicatedTitle: 'Arquivo duplicado',
+      duplicatedDescription: 'Este arquivo já foi adicionado.',
+      limitTitle: 'Limite de arquivos atingido',
+      limitDescription: 'Você pode adicionar até {max} arquivos.',
     },
   },
 
