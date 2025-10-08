@@ -1,8 +1,10 @@
 import { Paperclip, Upload, X } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { View, Text, Pressable, TextInput } from 'react-native';
+import { Pressable } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
+import { Text } from '../components/ui/text';
+import { View } from '../components/ui/view';
 import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
 import { pickFile } from '../utils/helpers';
