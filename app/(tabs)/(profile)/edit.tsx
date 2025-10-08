@@ -273,7 +273,7 @@ export default function EditProfileScreen() {
         ctx?: EditProfileValidationContext,
       ): string | null => {
         if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('description');
+          return buildRequiredFieldError('more');
         return null;
       },
     },
@@ -895,7 +895,7 @@ export default function EditProfileScreen() {
                   >
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.description}
+                        {Strings.common.fields.more}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <TextInput

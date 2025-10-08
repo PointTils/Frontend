@@ -150,7 +150,7 @@ export default function ProfileScreen() {
         {/* Divider */}
         <View className="w-full h-px bg-gray-200 mb-4" />
 
-        <View className="w-full mb-8">
+        <View className="w-full pl-2 mb-8">
           {profile.type === UserType.ENTERPRISE ? (
             <InfoRow
               label={Strings.common.fields.cnpj}
@@ -186,7 +186,7 @@ export default function ProfileScreen() {
           {/* Chips section */}
           {profile.type !== UserType.INTERPRETER && chipsItems.length > 0 && (
             <>
-              <Text className="w-full pl-2 text-lg font-ifood-medium text-left mb-1 text-primary-800">
+              <Text className="w-full text-lg font-ifood-medium text-left mb-1 text-primary-800">
                 {Strings.common.fields.preferences}
               </Text>
               <ChipsSection items={chipsItems} />
@@ -223,7 +223,7 @@ export default function ProfileScreen() {
               )}
 
               <InfoRow
-                label={Strings.common.fields.description}
+                label={Strings.common.fields.more}
                 value={
                   profile.professional_data?.description
                     ? profile.professional_data.description

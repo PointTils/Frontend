@@ -14,19 +14,25 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api/user';
-import { mapImageRights, mapModality } from '@/src/utils/masks';
+import { InfoRow } from '@/src/components/ui/infoRow';
+import {
+  mapImageRights,
+  mapModality,
+  formatValueRange,
+} from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import {
   BriefcaseBusinessIcon,
-  SquarePenIcon,
   StarIcon,
-  InfoIcon,
-  CameraIcon,
-  MapPinIcon,
-  BanknoteIcon,
   PlusIcon,
   Clock,
+  FileTextIcon,
+  PencilIcon,
+  PenSquareIcon,
+  InfoIcon,
+  MapPinIcon,
+  DollarSign,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -123,11 +129,15 @@ export default function InterpreterDetails() {
           </Avatar>
 
           <View className="flex-col gap-1">
-            <Text className="font-ifood-bold text-lg text-text-light dark:text-text-dark">
+            <Text
+              className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
               {interpreter.name}
             </Text>
             <Text
-              className="font-ifood-normal text-lg text-text-light dark:text-text-dark max-w-[180px]"
+              className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
               ellipsizeMode="tail"
               numberOfLines={1}
             >
@@ -137,13 +147,13 @@ export default function InterpreterDetails() {
             </Text>
             <StarRating
               rating={interpreter.professional_data.rating}
-              size={20}
+              size={18}
             />
           </View>
         </View>
 
         {/* Section selector */}
-        <View className="flex-row w-full mt-6">
+        <View className="flex-row w-full mt-8 mb-4">
           <TouchableOpacity
             activeOpacity={1}
             className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
@@ -158,7 +168,7 @@ export default function InterpreterDetails() {
                 }
               />
               <Text
-                className={`font-ifood-medium text-lg ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+                className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
               >
                 {Strings.search.details}
               </Text>
@@ -178,7 +188,7 @@ export default function InterpreterDetails() {
                 }
               />
               <Text
-                className={`font-ifood-medium text-lg ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+                className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
               >
                 {Strings.search.reviews}
               </Text>
@@ -189,70 +199,50 @@ export default function InterpreterDetails() {
         {/* Information section */}
         {section === Strings.search.details && (
           <>
-            <View className="flex-row items-center gap-2 mt-6">
-              <SquarePenIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.search.description}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {interpreter.professional_data.description}
-            </Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <InfoIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.modality}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {mapModality(interpreter.professional_data.modality)}
-            </Text>
+            <InfoRow
+              icon={PenSquareIcon}
+              label={Strings.search.description}
+              value={interpreter.professional_data.description || undefined}
+            />
+
+            <InfoRow
+              icon={InfoIcon}
+              label={Strings.common.fields.modality}
+              value={mapModality(interpreter.professional_data.modality)}
+            />
+
             {interpreter.professional_data.modality !== Modality.ONLINE && (
-              <>
-                <View className="flex-row items-center gap-2 mt-6">
-                  <MapPinIcon width={16} height={16} />
-                  <Text className="font-ifood-medium text-lg">
-                    {Strings.common.fields.location}
-                  </Text>
-                </View>
-                <Text className="px-7">
-                  {interpreter.locations
-                    .map((loc) => loc.neighborhood)
-                    .join(', ')}
-                </Text>
-              </>
+              <InfoRow
+                icon={MapPinIcon}
+                label={Strings.common.fields.location}
+                value={interpreter.locations
+                  .map((loc) => loc.neighborhood)
+                  .join(', ')}
+              />
             )}
 
-            <View className="flex-row items-center gap-2 mt-6">
-              <CameraIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.imageRights}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {mapImageRights(interpreter.professional_data.image_rights)}
-            </Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <BanknoteIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.valueRange}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {'R$' +
-                interpreter.professional_data.min_value +
-                '-' +
-                interpreter.professional_data.max_value}
-            </Text>
+            <InfoRow
+              icon={FileTextIcon}
+              label={Strings.common.fields.imageRights}
+              value={mapImageRights(interpreter.professional_data.image_rights)}
+            />
+
+            <InfoRow
+              icon={DollarSign}
+              label={Strings.common.fields.valueRange}
+              value={formatValueRange(
+                interpreter.professional_data.min_value,
+                interpreter.professional_data.max_value,
+              )}
+            />
 
             {SCHEDULE_ENABLED && (
-              <>
-                <View className="flex-row items-center gap-2 mt-6">
-                  <Clock width={16} height={16} />
-                  <Text className="font-ifood-medium text-lg">
-                    {Strings.hours.title}
-                  </Text>
-                </View>
+              <View className="mt-6">
+                <InfoRow
+                  icon={Clock}
+                  label={Strings.hours.title}
+                  value={undefined}
+                />
 
                 {loadingSchedule ? (
                   <View className="h-12 items-center justify-center">
@@ -268,7 +258,7 @@ export default function InterpreterDetails() {
                     onTimeSelect={setSelectedTime}
                   />
                 )}
-              </>
+              </View>
             )}
           </>
         )}

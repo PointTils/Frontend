@@ -1,10 +1,11 @@
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react-native';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { Text } from '../components/ui/text';
 
-import { Colors } from '../constants/Colors';
 import { Strings } from '../constants/Strings';
 import type { Schedule } from '../types/api/schedule';
+import { useColors } from '../hooks/useColors';
 
 type TimeSelection = { date: string; time: string } | null;
 
@@ -28,6 +29,7 @@ export default function InterpreterCalendar({
   selectedTime,
   onTimeSelect,
 }: InterpreterCalendarProps) {
+  const colors = useColors();
   const [startIndex, setStartIndex] = useState(0);
 
   // Reset selected time if schedules or startIndex change
@@ -110,17 +112,15 @@ export default function InterpreterCalendar({
       <TouchableOpacity
         disabled={isPrevDisabled}
         onPress={handlePrev}
-        className="p-2 mt-12"
+        className="p-2 mt-8"
       >
         <ChevronLeftIcon
-          color={
-            isPrevDisabled ? Colors.light.disabled : Colors.light.primaryBlue
-          }
+          color={isPrevDisabled ? colors.disabled : colors.text}
         />
       </TouchableOpacity>
 
       <View className="flex-1">
-        <View className="flex-row justify-around mt-4">
+        <View className="flex-row justify-around">
           {/* Map the 3 columns of the calendar */}
           {displayDays.map((day, index) =>
             day ? (
@@ -168,8 +168,8 @@ export default function InterpreterCalendar({
                     key={`${day.date}-${time}`}
                     className={`flex-1 items-center p-3 mb-2 mx-1 rounded-md ${
                       isSelected
-                        ? 'bg-primary-blue-light'
-                        : 'bg-primary-blue-light/30'
+                        ? 'bg-primary-success-light'
+                        : 'bg-primary-success-light/20'
                     }`}
                     onPress={() => {
                       // Time selection logic
@@ -181,7 +181,7 @@ export default function InterpreterCalendar({
                     }}
                   >
                     <Text
-                      className={`font-ifood-medium ${isSelected ? 'text-white' : 'text-primary-blue-light'}`}
+                      className={`font-ifood-medium ${isSelected ? 'text-white' : 'text-primary-success-light'}`}
                     >
                       {time}
                     </Text>
@@ -189,9 +189,9 @@ export default function InterpreterCalendar({
                 ) : (
                   <View
                     key={`${day.date}-${time}`}
-                    className="flex-1 items-center p-3 mb-2 mx-1 rounded-md bg-gray-100"
+                    className="flex-1 items-center p-3 mb-2 mx-1 rounded-md bg-primary-error-light/20"
                   >
-                    <Text className="text-gray-400">-</Text>
+                    <Text className="text-primary-error-light">-</Text>
                   </View>
                 );
               })}
@@ -203,12 +203,10 @@ export default function InterpreterCalendar({
       <TouchableOpacity
         disabled={isNextDisabled}
         onPress={handleNext}
-        className="p-2 mt-12"
+        className="p-2 mt-8"
       >
         <ChevronRightIcon
-          color={
-            isNextDisabled ? Colors.light.disabled : Colors.light.primaryBlue
-          }
+          color={isNextDisabled ? colors.disabled : colors.text}
         />
       </TouchableOpacity>
     </View>

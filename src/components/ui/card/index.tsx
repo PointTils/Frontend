@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Image, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Text } from '@/src/components/ui/text';
 import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
 import { useColors } from '@/src/hooks/useColors';
 import { Strings } from '@/src/constants/Strings';
 import { Avatar, AvatarImage } from '../avatar';
+import { StarRating } from '@/src/components/Rating';
 
 /**
  * A reusable card used across two variants:
@@ -131,44 +132,6 @@ export function Card({
   onPress,
 }: CardProps) {
   const colors = useColors();
-
-  const renderStars = (value: number) => {
-    const stars = [];
-    const full = Math.floor(value);
-    const hasHalf = value % 1 !== 0;
-
-    for (let i = 0; i < full; i++) {
-      stars.push(
-        <Text
-          key={`full-${i}`}
-          className="text-lg leading-none"
-          style={{ color: colors.primaryBlue }}
-        >
-          ★
-        </Text>,
-      );
-    }
-    if (hasHalf) {
-      stars.push(
-        <Text
-          key="half"
-          className="text-lg leading-none"
-          style={{ color: colors.primaryBlue }}
-        >
-          ☆
-        </Text>,
-      );
-    }
-    const empty = 5 - Math.ceil(value);
-    for (let i = 0; i < empty; i++) {
-      stars.push(
-        <Text key={`empty-${i}`} className="text-gray-300 text-lg leading-none">
-          ☆
-        </Text>,
-      );
-    }
-    return stars;
-  };
 
   /** --- Bottom section renderers --- */
   const renderAppointmentBottom = () => (
@@ -302,11 +265,8 @@ export function Card({
           )}
 
           {showRating && typeof rating === 'number' && (
-            <View className="flex-row items-end mt-1">
-              <View className="flex-row mr-2">{renderStars(rating)}</View>
-              <Text className="text-typography-600 text-xs leading-none">
-                {rating.toFixed(1)}
-              </Text>
+            <View className="mt-1">
+              <StarRating rating={rating} size={14} />
             </View>
           )}
         </View>

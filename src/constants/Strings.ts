@@ -46,7 +46,7 @@ export const Strings = {
       phone: 'Telefone',
       email: 'Email',
       password: 'Senha',
-      description: 'Descrição',
+      more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
       valueRange: 'Faixa de valores',
       min: 'Mínimo',
