@@ -2,13 +2,11 @@ import Header from '@/src/components/Header';
 import { Card } from '@/src/components/ui/card';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
-import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { Appointment, AppointmentsResponse } from '@/src/types/api';
-import { AppointmentStatus, UserType } from '@/src/types/api';
+import type { Appointment } from '@/src/types/api';
+import { UserType, AppointmentStatus, Modality } from '@/src/types/api';
 import {
   formatAppointmentLocation,
   formatCpfOrCnpj,
@@ -18,53 +16,70 @@ import {
 import { router } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
 import React, { Fragment } from 'react';
-import { ActivityIndicator, ScrollView } from 'react-native';
-import { Toast } from 'toastify-react-native';
+import { ScrollView } from 'react-native';
 
 export default function PendingRequestsScreen() {
   const colors = useColors();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
-  const { data, loading, error } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
-      user?.id || '',
-      user?.type || UserType.INTERPRETER,
-      AppointmentStatus.PENDING,
-    ),
-  );
+  // Dados mockados para demonstração
+  const mockRequests: Appointment[] = [
+    {
+      id: '1',
+      date: '2024-01-15',
+      start_time: '14:00',
+      end_time: '15:00',
+      status: AppointmentStatus.PENDING,
+      modality: Modality.PERSONALLY,
+      description: 'Consulta médica com necessidade de intérprete de Libras',
+      interpreter_id: 'interpreter-1',
+      user_id: 'user-1',
+      uf: 'RS',
+      city: 'Porto Alegre',
+      neighborhood: 'Partenon',
+      street: 'Av. Ipiranga',
+      street_number: 6681,
+      address_details: 'Prédio A, Sala 101',
+      contact_data: {
+        id: '1',
+        name: 'Maria Silva Santos',
+        document: '123.456.789-00',
+        picture: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
+        specialties: [
+          { id: '1', name: 'Libras' },
+          { id: '2', name: 'Audiodescrição' }
+        ]
+      }
+    },
+    {
+      id: '2',
+      date: '2024-01-16',
+      start_time: '10:30',
+      end_time: '11:30',
+      status: AppointmentStatus.PENDING,
+      modality: Modality.PERSONALLY,
+      description: 'Reunião de trabalho com participante surdo',
+      interpreter_id: 'interpreter-2',
+      user_id: 'user-2',
+      uf: 'RS',
+      city: 'Porto Alegre',
+      neighborhood: 'Centro',
+      street: 'Rua da República',
+      street_number: 123,
+      address_details: 'Sala de reuniões',
+      contact_data: {
+        id: '2',
+        name: 'João Pedro Oliveira',
+        document: '987.654.321-00',
+        picture: 'https://img.freepik.com/fotos-premium/homem-jovem-sorrindo-retrato-natural_360074-56805.jpg',
+        specialties: [
+          { id: '3', name: 'Libras' }
+        ]
+      }
+    }
+  ];
 
-  // Early return if not authenticated
-  if (!isAuthenticated || !user) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
-
-  // Redirect to home if no appointments data or error occurs
-  if (error || !data?.success || !data.data) {
-    router.replace('/');
-    Toast.show({
-      type: 'error',
-      text1: Strings.profile.toast.errorTitle,
-      text2: Strings.profile.toast.errorDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
-    return null;
-  }
-
-  const requests = (Array.isArray(data.data) ? data.data : []) as Appointment[];
+  const requests = mockRequests;
 
   return (
     <View className="flex-1 justify-center">
@@ -77,51 +92,41 @@ export default function PendingRequestsScreen() {
       </View>
 
       <View className="flex-1">
-        {/* No data state */}
-        {requests.length === 0 ? (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="text-typography-600 text-md">
-              {Strings.common.noResults}
-            </Text>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="flex-1 mt-2"
+        >
+          <View className="pb-4">
+            {requests.map((req) => (
+              <Fragment key={req.id}>
+                <View className="w-full h-px bg-gray-200" />
+                <Card
+                  photoUrl={req.contact_data?.picture || ''}
+                  fullName={req.contact_data?.name || ''}
+                  subtitle={
+                    user?.type !== UserType.INTERPRETER
+                      ? req.contact_data?.specialties
+                          ?.map((s) => s.name)
+                          .join(', ')
+                      : formatCpfOrCnpj(req.contact_data?.document)
+                  }
+                  showRating={false}
+                  date={`${formatDate(req.date)}  ${formatTime(req.start_time)} - ${formatTime(req.end_time)}`}
+                  location={formatAppointmentLocation(req)}
+                  pending={true}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/requests/[id]',
+                      params: { id: req.id || '' },
+                    })
+                  }
+                />
+                <View className="w-full h-px bg-gray-200" />
+              </Fragment>
+            ))}
           </View>
-        ) : (
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerClassName="flex-1 mt-2"
-          >
-            <View className="pb-4">
-              {requests.map((req) => (
-                <Fragment key={req.id}>
-                  <View className="w-full h-px bg-gray-200" />
-                  <Card
-                    photoUrl={req.contact_data?.picture || ''}
-                    fullName={req.contact_data?.name || ''}
-                    subtitle={
-                      user?.type !== UserType.INTERPRETER
-                        ? req.contact_data?.specialties
-                            ?.map((s) => s.name)
-                            .join(', ')
-                        : formatCpfOrCnpj(req.contact_data?.document)
-                    }
-                    showRating={false}
-                    date={`${formatDate(req.date)}  ${formatTime(req.start_time)} - ${formatTime(req.end_time)}`}
-                    location={formatAppointmentLocation(req)}
-                    pending={true}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/requests/[id]',
-                        params: { id: req.id || '' },
-                      })
-                    }
-                  />
-                  <View className="w-full h-px bg-gray-200" />
-                </Fragment>
-              ))}
-            </View>
-          </ScrollView>
-        )}
+        </ScrollView>
       </View>
     </View>
   );

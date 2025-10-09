@@ -9,12 +9,13 @@ import Header from '@/src/components/Header';
 import { useColors } from '@/src/hooks/useColors';
 import { router } from 'expo-router';
 import { 
-  Edit3, 
-  Calendar, 
+  SquarePen, 
+  CalendarDays, 
   MapPin, 
   Check, 
   X 
 } from 'lucide-react-native';
+import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
   const colors = useColors() || {
@@ -27,13 +28,35 @@ export default function RequestDetailsScreen() {
   };
 
   const handleAccept = () => {
-    console.log('Solicitação aceita');
-    // Implementar lógica de aceitar
+    // Mostrar toast de sucesso
+    Toast.show({
+      type: 'success',
+      text1: 'Solicitação Aprovada',
+      text2: 'A solicitação foi aceita com sucesso!',
+      position: 'top',
+      visibilityTime: 3000,
+      autoHide: true,
+      closeIconSize: 1,
+    });
+    
+    // Voltar para a tela anterior
+    router.back();
   };
 
   const handleReject = () => {
-    console.log('Solicitação recusada');
-    // Implementar lógica de recusar
+    // Mostrar toast de informação
+    Toast.show({
+      type: 'info',
+      text1: 'Solicitação Recusada',
+      text2: 'A solicitação foi recusada.',
+      position: 'top',
+      visibilityTime: 3000,
+      autoHide: true,
+      closeIconSize: 1,
+    });
+    
+    // Voltar para a tela anterior
+    router.back();
   };
 
   return (
@@ -44,42 +67,43 @@ export default function RequestDetailsScreen() {
         handleBack={handleBack} 
       />
       
-      <ScrollView className="flex-1 px-6">
+      <ScrollView className="flex-1 px-6 ">
         {/* Informações do solicitante */}
-        <View className="flex-row items-center mb-6">
-          <Avatar size="xl" borderRadius="full" className="mr-4">
-            <AvatarImage
-              source={{
-                uri: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
-              }}
-            />
-          </Avatar>
-          
-          <View className="flex-1">
-            <Text className="text-typography-900 font-medium text-base mb-1">
-              Nome Sobrenome
-            </Text>
-            <Text className="text-typography-600 font-regular text-sm">
-              XXX.XXX.XXX-XX
-            </Text>
-          </View>
-        </View>
-
-        {/* Linha separadora */}
-        <View className="h-px bg-typography-200 mb-6" />
+         <View className="flex-row items-center justify-center mb-6 pt-4">
+           <Avatar size="2xl" borderRadius="full" className="mr-4">
+             <AvatarImage
+               source={{
+                 uri: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
+               }}
+             />
+           </Avatar>
+           
+           <View>
+             <Text className="text-typography-900 font-medium text-base mb-1">
+               Nome Sobrenome
+             </Text>
+             <Text className="text-typography-600 font-regular text-sm">
+               XXX.XXX.XXX-XX
+             </Text>
+           </View>
+         </View>
 
         {/* Dados do agendamento */}
         <View className="mb-8">
           <Text className="text-typography-900 font-medium text-base mb-6">
             Dados do agendamento
           </Text>
+          
+          {/* Linha separadora */}
+          <View className="h-px bg-typography-200 mb-6" />
 
           {/* Descrição */}
           <View className="flex-row items-start mb-6">
-            <Edit3 
-              size={20} 
-              color={colors.primaryOrange} 
-              className="mr-3 mt-0.5" 
+            <SquarePen 
+              size={16} 
+              color="#000000"
+              className="mr-1 mt-0.5" 
+              style={{ marginRight: 4 }}
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
@@ -93,10 +117,11 @@ export default function RequestDetailsScreen() {
 
           {/* Data */}
           <View className="flex-row items-start mb-6">
-            <Calendar 
-              size={20} 
-              color={colors.primaryOrange} 
-              className="mr-3 mt-0.5" 
+            <CalendarDays 
+              size={16} 
+              color="#000000"
+              className="mr-1 mt-0.5" 
+              style={{ marginRight: 4 }}
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
@@ -111,9 +136,10 @@ export default function RequestDetailsScreen() {
           {/* Localização */}
           <View className="flex-row items-start">
             <MapPin 
-              size={20} 
-              color={colors.primaryOrange} 
-              className="mr-3 mt-0.5" 
+              size={16} 
+              color="#000000"
+              className="mr-1 mt-0.5" 
+              style={{ marginRight: 4 }}
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
@@ -136,7 +162,7 @@ export default function RequestDetailsScreen() {
           className="w-full mb-4"
           style={{ backgroundColor: colors.primaryOrange }}
         >
-          <ButtonIcon as={Check} size={20} />
+          <ButtonIcon as={Check} size={20} color="white" />
           <ButtonText className="text-white font-medium">
             Aceitar
           </ButtonText>
@@ -149,7 +175,7 @@ export default function RequestDetailsScreen() {
           onPress={handleReject}
           className="w-full"
         >
-          <ButtonIcon as={X} size={20} />
+          <ButtonIcon as={X} size={20} color={colors.primaryOrange} />
           <ButtonText 
             className="font-medium"
             style={{ color: colors.primaryOrange }}
