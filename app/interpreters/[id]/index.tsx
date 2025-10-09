@@ -5,6 +5,7 @@ import { StarRating } from '@/src/components/Rating';
 import { Avatar } from '@/src/components/ui/avatar';
 import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
+import { InfoRow } from '@/src/components/ui/infoRow';
 import { SCHEDULE_ENABLED } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
@@ -16,7 +17,6 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api';
-import { InfoRow } from '@/src/components/ui/infoRow';
 import {
   mapImageRights,
   mapModality,
@@ -30,7 +30,6 @@ import {
   PlusIcon,
   Clock,
   FileTextIcon,
-  PencilIcon,
   PenSquareIcon,
   InfoIcon,
   MapPinIcon,
