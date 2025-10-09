@@ -1,5 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
+import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
@@ -18,7 +19,6 @@ import { router } from 'expo-router';
 import { BellIcon, CalendarDays, MessageSquare } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
-import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
 
 export default function HomeScreen() {
   const { user } = useAuth();

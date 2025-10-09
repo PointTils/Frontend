@@ -1,14 +1,14 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native';
-import { View } from '@/src/components/ui/view';
-import { Text } from '@/src/components/ui/text';
-import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
-import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import Header from '@/src/components/Header';
+import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
+import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
+import { Text } from '@/src/components/ui/text';
+import { View } from '@/src/components/ui/view';
 import { useColors } from '@/src/hooks/useColors';
 import { router } from 'expo-router';
 import { SquarePen, CalendarDays, MapPin, Check, X } from 'lucide-react-native';
+import React from 'react';
+import { ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
@@ -93,11 +93,10 @@ export default function RequestDetailsScreen() {
 
           {/* Descrição */}
           <View className="flex-row items-start mb-6">
-            <SquarePen
-              size={16}
+            <SquarePen 
+              size={16} 
               color="#000000"
-              className="mr-1 mt-0.5"
-              style={{ marginRight: 4 }}
+              className="mr-1 mt-0.5" 
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
@@ -113,11 +112,10 @@ export default function RequestDetailsScreen() {
 
           {/* Data */}
           <View className="flex-row items-start mb-6">
-            <CalendarDays
-              size={16}
+            <CalendarDays 
+              size={16} 
               color="#000000"
-              className="mr-1 mt-0.5"
-              style={{ marginRight: 4 }}
+              className="mr-1 mt-0.5" 
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
@@ -131,11 +129,10 @@ export default function RequestDetailsScreen() {
 
           {/* Localização */}
           <View className="flex-row items-start">
-            <MapPin
-              size={16}
+            <MapPin 
+              size={16} 
               color="#000000"
-              className="mr-1 mt-0.5"
-              style={{ marginRight: 4 }}
+              className="mr-1 mt-0.5" 
             />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">

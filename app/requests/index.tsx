@@ -1,10 +1,8 @@
 import Header from '@/src/components/Header';
 import { Card } from '@/src/components/ui/card';
-import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
-import { useColors } from '@/src/hooks/useColors';
 import type { Appointment } from '@/src/types/api';
 import { UserType, AppointmentStatus, Modality } from '@/src/types/api';
 import {
@@ -14,12 +12,10 @@ import {
   formatTime,
 } from '@/src/utils/masks';
 import { router } from 'expo-router';
-import { PackageSearchIcon } from 'lucide-react-native';
 import React, { Fragment } from 'react';
 import { ScrollView } from 'react-native';
 
 export default function PendingRequestsScreen() {
-  const colors = useColors();
   const { user } = useAuth();
 
   // Dados mockados para demonstração
