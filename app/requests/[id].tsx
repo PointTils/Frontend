@@ -93,11 +93,7 @@ export default function RequestDetailsScreen() {
 
           {/* Descrição */}
           <View className="flex-row items-start mb-6">
-            <SquarePen 
-              size={16} 
-              color="#000000"
-              className="mr-1 mt-0.5" 
-            />
+            <SquarePen size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 Descrição
@@ -112,11 +108,7 @@ export default function RequestDetailsScreen() {
 
           {/* Data */}
           <View className="flex-row items-start mb-6">
-            <CalendarDays 
-              size={16} 
-              color="#000000"
-              className="mr-1 mt-0.5" 
-            />
+            <CalendarDays size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 Data
@@ -129,11 +121,7 @@ export default function RequestDetailsScreen() {
 
           {/* Localização */}
           <View className="flex-row items-start">
-            <MapPin 
-              size={16} 
-              color="#000000"
-              className="mr-1 mt-0.5" 
-            />
+            <MapPin size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 Localização
