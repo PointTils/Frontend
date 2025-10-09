@@ -35,7 +35,7 @@ export function StarRating({ rating, size = 24, color }: StarRatingProps) {
       ))}
 
       <View
-        className="absolute top-0 left-0 overflow-hidden flex-row"
+        className="absolute left-0 overflow-hidden flex-row"
         style={{
           // dynamic width must stay inline
           width: (rating / totalStars) * size * totalStars,
@@ -52,7 +52,11 @@ export function StarRating({ rating, size = 24, color }: StarRatingProps) {
         ))}
       </View>
 
-      <Text className="mx-3 font-ifood-light">{rating}</Text>
+      <Text
+        className={`mx-3 font-ifood-light ${size <= 14 ? 'text-sm' : 'text-md'}`}
+      >
+        {rating}
+      </Text>
     </View>
   );
 }
