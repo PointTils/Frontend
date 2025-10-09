@@ -1,4 +1,4 @@
-type Review = {
+export interface Review {
   id: number;
   stars: number;
   description: string;
@@ -8,10 +8,10 @@ type Review = {
     name: string;
     picture: string;
   };
-};
+}
 
-export type ReviewResponse = {
+export interface ReviewResponse {
   success: boolean;
   message: string;
   data: Review[];
-};
+}

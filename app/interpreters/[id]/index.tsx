@@ -10,12 +10,12 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { Modality } from '@/src/types/api';
-import type { ReviewResponse } from '@/src/types/api/review';
-import type { ScheduleResponse } from '@/src/types/api/schedule';
 import type {
+  ScheduleResponse,
+  ReviewResponse,
   InterpreterResponseData,
   UserResponse,
-} from '@/src/types/api/user';
+} from '@/src/types/api';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -108,14 +108,14 @@ export default function InterpreterDetails() {
         date: '2025-10-04',
         user: {
           id: 'u1',
-          name: 'João Silva',
+          name: 'João Silvaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
           picture:
             'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
         },
       },
       {
         id: 2,
-        stars: 4,
+        stars: 4.5,
         description:
           'Muito bom, cumpre o que promete. A entrega demorou um pouco mais que o esperado, mas o produto vale a pena.',
         date: '2025-10-02',

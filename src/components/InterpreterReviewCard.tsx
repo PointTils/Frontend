@@ -34,16 +34,22 @@ export default function InterpreterReviewCard({
           </Avatar>
 
           <View className="flex-col justify-start">
-            <Text className="font-ifood-bold">{userName}</Text>
+            <Text
+              className="font-ifood-medium max-w-[120]"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {userName}
+            </Text>
             <StarRating rating={rating} size={12} />
           </View>
         </View>
 
-        <Text className="font-ifood-medium text-sm">
+        <Text className="font-ifood-regular text-sm">
           {formatDate(reviewDate)}
         </Text>
       </View>
-      <Text className="font-ifood-regular text-typography-600 text-justify text-md">
+      <Text className="font-ifood-regular text-typography-600 text-justify text-sm">
         {reviewText}
       </Text>
     </View>

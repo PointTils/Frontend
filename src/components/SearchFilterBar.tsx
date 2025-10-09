@@ -16,8 +16,7 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { InterpreterListResponse } from '../types/api';
-import { Modality } from '../types/api/common';
+import { type InterpreterListResponse, Modality } from '../types/api';
 import type { AppliedFilters } from '../types/ui';
 
 interface SearchFilterBarProps {
