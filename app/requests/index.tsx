@@ -44,12 +44,13 @@ export default function PendingRequestsScreen() {
         id: '1',
         name: 'Maria Silva Santos',
         document: '123.456.789-00',
-        picture: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
+        picture:
+          'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
         specialties: [
           { id: '1', name: 'Libras' },
-          { id: '2', name: 'Audiodescrição' }
-        ]
-      }
+          { id: '2', name: 'Audiodescrição' },
+        ],
+      },
     },
     {
       id: '2',
@@ -71,12 +72,11 @@ export default function PendingRequestsScreen() {
         id: '2',
         name: 'João Pedro Oliveira',
         document: '987.654.321-00',
-        picture: 'https://img.freepik.com/fotos-premium/homem-jovem-sorrindo-retrato-natural_360074-56805.jpg',
-        specialties: [
-          { id: '3', name: 'Libras' }
-        ]
-      }
-    }
+        picture:
+          'https://img.freepik.com/fotos-premium/homem-jovem-sorrindo-retrato-natural_360074-56805.jpg',
+        specialties: [{ id: '3', name: 'Libras' }],
+      },
+    },
   ];
 
   const requests = mockRequests;

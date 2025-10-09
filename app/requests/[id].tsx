@@ -8,13 +8,7 @@ import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import Header from '@/src/components/Header';
 import { useColors } from '@/src/hooks/useColors';
 import { router } from 'expo-router';
-import { 
-  SquarePen, 
-  CalendarDays, 
-  MapPin, 
-  Check, 
-  X 
-} from 'lucide-react-native';
+import { SquarePen, CalendarDays, MapPin, Check, X } from 'lucide-react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
@@ -38,7 +32,7 @@ export default function RequestDetailsScreen() {
       autoHide: true,
       closeIconSize: 1,
     });
-    
+
     // Voltar para a tela anterior
     router.back();
   };
@@ -54,55 +48,55 @@ export default function RequestDetailsScreen() {
       autoHide: true,
       closeIconSize: 1,
     });
-    
+
     // Voltar para a tela anterior
     router.back();
   };
 
   return (
     <SafeAreaView className="flex-1 bg-background-0">
-      <Header 
-        title="SOLICITAÇÃO" 
-        showBackButton={true} 
-        handleBack={handleBack} 
+      <Header
+        title="SOLICITAÇÃO"
+        showBackButton={true}
+        handleBack={handleBack}
       />
-      
+
       <ScrollView className="flex-1 px-6 ">
         {/* Informações do solicitante */}
-         <View className="flex-row items-center justify-center mb-6 pt-4">
-           <Avatar size="2xl" borderRadius="full" className="mr-4">
-             <AvatarImage
-               source={{
-                 uri: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
-               }}
-             />
-           </Avatar>
-           
-           <View>
-             <Text className="text-typography-900 font-medium text-base mb-1">
-               Nome Sobrenome
-             </Text>
-             <Text className="text-typography-600 font-regular text-sm">
-               XXX.XXX.XXX-XX
-             </Text>
-           </View>
-         </View>
+        <View className="flex-row items-center justify-center mb-6 pt-4">
+          <Avatar size="2xl" borderRadius="full" className="mr-4">
+            <AvatarImage
+              source={{
+                uri: 'https://img.freepik.com/fotos-premium/beleza-e-feminilidade-linda-mulher-loira-com-longos-cabelos-loiros-sorrindo-retrato-natural_360074-56804.jpg',
+              }}
+            />
+          </Avatar>
+
+          <View>
+            <Text className="text-typography-900 font-medium text-base mb-1">
+              Nome Sobrenome
+            </Text>
+            <Text className="text-typography-600 font-regular text-sm">
+              XXX.XXX.XXX-XX
+            </Text>
+          </View>
+        </View>
 
         {/* Dados do agendamento */}
         <View className="mb-8">
           <Text className="text-typography-900 font-medium text-base mb-6">
             Dados do agendamento
           </Text>
-          
+
           {/* Linha separadora */}
           <View className="h-px bg-typography-200 mb-6" />
 
           {/* Descrição */}
           <View className="flex-row items-start mb-6">
-            <SquarePen 
-              size={16} 
+            <SquarePen
+              size={16}
               color="#000000"
-              className="mr-1 mt-0.5" 
+              className="mr-1 mt-0.5"
               style={{ marginRight: 4 }}
             />
             <View className="flex-1">
@@ -110,17 +104,19 @@ export default function RequestDetailsScreen() {
                 Descrição
               </Text>
               <Text className="text-typography-600 font-regular text-sm leading-5">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris.
               </Text>
             </View>
           </View>
 
           {/* Data */}
           <View className="flex-row items-start mb-6">
-            <CalendarDays 
-              size={16} 
+            <CalendarDays
+              size={16}
               color="#000000"
-              className="mr-1 mt-0.5" 
+              className="mr-1 mt-0.5"
               style={{ marginRight: 4 }}
             />
             <View className="flex-1">
@@ -135,10 +131,10 @@ export default function RequestDetailsScreen() {
 
           {/* Localização */}
           <View className="flex-row items-start">
-            <MapPin 
-              size={16} 
+            <MapPin
+              size={16}
               color="#000000"
-              className="mr-1 mt-0.5" 
+              className="mr-1 mt-0.5"
               style={{ marginRight: 4 }}
             />
             <View className="flex-1">
@@ -163,9 +159,7 @@ export default function RequestDetailsScreen() {
           style={{ backgroundColor: colors.primaryOrange }}
         >
           <ButtonIcon as={Check} size={20} color="white" />
-          <ButtonText className="text-white font-medium">
-            Aceitar
-          </ButtonText>
+          <ButtonText className="text-white font-medium">Aceitar</ButtonText>
         </Button>
 
         <Button
@@ -176,7 +170,7 @@ export default function RequestDetailsScreen() {
           className="w-full"
         >
           <ButtonIcon as={X} size={20} color={colors.primaryOrange} />
-          <ButtonText 
+          <ButtonText
             className="font-medium"
             style={{ color: colors.primaryOrange }}
           >
