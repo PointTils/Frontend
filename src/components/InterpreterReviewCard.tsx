@@ -1,7 +1,8 @@
-import { Avatar, AvatarImage } from './ui/avatar';
 import { StarRating } from '@/src/components/Rating';
 import { formatDate } from '@/src/utils/masks';
 import { View, Text } from 'react-native';
+
+import { Avatar, AvatarImage } from './ui/avatar';
 
 interface InterpreterReviewCardProps {
   userName: string;

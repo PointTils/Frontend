@@ -10,12 +10,12 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { Modality } from '@/src/types/api';
+import type { ReviewResponse } from '@/src/types/api/review';
 import type { ScheduleResponse } from '@/src/types/api/schedule';
 import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api/user';
-import type { ReviewResponse } from '@/src/types/api/review';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
