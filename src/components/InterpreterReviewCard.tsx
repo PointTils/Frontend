@@ -1,6 +1,7 @@
-import { View, Text } from 'react-native';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { StarRating } from '@/src/components/Rating';
+import { formatDate } from '@/src/utils/masks';
+import { View, Text } from 'react-native';
 
 interface InterpreterReviewCardProps {
   userName: string;
@@ -17,15 +18,6 @@ export default function InterpreterReviewCard({
   reviewDate,
   reviewText,
 }: InterpreterReviewCardProps) {
-  function formatDate(date: string): string {
-    const dateYear = date.slice(0, 4);
-    const dateMonth = date.slice(5, 7);
-    const dateDay = date.slice(8);
-
-    const formattedDate = `${dateDay}/${dateMonth}/${dateYear}`;
-
-    return formattedDate;
-  }
   return (
     <View className="flex-col py-4 gap-4 w-full mt-4">
       <View className="flex-row justify-between">
