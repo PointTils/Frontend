@@ -3,6 +3,7 @@ import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { router } from 'expo-router';
 import { SquarePen, CalendarDays, MapPin, Check, X } from 'lucide-react-native';
@@ -53,7 +54,7 @@ export default function RequestDetailsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background-0">
       <Header
-        title="SOLICITAÇÃO"
+        title={Strings.requests.request}
         showBackButton={true}
         handleBack={handleBack}
       />
@@ -82,7 +83,7 @@ export default function RequestDetailsScreen() {
         {/* Appointment data */}
         <View className="mb-8">
           <Text className="text-typography-900 font-medium text-base mb-6">
-            Dados do agendamento
+            {Strings.appointments.appointment}
           </Text>
 
           {/* Separator line */}
@@ -93,7 +94,7 @@ export default function RequestDetailsScreen() {
             <SquarePen size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
-                Descrição
+                {Strings.common.fields.description}
               </Text>
               <Text className="text-typography-600 font-regular text-sm leading-5">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
@@ -108,7 +109,7 @@ export default function RequestDetailsScreen() {
             <CalendarDays size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
-                Data
+                {Strings.common.fields.date}
               </Text>
               <Text className="text-typography-600 font-regular text-sm">
                 20/08/2025 11:30 - 12:30
@@ -121,7 +122,7 @@ export default function RequestDetailsScreen() {
             <MapPin size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
-                Localização
+                {Strings.common.fields.location}
               </Text>
               <Text className="text-typography-600 font-regular text-sm">
                 Av. Ipiranga 6681, Partenon - Porto Alegre/RS
@@ -141,7 +142,7 @@ export default function RequestDetailsScreen() {
           style={{ backgroundColor: colors.primaryOrange }}
         >
           <ButtonIcon as={Check} size={20} color="white" />
-          <ButtonText className="text-white font-medium">Aceitar</ButtonText>
+          <ButtonText className="text-white font-medium">{Strings.common.options.authorize}</ButtonText>
         </Button>
 
         <Button
@@ -156,7 +157,7 @@ export default function RequestDetailsScreen() {
             className="font-medium"
             style={{ color: colors.primaryOrange }}
           >
-            Recusar
+            {Strings.common.options.deny}
           </ButtonText>
         </Button>
       </View>
