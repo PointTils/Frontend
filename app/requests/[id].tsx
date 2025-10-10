@@ -142,7 +142,9 @@ export default function RequestDetailsScreen() {
           style={{ backgroundColor: colors.primaryOrange }}
         >
           <ButtonIcon as={Check} size={20} color="white" />
-          <ButtonText className="text-white font-medium">{Strings.common.options.authorize}</ButtonText>
+          <ButtonText className="text-white font-medium">
+            {Strings.common.options.authorize}
+          </ButtonText>
         </Button>
 
         <Button
