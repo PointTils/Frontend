@@ -90,8 +90,8 @@ export default function RequestDetailsScreen() {
           <View className="h-px bg-typography-200 mb-6" />
 
           {/* Description */}
-          <View className="flex-row items-start mb-6">
-            <SquarePen size={16} color="#000000" className="mr-1 mt-0.5" />
+          <View className="flex-row items-start mb-6 gap-2">
+            <SquarePen size={16} color="#000000" className="mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 {Strings.common.fields.description}
@@ -105,8 +105,8 @@ export default function RequestDetailsScreen() {
           </View>
 
           {/* Date */}
-          <View className="flex-row items-start mb-6">
-            <CalendarDays size={16} color="#000000" className="mr-1 mt-0.5" />
+          <View className="flex-row items-start mb-6 gap-2">
+            <CalendarDays size={16} color="#000000" className="mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 {Strings.common.fields.date}
@@ -118,8 +118,8 @@ export default function RequestDetailsScreen() {
           </View>
 
           {/* Location */}
-          <View className="flex-row items-start">
-            <MapPin size={16} color="#000000" className="mr-1 mt-0.5" />
+          <View className="flex-row items-start gap-2">
+            <MapPin size={16} color="#000000" className="mt-0.5" />
             <View className="flex-1">
               <Text className="text-typography-900 font-medium text-sm mb-2">
                 {Strings.common.fields.location}
