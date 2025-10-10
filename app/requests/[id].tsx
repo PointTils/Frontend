@@ -12,17 +12,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
-  const colors = useColors() || {
-    primaryOrange: '#F28D22',
-    primaryBlue: '#43A2DB',
-  };
+  const colors = useColors();
 
   const handleBack = () => {
     router.back();
   };
 
   const handleAccept = () => {
-    // Mostrar toast de sucesso
+    // Show success toast
     Toast.show({
       type: 'success',
       text1: 'Solicitação Aprovada',
@@ -33,12 +30,12 @@ export default function RequestDetailsScreen() {
       closeIconSize: 1,
     });
 
-    // Voltar para a tela anterior
+    // Go back to previous screen
     router.back();
   };
 
   const handleReject = () => {
-    // Mostrar toast de informação
+    // Show info toast
     Toast.show({
       type: 'info',
       text1: 'Solicitação Recusada',
@@ -49,7 +46,7 @@ export default function RequestDetailsScreen() {
       closeIconSize: 1,
     });
 
-    // Voltar para a tela anterior
+    // Go back to previous screen
     router.back();
   };
 
@@ -62,7 +59,7 @@ export default function RequestDetailsScreen() {
       />
 
       <ScrollView className="flex-1 px-6 ">
-        {/* Informações do solicitante */}
+        {/* Requester information */}
         <View className="flex-row items-center justify-center mb-6 pt-4">
           <Avatar size="2xl" borderRadius="full" className="mr-4">
             <AvatarImage
@@ -82,16 +79,16 @@ export default function RequestDetailsScreen() {
           </View>
         </View>
 
-        {/* Dados do agendamento */}
+        {/* Appointment data */}
         <View className="mb-8">
           <Text className="text-typography-900 font-medium text-base mb-6">
             Dados do agendamento
           </Text>
 
-          {/* Linha separadora */}
+          {/* Separator line */}
           <View className="h-px bg-typography-200 mb-6" />
 
-          {/* Descrição */}
+          {/* Description */}
           <View className="flex-row items-start mb-6">
             <SquarePen size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
@@ -106,7 +103,7 @@ export default function RequestDetailsScreen() {
             </View>
           </View>
 
-          {/* Data */}
+          {/* Date */}
           <View className="flex-row items-start mb-6">
             <CalendarDays size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
@@ -119,7 +116,7 @@ export default function RequestDetailsScreen() {
             </View>
           </View>
 
-          {/* Localização */}
+          {/* Location */}
           <View className="flex-row items-start">
             <MapPin size={16} color="#000000" className="mr-1 mt-0.5" />
             <View className="flex-1">
@@ -134,7 +131,7 @@ export default function RequestDetailsScreen() {
         </View>
       </ScrollView>
 
-      {/* Botões de ação */}
+      {/* Action buttons */}
       <View className="px-6 pb-6 pt-4 bg-background-0">
         <Button
           size="lg"
