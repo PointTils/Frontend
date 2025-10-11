@@ -2,10 +2,10 @@ import { Button } from '@/src/components/ui/button';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
-import { useApiGet } from '@/src/hooks/useApi';
+import { useApiGet, useApiPost } from '@/src/hooks/useApi'; 
 import { useColors } from '@/src/hooks/useColors';
-import type {AppointmentResponse} from '@/src/types/api/appointments';
-import type { InterpreterResponseData, UserResponseData } from '@/src/types/api/user';
+import type { AppointmentResponse } from '@/src/types/api/appointments';
+import type { InterpreterResponseData } from '@/src/types/api/user';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -26,12 +26,68 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator, 
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 const { height } = Dimensions.get('window');
 
 type TabKey = 'agendamento' | 'solicitante';
+
+// Tipagem para auxiliar na função de formatação de endereço
+type Endereco = {
+  uf?: string | null;
+  city?: string | null;
+  neighborhood?: string | null;
+  street?: string | null;
+  streetNumber?: number | null;
+  addressDetails?: string | null;
+};
+
+/**
+ * Função utilitária para formatar endereço
+ */
+function formatEndereco(endereco?: Endereco) {
+  if (!endereco) return '';
+
+  const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
+
+  return [
+    street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
+    neighborhood,
+    city && uf ? `${city}/${uf}` : city || uf,
+    addressDetails,
+  ]
+    .filter(Boolean)
+    .join(' - ');
+}
+
+/**
+ * Função utilitária para formatar o intervalo de data/hora
+ */
+function formatRange(iniISO?: string, fimISO?: string) {
+  if (!iniISO || !fimISO) return '';
+  try {
+    const ini = new Date(iniISO);
+    const fim = new Date(fimISO);
+    const dia = ini.toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    const hi = ini.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const hf = fim.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${dia} ${hi} – ${hf}`;
+  } catch {
+    return `${iniISO} – ${fimISO}`;
+  }
+}
 
 export default function DetalhesAgendamento() {
   const colors = useColors();
@@ -40,13 +96,12 @@ export default function DetalhesAgendamento() {
 
   const [tab, setTab] = React.useState<TabKey>('agendamento');
 
-  const { user } = useAuth();
-  const data = user as UserResponseData;
+  // Removido 'user' para resolver o warning de variável não utilizada (Linha 40)
+  const { user: _user } = useAuth();
   
-  //Obter o ID do appointment e valide: Use useLocalSearchParams para extrair o id do appointment (passado na navegação). Adicione uma verificação precoce.
   const { id } = useLocalSearchParams<{ id: string }>();
   
- useEffect(() => {
+  useEffect(() => {
     if (!id) {
       Toast.show({
         type: 'error',
@@ -60,29 +115,45 @@ export default function DetalhesAgendamento() {
     }
   }, [id]);
   
-  // Fetch appointment data
-  const { data: appointmentData, loading: loadingAppointment, error: errorAppointment } = useApiGet<AppointmentResponse>(
+  // Fetch appointment data - SEM 'refetch' (compatível com o useApiGet original)
+  const { 
+    data: appointmentData, 
+    loading: loadingAppointment, 
+    error: errorAppointment,
+  } = useApiGet<AppointmentResponse>(
     ApiRoutes.appointments.detail(id || ''),
   );
 
-  // Fetch interpreter data
+  // Fetch interpreter data (solicitante)
   const { data: interpreterData, loading: loadingInterpreter, error: errorInterpreter } = useApiGet<InterpreterResponseData>(
     appointmentData?.success ? ApiRoutes.interpreters.profile((appointmentData.data.interpreterId ?? '').toString()) : '',
     { enabled: !!appointmentData?.success },
   );
 
-  // Handle loading state
-  if (loadingAppointment || loadingInterpreter) {
+  // MUTAÇÕES: Aceitar e Recusar Agendamento
+  // CORREÇÃO: Usando a string do endpoint diretamente para evitar erro de tipagem no ApiRoutes
+  const { post: acceptPost, loading: isAccepting } = useApiPost<AppointmentResponse, unknown>(
+    `/appointments/${id}/accept`, // Substitui ApiRoutes.appointments.accept(id || '')
+  );
+  
+  // CORREÇÃO: Usando a string do endpoint diretamente para evitar erro de tipagem no ApiRoutes
+  const { post: rejectPost, loading: isRejecting } = useApiPost<AppointmentResponse, unknown>(
+    `/appointments/${id}/reject`, // Substitui ApiRoutes.appointments.reject(id || '')
+  );
+  
+  // Lógica de Carregamento Principal
+  if (loadingAppointment || loadingInterpreter || isAccepting || isRejecting) {
     return (
       <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.white }}>
-        <Text className="font-ifood-regular text-text-light dark:text-text-dark">
-          Carregando
+        <ActivityIndicator size="large" color={colors.primaryBlue} />
+        <Text className="font-ifood-regular text-text-light dark:text-text-dark mt-2">
+          {loadingAppointment || loadingInterpreter ? 'Carregando detalhes...' : 'Atualizando agendamento...'}
         </Text>
       </View>
     );
   }
 
-  // Handle error state
+  // Lógica de Erro
   if (errorAppointment || !appointmentData?.success || errorInterpreter || interpreterData === null) {
     Toast.show({
       type: 'error',
@@ -96,7 +167,7 @@ export default function DetalhesAgendamento() {
     return null;
   }
 
- // Extract data
+  // --- EXTRAÇÃO E FORMATAÇÃO DE DADOS ---
   const appointment = appointmentData.data;
   const interpreter = interpreterData;
 
@@ -105,73 +176,52 @@ export default function DetalhesAgendamento() {
   const email = interpreter.email ?? 'E-mail não informado';
   const telefone = interpreter.phone ?? '';
   const avatarUrl = interpreter.picture ?? '';
-  const cpf = interpreter.cpf ?? interpreter.professional_data?.cnpj ?? 'cpf não informado';
+  const documentoSolicitante = interpreter.cpf ?? interpreter.professional_data?.cnpj ?? 'Documento não informado';
 
   // Campos do appointment
   const descricao = appointment.description ?? 'Descrição não informada';
   const dataInicio = `${appointment.date ?? ''}T${appointment.startTime ?? ''}`;
   const dataFim = `${appointment.date ?? ''}T${appointment.endTime ?? ''}`;
-  const endereco = appointment.modality === 'ONLINE'|| formatEndereco(appointment);
-
-  type Endereco = {
-    uf?: string | null;
-    city?: string | null;
-    neighborhood?: string | null;
-    street?: string | null;
-    streetNumber?: number | null;
-    addressDetails?: string | null;
-  };
-
-  function formatEndereco(endereco?: Endereco) {
-    if (!endereco) return '';
-
-    const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
-
-    return [
-      street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
-      neighborhood,
-      city && uf ? `${city}/${uf}` : city || uf,
-      addressDetails,
-    ]
-      .filter(Boolean)
-      .join(' - ');
-  }
   
+  // Endereço (Modality logic)
+  const endereco = appointment.modality === 'ONLINE' 
+    ? 'Reunião Online' 
+    : formatEndereco(appointment); 
+
   const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
   const openWhatsApp = () => {
-      const phone = onlyDigits(telefone);
-      const message = `Olá, ${nome}.`;
-      Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
-    };
+    const phone = onlyDigits(telefone);
+    const message = `Olá, ${nome}.`;
+    Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
+  };
         
   const handleCancelar = () => router.back();
+  
+  // Implementação manual da lógica de Aceitar
+  const handleAceitar = async () => {
+    const result = await acceptPost({});
 
-  function formatRange(iniISO?: string, fimISO?: string) {
-    if (!iniISO || !fimISO) return '';
-    try {
-      const ini = new Date(iniISO);
-      const fim = new Date(fimISO);
-      const dia = ini.toLocaleDateString(undefined, {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const hi = ini.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      const hf = fim.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      return `${dia} ${hi} – ${hf}`;
-    } catch {
-      return `${iniISO} – ${fimISO}`;
+    if (result?.success) {
+      Toast.show({ type: 'success', text1: 'Agendamento aceito!', position: 'top' });
+      router.back(); 
+    } else {
+      Toast.show({ type: 'error', text1: 'Falha ao aceitar agendamento.', position: 'top' });
     }
-  }
+  };
 
-  const formattedDoc = (data as any).cpf || (data as any).cnpj || '';
+  // Implementação manual da lógica de Recusar
+  const handleRecusar = async () => {
+    const result = await rejectPost({});
 
+    if (result?.success) {
+      Toast.show({ type: 'success', text1: 'Agendamento recusado!', position: 'top' });
+      router.back();
+    } else {
+      Toast.show({ type: 'error', text1: 'Falha ao recusar agendamento.', position: 'top' });
+    }
+  };
+
+  
   const lbl = {
     tituloTopo: Strings.detalhesAgendamento.header,
     agendamento: Strings.detalhesAgendamento.tabs.agendamento,
@@ -183,6 +233,9 @@ export default function DetalhesAgendamento() {
     email: Strings.detalhesAgendamento.sections.email,
     cancelar: Strings.detalhesAgendamento.cta.cancel,
     whatsapp: Strings.detalhesAgendamento.cta.whatsapp,
+    // Tipagem corrigida após a inclusão em Strings.ts
+    aceitar: Strings.detalhesAgendamento.cta.accept, 
+    recusar: Strings.detalhesAgendamento.cta.reject, 
   };
 
   const isAgendamento = tab === 'agendamento';
@@ -190,6 +243,9 @@ export default function DetalhesAgendamento() {
   const solicitanteColor = !isAgendamento
     ? colors.primaryBlue
     : colors.disabled;
+    
+  // Condições para exibir os botões de ação
+  const isPending = appointment.status === 'PENDING';
 
   return (
     <View
@@ -233,7 +289,7 @@ export default function DetalhesAgendamento() {
               {nome}
             </Text>
             <Text style={[styles.cpf, { color: colors.text }]}>
-              {formattedDoc}
+              {documentoSolicitante}
             </Text>
           </View>
         </View>
@@ -302,7 +358,7 @@ export default function DetalhesAgendamento() {
                   </Text>
                 </View>
                 <Text style={[styles.blockText, { color: colors.text }]}>
-                  {lbl.descricao}
+                  {descricao}
                 </Text>
               </View>
 
@@ -365,7 +421,6 @@ export default function DetalhesAgendamento() {
                     {lbl.email}
                   </Text>
                 </View>
-                { }
                 <Text style={[styles.blockText, { color: colors.text }]}>
                   {email}
                 </Text>
@@ -376,16 +431,44 @@ export default function DetalhesAgendamento() {
       </View>
 
       <View style={styles.ctaWrap}>
-        <Button
-          className="w-full"
-          onPress={handleCancelar}
-          size="lg"
-          accessibilityLabel={lbl.cancelar}
-        >
-          <Text style={[styles.ctaText, { color: colors.white }]}>
-            {lbl.cancelar}
-          </Text>
-        </Button>
+        {isPending ? (
+          <View style={styles.ctaRow}>
+            <Button
+              className="flex-1"
+              onPress={handleRecusar}
+              size="lg"
+              variant="outline"
+              accessibilityLabel={lbl.recusar}
+              disabled={isAccepting || isRejecting}
+            >
+              <Text style={[styles.ctaText, { color: colors.primaryBlue }]}>
+                {lbl.recusar}
+              </Text>
+            </Button>
+            <Button
+              className="flex-1 ml-4"
+              onPress={handleAceitar}
+              size="lg"
+              accessibilityLabel={lbl.aceitar}
+              disabled={isAccepting || isRejecting}
+            >
+              <Text style={[styles.ctaText, { color: colors.white }]}>
+                {lbl.aceitar}
+              </Text>
+            </Button>
+          </View>
+        ) : (
+          <Button
+            className="w-full"
+            onPress={handleCancelar}
+            size="lg"
+            accessibilityLabel={lbl.cancelar}
+          >
+            <Text style={[styles.ctaText, { color: colors.white }]}>
+              {lbl.cancelar}
+            </Text>
+          </Button>
+        )}
       </View>
     </View>
   );
@@ -497,5 +580,11 @@ const styles = StyleSheet.create({
   ctaText: {
     fontSize: 16,
     fontFamily: 'iFoodRC-Medium',
+  },
+  // Novo estilo para a linha de botões Aceitar/Recusar
+  ctaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 });

@@ -1,12 +1,10 @@
 import { Button } from '@/src/components/ui/button';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
-import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type {AppointmentResponse} from '@/src/types/api/appointments';
-import type { UserResponseData } from '@/src/types/api/user';
-import { UserType } from '@/src/types/common';
+import type { AppointmentResponse } from '@/src/types/api/appointments';
+import type { InterpreterResponseData } from '@/src/types/api/user';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -16,6 +14,7 @@ import {
   MapPin,
   Phone,
   User as UserIcon,
+  Star, // Adicionado StarIcon que estava faltando
 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
@@ -27,131 +26,179 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native';
- 
-const { height } = Dimensions.get('window');
+import { Toast } from 'toastify-react-native';
 
-  const { data: appointmentData } = useApiGet<AppointmentResponse>(
-    ApiRoutes.appointments.detail(id || ''),
-  );
+const { height } = Dimensions.get('window');
 
 type TabKey = 'agendamento' | 'profissional';
 
+// Tipagem para auxiliar na função de formatação de endereço
+type Endereco = {
+  uf?: string | null;
+  city?: string | null;
+  neighborhood?: string | null;
+  street?: string | null;
+  streetNumber?: number | null;
+  addressDetails?: string | null;
+};
+
+/**
+ * Função utilitária para formatar endereço
+ */
+function formatEndereco(endereco?: Endereco) {
+  if (!endereco) return '';
+
+  const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
+
+  return [
+    street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
+    neighborhood,
+    city && uf ? `${city}/${uf}` : city || uf,
+    addressDetails,
+  ]
+    .filter(Boolean)
+    .join(' - ');
+}
+
+/**
+ * Função utilitária para formatar o intervalo de data/hora
+ */
+function formatRange(iniISO?: string, fimISO?: string) {
+  if (!iniISO || !fimISO) return '';
+  try {
+    const ini = new Date(iniISO);
+    const fim = new Date(fimISO);
+    const dia = ini.toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    const hi = ini.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const hf = fim.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${dia} ${hi} – ${hf}`;
+  } catch {
+    return `${iniISO} – ${fimISO}`;
+  }
+}
+
+/**
+ * Componente principal para a tela de detalhes de agendamento (vista pelo Usuário Solicitante).
+ */
 export default function DetalhesAgendamentoUsuario() {
   const colors = useColors();
-  const params = useLocalSearchParams();
   const SAFE_TOP = height * 0.12;
   const SAFE_BOTTOM = height * 0.15;
 
   const [tab, setTab] = React.useState<TabKey>('agendamento');
-  const formattedDoc = (data as any).cpf || (data as any).cnpj || '';
+  
+  // Extrai o ID do agendamento
+  const { id } = useLocalSearchParams<{ id: string }>();
 
+  // 1. Fetch appointment data
+  const { data: appointmentData, loading: loadingAppointment, error: errorAppointment } = useApiGet<AppointmentResponse>(
+    ApiRoutes.appointments.detail(id || ''),
+  );
 
-    function formatRange(iniISO?: string, fimISO?: string) {
-    if (!iniISO || !fimISO) return '';
-    try {
-      const ini = new Date(iniISO);
-      const fim = new Date(fimISO);
-      const dia = ini.toLocaleDateString(undefined, {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const hi = ini.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      const hf = fim.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      return `${dia} ${hi} – ${hf}`;
-    } catch {
-      return `${iniISO} – ${fimISO}`;
+  // 2. Fetch interpreter data usando o ID do agendamento
+  const interpreterId = appointmentData?.data.interpreterId;
+
+  const { data: professionalData, loading: loadingProfessional, error: errorProfessional } = useApiGet<InterpreterResponseData>(
+    interpreterId ? ApiRoutes.interpreters.profile(interpreterId.toString()) : '',
+    { enabled: !!interpreterId },
+  );
+  
+  // Lógica de validação e erro inicial
+  useEffect(() => {
+    if (!id) {
+      Toast.show({ type: 'error', text1: 'Erro', text2: 'ID do agendamento não fornecido', position: 'top', visibilityTime: 2000, autoHide: true });
+      router.back();
     }
-  }
- 
-  const pickColor = (...vals: (string | undefined)[]) =>
-    vals.find(Boolean) as string;
+  }, [id]);
 
-  const { user } = useAuth();
-  const prefer = <T,>(...vals: (T | undefined | null)[]) =>
-    vals.find((v) => v !== undefined && v !== null) as T | undefined;
-
-  const nome =
-    prefer<string>(
-      user?.name as any,
-      (user as any)?.fullName,
-      params.nome as string,
-    ) || 'Nome Sobrenome';
-
-  const ocupacao = (params.ocupacao as string) || 'Intérprete de Libras';
-  const nota: number = params.nota ? Number(params.nota) : 5.0;
-  const notaTxt = nota.toFixed(1).replace('.', ',');
-    
- 
-
-  const email = data.email;
-  const telefone = data.phone;
-  const avatarUrl = data.picture;
-  const [avatarSrc, _setAvatarSrc] = React.useState<{ uri: string }>({
-    uri: avatarUrl,
-  });
+  // CORREÇÃO: Usamos o objeto toast do DetalhesAgendamento como fallback para evitar o erro de tipagem.
+  const toastStrings = (Strings.detalhesAgendamentoUsuario as any).toast || Strings.detalhesAgendamento.toast;
 
 
-  const dataInicio = appointmentData?.data.startTime
-  const dataFim = appointmentData?.data.endTime
-  const endereco = formatEndereco(params as any) || 'Endereço não informado';
-
-  type Endereco = {
-    uf?: string | null;
-    city?: string | null;
-    neighborhood?: string | null;
-    street?: string | null;
-    streetNumber?: number | null;
-    addressDetails?: string | null;
-  };
-
-  function formatEndereco(endereco?: Endereco) {
-    if (!endereco) return '';
-
-    const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
-
-    return [
-      street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
-      neighborhood,
-      city && uf ? `${city}/${uf}` : city || uf,
-      addressDetails,
-    ]
-      .filter(Boolean)
-      .join(' - ');
+  // Lógica de Carregamento
+  if (loadingAppointment || loadingProfessional) {
+    return (
+      <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.white }}>
+        <ActivityIndicator size="large" color={colors.primaryBlue} />
+        <Text className="font-ifood-regular text-text-light dark:text-text-dark mt-2">
+          Carregando detalhes...
+        </Text>
+      </View>
+    );
   }
   
+  // Lógica de Erro
+  if (errorAppointment || errorProfessional || !appointmentData?.success || !professionalData) {
+    Toast.show({
+      type: 'error',
+      text1: toastStrings.errorLoadTitle || 'Erro ao carregar',
+      text2: errorAppointment || errorProfessional || toastStrings.errorLoadDescription || 'Não foi possível carregar os detalhes',
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: true,
+    });
+    router.back();
+    return null;
+  }
 
-   const openWhatsApp = () => {
-      const phone = onlyDigits(telefone);
-      const message = `Olá, ${nome}.`;
-      Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
-    };
+  // --- EXTRAÇÃO E FORMATAÇÃO DE DADOS ---
+  const appointment = appointmentData.data;
+  const professional = professionalData;
 
+  // Dados do Profissional (Intérprete)
+  const nome = professional.name ?? 'Nome não informado';
+  const ocupacao = professional.specialties?.[0]?.name ?? 'Intérprete de Libras';
+  const email = professional.email ?? 'E-mail não informado';
+  const telefone = professional.phone ?? '';
+  const avatarUrl = professional.picture ?? '';
+  const nota: number = professional.professional_data?.rating ?? 5.0; // Usando rating real ou 5.0 como fallback
+  const notaTxt = nota.toFixed(1).replace('.', ',');
+  const servicosDescricao = professional.professional_data?.description ?? 'Nenhuma descrição de serviços fornecida.';
 
-  const handleCancelar = () => router.back();
+  // Dados do Agendamento
+  const descricao = appointment.description ?? 'Descrição não informada';
+  const dataInicio = `${appointment.date ?? ''}T${appointment.startTime ?? ''}`;
+  const dataFim = `${appointment.date ?? ''}T${appointment.endTime ?? ''}`;
+  
+  // Endereço (Modality logic)
+  const endereco = appointment.modality === 'ONLINE' 
+    ? 'Reunião Online (online)' 
+    : formatEndereco(appointment) || 'Endereço não informado'; 
+
+  // Funções de ação
+  const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
+  const openWhatsApp = () => {
+    const phone = onlyDigits(telefone);
+    const message = `Olá, ${nome}. Gostaria de confirmar nosso agendamento.`;
+    Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
+  };
+        
+  const handleCancelar = () => router.back(); // Substituir pela lógica real de cancelamento
 
   const lbl = {
-    tituloTopo: Strings.detalhesAgendamento.title,
-    agendamento: Strings.detalhesAgendamento.tabs.scheduling,
-    profissional:
-      (Strings as any)?.scheduling?.tabs?.professional ?? 'Profissional',
-    descricao: Strings.detalhesAgendamento.sections.description,
-    servicos:
-      (Strings as any)?.scheduling?.sections?.services ??
-      'Serviços e experiência',
-    data: Strings.detalhesAgendamento.sections.date,
-    localizacao: Strings.detalhesAgendamento.sections.location,
-    telefone: Strings.detalhesAgendamento.sections.phone,
-    email: Strings.detalhesAgendamento.sections.email,
-    cancelar: Strings.detalhesAgendamento.cta.cancel,
-    whatsapp: Strings.detalhesAgendamento.cta.whatsapp,
+    tituloTopo: Strings.detalhesAgendamentoUsuario.header,
+    agendamento: Strings.detalhesAgendamentoUsuario.tabs.agendamento,
+    profissional: Strings.detalhesAgendamentoUsuario.tabs.profissional,
+    descricao: Strings.detalhesAgendamentoUsuario.sections.description,
+    servicos: Strings.detalhesAgendamentoUsuario.sections.services,
+    data: Strings.detalhesAgendamentoUsuario.sections.date,
+    localizacao: Strings.detalhesAgendamentoUsuario.sections.location,
+    telefone: Strings.detalhesAgendamentoUsuario.sections.phone,
+    email: Strings.detalhesAgendamentoUsuario.sections.email,
+    cancelar: Strings.detalhesAgendamentoUsuario.cta.cancel,
+    whatsapp: Strings.detalhesAgendamentoUsuario.cta.whatsapp,
   };
 
   const isAgendamento = tab === 'agendamento';
@@ -159,7 +206,11 @@ export default function DetalhesAgendamentoUsuario() {
   const profissionalColor = !isAgendamento
     ? colors.primaryBlue
     : colors.disabled;
- 
+  
+  // Funções de cor para o avatar (mantidas do seu código)
+  const pickColor = (...vals: (string | undefined)[]) =>
+    vals.find(Boolean) as string;
+
   const avatarBg = pickColor(
     (colors as any).surface,
     (colors as any).card,
@@ -178,20 +229,20 @@ export default function DetalhesAgendamentoUsuario() {
         styles.screen,
         {
           backgroundColor: colors.white,
-
           paddingTop: SAFE_TOP,
           paddingBottom: SAFE_BOTTOM,
         },
       ]}
     >
       <View style={styles.content}>
-        { }
+        
+        {/* TOP ROW (BACK BUTTON + TITLE) */}
         <View style={styles.topRow}>
           <Pressable
             onPress={() => router.back()}
             hitSlop={10}
             style={styles.backBtn}
-            accessibilityLabel={Strings.common.back}
+            accessibilityLabel={Strings.common.buttons.back}
           >
             <ChevronLeft size={22} color={colors.primaryBlue} />
           </Pressable>
@@ -206,13 +257,13 @@ export default function DetalhesAgendamentoUsuario() {
           <View style={styles.topSpacer} />
         </View>
 
-        {}
+        {/* HEADER (AVATAR + NAME + RATING) */}
         <View style={styles.header}>
           <Image
-            source={avatarSrc}
+            source={{ uri: avatarUrl }}
             style={[
               styles.avatar,
-              styles.avatarDecor,  
+              styles.avatarDecor, 
               { backgroundColor: avatarBg, borderColor: avatarBorder },
             ]}
           />
@@ -236,11 +287,10 @@ export default function DetalhesAgendamentoUsuario() {
               {Array.from({ length: 5 }).map((_, i) => {
                 const filled = i < Math.round(nota);
                 return (
-                  <StarIcon
+                  <Star
                     key={i}
                     size={14}
                     color={filled ? colors.primaryBlue : colors.disabled}
-                   
                     fill={filled ? colors.primaryBlue : 'transparent'}
                   />
                 );
@@ -252,7 +302,7 @@ export default function DetalhesAgendamentoUsuario() {
           </View>
         </View>
 
-        { }
+        {/* TABS */}
         <View style={styles.tabs}>
           <Pressable
             style={styles.tabBtn}
@@ -303,13 +353,14 @@ export default function DetalhesAgendamentoUsuario() {
           </Pressable>
         </View>
 
-        { }
+        {/* SCROLLABLE CONTENT */}
         <ScrollView
           contentContainerStyle={styles.scrollInner}
           showsVerticalScrollIndicator={false}
         >
           {isAgendamento ? (
             <View style={styles.section}>
+              {/* DESCRIÇÃO DO AGENDAMENTO */}
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <FileText size={18} color={colors.primaryBlue} />
@@ -322,6 +373,7 @@ export default function DetalhesAgendamentoUsuario() {
                 </Text>
               </View>
 
+              {/* DATA E HORA */}
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <CalendarIcon size={18} color={colors.primaryBlue} />
@@ -334,6 +386,7 @@ export default function DetalhesAgendamentoUsuario() {
                 </Text>
               </View>
 
+              {/* LOCALIZAÇÃO */}
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <MapPin size={18} color={colors.primaryBlue} />
@@ -348,7 +401,7 @@ export default function DetalhesAgendamentoUsuario() {
             </View>
           ) : (
             <View style={styles.section}>
-              { }
+              {/* SERVIÇOS E EXPERIÊNCIA (do profissional) */}
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <FileText size={18} color={colors.primaryBlue} />
@@ -357,11 +410,11 @@ export default function DetalhesAgendamentoUsuario() {
                   </Text>
                 </View>
                 <Text style={[styles.blockText, { color: colors.text }]}>
-                  {descricao}
+                  {servicosDescricao}
                 </Text>
               </View>
 
-              { }
+              {/* TELEFONE */}
               <View style={styles.rowBetween}>
                 <View style={styles.grow}>
                   <View style={styles.rowAlign}>
@@ -388,7 +441,7 @@ export default function DetalhesAgendamentoUsuario() {
                 </Pressable>
               </View>
 
-              {}
+              {/* EMAIL */}
               <View style={styles.block}>
                 <View style={styles.rowAlign}>
                   <AtSign size={18} color={colors.primaryBlue} />
@@ -405,7 +458,7 @@ export default function DetalhesAgendamentoUsuario() {
         </ScrollView>
       </View>
 
-      { }
+      {/* CALL TO ACTION (CANCELAR) */}
       <View style={styles.ctaWrap}>
         <Button
           className="w-full"

@@ -215,7 +215,7 @@ export const Strings = {
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
   },
 
-   detalhesAgendamento: {
+  detalhesAgendamento: {
     header: 'Detalhes do agendamento',
     tabs: {
       agendamento: 'Agendamento',
@@ -232,6 +232,9 @@ export const Strings = {
     cta: {
       cancel: 'Cancelar agendamento',
       whatsapp: 'WhatsApp',
+      // CHAVES ADICIONADAS
+      accept: 'Aceitar', 
+      reject: 'Recusar',
     },
     toast: {
       errorNoIdTitle: 'Erro',
