@@ -223,6 +223,7 @@ export const Strings = {
     selectCity: 'Selecione um estado primeiro',
     filter: 'Filtro',
     datesAvailable: 'Datas disponíveis',
+    noReviewsFound: 'Nenhuma avaliação encontrada.',
 
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
