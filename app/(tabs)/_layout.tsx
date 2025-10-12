@@ -3,7 +3,7 @@ import { Text } from '@/src/components/ui/text';
 import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { Tabs, useSegments } from 'expo-router';
+import { router, Tabs, useSegments } from 'expo-router';
 import { FileClock, House, User } from 'lucide-react-native';
 import React from 'react';
 
@@ -38,11 +38,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="appointments"
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault(); // avoid default behavior (keeping last nested route)
+            router.navigate('/appointments'); // go to index of the tab
+          },
+        }}
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
-              {Strings.history.tabBar}
+              {Strings.appointments.tabBar}
             </Text>
           ),
           tabBarIcon: ({ color }) => (

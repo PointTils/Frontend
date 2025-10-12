@@ -4,6 +4,12 @@ import { View, Text, TouchableOpacity } from 'react-native';
 
 import { useColors } from '../hooks/useColors';
 
+interface HeaderProps {
+  title: string;
+  showBackButton?: boolean;
+  handleBack?: () => void;
+}
+
 /**
  * Header component for screens with title and optional back button.
  *
@@ -18,13 +24,6 @@ import { useColors } from '../hooks/useColors';
  *   handleBack={() => router.replace('(tabs)')}
  * />
  */
-
-interface HeaderProps {
-  title: string;
-  showBackButton?: boolean;
-  handleBack?: () => void;
-}
-
 export default function Header({
   title,
   showBackButton,
@@ -33,7 +32,7 @@ export default function Header({
   const colorScheme = useColors();
 
   return (
-    <View className="w-full flex-row justify-center items-denter px-4">
+    <View className="w-full flex-row justify-center items-center px-4">
       <View className="w-8 items-start justify-center">
         {showBackButton && (
           <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>

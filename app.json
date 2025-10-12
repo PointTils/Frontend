@@ -13,12 +13,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.pointtils.pointtils",
+      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/apk-logo.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.pointtils.pointtils"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -27,6 +27,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-font",
       [
         "expo-splash-screen",
         {
@@ -43,7 +44,14 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ],
-      "expo-font"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -7,6 +7,16 @@ import { ChevronDownIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 
+interface ModalSingleSelectionProps {
+  items: OptionItem[];
+  selectedValue: string;
+  onSelectionChange: (value: string) => void;
+  placeholderText?: string;
+  hasError?: boolean;
+  scrollableHeight?: number;
+  minWidth?: number;
+}
+
 /**
  * A modal-based single selection dropdown component with custom styling and theming support.
  * Allows users to select one option from a list displayed in a modal overlay.
@@ -35,17 +45,6 @@ import { Modal, Pressable, ScrollView, TouchableOpacity } from 'react-native';
  *   hasError={errors.gender}
  * />
  */
-
-interface ModalSingleSelectionProps {
-  items: OptionItem[];
-  selectedValue: string;
-  onSelectionChange: (value: string) => void;
-  placeholderText?: string;
-  hasError?: boolean;
-  scrollableHeight?: number;
-  minWidth?: number;
-}
-
 export default function ModalSingleSelection({
   items,
   selectedValue,

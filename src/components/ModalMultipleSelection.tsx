@@ -7,6 +7,17 @@ import { CheckIcon, ChevronDownIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 
+interface ModalMultipleSelectionProps {
+  items: OptionItem[];
+  selectedValues: string[];
+  onSelectionChange: (values: string[]) => void;
+  placeholderText?: string;
+  hasError?: boolean;
+  scrollableHeight?: number;
+  maxSelections?: number;
+  minWidth?: number;
+}
+
 /**
  * A modal-based multiple selection dropdown component with custom styling and theming support.
  * Allows users to select multiple options from a list displayed in a modal overlay.
@@ -37,18 +48,6 @@ import { Modal, Pressable, ScrollView, TouchableOpacity } from 'react-native';
  *   maxSelections={3}
  * />
  */
-
-interface ModalMultipleSelectionProps {
-  items: OptionItem[];
-  selectedValues: string[];
-  onSelectionChange: (values: string[]) => void;
-  placeholderText?: string;
-  hasError?: boolean;
-  scrollableHeight?: number;
-  maxSelections?: number;
-  minWidth?: number;
-}
-
 export default function ModalMultipleSelection({
   items,
   selectedValues,
