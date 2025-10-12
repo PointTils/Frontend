@@ -29,8 +29,7 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import type { UserRequest, UserResponse } from '@/src/types/api';
-import { UserType } from '@/src/types/common';
+import { type UserRequest, type UserResponse, UserType } from '@/src/types/api';
 import {
   buildInvalidFieldError,
   buildRegisterPayload,
@@ -674,7 +673,7 @@ export default function RegisterScreen() {
               >
                 <ButtonIcon as={PlusIcon} className="text-white" />
                 <Text className="font-ifood-regular text-text-dark">
-                  {Strings.register.create}
+                  {Strings.auth.signUpAction}
                 </Text>
               </Button>
 

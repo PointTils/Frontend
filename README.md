@@ -40,7 +40,8 @@ npm install --global eas-cli
 npx expo login
 ```
 
-> Usar mesmas credenciais da conta criada no site do Expo Go
+> [!NOTE]
+> Use as mesmas credenciais da conta criada no site do Expo Go
 
 4. Iniciar o app (modo desenvolvimento)
 
@@ -48,7 +49,11 @@ npx expo login
 npm run start
 ```
 
-> Pressione “s” para Expo Go emulador e escanei o QR Code (Android: escanei usando o app do Expo Go, iPhone: escanei usando a câmera do celular).
+> [!IMPORTANT]
+> Pressione “s” para Expo Go emulador e escanei o QR Code.
+>
+> - Android: escanei usando o app do Expo Go
+> - iPhone: escanei usando a câmera do celular
 
 ## Scripts úteis
 

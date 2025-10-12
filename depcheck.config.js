@@ -35,6 +35,7 @@ module.exports = {
     // Expo/React Native dependencies
     'expo-splash-screen',
     'expo-dev-client',
+    'expo-build-properties',
 
     // ESLint plugins
     'eslint-plugin-import',
