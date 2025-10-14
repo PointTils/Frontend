@@ -8,7 +8,6 @@ import { Modal, TouchableOpacity, TextInput } from 'react-native';
 
 import { Button } from './ui/button';
 
-
 export default function FeedbackModal({
   visible,
   onClose,
