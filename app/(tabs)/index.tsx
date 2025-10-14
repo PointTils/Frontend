@@ -1,6 +1,5 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
-import { Button, ButtonText, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
@@ -16,7 +15,7 @@ import {
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
 import { router } from 'expo-router';
-import { BellIcon, CalendarDays, MessageSquare } from 'lucide-react-native';
+import { BellIcon, CalendarDays } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
 
@@ -101,22 +100,6 @@ export default function HomeScreen() {
         >
           <SearchFilterBar onData={() => {}} interactive={false} />
         </TouchableOpacity>
-
-        {/* Botão de teste para navegar para requests */}
-        <View className="px-4 mt-4">
-          <Button
-            size="md"
-            action="primary"
-            onPress={() => router.push('/requests')}
-            className="w-full"
-            style={{ backgroundColor: colors.primaryOrange }}
-          >
-            <ButtonIcon as={MessageSquare} size={20} color="white" />
-            <ButtonText className="text-white font-medium">
-              Testar Tela de Requests
-            </ButtonText>
-          </Button>
-        </View>
 
         <View
           className="h-px w-full mt-4"
