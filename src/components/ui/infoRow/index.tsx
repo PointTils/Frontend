@@ -1,8 +1,6 @@
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import { useColors } from '@/src/hooks/useColors';
 import React from 'react';
-import { View } from '../view';
 
 // esse é o componente da linha de informações da tela de perfil(apenas label e valor)
 
