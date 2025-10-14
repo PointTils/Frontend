@@ -44,22 +44,22 @@ export interface InterpreterBody {
 
 export interface PersonResponseData {
   id: string;
-  name: string;
-  cpf: string;
+  name?: string;
+  cpf?: string;
   email: string;
   phone: string;
   picture: string;
   type: UserType.PERSON;
   status: string;
-  gender: Gender;
-  birthday: string;
+  gender?: Gender;
+  birthday?: string;
   specialties?: Specialty[];
 }
 
 export interface EnterpriseResponseData {
   id: string;
-  corporate_reason: string;
-  cnpj: string;
+  corporate_reason?: string;
+  cnpj?: string;
   email: string;
   type: UserType.ENTERPRISE;
   status: string;
@@ -70,18 +70,18 @@ export interface EnterpriseResponseData {
 
 export interface InterpreterResponseData {
   id: string;
-  name: string;
-  cpf: string;
+  name?: string;
+  cpf?: string;
   email: string;
   type?: UserType.INTERPRETER;
   status: string;
   phone: string;
   picture: string;
-  gender: Gender;
-  birthday: string;
-  locations: Location[];
+  gender?: Gender;
+  birthday?: string;
+  locations?: Location[];
   specialties: Specialty[];
-  professional_data: {
+  professional_data?: {
     cnpj: string | null;
     rating: number;
     modality: Modality;
