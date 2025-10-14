@@ -17,6 +17,7 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import {
   mapImageRights,
   mapModality,
@@ -259,9 +260,9 @@ export default function InterpreterDetails() {
           <Avatar size="lg" borderRadius="full" className="h-28 w-28">
             <AvatarImage
               source={{
-                uri:
-                  interpreter.picture ||
-                  'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                uri: getSafeAvatarUri({
+                  remoteUrl: interpreter?.picture,
+                }),
               }}
             />
           </Avatar>
@@ -284,7 +285,7 @@ export default function InterpreterDetails() {
                 : ''}
             </Text>
             <StarRating
-              rating={interpreter.professional_data.rating}
+              rating={interpreter.professional_data?.rating || 0}
               size={18}
             />
           </View>
@@ -340,21 +341,21 @@ export default function InterpreterDetails() {
             <InfoRow
               icon={PenSquareIcon}
               label={Strings.search.description}
-              value={interpreter.professional_data.description || undefined}
+              value={interpreter.professional_data?.description || undefined}
             />
 
             <InfoRow
               icon={InfoIcon}
               label={Strings.common.fields.modality}
-              value={mapModality(interpreter.professional_data.modality)}
+              value={mapModality(interpreter.professional_data?.modality)}
             />
 
-            {interpreter.professional_data.modality !== Modality.ONLINE && (
+            {interpreter.professional_data?.modality !== Modality.ONLINE && (
               <InfoRow
                 icon={MapPinIcon}
                 label={Strings.common.fields.location}
                 value={interpreter.locations
-                  .map((loc) => loc.neighborhood)
+                  ?.map((loc) => loc.neighborhood)
                   .join(', ')}
               />
             )}
@@ -362,15 +363,15 @@ export default function InterpreterDetails() {
             <InfoRow
               icon={FileTextIcon}
               label={Strings.common.fields.imageRights}
-              value={mapImageRights(interpreter.professional_data.image_rights)}
+              value={mapImageRights(interpreter.professional_data?.image_rights)}
             />
 
             <InfoRow
               icon={DollarSign}
               label={Strings.common.fields.valueRange}
               value={formatValueRange(
-                interpreter.professional_data.min_value,
-                interpreter.professional_data.max_value,
+                interpreter.professional_data?.min_value,
+                interpreter.professional_data?.max_value,
               )}
             />
 

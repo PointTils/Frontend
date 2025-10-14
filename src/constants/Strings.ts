@@ -242,6 +242,14 @@ export const Strings = {
     },
   },
 
+  feedbackModal: {
+    title: 'Queremos saber sua opinião!',
+    subtitle:
+      'Avalie sua experiência no atendimento realizado pelo intérprete ',
+    placeholder: 'Escreva mais detalhes',
+    submitButton: 'Avaliar',
+  },
+
   // Enums and fixed options
   gender: {
     male: 'Masculino',
