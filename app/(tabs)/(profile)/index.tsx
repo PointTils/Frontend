@@ -16,6 +16,7 @@ import {
   Modality,
   UserType,
 } from '@/src/types/api';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import {
   formatDate,
   formatDaySchedule,
@@ -94,8 +95,8 @@ export default function ProfileScreen() {
 
   const showLocation =
     profile.type === UserType.INTERPRETER
-      ? profile.professional_data.modality === Modality.ALL ||
-        profile.professional_data.modality === Modality.PERSONALLY
+      ? profile.professional_data?.modality === Modality.ALL ||
+        profile.professional_data?.modality === Modality.PERSONALLY
       : false;
   const firstLocation =
     profile.type === UserType.INTERPRETER ? profile.locations?.[0] : undefined;
@@ -135,9 +136,9 @@ export default function ProfileScreen() {
         <Avatar size="lg" borderRadius="full" className="h-32 w-32">
           <AvatarImage
             source={{
-              uri:
-                profile.picture ||
-                'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+              uri: getSafeAvatarUri({
+                remoteUrl: profile?.picture,
+              }),
             }}
           />
         </Avatar>
