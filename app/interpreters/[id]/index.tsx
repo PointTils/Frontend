@@ -16,6 +16,7 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -254,9 +255,9 @@ export default function InterpreterDetails() {
           <Avatar size="lg" borderRadius="full" className="h-28 w-28">
             <AvatarImage
               source={{
-                uri:
-                  interpreter.picture ||
-                  'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                uri: getSafeAvatarUri({
+                  remoteUrl: interpreter?.picture,
+                }),
               }}
             />
           </Avatar>
@@ -275,7 +276,7 @@ export default function InterpreterDetails() {
                 : ''}
             </Text>
             <StarRating
-              rating={interpreter.professional_data.rating}
+              rating={interpreter.professional_data?.rating || 0}
               size={20}
             />
           </View>
@@ -335,7 +336,7 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {interpreter.professional_data.description}
+              {interpreter.professional_data?.description}
             </Text>
             <View className="flex-row items-center gap-2 mt-6">
               <InfoIcon width={16} height={16} />
@@ -344,9 +345,9 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {mapModality(interpreter.professional_data.modality)}
+              {mapModality(interpreter.professional_data?.modality)}
             </Text>
-            {interpreter.professional_data.modality !== Modality.ONLINE && (
+            {interpreter.professional_data?.modality !== Modality.ONLINE && (
               <>
                 <View className="flex-row items-center gap-2 mt-6">
                   <MapPinIcon width={16} height={16} />
@@ -356,7 +357,7 @@ export default function InterpreterDetails() {
                 </View>
                 <Text className="px-7">
                   {interpreter.locations
-                    .map((loc) => loc.neighborhood)
+                    ?.map((loc) => loc.neighborhood)
                     .join(', ')}
                 </Text>
               </>
@@ -369,7 +370,7 @@ export default function InterpreterDetails() {
               </Text>
             </View>
             <Text className="px-7">
-              {mapImageRights(interpreter.professional_data.image_rights)}
+              {mapImageRights(interpreter.professional_data?.image_rights)}
             </Text>
             <View className="flex-row items-center gap-2 mt-6">
               <BanknoteIcon width={16} height={16} />
@@ -379,9 +380,9 @@ export default function InterpreterDetails() {
             </View>
             <Text className="px-7">
               {'R$' +
-                interpreter.professional_data.min_value +
+                interpreter.professional_data?.min_value +
                 '-' +
-                interpreter.professional_data.max_value}
+                interpreter.professional_data?.max_value}
             </Text>
 
             {SCHEDULE_ENABLED && (
