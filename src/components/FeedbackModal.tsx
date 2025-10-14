@@ -2,7 +2,7 @@ import { Text } from '@/src/components/ui/text/index';
 import { View } from '@/src/components/ui/view/index';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { StarIcon } from 'lucide-react-native';
+import { StarIcon, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Modal, TouchableOpacity, TextInput } from 'react-native';
 
@@ -56,9 +56,7 @@ export default function FeedbackModal({
             className="absolute top-4 right-4 z-10"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text className="text-[22px]" style={{ color: colors.detailsGray }}>
-              ×
-            </Text>
+            <X size={22} color={colors.detailsGray} />
           </TouchableOpacity>
 
           {/* Título */}
