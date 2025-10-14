@@ -202,6 +202,16 @@ export const Strings = {
     title: 'Gerencie suas solicitações',
     subtitle:
       'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+    details: 'Dados do agendamento',
+    accept: 'Aceitar',
+    reject: 'Recusar',
+
+    toast: {
+      acceptTitle: 'Solicitação Aprovada',
+      acceptDescription: 'A solicitação foi aceita com sucesso!',
+      rejectTitle: 'Solicitação Recusada',
+      rejectDescription: 'A solicitação foi recusada com sucesso!',
+    },
   },
 
   appointments: {
