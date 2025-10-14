@@ -533,7 +533,6 @@ export default function EditProfileScreen() {
       !specialtyResponse?.success ||
       (selectedImage && !pictureResponse?.success)
     ) {
-      console.warn('Picture upload failed:', pictureResponse);
       router.replace('/(tabs)/(profile)');
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
@@ -549,7 +548,6 @@ export default function EditProfileScreen() {
     }
 
     // Successful update logic (e.g., navigate to profile)
-    console.warn('Picture upload:', pictureResponse);
     router.replace('/(tabs)/(profile)');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
