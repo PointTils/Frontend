@@ -50,7 +50,8 @@ type Endereco = {
 function formatEndereco(endereco?: Endereco) {
   if (!endereco) return '';
 
-  const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
+  const { street, streetNumber, neighborhood, city, uf, addressDetails } =
+    endereco;
 
   return [
     street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
@@ -65,21 +66,29 @@ function formatEndereco(endereco?: Endereco) {
 /**
  * Formata data/hora a partir de partes (robusto a snake/camel e fuso)
  */
-function formatRangeByParts(dateStr?: string, startStr?: string, endStr?: string) {
+function formatRangeByParts(
+  dateStr?: string,
+  startStr?: string,
+  endStr?: string,
+) {
   if (!dateStr || !startStr || !endStr) return '';
 
   // Suporta YYYY-MM-DD e DD/MM/YYYY
   const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/;
-  const brDate  = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  const brDate = /^(\d{2})\/(\d{2})\/(\d{4})$/;
 
   let y: number, m: number, d: number;
 
   if (isoDate.test(dateStr)) {
     const [, yy, mm, dd] = dateStr.match(isoDate)!;
-    y = +yy; m = +mm - 1; d = +dd;
+    y = +yy;
+    m = +mm - 1;
+    d = +dd;
   } else if (brDate.test(dateStr)) {
     const [, dd, mm, yy] = dateStr.match(brDate)!;
-    y = +yy; m = +mm - 1; d = +dd;
+    y = +yy;
+    m = +mm - 1;
+    d = +dd;
   } else {
     // fallback legível para debug
     return `${dateStr} ${startStr} – ${endStr}`;
@@ -87,7 +96,7 @@ function formatRangeByParts(dateStr?: string, startStr?: string, endStr?: string
 
   // Aceita HH:mm ou HH:mm:ss
   const toHMS = (t: string) => {
-    const [H='0', M='0', S='0'] = t.split(':');
+    const [H = '0', M = '0', S = '0'] = t.split(':');
     return { H: +H, M: +M, S: +S };
   };
 
@@ -98,9 +107,19 @@ function formatRangeByParts(dateStr?: string, startStr?: string, endStr?: string
   const ini = new Date(y, m, d, s.H, s.M, s.S);
   const fim = new Date(y, m, d, e.H, e.M, e.S);
 
-  const dia = ini.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const hi  = ini.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  const hf  = fim.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const dia = ini.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const hi = ini.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const hf = fim.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return `${dia} ${hi} – ${hf}`;
 }
@@ -114,9 +133,9 @@ export default function DetalhesAgendamento() {
 
   // Removido 'user' para resolver warning de variável não utilizada
   const { user: _user } = useAuth();
-  
+
   const { id } = useLocalSearchParams<{ id: string }>();
-  
+
   useEffect(() => {
     if (!id) {
       Toast.show({
@@ -130,51 +149,69 @@ export default function DetalhesAgendamento() {
       router.back();
     }
   }, [id]);
-  
+
   // Fetch appointment data
-  const { 
-    data: appointmentData, 
-    loading: loadingAppointment, 
+  const {
+    data: appointmentData,
+    loading: loadingAppointment,
     error: errorAppointment,
-  } = useApiGet<AppointmentResponse>(
-    ApiRoutes.appointments.detail(id || ''),
-  );
+  } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.detail(id || ''));
 
   // Fetch interpreter data (solicitante)
-  const { data: interpreterData, loading: loadingInterpreter, error: errorInterpreter } =
-    useApiGet<InterpreterResponseData>(
-      appointmentData?.success
-        ? ApiRoutes.interpreters.profile((appointmentData.data.interpreter_id ?? '').toString())
-        : '',
-      { enabled: !!appointmentData?.success },
-    );
+  const {
+    data: interpreterData,
+    loading: loadingInterpreter,
+    error: errorInterpreter,
+  } = useApiGet<InterpreterResponseData>(
+    appointmentData?.success
+      ? ApiRoutes.interpreters.profile(
+          (appointmentData.data.interpreter_id ?? '').toString(),
+        )
+      : '',
+    { enabled: !!appointmentData?.success },
+  );
 
   // MUTAÇÕES: Aceitar e Recusar Agendamento
-  const { post: acceptPost, loading: isAccepting } = useApiPost<AppointmentResponse, unknown>(
-    `/appointments/${id}/accept`,
-  );
-  const { post: rejectPost, loading: isRejecting } = useApiPost<AppointmentResponse, unknown>(
-    `/appointments/${id}/reject`,
-  );
-  
+  const { post: acceptPost, loading: isAccepting } = useApiPost<
+    AppointmentResponse,
+    unknown
+  >(`/appointments/${id}/accept`);
+  const { post: rejectPost, loading: isRejecting } = useApiPost<
+    AppointmentResponse,
+    unknown
+  >(`/appointments/${id}/reject`);
+
   // Lógica de Carregamento Principal
   if (loadingAppointment || loadingInterpreter || isAccepting || isRejecting) {
     return (
-      <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.white }}>
+      <View
+        className="flex-1 justify-center items-center"
+        style={{ backgroundColor: colors.white }}
+      >
         <ActivityIndicator size="large" color={colors.primaryBlue} />
         <Text className="font-ifood-regular text-text-light dark:text-text-dark mt-2">
-          {loadingAppointment || loadingInterpreter ? 'Carregando detalhes...' : 'Atualizando agendamento...'}
+          {loadingAppointment || loadingInterpreter
+            ? 'Carregando detalhes...'
+            : 'Atualizando agendamento...'}
         </Text>
       </View>
     );
   }
 
   // Lógica de Erro
-  if (errorAppointment || !appointmentData?.success || errorInterpreter || interpreterData === null) {
+  if (
+    errorAppointment ||
+    !appointmentData?.success ||
+    errorInterpreter ||
+    interpreterData === null
+  ) {
     Toast.show({
       type: 'error',
       text1: Strings.detalhesAgendamento.toast.errorLoadTitle,
-      text2: errorAppointment || errorInterpreter || Strings.detalhesAgendamento.toast.errorLoadDescription,
+      text2:
+        errorAppointment ||
+        errorInterpreter ||
+        Strings.detalhesAgendamento.toast.errorLoadDescription,
       position: 'top',
       visibilityTime: 2000,
       autoHide: true,
@@ -192,44 +229,66 @@ export default function DetalhesAgendamento() {
   const email = interpreter.email ?? 'E-mail não informado';
   const telefone = interpreter.phone ?? '';
   const avatarUrl = interpreter.picture ?? '';
-  const documentoSolicitante = interpreter.cpf ?? interpreter.professional_data?.cnpj ?? 'Documento não informado';
+  const documentoSolicitante =
+    interpreter.cpf ??
+    interpreter.professional_data?.cnpj ??
+    'Documento não informado';
 
   // Campos do appointment (lendo snake_case ou camelCase)
   const descricao = appointment.description ?? 'Descrição não informada';
 
-  const dateRaw  = (appointment as any).date ?? '';
-  const startRaw = (appointment as any).startTime ?? (appointment as any).start_time ?? '';
-  const endRaw   = (appointment as any).endTime   ?? (appointment as any).end_time   ?? '';
+  const dateRaw = (appointment as any).date ?? '';
+  const startRaw =
+    (appointment as any).startTime ?? (appointment as any).start_time ?? '';
+  const endRaw =
+    (appointment as any).endTime ?? (appointment as any).end_time ?? '';
 
   // Endereço (mapeando snake->camel só para esta função)
-  const endereco = appointment.modality === 'ONLINE'
-    ? 'Reunião Online'
-    : formatEndereco({
-        uf: (appointment as any).uf,
-        city: (appointment as any).city,
-        neighborhood: (appointment as any).neighborhood,
-        street: (appointment as any).street,
-        streetNumber: (appointment as any).street_number ?? (appointment as any).streetNumber ?? null,
-        addressDetails: (appointment as any).address_details ?? (appointment as any).addressDetails ?? null,
-      }) || 'Endereço não informado';
+  const endereco =
+    appointment.modality === 'ONLINE'
+      ? 'Reunião Online'
+      : formatEndereco({
+          uf: (appointment as any).uf,
+          city: (appointment as any).city,
+          neighborhood: (appointment as any).neighborhood,
+          street: (appointment as any).street,
+          streetNumber:
+            (appointment as any).street_number ??
+            (appointment as any).streetNumber ??
+            null,
+          addressDetails:
+            (appointment as any).address_details ??
+            (appointment as any).addressDetails ??
+            null,
+        }) || 'Endereço não informado';
 
   const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
   const openWhatsApp = () => {
     const phone = onlyDigits(telefone);
     const message = `Olá, ${nome}.`;
-    Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
+    Linking.openURL(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+    );
   };
-        
+
   const handleCancelar = () => router.back();
-  
+
   // Implementação da lógica de Aceitar
   const handleAceitar = async () => {
     const result = await acceptPost({});
     if (result?.success) {
-      Toast.show({ type: 'success', text1: 'Agendamento aceito!', position: 'top' });
+      Toast.show({
+        type: 'success',
+        text1: 'Agendamento aceito!',
+        position: 'top',
+      });
       router.back();
     } else {
-      Toast.show({ type: 'error', text1: 'Falha ao aceitar agendamento.', position: 'top' });
+      Toast.show({
+        type: 'error',
+        text1: 'Falha ao aceitar agendamento.',
+        position: 'top',
+      });
     }
   };
 
@@ -237,10 +296,18 @@ export default function DetalhesAgendamento() {
   const handleRecusar = async () => {
     const result = await rejectPost({});
     if (result?.success) {
-      Toast.show({ type: 'success', text1: 'Agendamento recusado!', position: 'top' });
+      Toast.show({
+        type: 'success',
+        text1: 'Agendamento recusado!',
+        position: 'top',
+      });
       router.back();
     } else {
-      Toast.show({ type: 'error', text1: 'Falha ao recusar agendamento.', position: 'top' });
+      Toast.show({
+        type: 'error',
+        text1: 'Falha ao recusar agendamento.',
+        position: 'top',
+      });
     }
   };
 
@@ -261,8 +328,10 @@ export default function DetalhesAgendamento() {
 
   const isAgendamento = tab === 'agendamento';
   const agendamentoColor = isAgendamento ? colors.primaryBlue : colors.disabled;
-  const solicitanteColor = !isAgendamento ? colors.primaryBlue : colors.disabled;
-    
+  const solicitanteColor = !isAgendamento
+    ? colors.primaryBlue
+    : colors.disabled;
+
   // Condições para exibir os botões de ação
   const isPending = appointment.status === 'PENDING';
 

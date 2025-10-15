@@ -290,7 +290,7 @@ export const Strings = {
       cancel: 'Cancelar agendamento',
       whatsapp: 'WhatsApp',
       // CHAVES ADICIONADAS
-      accept: 'Aceitar', 
+      accept: 'Aceitar',
       reject: 'Recusar',
     },
     toast: {
