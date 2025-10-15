@@ -2,9 +2,15 @@ import Header from '@/src/components/Header';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
+import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { InterpreterListResponse } from '@/src/types/api';
+import type {
+  InterpreterListResponse,
+  UserSpecialtyResponse,
+} from '@/src/types/api';
 import { mapModality } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import React, { Fragment, useState } from 'react';
@@ -12,9 +18,16 @@ import { ActivityIndicator, ScrollView, Text } from 'react-native';
 
 export default function SearchScreen() {
   const colors = useColors();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<InterpreterListResponse | null>(null);
+
+  const { data, loading: loadingSpecialties } =
+    useApiGet<UserSpecialtyResponse>(
+      ApiRoutes.userSpecialties.byUser(user?.id || ''),
+    );
+  const specialties = data?.data || [];
 
   const handleData = (data: InterpreterListResponse) => {
     setLoading(true);
@@ -34,12 +47,15 @@ export default function SearchScreen() {
         />
       </View>
 
-      <SearchFilterBar onData={handleData} />
+      <SearchFilterBar
+        onData={handleData}
+        preSelectedSpecialties={specialties.map((s) => s.id)}
+      />
 
       {/* Divider */}
       <View className="w-full h-[1px] bg-gray-200" />
 
-      {loading ? (
+      {loading || loadingSpecialties ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator color={colors.primaryBlue} size="small" />
           <Text className="mt-2 font-ifood-regular text-primary-blue-light">
@@ -65,11 +81,6 @@ export default function SearchScreen() {
                   rating={item?.professional_data?.rating || 0}
                   modality={
                     mapModality(item?.professional_data?.modality) || ''
-                  }
-                  priceRange={
-                    item?.professional_data
-                      ? `R$ ${item.professional_data?.min_value ?? '0,00'} - R$ ${item.professional_data?.max_value ?? '0,00'}`
-                      : ''
                   }
                   location={
                     item?.locations?.[0]

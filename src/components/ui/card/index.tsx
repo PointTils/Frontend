@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Image, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Text } from '@/src/components/ui/text';
 import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
 import { useColors } from '@/src/hooks/useColors';
 import { Strings } from '@/src/constants/Strings';
 import { Avatar, AvatarImage } from '../avatar';
+import { StarRating } from '@/src/components/Rating';
 
 /**
  * A reusable card used across two variants:
@@ -68,7 +69,6 @@ import { Avatar, AvatarImage } from '../avatar';
  *           specialty="Intérprete de Libras"
  *           rating={4.5}
  *           modality="Presencial/Online"
- *           priceRange="R$ 100 - R$ 2.500"
  *           location="Porto Alegre, Canoas & Gravataí"
  *         />
  *       </View>
@@ -104,7 +104,6 @@ export interface CardProps {
   /** "Search" fields (card 4) */
   variant?: CardVariant; // 'appointment' | 'search'
   modality?: string; // e.g., "Presencial/Online" or "Online"
-  priceRange?: string; // e.g., "R$ 100 - R$ 2.500"
   isOnlineOnly?: boolean; // true => hides Location
 
   /** Additional Tailwind classes */
@@ -125,50 +124,11 @@ export function Card({
   location,
   variant = 'appointment',
   modality,
-  priceRange,
   isOnlineOnly = false,
   className,
   onPress,
 }: CardProps) {
   const colors = useColors();
-
-  const renderStars = (value: number) => {
-    const stars = [];
-    const full = Math.floor(value);
-    const hasHalf = value % 1 !== 0;
-
-    for (let i = 0; i < full; i++) {
-      stars.push(
-        <Text
-          key={`full-${i}`}
-          className="text-lg leading-none"
-          style={{ color: colors.primaryBlue }}
-        >
-          ★
-        </Text>,
-      );
-    }
-    if (hasHalf) {
-      stars.push(
-        <Text
-          key="half"
-          className="text-lg leading-none"
-          style={{ color: colors.primaryBlue }}
-        >
-          ☆
-        </Text>,
-      );
-    }
-    const empty = 5 - Math.ceil(value);
-    for (let i = 0; i < empty; i++) {
-      stars.push(
-        <Text key={`empty-${i}`} className="text-gray-300 text-lg leading-none">
-          ☆
-        </Text>,
-      );
-    }
-    return stars;
-  };
 
   /** --- Bottom section renderers --- */
   const renderAppointmentBottom = () => (
@@ -177,23 +137,25 @@ export function Card({
       <View className="flex-1 mr-8">
         <View className="flex-row items-center mb-1">
           <CalendarDays size={12} color={colors.text} />
-          <Text className="text-primary-800 text-xs font-medium ml-1">
+          <Text className="text-text-light text-xs font-ifood-medium ml-1">
             {Strings.common.fields.date}
           </Text>
         </View>
-        <Text className="text-typography-500 text-xs">{date}</Text>
+        <Text className="text-typography-600 font-ifood-regular text-xs">
+          {date}
+        </Text>
       </View>
 
       {/* Location */}
       <View className="flex-1">
         <View className="flex-row items-center mb-1">
           <MapPin size={12} color={colors.text} />
-          <Text className="text-primary-800 text-xs font-medium ml-1">
+          <Text className="text-text-light text-xs font-ifood-medium ml-1">
             {Strings.common.fields.location}
           </Text>
         </View>
         <Text
-          className="text-typography-500 text-xs shrink"
+          className="text-typography-600 font-ifood-regular text-xs shrink"
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -205,47 +167,39 @@ export function Card({
 
   const renderSearchBottom = () => (
     <View>
-      {/* First row: modality | price range */}
+      {/* First column: modality */}
       <View className="flex-row">
         <View className="flex-1 mr-8">
           <View className="flex-row items-center mb-1">
             <Info size={12} color={colors.text} />
-            <Text className="text-primary-800 text-xs font-medium ml-1">
+            <Text className="text-text-light text-xs font-ifood-medium ml-1">
               {Strings.common.fields.modality}
             </Text>
           </View>
-          <Text className="text-typography-500 text-xs">{modality}</Text>
-        </View>
-
-        <View className="flex-1">
-          <View className="flex-row items-center mb-1">
-            <Wallet size={12} color={colors.text} />
-            <Text className="text-primary-800 text-xs font-medium ml-1">
-              {Strings.common.fields.valueRange}
-            </Text>
-          </View>
-          <Text className="text-typography-500 text-xs">{priceRange}</Text>
-        </View>
-      </View>
-
-      {/* Second row: location spanning full width */}
-      {!isOnlineOnly && !!location && (
-        <View className="mt-4">
-          <View className="flex-row items-center mb-1">
-            <MapPin size={12} color={colors.text} />
-            <Text className="text-primary-800 text-xs font-medium ml-1">
-              {Strings.common.fields.location}
-            </Text>
-          </View>
-          <Text
-            className="text-typography-500 text-xs shrink"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {location}
+          <Text className="text-typography-600 font-ifood-regular text-xs">
+            {modality}
           </Text>
         </View>
-      )}
+
+        {/* Second column: location spanning full width */}
+        {!isOnlineOnly && !!location && (
+          <View className="flex-1">
+            <View className="flex-row items-center mb-1">
+              <MapPin size={12} color={colors.text} />
+              <Text className="text-text-light text-xs font-ifood-medium ml-1">
+                {Strings.common.fields.location}
+              </Text>
+            </View>
+            <Text
+              className="text-typography-600 font-ifood-regular text-xs shrink"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {location}
+            </Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 
@@ -262,7 +216,7 @@ export function Card({
         >
           <Info size={12} color={colors.pendingBadge} />
           <Text
-            className="ml-1 text-xs font-medium"
+            className="ml-1 text-xs font-ifood-medium"
             style={{ color: colors.pendingBadge }}
           >
             {pendingLabel}
@@ -284,7 +238,7 @@ export function Card({
 
         <View className="flex-1 items-start">
           <Text
-            className="text-typography-900 font-medium text-sm mb-0.5"
+            className="text-text-light font-ifood-medium text-sm mb-0.5"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -293,7 +247,7 @@ export function Card({
 
           {(subtitle || specialty) && (
             <Text
-              className="text-typography-600 font-regular text-xs"
+              className="text-typography-600 font-ifood-regular text-xs"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -302,11 +256,8 @@ export function Card({
           )}
 
           {showRating && typeof rating === 'number' && (
-            <View className="flex-row items-end mt-1">
-              <View className="flex-row mr-2">{renderStars(rating)}</View>
-              <Text className="text-typography-600 text-xs leading-none">
-                {rating.toFixed(1)}
-              </Text>
+            <View className="mt-1">
+              <StarRating rating={rating} size={14} />
             </View>
           )}
         </View>

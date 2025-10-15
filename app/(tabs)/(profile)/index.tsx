@@ -1,7 +1,7 @@
+import ChipsSection from '@/src/components/ChipSection';
+import InfoRow from '@/src/components/InfoRow';
 import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
-import ChipsSection from '@/src/components/ui/chipSection';
-import { InfoRow } from '@/src/components/ui/infoRow';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
@@ -20,7 +20,6 @@ import { getSafeAvatarUri } from '@/src/utils/helpers';
 import {
   formatDate,
   formatDaySchedule,
-  formatValueRange,
   handleCnpjChange,
   handlePhoneChange,
   mapGender,
@@ -187,7 +186,7 @@ export default function ProfileScreen() {
           {/* Chips section */}
           {profile.type !== UserType.INTERPRETER && chipsItems.length > 0 && (
             <>
-              <Text className="w-full pl-2 text-lg font-ifood-medium text-left mb-1 text-primary-800">
+              <Text className="w-full mt-2 pl-2 text-lg font-ifood-medium text-left mb-1 text-primary-800">
                 {Strings.common.fields.preferences}
               </Text>
               <ChipsSection items={chipsItems} />
@@ -224,12 +223,13 @@ export default function ProfileScreen() {
               )}
 
               <InfoRow
-                label={Strings.common.fields.description}
+                label={Strings.common.fields.more}
                 value={
                   profile.professional_data?.description
                     ? profile.professional_data.description
                     : undefined
                 }
+                border={true}
               />
 
               <InfoRow
@@ -265,11 +265,8 @@ export default function ProfileScreen() {
               />
 
               <InfoRow
-                label={Strings.common.fields.valueRange}
-                value={formatValueRange(
-                  profile.professional_data?.min_value,
-                  profile.professional_data?.max_value,
-                )}
+                label={Strings.common.fields.values}
+                value={Strings.common.values.combined}
               />
 
               {/* Schedule */}

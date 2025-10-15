@@ -1,8 +1,8 @@
 import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
+import InfoRow from '@/src/components/InfoRow';
 import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
-import { InfoRow } from '@/src/components/ui/infoRow';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
@@ -90,7 +90,7 @@ export default function RequestDetailsScreen() {
             <Text className="text-typography-900 font-ifood-medium mb-1">
               Nome Sobrenome
             </Text>
-            <Text className="text-typography-600 font-ifood-regular text-sm">
+            <Text className="text-typography-700 font-ifood-regular text-sm">
               XXX.XXX.XXX-XX
             </Text>
           </View>
@@ -108,10 +108,11 @@ export default function RequestDetailsScreen() {
           {/* Description */}
           <InfoRow
             icon={<SquarePen size={16} color={colors.text} />}
-            label={Strings.common.fields.description}
+            label={Strings.common.fields.more}
             value="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
                 enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+            valueColor="text-typography-600"
           />
 
           {/* Date */}
@@ -119,6 +120,7 @@ export default function RequestDetailsScreen() {
             icon={<CalendarDays size={16} color={colors.text} />}
             label={Strings.common.fields.date}
             value="20/08/2025 11:30 - 12:30"
+            valueColor="text-typography-600"
           />
 
           {/* Location */}
@@ -126,6 +128,7 @@ export default function RequestDetailsScreen() {
             icon={<MapPin size={16} color={colors.text} />}
             label={Strings.common.fields.location}
             value="Av. Ipiranga 6681, Partenon - Porto Alegre/RS"
+            valueColor="text-typography-600"
           />
         </View>
       </ScrollView>

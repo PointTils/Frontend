@@ -36,8 +36,6 @@ export interface InterpreterBody {
     cnpj?: string | null;
     modality?: Modality;
     description?: string;
-    min_value?: number;
-    max_value?: number;
     image_rights?: boolean;
   };
 }
@@ -86,8 +84,6 @@ export interface InterpreterResponseData {
     rating: number;
     modality: Modality;
     description: string;
-    min_value: number;
-    max_value: number;
     image_rights: boolean;
   };
 }

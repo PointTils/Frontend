@@ -34,6 +34,11 @@ export const Strings = {
       inPerson: 'Presencial',
     },
 
+    values: {
+      combined: 'A combinar',
+      notInformed: 'Não informado',
+    },
+
     fields: {
       select: 'Selecione',
       selected: '{count} selecionados',
@@ -46,11 +51,9 @@ export const Strings = {
       phone: 'Telefone',
       email: 'Email',
       password: 'Senha',
-      description: 'Descrição',
+      more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
-      valueRange: 'Faixa de valores',
-      min: 'Mínimo',
-      max: 'Máximo',
+      values: 'Valores',
       modality: 'Modalidade',
       location: 'Localização',
       state: 'UF',

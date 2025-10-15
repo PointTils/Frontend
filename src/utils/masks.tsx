@@ -103,12 +103,6 @@ export const formatPhone = (phone?: string | null) => {
   return formatted;
 };
 
-export const formatValueRange = (min?: number, max?: number) => {
-  // Returns "R$ X - R$ Y"
-  if (min === undefined && max === undefined) return '-';
-  return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
-};
-
 export const formatCnpj = (cnpj?: string | null) => {
   // Returns "XX.XXX.XXX/XXXX-XX"
   if (!cnpj) return '';

@@ -19,7 +19,6 @@ import * as Haptics from 'expo-haptics';
  *   }}
  * />
  */
-
 export default function HapticTab(props: BottomTabBarButtonProps) {
   return (
     <PlatformPressable
