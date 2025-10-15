@@ -42,7 +42,7 @@ export default function InterpreterReviewCard({
             >
               {userName}
             </Text>
-            <StarRating rating={rating} size={12} />
+            <StarRating rating={rating} size={14} />
           </View>
         </View>
 

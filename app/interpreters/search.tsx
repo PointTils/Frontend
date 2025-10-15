@@ -25,7 +25,7 @@ export default function SearchScreen() {
 
   const { data, loading: loadingSpecialties } =
     useApiGet<UserSpecialtyResponse>(
-      ApiRoutes.userSpecialties.userSpecialties(user?.id || ''),
+      ApiRoutes.userSpecialties.byUser(user?.id || ''),
     );
   const specialties = data?.data || [];
 
@@ -81,11 +81,6 @@ export default function SearchScreen() {
                   rating={item?.professional_data?.rating || 0}
                   modality={
                     mapModality(item?.professional_data?.modality) || ''
-                  }
-                  priceRange={
-                    item?.professional_data
-                      ? `R$ ${item.professional_data?.min_value ?? '0,00'} - R$ ${item.professional_data?.max_value ?? '0,00'}`
-                      : ''
                   }
                   location={
                     item?.locations?.[0]

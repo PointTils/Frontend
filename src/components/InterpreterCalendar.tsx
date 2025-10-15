@@ -99,8 +99,8 @@ export default function InterpreterCalendar({
 
   if (!days || days.length === 0) {
     return (
-      <View className="h-24 justify-center items-center">
-        <Text className="text-gray-400 text-base">
+      <View className="h-22 justify-center items-center">
+        <Text className="text-gray-500 font-ifood-regular">
           {Strings.toSchedule.calendarNoAvailable}
         </Text>
       </View>
@@ -108,7 +108,7 @@ export default function InterpreterCalendar({
   }
 
   return (
-    <View className="flex-row items-start justify-center">
+    <View className="flex-row items-start justify-center -mt-6">
       <TouchableOpacity
         disabled={isPrevDisabled}
         onPress={handlePrev}

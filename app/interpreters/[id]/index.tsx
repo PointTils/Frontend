@@ -1,11 +1,11 @@
 import Header from '@/src/components/Header';
+import InfoRow from '@/src/components/InfoRow';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
 import InterpreterReviewCard from '@/src/components/InterpreterReviewCard';
 import { StarRating } from '@/src/components/Rating';
 import { Avatar } from '@/src/components/ui/avatar';
 import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
-import { InfoRow } from '@/src/components/ui/infoRow';
 import { SCHEDULE_ENABLED } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
@@ -18,11 +18,7 @@ import type {
   UserResponse,
 } from '@/src/types/api';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
-import {
-  mapImageRights,
-  mapModality,
-  formatValueRange,
-} from '@/src/utils/masks';
+import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import {
@@ -34,7 +30,6 @@ import {
   PenSquareIcon,
   InfoIcon,
   MapPinIcon,
-  DollarSign,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -339,48 +334,45 @@ export default function InterpreterDetails() {
         {section === Strings.search.details && (
           <>
             <InfoRow
-              icon={PenSquareIcon}
+              icon={<PenSquareIcon size={16} color={colors.text} />}
               label={Strings.search.description}
               value={interpreter.professional_data?.description || undefined}
+              valueColor="text-typography-600"
             />
 
             <InfoRow
-              icon={InfoIcon}
+              icon={<InfoIcon size={16} color={colors.text} />}
               label={Strings.common.fields.modality}
               value={mapModality(interpreter.professional_data?.modality)}
+              valueColor="text-typography-600"
             />
 
             {interpreter.professional_data?.modality !== Modality.ONLINE && (
               <InfoRow
-                icon={MapPinIcon}
+                icon={<MapPinIcon size={16} color={colors.text} />}
                 label={Strings.common.fields.location}
                 value={interpreter.locations
                   ?.map((loc) => loc.neighborhood)
                   .join(', ')}
+                valueColor="text-typography-600"
               />
             )}
 
             <InfoRow
-              icon={FileTextIcon}
+              icon={<FileTextIcon size={16} color={colors.text} />}
               label={Strings.common.fields.imageRights}
-              value={mapImageRights(interpreter.professional_data?.image_rights)}
-            />
-
-            <InfoRow
-              icon={DollarSign}
-              label={Strings.common.fields.valueRange}
-              value={formatValueRange(
-                interpreter.professional_data?.min_value,
-                interpreter.professional_data?.max_value,
+              value={mapImageRights(
+                interpreter.professional_data?.image_rights,
               )}
+              valueColor="text-typography-600"
             />
 
             {SCHEDULE_ENABLED && (
               <View className="mt-6">
                 <InfoRow
-                  icon={Clock}
+                  icon={<Clock size={16} color={colors.text} />}
                   label={Strings.hours.title}
-                  value={undefined}
+                  onlyLabel={true}
                 />
 
                 {loadingSchedule ? (

@@ -354,48 +354,6 @@ export default function EditProfileScreen() {
       validate: (_value: string, _ctx?: EditProfileValidationContext): null =>
         null,
     },
-    minPrice: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? (profile?.professional_data?.min_value?.toString() ?? '')
-          : '',
-      error: '',
-      validate: (
-        value: string,
-        ctx?: EditProfileValidationContext,
-      ): string | null => {
-        if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('min');
-        if (
-          ctx?.type === UserType.INTERPRETER &&
-          fields.maxPrice.value &&
-          Number(value) > Number(fields.maxPrice.value)
-        )
-          return buildInvalidFieldError('min');
-        return null;
-      },
-    },
-    maxPrice: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? (profile?.professional_data?.max_value?.toString() ?? '')
-          : '',
-      error: '',
-      validate: (
-        value: string,
-        ctx?: EditProfileValidationContext,
-      ): string | null => {
-        if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('max');
-        if (
-          ctx?.type === UserType.INTERPRETER &&
-          fields.minPrice.value &&
-          Number(fields.minPrice.value) > Number(value)
-        )
-          return buildInvalidFieldError('max');
-        return null;
-      },
-    },
   });
 
   const maxDate = useMemo(() => {
@@ -1199,66 +1157,6 @@ export default function EditProfileScreen() {
                         </RadioLabel>
                       </Radio>
                     </RadioGroup>
-                  </View>
-
-                  {/* Values Max/Min */}
-                  <View className="w-80">
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.valueRange}*
-                    </Text>
-                    <View className="flex-row justify-between mt-2">
-                      <FormControl isInvalid={!!fields.minPrice.error}>
-                        <FormControlLabel>
-                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.common.fields.min}
-                          </FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="w-36">
-                          <InputField
-                            className="font-ifood-regular"
-                            placeholder="0"
-                            value={fields.minPrice.value}
-                            onChangeText={(v) => setValue('minPrice', v)}
-                            keyboardType="numeric"
-                          />
-                        </Input>
-                        <FormControlError>
-                          <FormControlErrorIcon
-                            as={AlertCircleIcon}
-                            className="text-red-600"
-                          />
-                          <FormControlErrorText>
-                            {fields.minPrice.error}
-                          </FormControlErrorText>
-                        </FormControlError>
-                      </FormControl>
-
-                      <FormControl isInvalid={!!fields.maxPrice.error}>
-                        <FormControlLabel>
-                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.common.fields.max}
-                          </FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="w-36">
-                          <InputField
-                            className="font-ifood-regular"
-                            placeholder="100"
-                            value={fields.maxPrice.value}
-                            onChangeText={(v) => setValue('maxPrice', v)}
-                            keyboardType="numeric"
-                          />
-                        </Input>
-                        <FormControlError>
-                          <FormControlErrorIcon
-                            as={AlertCircleIcon}
-                            className="text-red-600"
-                          />
-                          <FormControlErrorText>
-                            {fields.maxPrice.error}
-                          </FormControlErrorText>
-                        </FormControlError>
-                      </FormControl>
-                    </View>
                   </View>
 
                   {/* Schedule */}

@@ -44,6 +44,7 @@ interface SearchFilterBarProps {
 export default function SearchFilterBar({
   onData,
   interactive = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   preSelectedSpecialties = [],
 }: SearchFilterBarProps) {
   const colors = useColors();
