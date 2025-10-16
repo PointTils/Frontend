@@ -112,7 +112,12 @@ export default function PendingRequestsScreen() {
                     onPress={() =>
                       router.push({
                         pathname: '/requests/[id]',
-                        params: { id: req.id || '' },
+                        params: { 
+                          id: req.id || '',
+                          userPhoto: req.contact_data?.picture || '',
+                          userName: req.contact_data?.name || '',
+                          userDocument: req.contact_data?.document || ''
+                        },
                       })
                     }
                   />

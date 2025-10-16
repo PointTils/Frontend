@@ -9,7 +9,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import { useApiGet } from '@/src/hooks/useApi';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
-import { formatDate, formatTime, formatAppointmentLocation } from '@/src/utils/masks';
+import { formatDate, formatTime, formatAppointmentLocation, formatCpfOrCnpj } from '@/src/utils/masks';
 import { type AppointmentResponse } from '@/src/types/api/appointment';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -25,7 +25,12 @@ import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
   const colors = useColors();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, userPhoto, userName, userDocument } = useLocalSearchParams<{ 
+    id: string;
+    userPhoto: string;
+    userName: string;
+    userDocument: string;
+  }>();
   
   // Buscar dados do appointment
   const { data: appointmentData, loading, error } = useApiGet<AppointmentResponse>(
@@ -127,7 +132,7 @@ export default function RequestDetailsScreen() {
             <AvatarImage
               source={{
                 uri: getSafeAvatarUri({
-                  remoteUrl: '',
+                  remoteUrl: userPhoto || '',
                 }),
               }}
             />
@@ -135,10 +140,10 @@ export default function RequestDetailsScreen() {
 
           <View>
             <Text className="text-typography-900 font-ifood-medium mb-1">
-              Nome Sobrenome
+              {userName || 'Nome não informado'}
             </Text>
             <Text className="text-typography-700 font-ifood-regular text-sm">
-              XXX.XXX.XXX-XX
+              {formatCpfOrCnpj(userDocument) || 'Documento não informado'}
             </Text>
           </View>
         </View>
