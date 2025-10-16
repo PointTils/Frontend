@@ -36,6 +36,7 @@ export const ApiRoutes = {
   },
   appointments: {
     base: '/appointments',
+    detail: (id: string) => `/appointments/${id}`,
     byStatus: (id: string, type: UserType, status: string) =>
       `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
     filter: '/appointments/filter',

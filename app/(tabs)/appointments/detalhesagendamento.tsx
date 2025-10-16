@@ -5,7 +5,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { AppointmentResponse } from '@/src/types/api/appointment';
-import type { InterpreterResponseData } from '@/src/types/api/user';
+import type { InterpreterResponseData, PersonResponseData, UserResponse } from '@/src/types/api/user';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -16,7 +16,7 @@ import {
   Phone,
   User as UserIcon,
 } from 'lucide-react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -150,26 +150,23 @@ export default function DetalhesAgendamento() {
     }
   }, [id]);
 
-  // Fetch appointment data
-  const {
-    data: appointmentData,
-    loading: loadingAppointment,
-    error: errorAppointment,
-  } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.detail(id || ''));
+  const { data: appointmentData, loading: loadingAppointment, error: errorAppointment } =
+    useApiGet<AppointmentResponse>(ApiRoutes.appointments.detail(id || ''));
 
-  // Fetch interpreter data (solicitante)
-  const {
-    data: interpreterData,
-    loading: loadingInterpreter,
-    error: errorInterpreter,
-  } = useApiGet<InterpreterResponseData>(
-    appointmentData?.success
-      ? ApiRoutes.interpreters.profile(
-          (appointmentData.data.interpreter_id ?? '').toString(),
-        )
-      : '',
-    { enabled: !!appointmentData?.success },
-  );
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (appointmentData?.success && appointmentData.data?.user_id) {
+      setUserId(appointmentData.data.user_id.toString());
+    }
+  }, [appointmentData]);
+
+  const { data: interpreterData, loading: loadingInterpreter, error: errorInterpreter } =
+    useApiGet<UserResponse>(
+      userId ? ApiRoutes.person.profile(userId) : 'No user ID',
+      { enabled: !!userId }
+    );
+
 
   // MUTAÇÕES: Aceitar e Recusar Agendamento
   const { post: acceptPost, loading: isAccepting } = useApiPost<
@@ -216,26 +213,23 @@ export default function DetalhesAgendamento() {
       visibilityTime: 2000,
       autoHide: true,
     });
-    router.back();
-    return null;
   }
 
   // --- EXTRAÇÃO E FORMATAÇÃO DE DADOS ---
-  const appointment = appointmentData.data;
-  const interpreter = interpreterData;
+  const appointment = appointmentData?.data;
+  const interpreter = interpreterData?.data as PersonResponseData;
 
   // Campos do solicitante
-  const nome = interpreter.name ?? 'Nome não informado';
-  const email = interpreter.email ?? 'E-mail não informado';
-  const telefone = interpreter.phone ?? '';
-  const avatarUrl = interpreter.picture ?? '';
+  const nome = interpreter?.name ?? 'Nome não informado';
+  const email = interpreter?.email ?? 'E-mail não informado';
+  const telefone = interpreter?.phone ?? '';
+  const avatarUrl = interpreter?.picture ?? '';
   const documentoSolicitante =
-    interpreter.cpf ??
-    interpreter.professional_data?.cnpj ??
+    interpreter?.cpf ??
     'Documento não informado';
 
   // Campos do appointment (lendo snake_case ou camelCase)
-  const descricao = appointment.description ?? 'Descrição não informada';
+  const descricao = appointment?.description ?? 'Descrição não informada';
 
   const dateRaw = (appointment as any).date ?? '';
   const startRaw =
@@ -245,22 +239,22 @@ export default function DetalhesAgendamento() {
 
   // Endereço (mapeando snake->camel só para esta função)
   const endereco =
-    appointment.modality === 'ONLINE'
+    appointment?.modality === 'ONLINE'
       ? 'Reunião Online'
       : formatEndereco({
-          uf: (appointment as any).uf,
-          city: (appointment as any).city,
-          neighborhood: (appointment as any).neighborhood,
-          street: (appointment as any).street,
-          streetNumber:
-            (appointment as any).street_number ??
-            (appointment as any).streetNumber ??
-            null,
-          addressDetails:
-            (appointment as any).address_details ??
-            (appointment as any).addressDetails ??
-            null,
-        }) || 'Endereço não informado';
+        uf: (appointment as any).uf,
+        city: (appointment as any).city,
+        neighborhood: (appointment as any).neighborhood,
+        street: (appointment as any).street,
+        streetNumber:
+          (appointment as any).street_number ??
+          (appointment as any).streetNumber ??
+          null,
+        addressDetails:
+          (appointment as any).address_details ??
+          (appointment as any).addressDetails ??
+          null,
+      }) || 'Endereço não informado';
 
   const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
   const openWhatsApp = () => {
@@ -333,7 +327,7 @@ export default function DetalhesAgendamento() {
     : colors.disabled;
 
   // Condições para exibir os botões de ação
-  const isPending = appointment.status === 'PENDING';
+  const isPending = appointment?.status === 'PENDING';
 
   return (
     <View

@@ -1,10 +1,12 @@
+import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button } from '@/src/components/ui/button';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { AppointmentResponse } from '@/src/types/api/appointment';
-import type { InterpreterResponseData } from '@/src/types/api/user';
+import type { InterpreterResponseData, UserResponse } from '@/src/types/api/user';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AtSign,
@@ -151,12 +153,13 @@ export default function DetalhesAgendamentoUsuario() {
     data: professionalData,
     loading: loadingProfessional,
     error: errorProfessional,
-  } = useApiGet<InterpreterResponseData>(
+  } = useApiGet<UserResponse>(
     interpreterId
       ? ApiRoutes.interpreters.profile(interpreterId.toString())
       : '',
     { enabled: !!interpreterId },
   );
+
 
   // Lógica de validação e erro inicial
   useEffect(() => {
@@ -169,7 +172,6 @@ export default function DetalhesAgendamentoUsuario() {
         visibilityTime: 2000,
         autoHide: true,
       });
-      router.back();
     }
   }, [id]);
 
@@ -217,8 +219,7 @@ export default function DetalhesAgendamentoUsuario() {
 
   // --- EXTRAÇÃO E FORMATAÇÃO DE DADOS ---
   const appointment = appointmentData.data;
-  const professional = professionalData;
-
+  const professional = professionalData?.data as InterpreterResponseData;
   // Dados do Profissional (Intérprete)
   const nome = professional.name ?? 'Nome não informado';
   const ocupacao =
@@ -343,14 +344,15 @@ export default function DetalhesAgendamentoUsuario() {
 
         {/* HEADER (AVATAR + NAME + RATING) */}
         <View style={styles.header}>
-          <Image
-            source={{ uri: avatarUrl }}
-            style={[
-              styles.avatar,
-              styles.avatarDecor,
-              { backgroundColor: avatarBg, borderColor: avatarBorder },
-            ]}
-          />
+          <Avatar size="lg" borderRadius="full" className="h-28 w-28">
+            <AvatarImage
+              source={{
+                uri: getSafeAvatarUri({
+                  remoteUrl: professional?.picture,
+                }),
+              }}
+            />
+          </Avatar>
 
           <View style={styles.grow}>
             <Text
