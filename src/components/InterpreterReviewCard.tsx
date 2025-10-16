@@ -3,6 +3,7 @@ import { formatDate } from '@/src/utils/masks';
 import { View, Text } from 'react-native';
 
 import { Avatar, AvatarImage } from './ui/avatar';
+import { getSafeAvatarUri } from '../utils/helpers';
 
 interface InterpreterReviewCardProps {
   userName: string;
@@ -26,9 +27,9 @@ export default function InterpreterReviewCard({
           <Avatar size="md" borderRadius="full">
             <AvatarImage
               source={{
-                uri:
-                  userPhoto ||
-                  'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                uri: getSafeAvatarUri({
+                  remoteUrl: userPhoto,
+                }),
               }}
             />
           </Avatar>
@@ -41,7 +42,7 @@ export default function InterpreterReviewCard({
             >
               {userName}
             </Text>
-            <StarRating rating={rating} size={12} />
+            <StarRating rating={rating} size={14} />
           </View>
         </View>
 

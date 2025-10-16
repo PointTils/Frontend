@@ -9,6 +9,12 @@ import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
 import { pickFile } from '../utils/helpers';
 
+type UploadInputProps = {
+  multiple?: boolean;
+  maxFiles?: number;
+  onChange: (files: string[]) => void;
+};
+
 /**
  * A file upload component that allows selecting one or multiple files
  * from the device. Displays a list of selected files with name and
@@ -26,12 +32,6 @@ import { pickFile } from '../utils/helpers';
  *   onChange={(files) => console.log('Selected files:', files)}
  * />
  */
-
-type UploadInputProps = {
-  multiple?: boolean;
-  maxFiles?: number;
-  onChange: (files: string[]) => void;
-};
 
 export default function UploadInput({
   multiple = false,
