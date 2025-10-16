@@ -81,7 +81,10 @@ export default function InterpreterDetails() {
     error: errorReviews,
   } = useApiGet<ReviewResponse>(`/ratings?interpreterId=${interpreterId}`);
 
-  if (loadingInterpreter || loadingReviews) {
+  const isLoading = loadingInterpreter || loadingReviews || loadingSchedule;
+  const isError = errorInterpreter || errorSchedule || errorReviews;
+
+  if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="small" color={colors.primaryBlue} />
@@ -92,12 +95,10 @@ export default function InterpreterDetails() {
     );
   }
 
-  if (errorInterpreter || errorSchedule || errorReviews) {
+  if (isError) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="text-red-500">
-          {errorInterpreter || errorSchedule || errorReviews}
-        </Text>
+        <Text className="text-red-500">{Strings.common.noResults}</Text>
       </View>
     );
   }
