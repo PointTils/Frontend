@@ -3,7 +3,8 @@
  * Update here if any route changes.
  */
 
-import { UserType } from '../types/api';
+import { UserType as _UserType } from '@/src/types/api/user';
+
 
 export const ApiRoutes = {
   auth: {
@@ -43,10 +44,10 @@ export const ApiRoutes = {
     delete: (id: string) => `/appointments/${id}`,
     filter: '/appointments/filter',
   },
-  // appointments: {
-  //   base: '/appointments',
-  //   byStatus: (id: string, type: UserType, status: string) =>
-  //     `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
-  //   filter: '/appointments/filter',
-  // },
+  /*appointments: {
+    base: '/appointments',
+    byStatus: (id: string, type: UserType, status: string) =>
+      `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
+    filter: '/appointments/filter',
+  },*/
 } as const;

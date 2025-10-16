@@ -3,7 +3,7 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { AppointmentResponse } from '@/src/types/api/appointments';
+import type { AppointmentResponse } from '@/src/types/api/appointment';
 import type { InterpreterResponseData } from '@/src/types/api/user';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -14,7 +14,7 @@ import {
   MapPin,
   Phone,
   User as UserIcon,
-  Star, // Adicionado StarIcon que estava faltando
+  Star,
 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
@@ -50,7 +50,8 @@ type Endereco = {
 function formatEndereco(endereco?: Endereco) {
   if (!endereco) return '';
 
-  const { street, streetNumber, neighborhood, city, uf, addressDetails } = endereco;
+  const { street, streetNumber, neighborhood, city, uf, addressDetails } =
+    endereco;
 
   return [
     street && `${street}${streetNumber ? `, ${streetNumber}` : ''}`,
@@ -63,30 +64,64 @@ function formatEndereco(endereco?: Endereco) {
 }
 
 /**
- * Função utilitária para formatar o intervalo de data/hora
+ * Formata data/hora a partir de partes (robusto a snake/camel e fuso)
  */
-function formatRange(iniISO?: string, fimISO?: string) {
-  if (!iniISO || !fimISO) return '';
-  try {
-    const ini = new Date(iniISO);
-    const fim = new Date(fimISO);
-    const dia = ini.toLocaleDateString(undefined, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-    const hi = ini.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    const hf = fim.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return `${dia} ${hi} – ${hf}`;
-  } catch {
-    return `${iniISO} – ${fimISO}`;
+function formatRangeByParts(
+  dateStr?: string,
+  startStr?: string,
+  endStr?: string,
+) {
+  if (!dateStr || !startStr || !endStr) return '';
+
+  // Suporta YYYY-MM-DD e DD/MM/YYYY
+  const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const brDate = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+  let y: number, m: number, d: number;
+
+  if (isoDate.test(dateStr)) {
+    const [, yy, mm, dd] = dateStr.match(isoDate)!;
+    y = +yy;
+    m = +mm - 1;
+    d = +dd;
+  } else if (brDate.test(dateStr)) {
+    const [, dd, mm, yy] = dateStr.match(brDate)!;
+    y = +yy;
+    m = +mm - 1;
+    d = +dd;
+  } else {
+    // fallback legível para debug
+    return `${dateStr} ${startStr} – ${endStr}`;
   }
+
+  // Aceita HH:mm ou HH:mm:ss
+  const toHMS = (t: string) => {
+    const [H = '0', M = '0', S = '0'] = t.split(':');
+    return { H: +H, M: +M, S: +S };
+  };
+
+  const s = toHMS(startStr);
+  const e = toHMS(endStr);
+
+  // Monta em horário LOCAL (troque por Date.UTC se o back enviar UTC rígido)
+  const ini = new Date(y, m, d, s.H, s.M, s.S);
+  const fim = new Date(y, m, d, e.H, e.M, e.S);
+
+  const dia = ini.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const hi = ini.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const hf = fim.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return `${dia} ${hi} – ${hf}`;
 }
 
 /**
@@ -98,39 +133,58 @@ export default function DetalhesAgendamentoUsuario() {
   const SAFE_BOTTOM = height * 0.15;
 
   const [tab, setTab] = React.useState<TabKey>('agendamento');
-  
+
   // Extrai o ID do agendamento
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // 1. Fetch appointment data
-  const { data: appointmentData, loading: loadingAppointment, error: errorAppointment } = useApiGet<AppointmentResponse>(
-    ApiRoutes.appointments.detail(id || ''),
-  );
+  const {
+    data: appointmentData,
+    loading: loadingAppointment,
+    error: errorAppointment,
+  } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.detail(id || ''));
 
   // 2. Fetch interpreter data usando o ID do agendamento
-  const interpreterId = appointmentData?.data.interpreterId;
+  const interpreterId = appointmentData?.data.interpreter_id;
 
-  const { data: professionalData, loading: loadingProfessional, error: errorProfessional } = useApiGet<InterpreterResponseData>(
-    interpreterId ? ApiRoutes.interpreters.profile(interpreterId.toString()) : '',
+  const {
+    data: professionalData,
+    loading: loadingProfessional,
+    error: errorProfessional,
+  } = useApiGet<InterpreterResponseData>(
+    interpreterId
+      ? ApiRoutes.interpreters.profile(interpreterId.toString())
+      : '',
     { enabled: !!interpreterId },
   );
-  
+
   // Lógica de validação e erro inicial
   useEffect(() => {
     if (!id) {
-      Toast.show({ type: 'error', text1: 'Erro', text2: 'ID do agendamento não fornecido', position: 'top', visibilityTime: 2000, autoHide: true });
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'ID do agendamento não fornecido',
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+      });
       router.back();
     }
   }, [id]);
 
   // CORREÇÃO: Usamos o objeto toast do DetalhesAgendamento como fallback para evitar o erro de tipagem.
-  const toastStrings = (Strings.detalhesAgendamentoUsuario as any).toast || Strings.detalhesAgendamento.toast;
-
+  const toastStrings =
+    (Strings.detalhesAgendamentoUsuario as any).toast ||
+    Strings.detalhesAgendamento.toast;
 
   // Lógica de Carregamento
   if (loadingAppointment || loadingProfessional) {
     return (
-      <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.white }}>
+      <View
+        className="flex-1 justify-center items-center"
+        style={{ backgroundColor: colors.white }}
+      >
         <ActivityIndicator size="large" color={colors.primaryBlue} />
         <Text className="font-ifood-regular text-text-light dark:text-text-dark mt-2">
           Carregando detalhes...
@@ -138,18 +192,26 @@ export default function DetalhesAgendamentoUsuario() {
       </View>
     );
   }
-  
+
   // Lógica de Erro
-  if (errorAppointment || errorProfessional || !appointmentData?.success || !professionalData) {
+  if (
+    errorAppointment ||
+    errorProfessional ||
+    !appointmentData?.success ||
+    !professionalData
+  ) {
     Toast.show({
       type: 'error',
       text1: toastStrings.errorLoadTitle || 'Erro ao carregar',
-      text2: errorAppointment || errorProfessional || toastStrings.errorLoadDescription || 'Não foi possível carregar os detalhes',
+      text2:
+        errorAppointment ||
+        errorProfessional ||
+        toastStrings.errorLoadDescription ||
+        'Não foi possível carregar os detalhes',
       position: 'top',
       visibilityTime: 2000,
       autoHide: true,
     });
-    router.back();
     return null;
   }
 
@@ -159,32 +221,55 @@ export default function DetalhesAgendamentoUsuario() {
 
   // Dados do Profissional (Intérprete)
   const nome = professional.name ?? 'Nome não informado';
-  const ocupacao = professional.specialties?.[0]?.name ?? 'Intérprete de Libras';
+  const ocupacao =
+    professional.specialties?.[0]?.name ?? 'Intérprete de Libras';
   const email = professional.email ?? 'E-mail não informado';
   const telefone = professional.phone ?? '';
   const avatarUrl = professional.picture ?? '';
-  const nota: number = professional.professional_data?.rating ?? 5.0; // Usando rating real ou 5.0 como fallback
+  const nota: number = professional.professional_data?.rating ?? 5.0;
   const notaTxt = nota.toFixed(1).replace('.', ',');
-  const servicosDescricao = professional.professional_data?.description ?? 'Nenhuma descrição de serviços fornecida.';
+  const servicosDescricao =
+    professional.professional_data?.description ??
+    'Nenhuma descrição de serviços fornecida.';
 
-  // Dados do Agendamento
+  // Dados do Agendamento (lendo snake_case ou camelCase)
   const descricao = appointment.description ?? 'Descrição não informada';
-  const dataInicio = `${appointment.date ?? ''}T${appointment.startTime ?? ''}`;
-  const dataFim = `${appointment.date ?? ''}T${appointment.endTime ?? ''}`;
-  
-  // Endereço (Modality logic)
-  const endereco = appointment.modality === 'ONLINE' 
-    ? 'Reunião Online (online)' 
-    : formatEndereco(appointment) || 'Endereço não informado'; 
+
+  const dateRaw = (appointment as any).date ?? '';
+  const startRaw =
+    (appointment as any).startTime ?? (appointment as any).start_time ?? '';
+  const endRaw =
+    (appointment as any).endTime ?? (appointment as any).end_time ?? '';
+
+  // Endereço (mapeando snake->camel só para esta função)
+  const endereco =
+    appointment.modality === 'ONLINE'
+      ? 'Reunião Online (online)'
+      : formatEndereco({
+          uf: (appointment as any).uf,
+          city: (appointment as any).city,
+          neighborhood: (appointment as any).neighborhood,
+          street: (appointment as any).street,
+          streetNumber:
+            (appointment as any).street_number ??
+            (appointment as any).streetNumber ??
+            null,
+          addressDetails:
+            (appointment as any).address_details ??
+            (appointment as any).addressDetails ??
+            null,
+        }) || 'Endereço não informado';
 
   // Funções de ação
   const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
   const openWhatsApp = () => {
     const phone = onlyDigits(telefone);
     const message = `Olá, ${nome}. Gostaria de confirmar nosso agendamento.`;
-    Linking.openURL(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
+    Linking.openURL(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+    );
   };
-        
+
   const handleCancelar = () => router.back(); // Substituir pela lógica real de cancelamento
 
   const lbl = {
@@ -206,7 +291,7 @@ export default function DetalhesAgendamentoUsuario() {
   const profissionalColor = !isAgendamento
     ? colors.primaryBlue
     : colors.disabled;
-  
+
   // Funções de cor para o avatar (mantidas do seu código)
   const pickColor = (...vals: (string | undefined)[]) =>
     vals.find(Boolean) as string;
@@ -235,7 +320,6 @@ export default function DetalhesAgendamentoUsuario() {
       ]}
     >
       <View style={styles.content}>
-        
         {/* TOP ROW (BACK BUTTON + TITLE) */}
         <View style={styles.topRow}>
           <Pressable
@@ -263,7 +347,7 @@ export default function DetalhesAgendamentoUsuario() {
             source={{ uri: avatarUrl }}
             style={[
               styles.avatar,
-              styles.avatarDecor, 
+              styles.avatarDecor,
               { backgroundColor: avatarBg, borderColor: avatarBorder },
             ]}
           />
@@ -382,7 +466,7 @@ export default function DetalhesAgendamentoUsuario() {
                   </Text>
                 </View>
                 <Text style={[styles.blockText, { color: colors.text }]}>
-                  {formatRange(dataInicio, dataFim)}
+                  {formatRangeByParts(dateRaw, startRaw, endRaw)}
                 </Text>
               </View>
 
@@ -416,7 +500,7 @@ export default function DetalhesAgendamentoUsuario() {
 
               {/* TELEFONE */}
               <View style={styles.rowBetween}>
-                <View style={styles.grow}>
+                <View className="flex-1">
                   <View style={styles.rowAlign}>
                     <Phone size={18} color={colors.primaryBlue} />
                     <Text style={[styles.blockTitle, { color: colors.text }]}>
