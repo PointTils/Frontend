@@ -1,4 +1,5 @@
 import Header from '@/src/components/Header';
+import InfoRow from '@/src/components/InfoRow';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
 import InterpreterReviewCard from '@/src/components/InterpreterReviewCard';
 import { StarRating } from '@/src/components/Rating';
@@ -16,19 +17,19 @@ import type {
   InterpreterResponseData,
   UserResponse,
 } from '@/src/types/api';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import {
   BriefcaseBusinessIcon,
-  SquarePenIcon,
   StarIcon,
-  InfoIcon,
-  CameraIcon,
-  MapPinIcon,
-  BanknoteIcon,
   PlusIcon,
   Clock,
+  FileTextIcon,
+  PenSquareIcon,
+  InfoIcon,
+  MapPinIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -254,19 +255,23 @@ export default function InterpreterDetails() {
           <Avatar size="lg" borderRadius="full" className="h-28 w-28">
             <AvatarImage
               source={{
-                uri:
-                  interpreter.picture ||
-                  'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                uri: getSafeAvatarUri({
+                  remoteUrl: interpreter?.picture,
+                }),
               }}
             />
           </Avatar>
 
           <View className="flex-col gap-1">
-            <Text className="font-ifood-bold text-lg text-text-light dark:text-text-dark">
+            <Text
+              className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
               {interpreter.name}
             </Text>
             <Text
-              className="font-ifood-normal text-lg text-text-light dark:text-text-dark max-w-[180px]"
+              className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
               ellipsizeMode="tail"
               numberOfLines={1}
             >
@@ -275,14 +280,14 @@ export default function InterpreterDetails() {
                 : ''}
             </Text>
             <StarRating
-              rating={interpreter.professional_data.rating}
-              size={20}
+              rating={interpreter.professional_data?.rating || 0}
+              size={18}
             />
           </View>
         </View>
 
         {/* Section selector */}
-        <View className="flex-row w-full mt-6">
+        <View className="flex-row w-full mt-8 mb-4">
           <TouchableOpacity
             activeOpacity={1}
             className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
@@ -297,7 +302,7 @@ export default function InterpreterDetails() {
                 }
               />
               <Text
-                className={`font-ifood-medium text-lg ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+                className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
               >
                 {Strings.search.details}
               </Text>
@@ -317,7 +322,7 @@ export default function InterpreterDetails() {
                 }
               />
               <Text
-                className={`font-ifood-medium text-lg ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+                className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
               >
                 {Strings.search.reviews}
               </Text>
@@ -328,70 +333,47 @@ export default function InterpreterDetails() {
         {/* Information section */}
         {section === Strings.search.details && (
           <>
-            <View className="flex-row items-center gap-2 mt-6">
-              <SquarePenIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.search.description}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {interpreter.professional_data.description}
-            </Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <InfoIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.modality}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {mapModality(interpreter.professional_data.modality)}
-            </Text>
-            {interpreter.professional_data.modality !== Modality.ONLINE && (
-              <>
-                <View className="flex-row items-center gap-2 mt-6">
-                  <MapPinIcon width={16} height={16} />
-                  <Text className="font-ifood-medium text-lg">
-                    {Strings.common.fields.location}
-                  </Text>
-                </View>
-                <Text className="px-7">
-                  {interpreter.locations
-                    .map((loc) => loc.neighborhood)
-                    .join(', ')}
-                </Text>
-              </>
+            <InfoRow
+              icon={<PenSquareIcon size={16} color={colors.text} />}
+              label={Strings.search.description}
+              value={interpreter.professional_data?.description || undefined}
+              valueColor="text-typography-600"
+            />
+
+            <InfoRow
+              icon={<InfoIcon size={16} color={colors.text} />}
+              label={Strings.common.fields.modality}
+              value={mapModality(interpreter.professional_data?.modality)}
+              valueColor="text-typography-600"
+            />
+
+            {interpreter.professional_data?.modality !== Modality.ONLINE && (
+              <InfoRow
+                icon={<MapPinIcon size={16} color={colors.text} />}
+                label={Strings.common.fields.location}
+                value={interpreter.locations
+                  ?.map((loc) => loc.neighborhood)
+                  .join(', ')}
+                valueColor="text-typography-600"
+              />
             )}
 
-            <View className="flex-row items-center gap-2 mt-6">
-              <CameraIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.imageRights}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {mapImageRights(interpreter.professional_data.image_rights)}
-            </Text>
-            <View className="flex-row items-center gap-2 mt-6">
-              <BanknoteIcon width={16} height={16} />
-              <Text className="font-ifood-medium text-lg">
-                {Strings.common.fields.valueRange}
-              </Text>
-            </View>
-            <Text className="px-7">
-              {'R$' +
-                interpreter.professional_data.min_value +
-                '-' +
-                interpreter.professional_data.max_value}
-            </Text>
+            <InfoRow
+              icon={<FileTextIcon size={16} color={colors.text} />}
+              label={Strings.common.fields.imageRights}
+              value={mapImageRights(
+                interpreter.professional_data?.image_rights,
+              )}
+              valueColor="text-typography-600"
+            />
 
             {SCHEDULE_ENABLED && (
-              <>
-                <View className="flex-row items-center gap-2 mt-6">
-                  <Clock width={16} height={16} />
-                  <Text className="font-ifood-medium text-lg">
-                    {Strings.hours.title}
-                  </Text>
-                </View>
+              <View className="mt-6">
+                <InfoRow
+                  icon={<Clock size={16} color={colors.text} />}
+                  label={Strings.hours.title}
+                  onlyLabel={true}
+                />
 
                 {loadingSchedule ? (
                   <View className="h-12 items-center justify-center">
@@ -407,7 +389,7 @@ export default function InterpreterDetails() {
                     onTimeSelect={setSelectedTime}
                   />
                 )}
-              </>
+              </View>
             )}
           </>
         )}

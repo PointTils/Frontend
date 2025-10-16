@@ -21,6 +21,7 @@ export function StarRating({ rating, size = 24, color }: StarRatingProps) {
   const colors = useColors();
   const totalStars = 5;
   const starColor = color ?? colors.primaryBlue;
+  const textSizeClass = size <= 14 ? 'text-sm' : 'text-md';
 
   return (
     <View className="flex-row relative items-center">
@@ -35,7 +36,7 @@ export function StarRating({ rating, size = 24, color }: StarRatingProps) {
       ))}
 
       <View
-        className="absolute left-0 overflow-hidden flex-row"
+        className={`absolute left-0 overflow-hidden flex-row ${size === 14 ? 'top-0.5' : 'top-0'}`}
         style={{
           // dynamic width must stay inline
           width: (rating / totalStars) * size * totalStars,
@@ -53,7 +54,7 @@ export function StarRating({ rating, size = 24, color }: StarRatingProps) {
       </View>
 
       <Text
-        className={`mx-3 font-ifood-light ${size <= 14 ? 'text-sm' : 'text-md'}`}
+        className={`mx-2 font-ifood-light text-typography-600 ${textSizeClass}`}
       >
         {rating}
       </Text>

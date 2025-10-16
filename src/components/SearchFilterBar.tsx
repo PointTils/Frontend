@@ -22,6 +22,7 @@ import type { AppliedFilters } from '../types/ui';
 interface SearchFilterBarProps {
   onData: (data: InterpreterListResponse) => void;
   interactive?: boolean;
+  preSelectedSpecialties?: string[];
 }
 
 /**
@@ -43,6 +44,8 @@ interface SearchFilterBarProps {
 export default function SearchFilterBar({
   onData,
   interactive = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  preSelectedSpecialties = [],
 }: SearchFilterBarProps) {
   const colors = useColors();
   const [query, setQuery] = useState('');

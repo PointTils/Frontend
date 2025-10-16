@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { View } from 'react-native';
@@ -57,7 +58,6 @@ export const buildRegisterPayload = (
     case UserType.PERSON:
       return {
         name: fields.name.value,
-        picture: '',
         email: fields.email.value,
         password: fields.password.value,
         phone: fields.phone.value.replace(/\D/g, ''),
@@ -68,7 +68,6 @@ export const buildRegisterPayload = (
     case UserType.ENTERPRISE:
       return {
         corporate_reason: fields.reason.value,
-        picture: '',
         cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         password: fields.password.value,
@@ -79,7 +78,6 @@ export const buildRegisterPayload = (
         name: fields.name.value,
         email: fields.email.value,
         password: fields.password.value,
-        picture: '',
         phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
@@ -102,7 +100,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.ENTERPRISE:
       return {
@@ -110,7 +107,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.INTERPRETER:
       const neighborhoods = (fields.neighborhoods.value ?? []) as string[];
@@ -126,7 +122,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
-        picture: '',
         ...(locations.length > 0 ? { locations } : {}),
         professional_data: {
           ...(fields.cnpj.value
@@ -136,8 +131,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
-          min_value: Number(fields.minPrice.value),
-          max_value: Number(fields.maxPrice.value),
         },
       };
     default:
@@ -177,6 +170,20 @@ export const buildAppointmentPayload = (
         : null,
     address_details: isOnline ? null : fields.floor.value || null,
   } as AppointmentRequest;
+};
+
+export const buildAvatarFormData = (image: ImagePickerAsset) => {
+  const form = new FormData();
+  const inferredExt = image.mimeType?.split('/')?.[1] || 'jpg';
+  const name = image.fileName || `profile_${Date.now()}.${inferredExt}`;
+  const type = `image/${inferredExt}`;
+
+  form.append('file', {
+    uri: image.uri,
+    name,
+    type,
+  } as any);
+  return form;
 };
 
 const modalityToSend = (modality: Modality[]) => {
@@ -242,6 +249,26 @@ export const pickFile = async () => {
     console.error(error);
     return null;
   }
+};
+
+export const getSafeAvatarUri = ({
+  selectedUri,
+  remoteUrl,
+  fallback = 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+}: {
+  selectedUri?: string | null;
+  remoteUrl?: string | null;
+  fallback?: string;
+}): string => {
+  if (selectedUri && selectedUri.trim()) return selectedUri;
+  if (remoteUrl && remoteUrl.trim()) {
+    try {
+      return encodeURI(remoteUrl);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
 };
 
 type RenderApptItemOptions = {

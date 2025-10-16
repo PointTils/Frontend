@@ -34,6 +34,11 @@ export const Strings = {
       inPerson: 'Presencial',
     },
 
+    values: {
+      combined: 'A combinar',
+      notInformed: 'Não informado',
+    },
+
     fields: {
       select: 'Selecione',
       selected: '{count} selecionados',
@@ -46,11 +51,9 @@ export const Strings = {
       phone: 'Telefone',
       email: 'Email',
       password: 'Senha',
-      description: 'Descrição',
+      more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
-      valueRange: 'Faixa de valores',
-      min: 'Mínimo',
-      max: 'Máximo',
+      values: 'Valores',
       modality: 'Modalidade',
       location: 'Localização',
       state: 'UF',
@@ -202,6 +205,16 @@ export const Strings = {
     title: 'Gerencie suas solicitações',
     subtitle:
       'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+    details: 'Dados do agendamento',
+    accept: 'Aceitar',
+    reject: 'Recusar',
+
+    toast: {
+      acceptTitle: 'Solicitação Aprovada',
+      acceptDescription: 'A solicitação foi aceita com sucesso!',
+      rejectTitle: 'Solicitação Recusada',
+      rejectDescription: 'A solicitação foi recusada com sucesso!',
+    },
   },
 
   appointments: {
@@ -240,6 +253,14 @@ export const Strings = {
       limitTitle: 'Limite de arquivos atingido',
       limitDescription: 'Você pode adicionar até {max} arquivos.',
     },
+  },
+
+  feedbackModal: {
+    title: 'Queremos saber sua opinião!',
+    subtitle:
+      'Avalie sua experiência no atendimento realizado pelo intérprete ',
+    placeholder: 'Escreva mais detalhes',
+    submitButton: 'Avaliar',
   },
 
   // Enums and fixed options

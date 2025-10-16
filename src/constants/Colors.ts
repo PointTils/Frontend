@@ -21,6 +21,8 @@ export const Colors = {
     modalOverlay: 'rgba(0, 0, 0, 0.5)', // Modal backdrop
     pendingBadge: '#C96A2C',
     pendingBadgeBackground: '#FCEFE6',
+    success: '#348352',
+    error: '#E63535',
   },
   dark: {
     text: '#fff',
@@ -38,5 +40,7 @@ export const Colors = {
     modalOverlay: 'rgba(0, 0, 0, 0.6)', // Modal backdrop - slightly darker for dark mode
     pendingBadge: '#C96A2C',
     pendingBadgeBackground: '#FCEFE6',
+    success: '#319758ff',
+    error: '#ff3131ff',
   },
 } as const;
