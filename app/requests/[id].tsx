@@ -7,8 +7,11 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
+import { useApiGet } from '@/src/hooks/useApi';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { formatDate, formatTime, formatAppointmentLocation } from '@/src/utils/masks';
+import { type AppointmentResponse } from '@/src/types/api/appointment';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   SquarePen,
   CalendarDays,
@@ -17,11 +20,17 @@ import {
   CheckIcon,
 } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, ActivityIndicator } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
   const colors = useColors();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  
+  // Buscar dados do appointment
+  const { data: appointmentData, loading, error } = useApiGet<AppointmentResponse>(
+    `/appointments/${id}`
+  );
 
   const handleBack = () => {
     router.back();
@@ -58,6 +67,44 @@ export default function RequestDetailsScreen() {
     // Go back to previous screen
     handleBack();
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color={colors.primaryOrange} />
+        <Text className="text-typography-600 font-ifood-regular mt-4">
+          Carregando solicitação...
+        </Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !appointmentData?.data) {
+    return (
+      <View className="flex-1 justify-center items-center px-6">
+        <Text className="text-typography-900 font-ifood-medium text-lg mb-2">
+          Erro ao carregar solicitação
+        </Text>
+        <Text className="text-typography-600 font-ifood-regular text-center mb-6">
+          {error || 'Não foi possível carregar os dados da solicitação'}
+        </Text>
+        <Button onPress={handleBack}>
+          <Text className="font-ifood-regular text-text-dark">
+            Voltar
+          </Text>
+        </Button>
+      </View>
+    );
+  }
+
+  const appointment = appointmentData.data;
+
+  // Formatar dados para exibição
+  const formattedDate = `${formatDate(appointment.date)} ${formatTime(appointment.start_time)} - ${formatTime(appointment.end_time)}`;
+  const formattedLocation = formatAppointmentLocation(appointment);
+  const formattedDescription = appointment.description || 'Nenhuma descrição fornecida';
 
   return (
     <View className="flex-1 justify-center">
@@ -109,9 +156,7 @@ export default function RequestDetailsScreen() {
           <InfoRow
             icon={<SquarePen size={16} color={colors.text} />}
             label={Strings.common.fields.more}
-            value="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+            value={formattedDescription}
             valueColor="text-typography-600"
           />
 
@@ -119,7 +164,7 @@ export default function RequestDetailsScreen() {
           <InfoRow
             icon={<CalendarDays size={16} color={colors.text} />}
             label={Strings.common.fields.date}
-            value="20/08/2025 11:30 - 12:30"
+            value={formattedDate}
             valueColor="text-typography-600"
           />
 
@@ -127,7 +172,7 @@ export default function RequestDetailsScreen() {
           <InfoRow
             icon={<MapPin size={16} color={colors.text} />}
             label={Strings.common.fields.location}
-            value="Av. Ipiranga 6681, Partenon - Porto Alegre/RS"
+            value={formattedLocation}
             valueColor="text-typography-600"
           />
         </View>
