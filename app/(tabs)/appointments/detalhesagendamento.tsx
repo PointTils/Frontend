@@ -593,9 +593,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    marginTop: 50,
   },
   avatar: { width: 72, height: 72, borderRadius: 36 },
-  nome: { fontSize: 18, lineHeight: 22, fontFamily: 'iFoodRC-Medium' },
+  nome: { fontSize: 18, lineHeight: 22, fontFamily: 'iFoodRC-Medium', marginTop: 3  },
   cpf: { marginTop: 4, fontSize: 14, fontFamily: 'iFoodRC-Regular' },
   grow: { flex: 1 },
   tabs: {
