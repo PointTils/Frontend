@@ -30,6 +30,7 @@ import {
   PenSquareIcon,
   InfoIcon,
   MapPinIcon,
+  PackageSearchIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -116,91 +117,94 @@ export default function InterpreterDetails() {
         />
       </View>
 
-      {/* Name and photo section */}
-      <ScrollView className="px-8">
-        {/* For alignment purposes */}
-        <View className="w-full h-6" />
+      {/* For alignment purposes */}
+      <View className="w-full h-6" />
 
-        <View className="items-center flex-row w-full justify-center gap-4">
-          {/* Avatar */}
-          <Avatar size="lg" borderRadius="full" className="h-28 w-28">
-            <AvatarImage
-              source={{
-                uri: getSafeAvatarUri({
-                  remoteUrl: interpreter?.picture,
-                }),
-              }}
-            />
-          </Avatar>
+      <View className="items-center flex-row w-full justify-center gap-4 px-8">
+        {/* Avatar */}
+        <Avatar size="lg" borderRadius="full" className="h-28 w-28">
+          <AvatarImage
+            source={{
+              uri: getSafeAvatarUri({
+                remoteUrl: interpreter?.picture,
+              }),
+            }}
+          />
+        </Avatar>
 
-          <View className="flex-col gap-1">
-            <Text
-              className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {interpreter.name}
-            </Text>
-            <Text
-              className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {interpreter.specialties.length > 0
-                ? interpreter.specialties.map((s) => s.name).join(', ')
-                : ''}
-            </Text>
-            <StarRating
-              rating={interpreter.professional_data?.rating || 0}
-              size={18}
+        <View className="flex-col gap-1">
+          <Text
+            className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {interpreter.name}
+          </Text>
+          <Text
+            className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {interpreter.specialties.length > 0
+              ? interpreter.specialties.map((s) => s.name).join(', ')
+              : ''}
+          </Text>
+          <StarRating
+            rating={interpreter.professional_data?.rating || 0}
+            size={18}
+          />
+        </View>
+      </View>
+
+      {/* Section selector */}
+      <View className="flex-row w-full mt-8 px-8">
+        <TouchableOpacity
+          activeOpacity={1}
+          className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection(Strings.search.details)}
+        >
+          <View className="flex-row items-center gap-2">
+            <BriefcaseBusinessIcon
+              color={
+                section === Strings.search.details
+                  ? colors.primaryBlue
+                  : colors.disabled
+              }
             />
+            <Text
+              className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+            >
+              {Strings.search.details}
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection(Strings.search.reviews)}
+        >
+          <View className="flex-row items-center gap-2">
+            <StarIcon
+              color={
+                section === Strings.search.reviews
+                  ? colors.primaryBlue
+                  : colors.disabled
+              }
+            />
+            <Text
+              className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+            >
+              {Strings.search.reviews}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
-        {/* Section selector */}
-        <View className="flex-row w-full mt-8 mb-4">
-          <TouchableOpacity
-            activeOpacity={1}
-            className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
-            onPress={() => setSection(Strings.search.details)}
-          >
-            <View className="flex-row items-center gap-2">
-              <BriefcaseBusinessIcon
-                color={
-                  section === Strings.search.details
-                    ? colors.primaryBlue
-                    : colors.disabled
-                }
-              />
-              <Text
-                className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
-              >
-                {Strings.search.details}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={1}
-            className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
-            onPress={() => setSection(Strings.search.reviews)}
-          >
-            <View className="flex-row items-center gap-2">
-              <StarIcon
-                color={
-                  section === Strings.search.reviews
-                    ? colors.primaryBlue
-                    : colors.disabled
-                }
-              />
-              <Text
-                className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
-              >
-                {Strings.search.reviews}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
+      <ScrollView
+        className="pt-4 px-8"
+        contentContainerClassName="flex-grow"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Information section */}
         {section === Strings.search.details && (
           <>
@@ -254,11 +258,13 @@ export default function InterpreterDetails() {
                     />
                   </View>
                 ) : (
-                  <InterpreterCalendar
-                    schedules={schedules?.data ?? []}
-                    selectedTime={selectTime}
-                    onTimeSelect={setSelectedTime}
-                  />
+                  <View className="mb-4">
+                    <InterpreterCalendar
+                      schedules={schedules?.data ?? []}
+                      selectedTime={selectTime}
+                      onTimeSelect={setSelectedTime}
+                    />
+                  </View>
                 )}
               </View>
             )}
@@ -266,7 +272,7 @@ export default function InterpreterDetails() {
         )}
 
         {section === Strings.search.reviews && (
-          <View>
+          <>
             {reviews && reviews.data.length > 0 ? (
               reviews.data.map((review) => (
                 <InterpreterReviewCard
@@ -279,11 +285,14 @@ export default function InterpreterDetails() {
                 />
               ))
             ) : (
-              <Text className="font-iFood-regular mt-32 text-center text-typography-500">
-                {Strings.search.noReviewsFound}
-              </Text>
+              <View className="flex-1 justify-center gap-y-4 items-center">
+                <PackageSearchIcon size={38} color={colors.detailsGray} />
+                <Text className="font-ifood-regular text-typography-400 text-md">
+                  {Strings.search.noReviewsFound}
+                </Text>
+              </View>
             )}
-          </View>
+          </>
         )}
       </ScrollView>
 

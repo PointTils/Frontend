@@ -17,7 +17,7 @@ export const Colors = {
     mandatory: '#B91C1C',
     onPressGray: '#e4e4e4ff',
     fieldGray: '#D3D3D3', // border300 - Gluestack
-    detailsGray: '#737373', // typography600 - Gluestack
+    detailsGray: '#8E8E8E', // typography600 - Gluestack
     modalOverlay: 'rgba(0, 0, 0, 0.5)', // Modal backdrop
     pendingBadge: '#C96A2C',
     pendingBadgeBackground: '#FCEFE6',
@@ -36,7 +36,7 @@ export const Colors = {
     onPressOrange: '#F28D22',
     onPressGray: '#374151',
     fieldGray: '#374151', // border600 - Gluestack
-    detailsGray: '#9CA3AF', // typography400 - Gluestack
+    detailsGray: '#a2a6aeff', // typography400 - Gluestack
     modalOverlay: 'rgba(0, 0, 0, 0.6)', // Modal backdrop - slightly darker for dark mode
     pendingBadge: '#C96A2C',
     pendingBadgeBackground: '#FCEFE6',

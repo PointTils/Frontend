@@ -21,7 +21,7 @@ export default function InterpreterReviewCard({
   reviewText,
 }: InterpreterReviewCardProps) {
   return (
-    <View className="flex-col py-4 gap-4 w-full mt-4">
+    <View className="flex-col py-4 gap-4 w-full">
       <View className="flex-row justify-between">
         <View className="flex-row items-center gap-4">
           <Avatar size="md" borderRadius="full">
