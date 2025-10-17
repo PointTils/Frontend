@@ -7,12 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { Modal, TouchableOpacity, TextInput } from 'react-native';
 
 import { Button } from './ui/button';
+import { ApiRoutes } from '../constants/ApiRoutes';
+import { useApiPost } from '../hooks/useApi';
 
 interface FeedbackModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (details: string) => void;
-  interpreterId?: string;
+  appointmentId: string;
   interpreterName?: string;
 }
 
@@ -38,14 +39,19 @@ interface FeedbackModalProps {
 export default function FeedbackModal({
   visible = false,
   onClose,
-  onSubmit,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interpreterId,
+  appointmentId,
+
   interpreterName,
 }: FeedbackModalProps) {
   const colors = useColors();
   const [details, setDetails] = useState('');
   const [rating, setRating] = useState(0);
+
+  //hook para enviar a avaliação
+  const { post, loading } = useApiPost<
+    { success: boolean; message: string },
+    { stars: number; description?: string }
+  >(ApiRoutes.ratings.create(appointmentId));
 
   // Reset state when modal is opened
   useEffect(() => {
@@ -54,6 +60,27 @@ export default function FeedbackModal({
       setDetails('');
     }
   }, [visible]);
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      alert('Por favor, selecione uma nota antes de enviar.');
+      return;
+    }
+
+    const body = {
+      stars: rating,
+      description: details.trim() || undefined,
+    };
+
+    const response = await post(body);
+
+    if (response?.success) {
+      alert('Avaliação enviada com sucesso!');
+      onClose();
+    } else {
+      alert(response?.message || 'Não foi possível enviar a avaliação.');
+    }
+  };
 
   const modalContainerStyle = {
     backgroundColor: colors.background,
@@ -150,10 +177,18 @@ export default function FeedbackModal({
           <View className="items-end">
             <Button
               size="md"
-              className="bg-primary-blue-light dark:bg-primary-blue-dark data-[active=true]:bg-primary-blue-press-light"
-              onPress={() => onSubmit(details)}
+              onPress={handleSubmit}
+              disabled={loading}
+              className={`
+                ${
+                  loading
+                    ? 'bg-disabled'
+                    : 'active:bg-onPressBlue bg-primary-blue-light dark:bg-primary-blue-dark'
+                }
+                 rounded-md px-6 py-3
+            `}
             >
-              <Text className="text-white font-ifood-regular">
+              <Text className="text-white font-ifood-regular text-base">
                 {Strings.feedbackModal.submitButton}
               </Text>
             </Button>
