@@ -30,6 +30,7 @@ import {
   PenSquareIcon,
   InfoIcon,
   MapPinIcon,
+  PackageSearchIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -58,7 +59,7 @@ export default function InterpreterDetails() {
 
   // Interpreter request
   const {
-    data: data,
+    data: interpreterData,
     loading: loadingInterpreter,
     error: errorInterpreter,
   } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
@@ -74,7 +75,17 @@ export default function InterpreterDetails() {
     dateTo: then.toISOString().split('T')[0],
   });
 
-  if (loadingInterpreter || loadingSchedule) {
+  // Reviews request
+  const {
+    data: reviews,
+    loading: loadingReviews,
+    error: errorReviews,
+  } = useApiGet<ReviewResponse>(`/ratings?interpreterId=${interpreterId}`);
+
+  const isLoading = loadingInterpreter || loadingReviews || loadingSchedule;
+  const isError = errorInterpreter || errorSchedule || errorReviews;
+
+  if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="small" color={colors.primaryBlue} />
@@ -85,154 +96,15 @@ export default function InterpreterDetails() {
     );
   }
 
-  if (errorInterpreter || errorSchedule || !data || !data.success) {
+  if (isError) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="text-red-500">
-          {errorInterpreter ?? 'Intérprete não encontrado'}
-        </Text>
+        <Text className="text-red-500">{Strings.common.noResults}</Text>
       </View>
     );
   }
 
-  const interpreter = data.data as InterpreterResponseData;
-
-  const mockReviewResponse: ReviewResponse = {
-    success: true,
-    message: 'Avaliações carregadas com sucesso.',
-    data: [
-      {
-        id: 1,
-        stars: 5,
-        description:
-          'Excelente produto! Superou todas as minhas expectativas. A qualidade do material é incrível.',
-        date: '2025-10-04',
-        user: {
-          id: 'u1',
-          name: 'João Silvaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 2,
-        stars: 4.5,
-        description:
-          'Muito bom, cumpre o que promete. A entrega demorou um pouco mais que o esperado, mas o produto vale a pena.',
-        date: '2025-10-02',
-        user: {
-          id: 'u2',
-          name: 'Maria Oliveira',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 3,
-        stars: 3,
-        description:
-          'É um produto razoável. Pelo preço, eu esperava um pouco mais de qualidade nos acabamentos.',
-        date: '2025-09-30',
-        user: {
-          id: 'u3',
-          name: 'Pedro Santos',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 4,
-        stars: 5,
-        description:
-          'Atendimento impecável e o produto chegou antes do prazo. Recomendo fortemente a loja!',
-        date: '2025-09-28',
-        user: {
-          id: 'u4',
-          name: 'Carla Mendes',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 5,
-        stars: 1,
-        description:
-          'Péssima experiência. O produto veio com defeito e o processo de devolução foi muito complicado.',
-        date: '2025-09-25',
-        user: {
-          id: 'u5',
-          name: 'Rafael Lima',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 6,
-        stars: 4,
-        description:
-          'Gostei bastante, ótima relação custo-benefício. Ideal para o uso diário.',
-        date: '2025-09-22',
-        user: {
-          id: 'u6',
-          name: 'Ana Paula',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 7,
-        stars: 2,
-        description:
-          'A descrição não condiz com a realidade. O produto é muito menor do que parece nas fotos.',
-        date: '2025-09-20',
-        user: {
-          id: 'u7',
-          name: 'Lucas Ferreira',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 8,
-        stars: 5,
-        description:
-          'Simplesmente perfeito! Já é a minha segunda compra e a qualidade continua excelente. Virou minha marca favorita.',
-        date: '2025-09-18',
-        user: {
-          id: 'u8',
-          name: 'Fernanda Souza',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 9,
-        stars: 4,
-        description:
-          'Ótimo, só achei a embalagem um pouco frágil para um produto tão delicado. Felizmente, não houve danos.',
-        date: '2025-09-15',
-        user: {
-          id: 'u9',
-          name: 'Ricardo Almeida',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-      {
-        id: 10,
-        stars: 3,
-        description:
-          'Funciona, mas o manual de instruções é muito confuso. Levei um tempo para conseguir montar.',
-        date: '2025-09-11',
-        user: {
-          id: 'u10',
-          name: 'Juliana Castro',
-          picture:
-            'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
-        },
-      },
-    ],
-  };
+  const interpreter = interpreterData?.data as InterpreterResponseData;
 
   return (
     <>
@@ -245,91 +117,94 @@ export default function InterpreterDetails() {
         />
       </View>
 
-      {/* Name and photo section */}
-      <ScrollView className="px-8">
-        {/* For alignment purposes */}
-        <View className="w-full h-6" />
+      {/* For alignment purposes */}
+      <View className="w-full h-6" />
 
-        <View className="items-center flex-row w-full justify-center gap-4">
-          {/* Avatar */}
-          <Avatar size="lg" borderRadius="full" className="h-28 w-28">
-            <AvatarImage
-              source={{
-                uri: getSafeAvatarUri({
-                  remoteUrl: interpreter?.picture,
-                }),
-              }}
-            />
-          </Avatar>
+      <View className="items-center flex-row w-full justify-center gap-4 px-8">
+        {/* Avatar */}
+        <Avatar size="lg" borderRadius="full" className="h-28 w-28">
+          <AvatarImage
+            source={{
+              uri: getSafeAvatarUri({
+                remoteUrl: interpreter?.picture,
+              }),
+            }}
+          />
+        </Avatar>
 
-          <View className="flex-col gap-1">
-            <Text
-              className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {interpreter.name}
-            </Text>
-            <Text
-              className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {interpreter.specialties.length > 0
-                ? interpreter.specialties.map((s) => s.name).join(', ')
-                : ''}
-            </Text>
-            <StarRating
-              rating={interpreter.professional_data?.rating || 0}
-              size={18}
+        <View className="flex-col gap-1">
+          <Text
+            className="font-ifood-medium text-lg text-text-light dark:text-text-dark max-w-[180px]"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {interpreter.name}
+          </Text>
+          <Text
+            className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {interpreter.specialties.length > 0
+              ? interpreter.specialties.map((s) => s.name).join(', ')
+              : ''}
+          </Text>
+          <StarRating
+            rating={interpreter.professional_data?.rating || 0}
+            size={18}
+          />
+        </View>
+      </View>
+
+      {/* Section selector */}
+      <View className="flex-row w-full mt-8 px-8">
+        <TouchableOpacity
+          activeOpacity={1}
+          className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection(Strings.search.details)}
+        >
+          <View className="flex-row items-center gap-2">
+            <BriefcaseBusinessIcon
+              color={
+                section === Strings.search.details
+                  ? colors.primaryBlue
+                  : colors.disabled
+              }
             />
+            <Text
+              className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+            >
+              {Strings.search.details}
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection(Strings.search.reviews)}
+        >
+          <View className="flex-row items-center gap-2">
+            <StarIcon
+              color={
+                section === Strings.search.reviews
+                  ? colors.primaryBlue
+                  : colors.disabled
+              }
+            />
+            <Text
+              className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+            >
+              {Strings.search.reviews}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
-        {/* Section selector */}
-        <View className="flex-row w-full mt-8 mb-4">
-          <TouchableOpacity
-            activeOpacity={1}
-            className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
-            onPress={() => setSection(Strings.search.details)}
-          >
-            <View className="flex-row items-center gap-2">
-              <BriefcaseBusinessIcon
-                color={
-                  section === Strings.search.details
-                    ? colors.primaryBlue
-                    : colors.disabled
-                }
-              />
-              <Text
-                className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
-              >
-                {Strings.search.details}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={1}
-            className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
-            onPress={() => setSection(Strings.search.reviews)}
-          >
-            <View className="flex-row items-center gap-2">
-              <StarIcon
-                color={
-                  section === Strings.search.reviews
-                    ? colors.primaryBlue
-                    : colors.disabled
-                }
-              />
-              <Text
-                className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
-              >
-                {Strings.search.reviews}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
+      <ScrollView
+        className="pt-4 px-8"
+        contentContainerClassName="flex-grow"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Information section */}
         {section === Strings.search.details && (
           <>
@@ -383,11 +258,13 @@ export default function InterpreterDetails() {
                     />
                   </View>
                 ) : (
-                  <InterpreterCalendar
-                    schedules={schedules?.data ?? []}
-                    selectedTime={selectTime}
-                    onTimeSelect={setSelectedTime}
-                  />
+                  <View className="mb-4">
+                    <InterpreterCalendar
+                      schedules={schedules?.data ?? []}
+                      selectedTime={selectTime}
+                      onTimeSelect={setSelectedTime}
+                    />
+                  </View>
                 )}
               </View>
             )}
@@ -396,16 +273,25 @@ export default function InterpreterDetails() {
 
         {section === Strings.search.reviews && (
           <>
-            {mockReviewResponse.data.map((review) => (
-              <InterpreterReviewCard
-                key={review.id}
-                rating={review.stars}
-                reviewDate={review.date}
-                userName={review.user.name}
-                reviewText={review.description}
-                userPhoto={review.user.picture}
-              />
-            ))}
+            {reviews && reviews.data.length > 0 ? (
+              reviews.data.map((review) => (
+                <InterpreterReviewCard
+                  key={review.id}
+                  rating={review.stars}
+                  reviewDate={review.date}
+                  userName={review.user.name}
+                  reviewText={review.description}
+                  userPhoto={review.user.picture}
+                />
+              ))
+            ) : (
+              <View className="flex-1 justify-center gap-y-4 items-center">
+                <PackageSearchIcon size={38} color={colors.detailsGray} />
+                <Text className="font-ifood-regular text-typography-400 text-md">
+                  {Strings.search.noReviewsFound}
+                </Text>
+              </View>
+            )}
           </>
         )}
       </ScrollView>

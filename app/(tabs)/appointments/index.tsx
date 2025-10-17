@@ -171,7 +171,7 @@ export default function AppointmentsScreen() {
         {current.length === 0 ? (
           <View className="flex-1 justify-center gap-y-4 items-center">
             <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="text-typography-600 text-md">
+            <Text className="font-ifood-regular text-typography-400 text-md">
               {Strings.common.noResults}
             </Text>
           </View>
