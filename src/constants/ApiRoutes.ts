@@ -32,12 +32,16 @@ export const ApiRoutes = {
     cities: (stateId: string) => `/states/${stateId}/cities`,
   },
   userSpecialties: {
-    userSpecialties: (userId: string) => `/users/${userId}/specialties`,
+    byUser: (userId: string) => `/users/${userId}/specialties`,
   },
   appointments: {
     base: '/appointments',
+    detail: (id: string) => `/appointments/${id}`,
     byStatus: (id: string, type: UserType, status: string) =>
       `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
     filter: '/appointments/filter',
+  },
+  userPicture: {
+    upload: (userId: string) => `/users/${userId}/picture`,
   },
 } as const;

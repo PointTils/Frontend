@@ -1,13 +1,21 @@
-import { Chip } from '@/src/components/ui/chip';
+import Chip from '@/src/components/Chip';
 import React from 'react';
 import { View } from 'react-native';
-
-// esse é o componente do grid de chips das Preferências e Especialidades
 
 type ChipsSectionProps = {
   items?: string[];
 };
 
+/**
+ * A component to display a section of chips.
+ *
+ * @param items - An array of strings to display as chips.
+ *
+ * @returns A styled section containing multiple chip components.
+ *
+ * @example
+ * <ChipsSection items={['Chip 1', 'Chip 2', 'Chip 3']} />
+ */
 export default function ChipsSection({ items }: ChipsSectionProps) {
   if (!items || items.length === 0) return null;
 

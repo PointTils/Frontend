@@ -39,6 +39,14 @@ module.exports = {
           light: '#0D0D0D',
           dark: '#fff',
         },
+        'primary-success': {
+          light: '#348352',
+          dark: '#319758ff',
+        },
+        'primary-error': {
+          light: '#E63535',
+          dark: '#ff3131ff',
+        },
         // default
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',

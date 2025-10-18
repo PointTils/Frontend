@@ -56,10 +56,12 @@ import {
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
+  buildAvatarFormData,
   buildEditPayload,
   buildInvalidFieldError,
   buildRequiredFieldError,
   getModality,
+  getSafeAvatarUri,
   pickImage,
 } from '@/src/utils/helpers';
 import {
@@ -147,7 +149,10 @@ export default function EditProfileScreen() {
   const userSpecialtyApi = useApiPost<
     UserSpecialtyResponse,
     UserSpecialtyRequest
-  >(ApiRoutes.userSpecialties.userSpecialties(profile?.id || ''));
+  >(ApiRoutes.userSpecialties.byUser(profile?.id || ''));
+  const userPictureApi = useApiPost<UserResponse, FormData>(
+    ApiRoutes.userPicture.upload(profile?.id || ''),
+  );
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
@@ -273,7 +278,7 @@ export default function EditProfileScreen() {
         ctx?: EditProfileValidationContext,
       ): string | null => {
         if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('description');
+          return buildRequiredFieldError('more');
         return null;
       },
     },
@@ -349,48 +354,6 @@ export default function EditProfileScreen() {
       validate: (_value: string, _ctx?: EditProfileValidationContext): null =>
         null,
     },
-    minPrice: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? (profile?.professional_data?.min_value?.toString() ?? '')
-          : '',
-      error: '',
-      validate: (
-        value: string,
-        ctx?: EditProfileValidationContext,
-      ): string | null => {
-        if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('min');
-        if (
-          ctx?.type === UserType.INTERPRETER &&
-          fields.maxPrice.value &&
-          Number(value) > Number(fields.maxPrice.value)
-        )
-          return buildInvalidFieldError('min');
-        return null;
-      },
-    },
-    maxPrice: {
-      value:
-        profile?.type === UserType.INTERPRETER
-          ? (profile?.professional_data?.max_value?.toString() ?? '')
-          : '',
-      error: '',
-      validate: (
-        value: string,
-        ctx?: EditProfileValidationContext,
-      ): string | null => {
-        if (ctx?.type === UserType.INTERPRETER && !value.trim())
-          return buildRequiredFieldError('max');
-        if (
-          ctx?.type === UserType.INTERPRETER &&
-          fields.minPrice.value &&
-          Number(fields.minPrice.value) > Number(value)
-        )
-          return buildInvalidFieldError('max');
-        return null;
-      },
-    },
   });
 
   const maxDate = useMemo(() => {
@@ -418,9 +381,14 @@ export default function EditProfileScreen() {
   }, [profile]);
 
   // Fetch all states
+  const isInterpreter = profile?.type === UserType.INTERPRETER;
+
   const [selectedState, setselectedState] = useState(fields.state.value);
+
   const { data: states } = useApiGet<StateAndCityResponse>(
     ApiRoutes.states.base,
+    undefined,
+    { enabled: isInterpreter },
   );
 
   let stateOptions: OptionItem[] = [];
@@ -434,6 +402,8 @@ export default function EditProfileScreen() {
   // Fetch cities based on selected state
   const { data: cities } = useApiGet<StateAndCityResponse>(
     ApiRoutes.states.cities(selectedState),
+    undefined,
+    { enabled: isInterpreter && !!selectedState },
   );
 
   let cityOptions: OptionItem[] = [];
@@ -499,18 +469,28 @@ export default function EditProfileScreen() {
       replace_existing: true, // Always replace existing specialties - similar to PUT behavior
     };
 
-    if (!api && !userSpecialtyApi) return;
+    if (!api && !userSpecialtyApi && !userPictureApi) return;
+
+    const profilePromise = api.patch(payload);
+    const specialtyPromise = userSpecialtyApi.post(specialtiesPayload);
+
+    let picturePromise: Promise<UserResponse | null>;
+    if (selectedImage) {
+      picturePromise = userPictureApi.post(buildAvatarFormData(selectedImage));
+    } else {
+      picturePromise = Promise.resolve({ success: true } as any);
+    }
 
     // Submit updates
-    const profileResponse = await api.patch(payload);
-    const specialtyResponse = await userSpecialtyApi.post(specialtiesPayload);
+    const [profileResponse, specialtyResponse, pictureResponse] =
+      await Promise.all([profilePromise, specialtyPromise, picturePromise]);
 
     if (
       !profileResponse?.success ||
       !profileResponse?.data ||
-      !specialtyResponse?.success
+      !specialtyResponse?.success ||
+      (selectedImage && !pictureResponse?.success)
     ) {
-      console.error('Update error:', api.error || 'Unknown error');
       router.replace('/(tabs)/(profile)');
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
@@ -525,7 +505,7 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // Successful update logic (e.g., navigate to login)
+    // Successful update logic (e.g., navigate to profile)
     router.replace('/(tabs)/(profile)');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
@@ -570,8 +550,9 @@ export default function EditProfileScreen() {
                     source={{
                       uri:
                         selectedImage?.uri ||
-                        profile?.picture ||
-                        'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+                        getSafeAvatarUri({
+                          remoteUrl: profile?.picture,
+                        }),
                     }}
                   />
                 </Avatar>
@@ -895,7 +876,7 @@ export default function EditProfileScreen() {
                   >
                     <FormControlLabel>
                       <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.description}
+                        {Strings.common.fields.more}
                       </FormControlLabelText>
                     </FormControlLabel>
                     <TextInput
@@ -1176,66 +1157,6 @@ export default function EditProfileScreen() {
                         </RadioLabel>
                       </Radio>
                     </RadioGroup>
-                  </View>
-
-                  {/* Values Max/Min */}
-                  <View className="w-80">
-                    <Text className="font-ifood-medium text-text-light dark:text-text-dark">
-                      {Strings.common.fields.valueRange}*
-                    </Text>
-                    <View className="flex-row justify-between mt-2">
-                      <FormControl isInvalid={!!fields.minPrice.error}>
-                        <FormControlLabel>
-                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.common.fields.min}
-                          </FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="w-36">
-                          <InputField
-                            className="font-ifood-regular"
-                            placeholder="0"
-                            value={fields.minPrice.value}
-                            onChangeText={(v) => setValue('minPrice', v)}
-                            keyboardType="numeric"
-                          />
-                        </Input>
-                        <FormControlError>
-                          <FormControlErrorIcon
-                            as={AlertCircleIcon}
-                            className="text-red-600"
-                          />
-                          <FormControlErrorText>
-                            {fields.minPrice.error}
-                          </FormControlErrorText>
-                        </FormControlError>
-                      </FormControl>
-
-                      <FormControl isInvalid={!!fields.maxPrice.error}>
-                        <FormControlLabel>
-                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                            {Strings.common.fields.max}
-                          </FormControlLabelText>
-                        </FormControlLabel>
-                        <Input className="w-36">
-                          <InputField
-                            className="font-ifood-regular"
-                            placeholder="100"
-                            value={fields.maxPrice.value}
-                            onChangeText={(v) => setValue('maxPrice', v)}
-                            keyboardType="numeric"
-                          />
-                        </Input>
-                        <FormControlError>
-                          <FormControlErrorIcon
-                            as={AlertCircleIcon}
-                            className="text-red-600"
-                          />
-                          <FormControlErrorText>
-                            {fields.maxPrice.error}
-                          </FormControlErrorText>
-                        </FormControlError>
-                      </FormControl>
-                    </View>
                   </View>
 
                   {/* Schedule */}

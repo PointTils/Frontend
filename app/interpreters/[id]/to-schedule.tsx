@@ -94,7 +94,7 @@ export default function ToScheduleScreen() {
       value: '',
       error: '',
       validate: (value: string): string | null =>
-        !value.trim() ? buildRequiredFieldError('description') : null,
+        !value.trim() ? buildRequiredFieldError('more') : null,
     },
     date: {
       value: '',
@@ -325,7 +325,7 @@ export default function ToScheduleScreen() {
             >
               <FormControlLabel>
                 <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.common.fields.description}
+                  {Strings.common.fields.more}
                 </FormControlLabelText>
               </FormControlLabel>
               <TextInput

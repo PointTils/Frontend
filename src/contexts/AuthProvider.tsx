@@ -251,8 +251,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       return false;
-    } catch (error) {
-      console.error('Token refresh failed:', error);
+    } catch {
       return false;
     }
   }

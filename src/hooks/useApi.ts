@@ -1,5 +1,5 @@
 import api from '@/src/api';
-import type { AxiosError, AxiosResponse } from 'axios';
+import { isAxiosError, type AxiosError, type AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 
 type ApiState<T> = {
@@ -8,22 +8,63 @@ type ApiState<T> = {
   error: string | null;
 };
 
+type GetOptions = {
+  enabled?: boolean;
+};
+
+// Helper to detect FormData
+const isFormData = (v: unknown): v is FormData =>
+  typeof FormData !== 'undefined' && v instanceof FormData;
+
+// Compact stringify to avoid huge logs/stack traces
+const compact = (obj: unknown, max = 300) => {
+  try {
+    const s = typeof obj === 'string' ? obj : JSON.stringify(obj);
+    return s.length > max ? `${s.slice(0, max)}…` : s;
+  } catch {
+    return '[unserializable]';
+  }
+};
+
+// Centralized error logging
+const logAxiosError = (
+  verb: 'GET' | 'POST' | 'PATCH',
+  endpoint: string,
+  err: unknown,
+) => {
+  if (isAxiosError(err)) {
+    const { response, code, message, config } = err;
+    const url = config?.url || endpoint;
+    console.warn(
+      `[API] ${verb} ${url} failed: status=${response?.status ?? 'n/a'} code=${code ?? 'n/a'} msg=${message}`,
+    );
+  } else {
+    console.warn(`[API] ${verb} ${endpoint} failed:`, compact(err));
+  }
+};
+
 /**
  * Usage example:
  *
  *   const { data, loading, error } = useApiGet<UserResponse[]>('/users', { active: true });
  */
-export const useApiGet = <T>(endpoint: string, params?: object) => {
+export const useApiGet = <T>(
+  endpoint: string,
+  params?: object,
+  options?: GetOptions,
+) => {
+  const enabled = options?.enabled ?? true;
+
   const [state, setState] = useState<ApiState<T>>({
     data: null,
-    loading: true,
+    loading: !!(enabled && endpoint),
     error: null,
   });
 
   const serializedParams = JSON.stringify(params ?? {});
 
   useEffect(() => {
-    if (!endpoint) {
+    if (!endpoint || !enabled) {
       setState({ data: null, loading: false, error: null });
       return;
     }
@@ -37,6 +78,7 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
           setState({ data: res.data, loading: false, error: null });
       })
       .catch((err: AxiosError) => {
+        logAxiosError('GET', endpoint, err);
         if (isMounted)
           setState({ data: null, loading: false, error: err.message });
       });
@@ -45,7 +87,7 @@ export const useApiGet = <T>(endpoint: string, params?: object) => {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endpoint, serializedParams]);
+  }, [endpoint, serializedParams, enabled]);
 
   return state;
 };
@@ -66,13 +108,20 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
   const post = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
+      const effectivePayload = (payload ?? body) as unknown;
+      const config = isFormData(effectivePayload)
+        ? { headers: { 'Content-Type': 'multipart/form-data' } }
+        : undefined;
+
       const res: AxiosResponse<T> = await api.post<T>(
         endpoint,
-        payload ?? body,
+        effectivePayload as U,
+        config,
       );
       setState({ data: res.data, loading: false, error: null });
       return res.data;
     } catch (err: any) {
+      logAxiosError('POST', endpoint, err);
       setState({ data: null, loading: false, error: err.message });
       return null;
     }
@@ -97,13 +146,20 @@ export const useApiPatch = <T, U>(endpoint: string, body?: U) => {
   const patch = async (payload?: U) => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
+      const effectivePayload = (payload ?? body) as unknown;
+      const config = isFormData(effectivePayload)
+        ? { headers: { 'Content-Type': 'multipart/form-data' } }
+        : undefined;
+
       const res: AxiosResponse<T> = await api.patch<T>(
         endpoint,
-        payload ?? body,
+        effectivePayload as U,
+        config,
       );
       setState({ data: res.data, loading: false, error: null });
       return res.data;
     } catch (err: any) {
+      logAxiosError('PATCH', endpoint, err);
       setState({ data: null, loading: false, error: err.message });
       return null;
     }

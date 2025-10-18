@@ -34,6 +34,11 @@ export const Strings = {
       inPerson: 'Presencial',
     },
 
+    values: {
+      combined: 'A combinar',
+      notInformed: 'Não informado',
+    },
+
     fields: {
       select: 'Selecione',
       selected: '{count} selecionados',
@@ -46,11 +51,9 @@ export const Strings = {
       phone: 'Telefone',
       email: 'Email',
       password: 'Senha',
-      description: 'Descrição',
+      more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
-      valueRange: 'Faixa de valores',
-      min: 'Mínimo',
-      max: 'Máximo',
+      values: 'Valores',
       modality: 'Modalidade',
       location: 'Localização',
       state: 'UF',
@@ -66,6 +69,7 @@ export const Strings = {
       professionalArea: 'Área profissional',
       date: 'Data',
       time: 'Hora',
+      uploadFile: 'Adicionar arquivo',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
@@ -201,6 +205,16 @@ export const Strings = {
     title: 'Gerencie suas solicitações',
     subtitle:
       'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+    details: 'Dados do agendamento',
+    accept: 'Aceitar',
+    reject: 'Recusar',
+
+    toast: {
+      acceptTitle: 'Solicitação Aprovada',
+      acceptDescription: 'A solicitação foi aceita com sucesso!',
+      rejectTitle: 'Solicitação Recusada',
+      rejectDescription: 'A solicitação foi recusada com sucesso!',
+    },
   },
 
   appointments: {
@@ -227,6 +241,26 @@ export const Strings = {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',
     },
+  },
+
+  // Components
+  upload: {
+    toast: {
+      errorTitle: 'Falha no upload',
+      errorDescription: 'Erro ao adicionar arquivo. Tente novamente',
+      duplicatedTitle: 'Arquivo duplicado',
+      duplicatedDescription: 'Este arquivo já foi adicionado.',
+      limitTitle: 'Limite de arquivos atingido',
+      limitDescription: 'Você pode adicionar até {max} arquivos.',
+    },
+  },
+
+  feedbackModal: {
+    title: 'Queremos saber sua opinião!',
+    subtitle:
+      'Avalie sua experiência no atendimento realizado pelo intérprete ',
+    placeholder: 'Escreva mais detalhes',
+    submitButton: 'Avaliar',
   },
 
   // Enums and fixed options
@@ -257,5 +291,60 @@ export const Strings = {
     guideInterpreterOfLibras: 'Guia-intérprete de Libras',
     tactileInterpreter: 'Intérprete Tátil',
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
+  },
+
+  detalhesAgendamento: {
+    header: 'Detalhes do agendamento',
+    tabs: {
+      agendamento: 'Agendamento',
+      solicitante: 'Solicitante',
+    },
+    sections: {
+      description: 'Descrição',
+      services: 'Serviços e experiência',
+      date: 'Data',
+      location: 'Localização',
+      phone: 'Telefone',
+      email: 'E-mail',
+    },
+    cta: {
+      cancel: 'Cancelar agendamento',
+      whatsapp: 'WhatsApp',
+      // CHAVES ADICIONADAS
+      accept: 'Aceitar',
+      reject: 'Recusar',
+    },
+    toast: {
+      errorNoIdTitle: 'Erro',
+      errorNoIdDescription: 'ID do agendamento não fornecido',
+      errorLoadTitle: 'Erro ao carregar',
+      errorLoadDescription: 'Não foi possível carregar os detalhes',
+      successCancelTitle: 'Cancelado',
+      successCancelDescription: 'Agendamento cancelado com sucesso',
+      errorCancelTitle: 'Erro ao cancelar',
+      errorCancelDescription: 'Não foi possível cancelar o agendamento',
+      noPhoneTitle: 'Erro',
+      noPhoneDescription: 'Telefone não disponível para contato',
+    },
+  },
+
+  detalhesAgendamentoUsuario: {
+    header: 'Detalhes do agendamento',
+    tabs: {
+      agendamento: 'Agendamento',
+      profissional: 'Profissional',
+    },
+    sections: {
+      description: 'Descrição',
+      services: 'Serviços e experiência',
+      date: 'Data',
+      location: 'Localização',
+      phone: 'Telefone',
+      email: 'E-mail',
+    },
+    cta: {
+      cancel: 'Cancelar agendamento',
+      whatsapp: 'WhatsApp',
+    },
   },
 } as const;

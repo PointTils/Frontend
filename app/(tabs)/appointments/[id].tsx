@@ -1,50 +1,25 @@
-import Header from '@/src/components/Header';
-import { Text } from '@/src/components/ui/text';
-import { View } from '@/src/components/ui/view';
-import { Strings } from '@/src/constants/Strings';
-import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
-import { ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { View, ActivityIndicator, Text } from 'react-native';
+import { useAuth } from '@/src/contexts/AuthProvider'; 
+import DetalheAgendamento from './detalhesagendamento';
+import DetalheAgendamentoUsuario from './detalhesagendamentousuario';
+import { UserType } from '@/src/types/api/common'
 
-export default function AppointmentDetailsScreen() {
-  const { id, returnTo } = useLocalSearchParams<{
-    id: string;
-    returnTo?: string;
-  }>(); // Appointment ID from route params
+export default function AppointmentDetailsPage() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user, isLoading } = useAuth(); 
 
-  const handleBack = (returnTo: string) => {
-    const target =
-      typeof returnTo === 'string' && returnTo.length > 0
-        ? returnTo === '/(tabs)'
-          ? '/'
-          : returnTo
-        : '';
-
-    if (target) {
-      router.replace(target as any);
-      return;
-    }
-    router.back();
-  };
-
-  return (
-    <View className="flex-1">
-      <View className="mt-12 pb-2">
-        <Header
-          title={Strings.appointments.appointment}
-          showBackButton={true}
-          handleBack={() => handleBack(returnTo || '')}
-        />
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator />
       </View>
+    );
+  }
 
-      <ScrollView
-        className="flex-1 px-6 py-4"
-        showsVerticalScrollIndicator={false}
-      >
-        <Text className="text-xl font-ifood-medium text-text-light dark:text-text-dark">
-          #{id}
-        </Text>
-      </ScrollView>
-    </View>
-  );
+  if (user?.type === UserType.INTERPRETER) {
+    return <DetalheAgendamento/>;
+  }
+  return <DetalheAgendamentoUsuario/>;
+  
 }

@@ -93,6 +93,13 @@ export const formatDateToISO = (dateString: string): string => {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 };
 
+export const formatPhoneOnlyDigits = (phone?: string | null) => {
+  // Returns "YYXXXXXXXXX"
+  if (!phone) return '';
+  const formatted = phone?.replace(/\D/g, '');
+  return formatted;
+};
+
 export const formatPhone = (phone?: string | null) => {
   // Returns "(XX) XXXXX-XXXX"
   if (!phone) return '';
@@ -101,12 +108,6 @@ export const formatPhone = (phone?: string | null) => {
     .replace(/^(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
   return formatted;
-};
-
-export const formatValueRange = (min?: number, max?: number) => {
-  // Returns "R$ X - R$ Y"
-  if (min === undefined && max === undefined) return '-';
-  return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
 };
 
 export const formatCnpj = (cnpj?: string | null) => {
