@@ -12,11 +12,13 @@ import {
   type Appointment,
   UserType,
   AppointmentStatus,
+  UserResponse,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { BellIcon, CalendarDays } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
 
 export default function HomeScreen() {
@@ -71,6 +73,37 @@ export default function HomeScreen() {
   const welcomeMessage = user
     ? Strings.home.welcome.replace('{User}', user.name)
     : Strings.home.welcome;
+
+  /**
+   * Lógica de exibição avaliação apenas no primeiro acesso
+   */
+  useEffect(() => {
+    const checkReviewStatus = async () => {
+      if (!user) return;
+
+      try {
+        // Verifica se já foi checado anteriormente
+        const alreadyChecked = await AsyncStorage.getItem('@reviewCheckDone');
+        if (alreadyChecked) return;
+        const {
+          data: data,
+          loading: loadingInterpreter,
+          error: errorInterpreter,
+        } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
+
+        
+        if () {
+        }
+
+        // Marca como checado para não repetir até o próximo login
+        await AsyncStorage.setItem('@reviewCheckDone', 'true');
+      } catch (err) {
+        console.log('Erro ao verificar status de avaliação', err);
+      }
+    };
+
+    checkReviewStatus();
+  }, [user]);
 
   return (
     <View className="flex-1">
