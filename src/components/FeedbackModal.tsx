@@ -49,7 +49,16 @@ export default function FeedbackModal({
 
   //hook para enviar a avaliação
   const { post, loading } = useApiPost<
-    { success: boolean; message: string },
+    {
+      success: boolean;
+      message: string;
+      data: {
+        id: number;
+        stars: number;
+        description: string;
+        appointmentId: string | number;
+      };
+    },
     { stars: number; description?: string }
   >(ApiRoutes.ratings.create(appointmentId));
 
