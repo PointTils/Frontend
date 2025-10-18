@@ -12,21 +12,19 @@ import {
   type Appointment,
   UserType,
   AppointmentStatus,
-  UserResponse,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { BellIcon, CalendarDays } from 'lucide-react-native';
-import { useEffect, useMemo } from 'react';
-import { ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays } from 'lucide-react-native';
-import { useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
+import FeedbackModal from '@/src/components/FeedbackModal';
+import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const colors = useColors();
+  const { showFeedbackModal, setShowFeedbackModal } = useCheckFeedback(user);
 
   const renderItem = useMemo(
     () =>
@@ -77,36 +75,16 @@ export default function HomeScreen() {
     ? Strings.home.welcome.replace('{User}', user.name)
     : Strings.home.welcome;
 
-  /**
-   * Lógica de exibição avaliação apenas no primeiro acesso
-   */
-  useEffect(() => {
-    const checkReviewStatus = async () => {
-      if (!user) return;
-
-      try {
-        // Verifica se já foi checado anteriormente
-        const alreadyChecked = await AsyncStorage.getItem('@reviewCheckDone');
-        if (alreadyChecked) return;
-        const {
-          data: data,
-          loading: loadingInterpreter,
-          error: errorInterpreter,
-        } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
-
-        
-        if () {
-        }
-
-        // Marca como checado para não repetir até o próximo login
-        await AsyncStorage.setItem('@reviewCheckDone', 'true');
-      } catch (err) {
-        console.log('Erro ao verificar status de avaliação', err);
-      }
-    };
-
-    checkReviewStatus();
-  }, [user]);
+  if (appointmentsLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.loading}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1">
@@ -160,6 +138,14 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
+
+      <FeedbackModal
+        visible={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        onSubmit={(details: string) => {
+          setShowFeedbackModal(false);
+        }}
+      />
     </View>
   );
 }
