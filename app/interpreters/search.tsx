@@ -12,6 +12,7 @@ import type {
 import type { AppliedFilters } from '@/src/types/ui';
 import { formatDateToISO, mapModality } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
+import { PackageSearchIcon } from 'lucide-react-native';
 import React, { Fragment, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text } from 'react-native';
 
@@ -113,9 +114,12 @@ export default function SearchScreen() {
           </View>
         </ScrollView>
       ) : (
-        <Text className="text-gray-500 text-center mt-6">
-          {Strings.common.noResults}
-        </Text>
+        <View className="flex-1 justify-center gap-y-4 items-center">
+          <PackageSearchIcon size={38} color={colors.detailsGray} />
+          <Text className="font-ifood-regular text-typography-400 text-md">
+            {Strings.common.noResults}
+          </Text>
+        </View>
       )}
     </View>
   );

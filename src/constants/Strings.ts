@@ -199,36 +199,51 @@ export const Strings = {
     },
   },
 
-  requests: {
-    request: 'Solicitação',
-    requests: 'Solicitações',
-    title: 'Gerencie suas solicitações',
-    subtitle:
-      'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
+  appointments: {
+    tabBar: 'Agendamentos',
     details: 'Dados do agendamento',
+
+    headers: {
+      myAppointments: 'Meus Agendamentos',
+      appointment: 'Agendamento',
+      request: 'Solicitação',
+    },
+
+    states: {
+      active: 'Ativos',
+      completed: 'Encerrados',
+      canceled: 'Cancelados',
+      pending: 'Pendentes',
+    },
+
+    tabs: {
+      appointment: 'Agendamento',
+      professional: 'Profissional',
+      requester: 'Solicitante',
+    },
+
     accept: 'Aceitar',
     reject: 'Recusar',
+    cancelAppointment: 'Cancelar Agendamento',
 
     toast: {
       acceptTitle: 'Solicitação Aprovada',
       acceptDescription: 'A solicitação foi aceita com sucesso!',
       rejectTitle: 'Solicitação Recusada',
       rejectDescription: 'A solicitação foi recusada com sucesso!',
+      cancelTitle: 'Solicitação Cancelada',
+      cancelDescription: 'A solicitação foi cancelada com sucesso!',
     },
-  },
-
-  appointments: {
-    tabBar: 'Histórico',
-    appointment: 'Agendamento',
-    active: 'Ativos',
-    completed: 'Encerrados',
-    canceled: 'Cancelados',
   },
 
   search: {
     header: 'PESQUISA',
-    details: 'Dados',
-    reviews: 'Avaliações',
+
+    tabs: {
+      details: 'Dados',
+      reviews: 'Avaliações',
+    },
+
     createAppointment: 'Fazer solicitação',
     description: 'Serviços e experiência',
     calendar: 'Calendário',
