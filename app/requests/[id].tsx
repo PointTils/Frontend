@@ -95,7 +95,7 @@ export default function RequestDetailsScreen() {
         // Go back to previous screen
         handleBack();
       }
-    } catch (error) {
+    } catch {
       // Show error toast
       Toast.show({
         type: 'error',
@@ -150,7 +150,7 @@ export default function RequestDetailsScreen() {
         // Go back to previous screen
         handleBack();
       }
-    } catch (error) {
+    } catch {
       // Show error toast
       Toast.show({
         type: 'error',
