@@ -6,11 +6,16 @@ import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
-import { useColors } from '@/src/hooks/useColors';
 import { useApiGet, useApiPatch } from '@/src/hooks/useApi';
-import { getSafeAvatarUri } from '@/src/utils/helpers';
-import { formatDate, formatTime, formatAppointmentLocation, formatCpfOrCnpj } from '@/src/utils/masks';
+import { useColors } from '@/src/hooks/useColors';
 import { type AppointmentResponse } from '@/src/types/api/appointment';
+import { getSafeAvatarUri } from '@/src/utils/helpers';
+import {
+  formatDate,
+  formatTime,
+  formatAppointmentLocation,
+  formatCpfOrCnpj,
+} from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   SquarePen,
@@ -25,7 +30,7 @@ import { Toast } from 'toastify-react-native';
 
 export default function RequestDetailsScreen() {
   const colors = useColors();
-  const { id, userPhoto, userName, userDocument } = useLocalSearchParams<{ 
+  const { id, userPhoto, userName, userDocument } = useLocalSearchParams<{
     id: string;
     userPhoto: string;
     userName: string;
@@ -33,14 +38,17 @@ export default function RequestDetailsScreen() {
   }>();
 
   // Buscar dados do appointment
-  const { data: appointmentData, loading, error } = useApiGet<AppointmentResponse>(
-    `/appointments/${id}`
-  );
+  const {
+    data: appointmentData,
+    loading,
+    error,
+  } = useApiGet<AppointmentResponse>(`/appointments/${id}`);
 
   // Hook para fazer PATCH no appointment
-  const { patch, loading: patchLoading } = useApiPatch<AppointmentResponse, any>(
-    `/appointments/${id}`
-  );
+  const { patch, loading: patchLoading } = useApiPatch<
+    AppointmentResponse,
+    any
+  >(`/appointments/${id}`);
 
   const handleBack = () => {
     router.back();
@@ -50,7 +58,7 @@ export default function RequestDetailsScreen() {
     if (!appointmentData?.data) return;
 
     const appointment = appointmentData.data;
-    
+
     // Preparar dados para o PATCH com status ACCEPTED
     const patchData = {
       uf: appointment.uf,
@@ -60,18 +68,18 @@ export default function RequestDetailsScreen() {
       modality: appointment.modality,
       date: appointment.date,
       description: appointment.description,
-      status: "ACCEPTED",
+      status: 'ACCEPTED',
       street_number: appointment.street_number,
       address_details: appointment.address_details,
       interpreter_id: appointment.interpreter_id,
       user_id: appointment.user_id,
       start_time: appointment.start_time,
-      end_time: appointment.end_time
+      end_time: appointment.end_time,
     };
 
     try {
       const result = await patch(patchData);
-      
+
       if (result) {
         // Show success toast
         Toast.show({
@@ -105,7 +113,7 @@ export default function RequestDetailsScreen() {
     if (!appointmentData?.data) return;
 
     const appointment = appointmentData.data;
-    
+
     // Preparar dados para o PATCH com status CANCELED
     const patchData = {
       uf: appointment.uf,
@@ -115,18 +123,18 @@ export default function RequestDetailsScreen() {
       modality: appointment.modality,
       date: appointment.date,
       description: appointment.description,
-      status: "CANCELED",
+      status: 'CANCELED',
       street_number: appointment.street_number,
       address_details: appointment.address_details,
       interpreter_id: appointment.interpreter_id,
       user_id: appointment.user_id,
       start_time: appointment.start_time,
-      end_time: appointment.end_time
+      end_time: appointment.end_time,
     };
 
     try {
       const result = await patch(patchData);
-      
+
       if (result) {
         // Show info toast
         Toast.show({
@@ -179,9 +187,7 @@ export default function RequestDetailsScreen() {
           {error || 'Não foi possível carregar os dados da solicitação'}
         </Text>
         <Button onPress={handleBack}>
-          <Text className="font-ifood-regular text-text-dark">
-            Voltar
-          </Text>
+          <Text className="font-ifood-regular text-text-dark">Voltar</Text>
         </Button>
       </View>
     );
@@ -192,7 +198,8 @@ export default function RequestDetailsScreen() {
   // Formatar dados para exibição
   const formattedDate = `${formatDate(appointment.date)} ${formatTime(appointment.start_time)} - ${formatTime(appointment.end_time)}`;
   const formattedLocation = formatAppointmentLocation(appointment);
-  const formattedDescription = appointment.description || 'Nenhuma descrição fornecida';
+  const formattedDescription =
+    appointment.description || 'Nenhuma descrição fornecida';
 
   return (
     <View className="flex-1 justify-center">
@@ -285,8 +292,12 @@ export default function RequestDetailsScreen() {
           disabled={patchLoading}
           className="flex-row justify-center gap-2 py-2"
         >
-          <XIcon color={patchLoading ? colors.detailsGray : colors.primaryOrange} />
-          <Text className={`font-ifood-regular ${patchLoading ? 'text-typography-400' : 'text-primary-orange-light dark:text-primary-orange-dark'}`}>
+          <XIcon
+            color={patchLoading ? colors.detailsGray : colors.primaryOrange}
+          />
+          <Text
+            className={`font-ifood-regular ${patchLoading ? 'text-typography-400' : 'text-primary-orange-light dark:text-primary-orange-dark'}`}
+          >
             {patchLoading ? 'Processando...' : Strings.requests.reject}
           </Text>
         </HapticTab>
