@@ -7,7 +7,7 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import { useApiGet } from '@/src/hooks/useApi';
+import { useApiGet, useApiPatch } from '@/src/hooks/useApi';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { formatDate, formatTime, formatAppointmentLocation, formatCpfOrCnpj } from '@/src/utils/masks';
 import { type AppointmentResponse } from '@/src/types/api/appointment';
@@ -31,9 +31,14 @@ export default function RequestDetailsScreen() {
     userName: string;
     userDocument: string;
   }>();
-  
+
   // Buscar dados do appointment
   const { data: appointmentData, loading, error } = useApiGet<AppointmentResponse>(
+    `/appointments/${id}`
+  );
+
+  // Hook para fazer PATCH no appointment
+  const { patch, loading: patchLoading } = useApiPatch<AppointmentResponse, any>(
     `/appointments/${id}`
   );
 
@@ -41,36 +46,114 @@ export default function RequestDetailsScreen() {
     router.back();
   };
 
-  const handleAccept = () => {
-    // Show success toast
-    Toast.show({
-      type: 'success',
-      text1: Strings.requests.toast.acceptTitle,
-      text2: Strings.requests.toast.acceptDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  const handleAccept = async () => {
+    if (!appointmentData?.data) return;
 
-    // Go back to previous screen
-    handleBack();
+    const appointment = appointmentData.data;
+    
+    // Preparar dados para o PATCH com status ACCEPTED
+    const patchData = {
+      uf: appointment.uf,
+      city: appointment.city,
+      neighborhood: appointment.neighborhood,
+      street: appointment.street,
+      modality: appointment.modality,
+      date: appointment.date,
+      description: appointment.description,
+      status: "ACCEPTED",
+      street_number: appointment.street_number,
+      address_details: appointment.address_details,
+      interpreter_id: appointment.interpreter_id,
+      user_id: appointment.user_id,
+      start_time: appointment.start_time,
+      end_time: appointment.end_time
+    };
+
+    try {
+      const result = await patch(patchData);
+      
+      if (result) {
+        // Show success toast
+        Toast.show({
+          type: 'success',
+          text1: Strings.requests.toast.acceptTitle,
+          text2: Strings.requests.toast.acceptDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+
+        // Go back to previous screen
+        handleBack();
+      }
+    } catch (error) {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Não foi possível aceitar a solicitação',
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
   };
 
-  const handleReject = () => {
-    // Show info toast
-    Toast.show({
-      type: 'info',
-      text1: Strings.requests.toast.rejectTitle,
-      text2: Strings.requests.toast.rejectDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  const handleReject = async () => {
+    if (!appointmentData?.data) return;
 
-    // Go back to previous screen
-    handleBack();
+    const appointment = appointmentData.data;
+    
+    // Preparar dados para o PATCH com status CANCELED
+    const patchData = {
+      uf: appointment.uf,
+      city: appointment.city,
+      neighborhood: appointment.neighborhood,
+      street: appointment.street,
+      modality: appointment.modality,
+      date: appointment.date,
+      description: appointment.description,
+      status: "CANCELED",
+      street_number: appointment.street_number,
+      address_details: appointment.address_details,
+      interpreter_id: appointment.interpreter_id,
+      user_id: appointment.user_id,
+      start_time: appointment.start_time,
+      end_time: appointment.end_time
+    };
+
+    try {
+      const result = await patch(patchData);
+      
+      if (result) {
+        // Show info toast
+        Toast.show({
+          type: 'info',
+          text1: Strings.requests.toast.rejectTitle,
+          text2: Strings.requests.toast.rejectDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+
+        // Go back to previous screen
+        handleBack();
+      }
+    } catch (error) {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Não foi possível recusar a solicitação',
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
   };
 
   // Loading state
@@ -188,21 +271,23 @@ export default function RequestDetailsScreen() {
         <Button
           size="md"
           onPress={handleAccept}
+          disabled={patchLoading}
           className="data-[active=true]:bg-primary-orange-press-light"
         >
           <ButtonIcon as={CheckIcon} className="text-white" />
           <Text className="font-ifood-regular text-text-dark">
-            {Strings.requests.accept}
+            {patchLoading ? 'Processando...' : Strings.requests.accept}
           </Text>
         </Button>
 
         <HapticTab
           onPress={handleReject}
+          disabled={patchLoading}
           className="flex-row justify-center gap-2 py-2"
         >
-          <XIcon color={colors.primaryOrange} />
-          <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-            {Strings.requests.reject}
+          <XIcon color={patchLoading ? colors.detailsGray : colors.primaryOrange} />
+          <Text className={`font-ifood-regular ${patchLoading ? 'text-typography-400' : 'text-primary-orange-light dark:text-primary-orange-dark'}`}>
+            {patchLoading ? 'Processando...' : Strings.requests.reject}
           </Text>
         </HapticTab>
       </View>
