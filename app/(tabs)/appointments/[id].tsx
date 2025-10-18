@@ -41,12 +41,10 @@ export default function AppointmentDetailsScreen() {
   }>(); // Appointment ID from route params
 
   const isPendingBool =
-    typeof isPending === 'string' &&
-    ['true', '1', 'yes'].includes(isPending.toLowerCase());
+    typeof isPending === 'string' && isPending.toLowerCase() === 'true';
 
   const isActiveBool =
-    typeof isActive === 'string' &&
-    ['true', '1', 'yes'].includes(isActive.toLowerCase());
+    typeof isActive === 'string' && isActive.toLowerCase() === 'true';
 
   const [section, setSection] = useState<TabKey>('appointment');
 
