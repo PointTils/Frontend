@@ -271,29 +271,26 @@ export default function InterpreterDetails() {
           </>
         )}
 
-        {section === Strings.search.reviews && (
-          <>
-            {reviews && reviews.data.length > 0 ? (
-              reviews.data.map((review) => (
-                <InterpreterReviewCard
-                  key={review.id}
-                  rating={review.stars}
-                  reviewDate={review.date}
-                  userName={review.user.name}
-                  reviewText={review.description}
-                  userPhoto={review.user.picture}
-                />
-              ))
-            ) : (
-              <View className="flex-1 justify-center gap-y-4 items-center">
-                <PackageSearchIcon size={38} color={colors.detailsGray} />
-                <Text className="font-ifood-regular text-typography-400 text-md">
-                  {Strings.search.noReviewsFound}
-                </Text>
-              </View>
-            )}
-          </>
-        )}
+        {section === Strings.search.reviews &&
+          (reviews && reviews.data.length > 0 ? (
+            reviews.data.map((review) => (
+              <InterpreterReviewCard
+                key={review.id}
+                rating={review.stars}
+                reviewDate={review.date}
+                userName={review.user.name}
+                reviewText={review.description}
+                userPhoto={review.user.picture}
+              />
+            ))
+          ) : (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.search.noReviewsFound}
+              </Text>
+            </View>
+          ))}
       </ScrollView>
 
       <View className="w-full mb-8 pt-6 px-8 border-t border-typography-200 dark:border-typography-700">
