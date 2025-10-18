@@ -6,6 +6,7 @@ import { StarRating } from '@/src/components/Rating';
 import { Avatar } from '@/src/components/ui/avatar';
 import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { SCHEDULE_ENABLED } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
@@ -41,15 +42,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+type TabKey = keyof typeof Strings.search.tabs;
 type TimeSelection = { date: string; time: string } | null;
 
 export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
 
-  const [section, setSection] = useState<'Avaliações' | 'Dados'>(
-    Strings.search.details,
-  );
+  const [section, setSection] = useState<TabKey>('details');
   const [selectTime, setSelectedTime] = useState<TimeSelection>(null);
   const colors = useColors();
   const router = useRouter();
@@ -62,25 +62,27 @@ export default function InterpreterDetails() {
     data: interpreterData,
     loading: loadingInterpreter,
     error: errorInterpreter,
-  } = useApiGet<UserResponse>(`/interpreters/${interpreterId}`);
+  } = useApiGet<UserResponse>(ApiRoutes.interpreters.profile(interpreterId));
 
   // Schedule request
   const {
     data: schedules,
     loading: loadingSchedule,
     error: errorSchedule,
-  } = useApiGet<ScheduleResponse>('/schedules/available', {
-    interpreterId: interpreterId,
-    dateFrom: now.toISOString().split('T')[0],
-    dateTo: then.toISOString().split('T')[0],
-  });
+  } = useApiGet<ScheduleResponse>(
+    ApiRoutes.schedules.interpreterSchedule(
+      interpreterId,
+      now.toISOString().split('T')[0],
+      then.toISOString().split('T')[0],
+    ),
+  );
 
   // Reviews request
   const {
     data: reviews,
     loading: loadingReviews,
     error: errorReviews,
-  } = useApiGet<ReviewResponse>(`/ratings?interpreterId=${interpreterId}`);
+  } = useApiGet<ReviewResponse>(ApiRoutes.ratings.byInterpreter(interpreterId));
 
   const isLoading = loadingInterpreter || loadingReviews || loadingSchedule;
   const isError = errorInterpreter || errorSchedule || errorReviews;
@@ -120,7 +122,7 @@ export default function InterpreterDetails() {
       {/* For alignment purposes */}
       <View className="w-full h-6" />
 
-      <View className="items-center flex-row w-full justify-center gap-4 px-8">
+      <View className="items-center flex-row w-full justify-center gap-4 px-6">
         {/* Avatar */}
         <Avatar size="lg" borderRadius="full" className="h-28 w-28">
           <AvatarImage
@@ -157,56 +159,54 @@ export default function InterpreterDetails() {
       </View>
 
       {/* Section selector */}
-      <View className="flex-row w-full mt-8 px-8">
+      <View className="flex-row w-full mt-8 px-6">
         <TouchableOpacity
           activeOpacity={1}
-          className={`basis-1/2 pb-2 items-center ${section === Strings.search.details ? 'border-b-2 border-primary-blue-light' : ''}`}
-          onPress={() => setSection(Strings.search.details)}
+          className={`basis-1/2 pb-2 items-center ${section === 'details' ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection('details')}
         >
           <View className="flex-row items-center gap-2">
             <BriefcaseBusinessIcon
+              size={20}
               color={
-                section === Strings.search.details
-                  ? colors.primaryBlue
-                  : colors.disabled
+                section === 'details' ? colors.primaryBlue : colors.disabled
               }
             />
             <Text
-              className={`font-ifood-medium text-md ${section === Strings.search.details ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+              className={`font-ifood-medium text-md ${section === 'details' ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
             >
-              {Strings.search.details}
+              {Strings.search.tabs.details}
             </Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={1}
-          className={`basis-1/2 pb-2 items-center ${section === Strings.search.reviews ? 'border-b-2 border-primary-blue-light' : ''}`}
-          onPress={() => setSection(Strings.search.reviews)}
+          className={`basis-1/2 pb-2 items-center ${section === 'reviews' ? 'border-b-2 border-primary-blue-light' : ''}`}
+          onPress={() => setSection('reviews')}
         >
           <View className="flex-row items-center gap-2">
             <StarIcon
+              size={20}
               color={
-                section === Strings.search.reviews
-                  ? colors.primaryBlue
-                  : colors.disabled
+                section === 'reviews' ? colors.primaryBlue : colors.disabled
               }
             />
             <Text
-              className={`font-ifood-medium text-md ${section === Strings.search.reviews ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
+              className={`font-ifood-medium text-md ${section === 'reviews' ? 'text-primary-blue-light' : 'text-typography-500 dark:text-typography-500'}`}
             >
-              {Strings.search.reviews}
+              {Strings.search.tabs.reviews}
             </Text>
           </View>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        className="pt-4 px-8"
-        contentContainerClassName="flex-grow"
+        className="pt-6 px-6"
+        contentContainerClassName="grow"
         showsVerticalScrollIndicator={false}
       >
         {/* Information section */}
-        {section === Strings.search.details && (
+        {section === 'details' && (
           <>
             <InfoRow
               icon={<PenSquareIcon size={16} color={colors.text} />}
@@ -271,7 +271,7 @@ export default function InterpreterDetails() {
           </>
         )}
 
-        {section === Strings.search.reviews &&
+        {section === 'reviews' &&
           (reviews && reviews.data.length > 0 ? (
             reviews.data.map((review) => (
               <InterpreterReviewCard

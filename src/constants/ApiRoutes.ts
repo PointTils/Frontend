@@ -43,4 +43,18 @@ export const ApiRoutes = {
   userPicture: {
     upload: (userId: string) => `/users/${userId}/picture`,
   },
+  schedules: {
+    base: '/schedules',
+    interpreterSchedule: (
+      interpreterId: string,
+      dateFrom: string,
+      dateTo: string,
+    ) =>
+      `/schedules/available?interpreterId=${interpreterId}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  },
+  ratings: {
+    base: '/ratings',
+    byInterpreter: (interpreterId: string) =>
+      `/ratings?interpreterId=${interpreterId}`,
+  },
 } as const;
