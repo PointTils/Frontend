@@ -1,4 +1,5 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
+import FeedbackModal from '@/src/components/FeedbackModal';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -7,6 +8,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
   type Appointment,
@@ -14,12 +16,9 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
-import FeedbackModal from '@/src/components/FeedbackModal';
-import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -142,7 +141,7 @@ export default function HomeScreen() {
       <FeedbackModal
         visible={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
-        onSubmit={(details: string) => {
+        onSubmit={() => {
           setShowFeedbackModal(false);
         }}
       />
