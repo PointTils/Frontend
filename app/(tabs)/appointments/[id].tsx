@@ -11,12 +11,20 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet, useApiPatch } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import type { AppointmentRequest, AppointmentResponse } from '@/src/types/api';
+import type {
+  AppointmentRequest,
+  AppointmentResponse,
+  EnterpriseResponseData,
+  InterpreterResponseData,
+  PersonResponseData,
+  UserResponse,
+} from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import { getSafeAvatarUri, toBoolean, toFloat } from '@/src/utils/helpers';
 import {
   formatAppointmentLocation,
   formatDate,
+  formatPhoneOnlyDigits,
   formatTime,
 } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -29,9 +37,17 @@ import {
   XCircleIcon,
   User,
   BriefcaseBusinessIcon,
+  Phone,
+  AtSign,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 type TabKey = keyof typeof Strings.appointments.tabs;
@@ -73,6 +89,32 @@ export default function AppointmentDetailsScreen() {
     error: appointmentError,
   } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.byId(id));
 
+  // Fetch interpreter data
+  const interpreterId = appointmentData?.data?.interpreter_id ?? null;
+
+  const {
+    data: interpreterData,
+    loading: loadingInterpreter,
+    error: interpreterError,
+  } = useApiGet<UserResponse>(
+    interpreterId ? ApiRoutes.interpreters.profile(interpreterId) : '',
+  );
+
+  // Fetch interpreter data
+  const userId = appointmentData?.data?.user_id ?? null;
+
+  const {
+    data: userData,
+    loading: loadingUser,
+    error: userError,
+  } = useApiGet<UserResponse>(userId ? ApiRoutes.person.profile(userId) : '');
+
+  const interpreter = interpreterData?.data as InterpreterResponseData;
+  const userTypeData =
+    user?.type === UserType.ENTERPRISE
+      ? (interpreterData?.data as EnterpriseResponseData)
+      : (userData?.data as PersonResponseData);
+
   // Hook to PATCH appointment
   const {
     patch,
@@ -81,6 +123,18 @@ export default function AppointmentDetailsScreen() {
   } = useApiPatch<AppointmentResponse, AppointmentRequest>(
     ApiRoutes.appointments.byId(id),
   );
+
+  const handleOpenWhatsApp = () => {
+    const phone = formatPhoneOnlyDigits(
+      user?.type === UserType.INTERPRETER
+        ? interpreter?.phone
+        : userTypeData?.phone,
+    );
+    const message = `Olá, ${user?.name}.`;
+    Linking.openURL(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+    );
+  };
 
   const handleBack = (returnTo: string) => {
     const target =
@@ -175,23 +229,46 @@ export default function AppointmentDetailsScreen() {
     }
   }
 
-  const handleCancelPending = () => {
-    // Show success toast
-    Toast.show({
-      type: 'success',
-      text1: Strings.appointments.toast.cancelTitle,
-      text2: Strings.appointments.toast.cancelDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  const handleCancelPending = async () => {
+    if (!appointmentData?.data) return;
 
-    // Go back to previous screen
-    handleBack(returnTo || '');
+    const patchData = {
+      status: AppointmentStatus.CANCELED,
+    };
+
+    try {
+      const response = await patch(patchData);
+
+      if (response?.success) {
+        // Show success toast
+        Toast.show({
+          type: 'success',
+          text1: Strings.appointments.toast.cancelTitle,
+          text2: Strings.appointments.toast.cancelDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+      }
+    } catch {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: Strings.appointments.toast.errorTitle,
+        text2: Strings.appointments.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } finally {
+      // Go back to previous screen
+      handleBack(returnTo || '');
+    }
   };
 
-  if (loadingAppointment || patchLoading) {
+  if (loadingAppointment || loadingInterpreter || loadingUser || patchLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={colors.primaryOrange} />
@@ -203,7 +280,15 @@ export default function AppointmentDetailsScreen() {
   }
 
   // Handle errors
-  if (appointmentError || patchError || !appointmentData?.data) {
+  if (
+    appointmentError ||
+    userError ||
+    interpreterError ||
+    patchError ||
+    !appointmentData?.data ||
+    !interpreterData?.data ||
+    !userData?.data
+  ) {
     handleBack(returnTo || '');
     Toast.show({
       type: 'error',
@@ -222,7 +307,6 @@ export default function AppointmentDetailsScreen() {
   const formattedLocation = formatAppointmentLocation(appointment);
   const formattedDescription =
     appointment.description || 'Nenhuma descrição fornecida';
-
   return (
     <>
       <View className="mt-12 pb-2">
@@ -274,7 +358,7 @@ export default function AppointmentDetailsScreen() {
       </View>
 
       {/* Section selector */}
-      {isPendingBool ? (
+      {appointment.status !== AppointmentStatus.ACCEPTED ? (
         <View className="w-full px-6">
           <Text className="text-text-light font-ifood-medium text-lg mb-2">
             {Strings.appointments.details}
@@ -358,31 +442,82 @@ export default function AppointmentDetailsScreen() {
         contentContainerClassName="grow px-6 pb-4 pt-6"
         showsVerticalScrollIndicator={false}
       >
-        {/* Description */}
-        <InfoRow
-          icon={<SquarePen size={16} color={colors.text} />}
-          label={Strings.common.fields.more}
-          value={formattedDescription}
-          valueColor="text-typography-600"
-        />
+        {section === 'appointment' ? (
+          <>
+            {/* Description */}
+            <InfoRow
+              icon={<SquarePen size={16} color={colors.text} />}
+              label={Strings.common.fields.more}
+              value={formattedDescription}
+              valueColor="text-typography-600"
+            />
 
-        {/* Date */}
-        <InfoRow
-          icon={<CalendarDays size={16} color={colors.text} />}
-          label={Strings.common.fields.date}
-          value={formattedDate}
-          valueColor="text-typography-600"
-        />
+            {/* Date */}
+            <InfoRow
+              icon={<CalendarDays size={16} color={colors.text} />}
+              label={Strings.common.fields.date}
+              value={formattedDate}
+              valueColor="text-typography-600"
+            />
 
-        {/* Location */}
-        <InfoRow
-          icon={<MapPin size={16} color={colors.text} />}
-          label={Strings.common.fields.location}
-          value={formattedLocation}
-          valueColor="text-typography-600"
-        />
+            {/* Location */}
+            <InfoRow
+              icon={<MapPin size={16} color={colors.text} />}
+              label={Strings.common.fields.location}
+              value={formattedLocation}
+              valueColor="text-typography-600"
+            />
+          </>
+        ) : (
+          <>
+            {/* Interpreter Description */}
+            {user?.type !== UserType.INTERPRETER && (
+              <InfoRow
+                icon={<SquarePen size={16} color={colors.text} />}
+                label={Strings.detalhesAgendamento.sections.services}
+                value={interpreter?.professional_data?.description}
+                valueColor="text-typography-600"
+              />
+            )}
+
+            {/* Phone */}
+            <View className="flex-row justify-between">
+              <View className="w-1/2">
+                <InfoRow
+                  icon={<Phone size={16} color={colors.text} />}
+                  label={Strings.common.fields.phone}
+                  value={
+                    user?.type === UserType.INTERPRETER
+                      ? userTypeData?.phone
+                      : interpreter?.phone
+                  }
+                  valueColor="text-typography-600"
+                />
+              </View>
+
+              <Pressable
+                onPress={handleOpenWhatsApp}
+                accessibilityLabel={Strings.detalhesAgendamento.cta.whatsapp}
+              >
+                <Text className="text-success-300 border-success-300 px-4 py-2 border rounded">
+                  {Strings.detalhesAgendamento.cta.whatsapp}
+                </Text>
+              </Pressable>
+            </View>
+            {/* Email */}
+            <InfoRow
+              icon={<AtSign size={16} color={colors.text} />}
+              label={Strings.common.fields.phone}
+              value={
+                user?.type === UserType.INTERPRETER
+                  ? userTypeData?.email
+                  : interpreter?.email
+              }
+              valueColor="text-typography-600"
+            />
+          </>
+        )}
       </ScrollView>
-
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
           <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
