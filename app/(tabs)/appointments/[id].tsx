@@ -6,11 +6,19 @@ import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
+import { useApiGet, useApiPatch } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import { UserType } from '@/src/types/api';
-import { getSafeAvatarUri } from '@/src/utils/helpers';
+import type { AppointmentRequest, AppointmentResponse } from '@/src/types/api';
+import { AppointmentStatus, UserType } from '@/src/types/api';
+import { getSafeAvatarUri, toBoolean, toFloat } from '@/src/utils/helpers';
+import {
+  formatAppointmentLocation,
+  formatDate,
+  formatTime,
+} from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   SquarePen,
@@ -23,7 +31,7 @@ import {
   BriefcaseBusinessIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ScrollView, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 type TabKey = keyof typeof Strings.appointments.tabs;
@@ -32,21 +40,47 @@ export default function AppointmentDetailsScreen() {
   const colors = useColors();
   const { user } = useAuth();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, isPending, isActive, returnTo } = useLocalSearchParams<{
+  const [section, setSection] = useState<TabKey>('appointment');
+
+  const {
+    id,
+    userPhoto,
+    userName,
+    userDocument,
+    rating,
+    isPending,
+    isActive,
+    returnTo,
+  } = useLocalSearchParams<{
     id: string;
+    userPhoto: string;
+    userName: string;
+    userDocument: string;
+    rating?: string;
     isPending?: string;
     isActive?: string;
     returnTo?: string;
-  }>(); // Appointment ID from route params
+  }>();
 
-  const isPendingBool =
-    typeof isPending === 'string' && isPending.toLowerCase() === 'true';
+  const ratingNumber = toFloat(rating, { min: 0, max: 5 }) ?? 0;
+  const isPendingBool = toBoolean(isPending) ?? false;
+  const isActiveBool = toBoolean(isActive) ?? false;
 
-  const isActiveBool =
-    typeof isActive === 'string' && isActive.toLowerCase() === 'true';
+  // Fetch appointment data
+  const {
+    data: appointmentData,
+    loading: loadingAppointment,
+    error: appointmentError,
+  } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.byId(id));
 
-  const [section, setSection] = useState<TabKey>('appointment');
+  // Hook to PATCH appointment
+  const {
+    patch,
+    loading: patchLoading,
+    error: patchError,
+  } = useApiPatch<AppointmentResponse, AppointmentRequest>(
+    ApiRoutes.appointments.byId(id),
+  );
 
   const handleBack = (returnTo: string) => {
     const target =
@@ -63,37 +97,83 @@ export default function AppointmentDetailsScreen() {
     router.back();
   };
 
-  const handleAcceptPending = () => {
-    // Show success toast
-    Toast.show({
-      type: 'success',
-      text1: Strings.appointments.toast.acceptTitle,
-      text2: Strings.appointments.toast.acceptDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  async function handleAcceptPending() {
+    if (!appointmentData?.data) return;
 
-    // Go back to previous screen
-    handleBack(returnTo || '');
-  };
+    const patchData = {
+      status: AppointmentStatus.ACCEPTED,
+    };
 
-  const handleRejectPending = () => {
-    // Show info toast
-    Toast.show({
-      type: 'info',
-      text1: Strings.appointments.toast.rejectTitle,
-      text2: Strings.appointments.toast.rejectDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+    try {
+      const response = await patch(patchData);
 
-    // Go back to previous screen
-    handleBack(returnTo || '');
-  };
+      if (response?.success) {
+        // Show success toast
+        Toast.show({
+          type: 'success',
+          text1: Strings.appointments.toast.acceptTitle,
+          text2: Strings.appointments.toast.acceptDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+      }
+    } catch {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: Strings.appointments.toast.errorTitle,
+        text2: Strings.appointments.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } finally {
+      // Go back to previous screen
+      handleBack(returnTo || '');
+    }
+  }
+
+  async function handleRejectPending() {
+    if (!appointmentData?.data) return;
+
+    const patchData = {
+      status: AppointmentStatus.CANCELED,
+    };
+
+    try {
+      const response = await patch(patchData);
+
+      if (response?.success) {
+        // Show success toast
+        Toast.show({
+          type: 'success',
+          text1: Strings.appointments.toast.rejectTitle,
+          text2: Strings.appointments.toast.rejectDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+      }
+    } catch {
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: Strings.appointments.toast.errorTitle,
+        text2: Strings.appointments.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } finally {
+      // Go back to previous screen
+      handleBack(returnTo || '');
+    }
+  }
 
   const handleCancelPending = () => {
     // Show success toast
@@ -110,6 +190,38 @@ export default function AppointmentDetailsScreen() {
     // Go back to previous screen
     handleBack(returnTo || '');
   };
+
+  if (loadingAppointment || patchLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color={colors.primaryOrange} />
+        <Text className="text-typography-600 font-ifood-regular mt-4">
+          {Strings.common.loading}
+        </Text>
+      </View>
+    );
+  }
+
+  // Handle errors
+  if (appointmentError || patchError || !appointmentData?.data) {
+    handleBack(returnTo || '');
+    Toast.show({
+      type: 'error',
+      text1: Strings.appointments.toast.errorTitle,
+      text2: Strings.appointments.toast.errorDescription,
+      position: 'top',
+      visibilityTime: 2000,
+      autoHide: true,
+      closeIconSize: 1,
+    });
+    return null;
+  }
+
+  const appointment = appointmentData.data;
+  const formattedDate = `${formatDate(appointment.date)} ${formatTime(appointment.start_time)} - ${formatTime(appointment.end_time)}`;
+  const formattedLocation = formatAppointmentLocation(appointment);
+  const formattedDescription =
+    appointment.description || 'Nenhuma descrição fornecida';
 
   return (
     <>
@@ -134,7 +246,7 @@ export default function AppointmentDetailsScreen() {
           <AvatarImage
             source={{
               uri: getSafeAvatarUri({
-                remoteUrl: '',
+                remoteUrl: userPhoto || '',
               }),
             }}
           />
@@ -146,17 +258,17 @@ export default function AppointmentDetailsScreen() {
             ellipsizeMode="tail"
             numberOfLines={1}
           >
-            Nome Sobrenome
+            {userName}
           </Text>
           <Text
             className="font-ifood-regular text-md text-text-light dark:text-text-dark max-w-[180px]"
             ellipsizeMode="tail"
             numberOfLines={1}
           >
-            XXX.XXX.XXX-XX
+            {userDocument}
           </Text>
           {user?.type !== UserType.INTERPRETER && (
-            <StarRating rating={0} size={18} />
+            <StarRating rating={ratingNumber} size={18} />
           )}
         </View>
       </View>
@@ -167,10 +279,10 @@ export default function AppointmentDetailsScreen() {
           <Text className="text-text-light font-ifood-medium text-lg mb-2">
             {Strings.appointments.details}
           </Text>
-          <View className="h-px bg-typography-200 mb-6" />
+          <View className="h-px bg-typography-200" />
         </View>
       ) : (
-        <View className="flex-row w-full px-6 pb-6">
+        <View className="flex-row w-full px-6">
           <TouchableOpacity
             activeOpacity={1}
             className={`basis-1/2 pb-2 items-center ${section === 'appointment' ? 'border-b-2 border-primary-blue-light' : ''}`}
@@ -243,16 +355,14 @@ export default function AppointmentDetailsScreen() {
 
       <ScrollView
         className="w-full"
-        contentContainerClassName="grow px-6 pb-4"
+        contentContainerClassName="grow px-6 pb-4 pt-6"
         showsVerticalScrollIndicator={false}
       >
         {/* Description */}
         <InfoRow
           icon={<SquarePen size={16} color={colors.text} />}
           label={Strings.common.fields.more}
-          value="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+          value={formattedDescription}
           valueColor="text-typography-600"
         />
 
@@ -260,7 +370,7 @@ export default function AppointmentDetailsScreen() {
         <InfoRow
           icon={<CalendarDays size={16} color={colors.text} />}
           label={Strings.common.fields.date}
-          value="20/08/2025 11:30 - 12:30"
+          value={formattedDate}
           valueColor="text-typography-600"
         />
 
@@ -268,17 +378,18 @@ export default function AppointmentDetailsScreen() {
         <InfoRow
           icon={<MapPin size={16} color={colors.text} />}
           label={Strings.common.fields.location}
-          value="Av. Ipiranga 6681, Partenon - Porto Alegre/RS"
+          value={formattedLocation}
           valueColor="text-typography-600"
         />
       </ScrollView>
 
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
-          <View className="px-6 pb-6 gap-4">
+          <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
             <Button
               size="md"
               onPress={handleAcceptPending}
+              disabled={patchLoading}
               className="data-[active=true]:bg-primary-orange-press-light"
             >
               <ButtonIcon as={CheckIcon} className="text-white" />
@@ -289,6 +400,7 @@ export default function AppointmentDetailsScreen() {
 
             <HapticTab
               onPress={handleRejectPending}
+              disabled={patchLoading}
               className="flex-row justify-center gap-2 py-2"
             >
               <XIcon color={colors.primaryOrange} />
@@ -298,7 +410,7 @@ export default function AppointmentDetailsScreen() {
             </HapticTab>
           </View>
         ) : (
-          <View className="px-6 pb-12">
+          <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
             <Button
               size="md"
               onPress={handleCancelPending}
@@ -312,7 +424,7 @@ export default function AppointmentDetailsScreen() {
           </View>
         )
       ) : isActiveBool ? (
-        <View className="px-6 pb-12">
+        <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
           <Button
             size="md"
             onPress={handleCancelPending}
