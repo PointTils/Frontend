@@ -15,3 +15,19 @@ export interface ReviewResponse {
   message: string;
   data: Review[];
 }
+
+export interface CreateRatingRequest {
+  stars: number;
+  description?: string;
+}
+
+export interface RatingResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    stars: number;
+    description: string;
+    appointmentId: string | number;
+  };
+}

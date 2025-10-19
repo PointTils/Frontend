@@ -2,6 +2,7 @@ import { Text } from '@/src/components/ui/text/index';
 import { View } from '@/src/components/ui/view/index';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
+import type { RatingResponse, CreateRatingRequest } from '@/src/types/api/review';
 import { StarIcon, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Modal, TouchableOpacity, TextInput } from 'react-native';
@@ -47,20 +48,10 @@ export default function FeedbackModal({
   const [details, setDetails] = useState('');
   const [rating, setRating] = useState(0);
 
-  //hook para enviar a avaliação
-  const { post, loading } = useApiPost<
-    {
-      success: boolean;
-      message: string;
-      data: {
-        id: number;
-        stars: number;
-        description: string;
-        appointmentId: string | number;
-      };
-    },
-    { stars: number; description?: string }
-  >(ApiRoutes.ratings.create(appointmentId));
+  //hook para enviar a avaliação para o endpoint
+  const { post, loading } = useApiPost<RatingResponse, CreateRatingRequest>(
+    ApiRoutes.ratings.create(appointmentId),
+  );
 
   // Reset state when modal is opened
   useEffect(() => {
