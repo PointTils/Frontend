@@ -40,6 +40,7 @@ interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
   onClose: () => void;
   filter: AppliedFilters;
+  preSelectedSpecialty?: string[];
   initialFocus?: 'date' | 'modality';
 }
 
@@ -68,11 +69,11 @@ export default function FilterSheet({
   onApply,
   onClose,
   filter,
+  preSelectedSpecialty,
   initialFocus,
 }: FilterSheetProps) {
   const [showDate, setShowDate] = useState(initialFocus === 'date');
   const [showTime, setShowTime] = useState(false);
-
   const [specialty, setSpecialty] = useState<string[]>([]);
   const [date, setDate] = useState<Date | null>(null);
   const [gender, setGender] = useState<Gender | null>(null);
@@ -103,8 +104,12 @@ export default function FilterSheet({
     useApiGet<StateAndCityResponse>(citiesApiUrl || '');
 
   useEffect(() => {
-    if (filter) {
-      setSpecialty(filter.specialty ?? []);
+    if (filter || preSelectedSpecialty) {
+      const initialSpecs =
+        filter.specialty && filter.specialty.length > 0
+          ? filter.specialty
+          : (preSelectedSpecialty ?? []);
+      setSpecialty(initialSpecs);
       setCity(filter.city ?? '');
       setState(filter.state ?? '');
       setGender(filter.gender ?? null);
@@ -122,7 +127,7 @@ export default function FilterSheet({
         }
       }
     }
-  }, [filter]);
+  }, [filter, preSelectedSpecialty]);
 
   // Fetch states
   useEffect(() => {

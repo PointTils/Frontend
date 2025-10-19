@@ -19,6 +19,7 @@ import {
   type Appointment,
   type AppointmentRequest,
   type UserRequest,
+  AppointmentStatus,
   Modality,
   UserType,
 } from '../types/api';
@@ -287,10 +288,20 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
         opts.onPress(appt);
         return;
       }
-      const params: { id: string | number; returnTo?: string } = {
+
+      const params: {
+        id: string | number;
+        isPending?: string;
+        isActive?: string;
+        returnTo?: string;
+      } = {
         id: appt.id || '',
+        isPending: appt.status === AppointmentStatus.PENDING ? 'true' : 'false',
+        isActive: appt.status === AppointmentStatus.ACCEPTED ? 'true' : 'false',
       };
+
       if (opts.returnTo) params.returnTo = opts.returnTo;
+
       router.push({ pathname: '/appointments/[id]', params });
     };
 
@@ -309,6 +320,7 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
           rating={!isInterpreter ? appt.contact_data?.rating || 0 : 0}
           date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
           location={formatAppointmentLocation(appt)}
+          pending={appt.status === AppointmentStatus.PENDING}
           onPress={handlePress}
         />
         <View className="w-full h-px bg-gray-200" />

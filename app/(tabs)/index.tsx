@@ -14,10 +14,9 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
-import { BellIcon, CalendarDays } from 'lucide-react-native';
+import { CalendarDays } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -75,31 +74,14 @@ export default function HomeScreen() {
   return (
     <View className="flex-1">
       <View className="pt-16">
-        <View className="flex-row pl-4 pr-6 justify-between items-center">
-          <View className="flex-row items-center gap-2">
-            <DarkBlueLogo width={85} height={50} />
-            <Text className="text-left text-2xl font-ifood-medium text-text max-w-[65%]">
-              {welcomeMessage}
-            </Text>
-          </View>
-
-          {user?.type === UserType.INTERPRETER && (
-            <BellIcon
-              size={24}
-              className="pr-4 text-right"
-              onPress={() => router.push('/requests')}
-            />
-          )}
+        <View className="flex-row px-2 pb-6 items-center gap-2">
+          <DarkBlueLogo width={85} height={50} />
+          <Text className="text-left text-2xl font-ifood-medium text-text max-w-[65%]">
+            {welcomeMessage}
+          </Text>
         </View>
 
-        <TouchableOpacity
-          className="mt-6"
-          accessibilityRole="button"
-          accessibilityLabel={Strings.common.buttons.search}
-          onPress={() => router.push('/interpreters/search')}
-        >
-          <SearchFilterBar onData={() => {}} interactive={false} />
-        </TouchableOpacity>
+        <SearchFilterBar onData={() => {}} navigateOnSearch />
 
         <View
           className="h-px w-full mt-4"
@@ -120,7 +102,7 @@ export default function HomeScreen() {
         />
       </View>
 
-      <View className="flex-1 pb-4">
+      <View className="flex-1">
         {appointments.length > 0 ? (
           <FlatList
             data={appointments}
