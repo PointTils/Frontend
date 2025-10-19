@@ -26,7 +26,11 @@ export interface Appointment {
   };
 }
 
-export type AppointmentRequest = Appointment;
+export interface AppointmentPatch {
+  status: AppointmentStatus;
+}
+
+export type AppointmentRequest = Appointment | AppointmentPatch;
 
 export interface AppointmentResponse {
   success: boolean;
