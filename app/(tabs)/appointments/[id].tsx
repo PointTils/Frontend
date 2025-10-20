@@ -40,7 +40,7 @@ import {
   Phone,
   AtSign,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -90,24 +90,30 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.byId(id));
 
   // Fetch interpreter data
-  const interpreterId = appointmentData?.data?.interpreter_id ?? null;
+  const interpreterId = appointmentData?.data?.interpreter_id;
 
   const {
     data: interpreterData,
     loading: loadingInterpreter,
     error: interpreterError,
   } = useApiGet<UserResponse>(
-    interpreterId ? ApiRoutes.interpreters.profile(interpreterId) : '',
+    ApiRoutes.interpreters.profile(interpreterId!),
+    {},
+    { enabled: !!interpreterId }, // This hook will WAIT until interpreterId is a valid string.
   );
 
   // Fetch interpreter data
-  const userId = appointmentData?.data?.user_id ?? null;
+  const userId = appointmentData?.data?.user_id;
 
   const {
     data: userData,
     loading: loadingUser,
     error: userError,
-  } = useApiGet<UserResponse>(userId ? ApiRoutes.person.profile(userId) : '');
+  } = useApiGet<UserResponse>(
+    ApiRoutes.person.profile(userId!),
+    {},
+    { enabled: !!userId }, // This hook will WAIT until userId is a valid string.
+  );
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
   const userTypeData =
@@ -123,6 +129,42 @@ export default function AppointmentDetailsScreen() {
   } = useApiPatch<AppointmentResponse, AppointmentRequest>(
     ApiRoutes.appointments.byId(id),
   );
+
+ const everythingLoaded =
+    loadingAppointment ||
+    patchLoading ||
+    (!!interpreterId && !interpreterData && !interpreterError) ||
+    (!!userId && !userData && !userError);
+
+  // Handle errors
+  useEffect(() => {
+    if (everythingLoaded) {
+      return;
+    }
+    const appointment = appointmentData?.data;
+    const anyApiError =
+      appointmentError || userError || interpreterError || patchError;
+
+    const requiredDataIsMissing =
+      !appointment ||
+      (!!appointment.interpreter_id && !interpreterData?.data) ||
+      (!!appointment.user_id && !userData?.data);
+
+    if (anyApiError || requiredDataIsMissing) {
+      Toast.show({ type: 'error', text1: 'Validation Failed' });
+      handleBack(returnTo || '');
+    } 
+  }, [
+    everythingLoaded,
+    appointmentData,
+    interpreterData,
+    userData,
+    appointmentError,
+    interpreterError,
+    userError,
+    patchError,
+  ]);
+
 
   const handleOpenWhatsApp = () => {
     const phone = formatPhoneOnlyDigits(
@@ -279,27 +321,11 @@ export default function AppointmentDetailsScreen() {
     );
   }
 
-  // Handle errors
-  if (
-    appointmentError ||
-    userError ||
-    interpreterError ||
-    patchError ||
-    !appointmentData?.data ||
-    !interpreterData?.data ||
-    !userData?.data
-  ) {
-    handleBack(returnTo || '');
-    Toast.show({
-      type: 'error',
-      text1: Strings.appointments.toast.errorTitle,
-      text2: Strings.appointments.toast.errorDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
-    return null;
+
+
+
+  if (!appointmentData?.data) {
+    return null; // Or a fallback UI
   }
 
   const appointment = appointmentData.data;
