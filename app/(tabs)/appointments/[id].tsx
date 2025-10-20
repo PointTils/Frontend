@@ -99,10 +99,10 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     ApiRoutes.interpreters.profile(interpreterId!),
     {},
-    { enabled: !!interpreterId }, // This hook will WAIT until interpreterId is a valid string.
+    { enabled: !!interpreterId }, 
   );
 
-  // Fetch interpreter data
+  // Fetch user data
   const userId = appointmentData?.data?.user_id;
 
   const {
@@ -112,7 +112,7 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     ApiRoutes.person.profile(userId!),
     {},
-    { enabled: !!userId }, // This hook will WAIT until userId is a valid string.
+    { enabled: !!userId }, 
   );
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
@@ -130,11 +130,27 @@ export default function AppointmentDetailsScreen() {
     ApiRoutes.appointments.byId(id),
   );
 
- const everythingLoaded =
+  // Determine if all data is loaded
+  const everythingLoaded =
     loadingAppointment ||
     patchLoading ||
     (!!interpreterId && !interpreterData && !interpreterError) ||
     (!!userId && !userData && !userError);
+
+  const handleBack = (returnTo: string) => {
+    const target =
+      typeof returnTo === 'string' && returnTo.length > 0
+        ? returnTo === '/(tabs)'
+          ? '/'
+          : returnTo
+        : '';
+
+    if (target) {
+      router.replace(target as any);
+      return;
+    }
+    router.back();
+  };
 
   // Handle errors
   useEffect(() => {
@@ -151,9 +167,16 @@ export default function AppointmentDetailsScreen() {
       (!!appointment.user_id && !userData?.data);
 
     if (anyApiError || requiredDataIsMissing) {
-      Toast.show({ type: 'error', text1: 'Validation Failed' });
-      handleBack(returnTo || '');
-    } 
+      Toast.show({
+        type: 'error',
+        text1: Strings.appointments.toast.errorTitle,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      router.back();
+    }
   }, [
     everythingLoaded,
     appointmentData,
@@ -165,7 +188,6 @@ export default function AppointmentDetailsScreen() {
     patchError,
   ]);
 
-
   const handleOpenWhatsApp = () => {
     const phone = formatPhoneOnlyDigits(
       user?.type === UserType.INTERPRETER
@@ -176,21 +198,6 @@ export default function AppointmentDetailsScreen() {
     Linking.openURL(
       `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
     );
-  };
-
-  const handleBack = (returnTo: string) => {
-    const target =
-      typeof returnTo === 'string' && returnTo.length > 0
-        ? returnTo === '/(tabs)'
-          ? '/'
-          : returnTo
-        : '';
-
-    if (target) {
-      router.replace(target as any);
-      return;
-    }
-    router.back();
   };
 
   async function handleAcceptPending() {
@@ -320,9 +327,6 @@ export default function AppointmentDetailsScreen() {
       </View>
     );
   }
-
-
-
 
   if (!appointmentData?.data) {
     return null; // Or a fallback UI
