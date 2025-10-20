@@ -51,6 +51,27 @@ export const getModality = (modality: Modality | undefined): Modality[] => {
   return [modality];
 };
 
+export const toBoolean = (value?: string | null): boolean | undefined => {
+  if (value == null) return undefined;
+  const v = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on', 'sim', 's'].includes(v)) return true;
+  if (['false', '0', 'no', 'n', 'off', 'nao', 'não'].includes(v)) return false;
+  return undefined;
+};
+
+export const toFloat = (
+  value?: string | null,
+  clamp?: { min?: number; max?: number },
+): number | undefined => {
+  if (value == null) return undefined;
+  const n = Number.parseFloat(value.replace(',', '.').trim());
+  if (!Number.isFinite(n)) return undefined;
+  const min = clamp?.min ?? -Infinity;
+  const max = clamp?.max ?? Infinity;
+  return Math.max(min, Math.min(max, n));
+};
+
+// Payload builders
 export const buildRegisterPayload = (
   type: string,
   fields: any,
@@ -291,11 +312,23 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
 
       const params: {
         id: string | number;
+        userPhoto: string;
+        userName: string;
+        userDocument: string;
+        rating?: string;
         isPending?: string;
         isActive?: string;
         returnTo?: string;
       } = {
         id: appt.id || '',
+        userPhoto: appt.contact_data?.picture || '',
+        userName: appt.contact_data?.name || '',
+        userDocument: appt.contact_data
+          ? formatCpfOrCnpj(appt.contact_data.document)
+          : '',
+        rating: appt.contact_data?.rating
+          ? String(appt.contact_data.rating)
+          : '',
         isPending: appt.status === AppointmentStatus.PENDING ? 'true' : 'false',
         isActive: appt.status === AppointmentStatus.ACCEPTED ? 'true' : 'false',
       };
