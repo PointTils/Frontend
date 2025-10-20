@@ -233,6 +233,8 @@ export const Strings = {
       rejectDescription: 'A solicitação foi recusada com sucesso!',
       cancelTitle: 'Solicitação Cancelada',
       cancelDescription: 'A solicitação foi cancelada com sucesso!',
+      errorTitle: 'Erro',
+      errorDescription: 'Não foi possível processar a solicitação',
     },
   },
 
@@ -277,6 +279,15 @@ export const Strings = {
       'Avalie sua experiência no atendimento realizado pelo intérprete ',
     placeholder: 'Escreva mais detalhes',
     submitButton: 'Avaliar',
+
+    toast: {
+      noRatingTitle: 'Avaliação necessária',
+      noRatingDescription: 'Por favor, selecione uma nota antes de enviar.',
+      errorTitle: 'Erro ao enviar avaliação',
+      errorDescription: 'Tente novamente mais tarde.',
+      successTitle: 'Avaliação enviada',
+      successDescription: 'Seu feedback foi enviado com sucesso!',
+    },
   },
 
   // Enums and fixed options

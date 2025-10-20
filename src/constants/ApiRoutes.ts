@@ -39,6 +39,7 @@ export const ApiRoutes = {
     byStatus: (id: string, type: UserType, status: string) =>
       `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
     filter: '/appointments/filter',
+    byId: (appointmentId: string) => `/appointments/${appointmentId}`,
   },
   userPicture: {
     upload: (userId: string) => `/users/${userId}/picture`,
@@ -56,5 +57,6 @@ export const ApiRoutes = {
     base: '/ratings',
     byInterpreter: (interpreterId: string) =>
       `/ratings?interpreterId=${interpreterId}`,
+    create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
 } as const;
