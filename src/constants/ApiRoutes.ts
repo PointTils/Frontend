@@ -39,6 +39,7 @@ export const ApiRoutes = {
     byStatus: (id: string, type: UserType, status: string) =>
       `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
     filter: '/appointments/filter',
+    byId: (appointmentId: string) => `/appointments/${appointmentId}`,
   },
   ratings: {
     base: 'v1/ratings',
@@ -46,5 +47,19 @@ export const ApiRoutes = {
   },
   userPicture: {
     upload: (userId: string) => `/users/${userId}/picture`,
+  },
+  schedules: {
+    base: '/schedules',
+    interpreterSchedule: (
+      interpreterId: string,
+      dateFrom: string,
+      dateTo: string,
+    ) =>
+      `/schedules/available?interpreterId=${interpreterId}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  },
+  ratings: {
+    base: '/ratings',
+    byInterpreter: (interpreterId: string) =>
+      `/ratings?interpreterId=${interpreterId}`,
   },
 } as const;
