@@ -41,10 +41,6 @@ export const ApiRoutes = {
     filter: '/appointments/filter',
     byId: (appointmentId: string) => `/appointments/${appointmentId}`,
   },
-  ratings: {
-    base: 'v1/ratings',
-    create: (appointmentId: string) => `/v1/ratings/${appointmentId}`,
-  },
   userPicture: {
     upload: (userId: string) => `/users/${userId}/picture`,
   },
@@ -61,5 +57,6 @@ export const ApiRoutes = {
     base: '/ratings',
     byInterpreter: (interpreterId: string) =>
       `/ratings?interpreterId=${interpreterId}`,
+    create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
 } as const;
