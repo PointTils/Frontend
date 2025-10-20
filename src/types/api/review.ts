@@ -16,9 +16,10 @@ export interface ReviewResponse {
   data: Review[];
 }
 
-export interface CreateRatingRequest {
+export interface RatingRequest {
   stars: number;
-  description?: string;
+  description?: string | null;
+  user_id: string;
 }
 
 export interface RatingResponse {
@@ -28,6 +29,11 @@ export interface RatingResponse {
     id: number;
     stars: number;
     description: string;
-    appointmentId: string | number;
+    date: string;
+    user: {
+      id: string;
+      name: string;
+      picture: string;
+    };
   };
 }

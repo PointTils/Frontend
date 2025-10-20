@@ -2,16 +2,15 @@ import { Text } from '@/src/components/ui/text/index';
 import { View } from '@/src/components/ui/view/index';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import type {
-  RatingResponse,
-  CreateRatingRequest,
-} from '@/src/types/api/review';
+import type { RatingResponse, RatingRequest } from '@/src/types/api/review';
 import { StarIcon, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Modal, TouchableOpacity, TextInput } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 import { Button } from './ui/button';
 import { ApiRoutes } from '../constants/ApiRoutes';
+import { useAuth } from '../contexts/AuthProvider';
 import { useApiPost } from '../hooks/useApi';
 
 interface FeedbackModalProps {
@@ -26,9 +25,8 @@ interface FeedbackModalProps {
  *
  * @param visible - Controls the visibility of the modal.
  * @param onClose - Function to call when the modal is closed.
- * @param onSubmit - Function to call with the feedback details when submitted.
+ * @param appointmentId - ID of the appointment to associate the feedback with.
  * @param interpreterName - Name of the interpreter to personalize the feedback request.
- * @param interpreterId - ID of the interpreter to associate the feedback with.
  *
  * @returns The rendered FeedbackModal component.
  *
@@ -36,7 +34,7 @@ interface FeedbackModalProps {
  * <FeedbackModal
  *   visible={isModalVisible}
  *   onClose={handleClose}
- *   onSubmit={handleSubmit}
+ *   appointmentId="67890"
  *   interpreterName="John Doe"
  * />
  */
@@ -44,15 +42,15 @@ export default function FeedbackModal({
   visible = false,
   onClose,
   appointmentId,
-
   interpreterName,
 }: FeedbackModalProps) {
+  const { user } = useAuth();
   const colors = useColors();
+
   const [details, setDetails] = useState('');
   const [rating, setRating] = useState(0);
 
-  //hook para enviar a avaliação para o endpoint
-  const { post, loading } = useApiPost<RatingResponse, CreateRatingRequest>(
+  const { post, loading } = useApiPost<RatingResponse, RatingRequest>(
     ApiRoutes.ratings.create(appointmentId),
   );
 
@@ -66,22 +64,48 @@ export default function FeedbackModal({
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      alert('Por favor, selecione uma nota antes de enviar.');
+      Toast.show({
+        type: 'info',
+        text1: Strings.feedbackModal.toast.noRatingTitle,
+        text2: Strings.feedbackModal.toast.noRatingDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
       return;
     }
 
     const body = {
       stars: rating,
-      description: details.trim() || undefined,
+      description: details.trim() || null,
+      user_id: user?.id || '',
     };
 
     const response = await post(body);
 
     if (response?.success) {
-      alert('Avaliação enviada com sucesso!');
+      Toast.show({
+        type: 'success',
+        text1: Strings.feedbackModal.toast.successTitle,
+        text2: Strings.feedbackModal.toast.successDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
       onClose();
     } else {
-      alert(response?.message || 'Não foi possível enviar a avaliação.');
+      console.error('Error submitting rating:', response?.message);
+      Toast.show({
+        type: 'error',
+        text1: Strings.feedbackModal.toast.errorTitle,
+        text2: Strings.feedbackModal.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
     }
   };
 
@@ -188,7 +212,7 @@ export default function FeedbackModal({
                     ? 'bg-disabled'
                     : 'active:bg-onPressBlue bg-primary-blue-light dark:bg-primary-blue-dark'
                 }
-                 rounded-md px-6 py-3
+                 rounded-md px-6
             `}
             >
               <Text className="text-white font-ifood-regular text-base">
