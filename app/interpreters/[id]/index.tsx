@@ -14,9 +14,9 @@ import { useColors } from '@/src/hooks/useColors';
 import { Modality } from '@/src/types/api';
 import type {
   ScheduleResponse,
-  ReviewResponse,
   InterpreterResponseData,
   UserResponse,
+  RatingsResponse,
 } from '@/src/types/api';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
@@ -82,7 +82,9 @@ export default function InterpreterDetails() {
     data: reviews,
     loading: loadingReviews,
     error: errorReviews,
-  } = useApiGet<ReviewResponse>(ApiRoutes.ratings.byInterpreter(interpreterId));
+  } = useApiGet<RatingsResponse>(
+    ApiRoutes.ratings.byInterpreter(interpreterId),
+  );
 
   const isLoading = loadingInterpreter || loadingReviews || loadingSchedule;
   const isError = errorInterpreter || errorSchedule || errorReviews;
