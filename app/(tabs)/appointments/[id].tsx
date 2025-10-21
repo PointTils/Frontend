@@ -99,7 +99,7 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     ApiRoutes.interpreters.profile(interpreterId!),
     {},
-    { enabled: !!interpreterId }, 
+    { enabled: !!interpreterId },
   );
 
   // Fetch user data
@@ -112,7 +112,7 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     ApiRoutes.person.profile(userId!),
     {},
-    { enabled: !!userId }, 
+    { enabled: !!userId },
   );
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
