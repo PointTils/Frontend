@@ -10,6 +10,7 @@ export function useCheckFeedback(user: any) {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [appointmentForFeedback, setAppointmentForFeedback] = useState<Appointment | null>(null);
   const [interpreterName, setInterpreterName] = useState<string | null>(null);
+  const [shouldFetch, setShouldFetch] = useState(false);
 
   const completedRoute = useMemo(() => {
     if (!user?.id) return '';
@@ -22,8 +23,22 @@ export function useCheckFeedback(user: any) {
     );
   }, [user?.id, user?.type]);
 
-  const { data: apptCompleted, loading: loadCompleted, error: errorCompleted } =
-    useApiGet<AppointmentsResponse>(completedRoute);
+  const {
+    data: apptCompleted,
+    loading: loadCompleted,
+    error: errorCompleted,
+  } = useApiGet<AppointmentsResponse>(
+    shouldFetch ? completedRoute : '',
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldFetch(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
 
   useEffect(() => {
     if (!user || loadCompleted || errorCompleted) return;
