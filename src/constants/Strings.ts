@@ -238,8 +238,6 @@ export const Strings = {
       rejectDescription: 'A solicitação foi recusada com sucesso!',
       cancelTitle: 'Solicitação Cancelada',
       cancelDescription: 'A solicitação foi cancelada com sucesso!',
-      errorTitle: 'Erro',
-      errorDescription: 'Não foi possível processar a solicitação',
     },
   },
 

@@ -39,6 +39,7 @@ import type { OptionItem } from '@/src/types/ui';
 import {
   buildAppointmentPayload,
   buildRequiredFieldError,
+  showGenericErrorToast,
 } from '@/src/utils/helpers';
 import { formatDate, formatTime } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -264,15 +265,7 @@ export default function ToScheduleScreen() {
       }
     } catch (error: any) {
       console.error('Failed to submit appointment:', error);
-      Toast.show({
-        type: 'error',
-        text1: Strings.common.toast.errorUnknownTitle,
-        text2: Strings.common.toast.errorUnknownDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
+      showGenericErrorToast();
       return;
     }
 

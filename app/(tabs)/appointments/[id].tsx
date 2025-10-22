@@ -20,7 +20,12 @@ import type {
   UserResponse,
 } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
-import { getSafeAvatarUri, toBoolean, toFloat } from '@/src/utils/helpers';
+import {
+  getSafeAvatarUri,
+  showGenericErrorToast,
+  toBoolean,
+  toFloat,
+} from '@/src/utils/helpers';
 import {
   formatAppointmentLocation,
   formatDate,
@@ -98,14 +103,22 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     ApiRoutes.interpreters.profile(appointmentData?.data?.interpreter_id!),
     {},
-    { enabled: user?.type !== UserType.INTERPRETER && !isPendingBool },
+    {
+      enabled:
+        user?.type !== UserType.INTERPRETER &&
+        !!appointmentData?.data?.interpreter_id &&
+        !isPendingBool,
+    },
   );
   const interpreter = interpreterData?.data as InterpreterResponseData;
 
-  // Fetch Person or Enterprise data
-  const route = validateCnpj(userDocument)
-    ? ApiRoutes.enterprises.profile(appointmentData?.data?.user_id!)
-    : ApiRoutes.person.profile(appointmentData?.data?.user_id!);
+  // Fetch Person or Enterprise data after appointment data is loaded
+  const route =
+    appointmentData?.data?.user_id && validateCnpj(userDocument)
+      ? ApiRoutes.enterprises.profile(appointmentData.data.user_id)
+      : appointmentData?.data?.user_id
+        ? ApiRoutes.person.profile(appointmentData.data.user_id)
+        : '';
   const {
     data: userData,
     loading: loadingUser,
@@ -113,7 +126,12 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<UserResponse>(
     route,
     {},
-    { enabled: user?.type === UserType.INTERPRETER && !isPendingBool },
+    {
+      enabled:
+        user?.type === UserType.INTERPRETER &&
+        !!appointmentData?.data?.user_id &&
+        !isPendingBool,
+    },
   );
   const userPerEnt =
     user?.type === UserType.ENTERPRISE
@@ -129,12 +147,24 @@ export default function AppointmentDetailsScreen() {
     ApiRoutes.appointments.byId(id),
   );
 
-  // Determine if all data is loaded
-  const everythingLoaded =
-    loadingAppointment ||
-    patchLoading ||
-    (!interpreterData && !interpreterError) ||
-    (!userData && !userError);
+  // Determine loading state
+  const isLoading =
+    loadingAppointment || loadingInterpreter || loadingUser || patchLoading;
+
+  // Handle errors
+  useEffect(() => {
+    if (isLoading) return;
+
+    const appointment = appointmentData?.data;
+    const hasApiError =
+      appointmentError || userError || interpreterError || patchError;
+
+    if (hasApiError || !appointment) {
+      showGenericErrorToast();
+      handleBack(returnTo || '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, appointmentError, interpreterError, userError, patchError]);
 
   const handleBack = (returnTo: string) => {
     const target =
@@ -150,42 +180,6 @@ export default function AppointmentDetailsScreen() {
     }
     router.back();
   };
-
-  // Handle errors
-  useEffect(() => {
-    if (everythingLoaded) {
-      return;
-    }
-    const appointment = appointmentData?.data;
-    const anyApiError =
-      appointmentError || userError || interpreterError || patchError;
-
-    const requiredDataIsMissing =
-      !appointment ||
-      (!!appointment.interpreter_id && !interpreterData?.data) ||
-      (!!appointment.user_id && !userData?.data);
-
-    if (anyApiError || requiredDataIsMissing) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.appointments.toast.errorTitle,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
-      router.back();
-    }
-  }, [
-    everythingLoaded,
-    appointmentData,
-    interpreterData,
-    userData,
-    appointmentError,
-    interpreterError,
-    userError,
-    patchError,
-  ]);
 
   const handleOpenWhatsApp = () => {
     const phone =
@@ -223,15 +217,7 @@ export default function AppointmentDetailsScreen() {
       }
     } catch {
       // Show error toast
-      Toast.show({
-        type: 'error',
-        text1: Strings.appointments.toast.errorTitle,
-        text2: Strings.appointments.toast.errorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
+      showGenericErrorToast();
     } finally {
       // Go back to previous screen
       handleBack(returnTo || '');
@@ -262,15 +248,7 @@ export default function AppointmentDetailsScreen() {
       }
     } catch {
       // Show error toast
-      Toast.show({
-        type: 'error',
-        text1: Strings.appointments.toast.errorTitle,
-        text2: Strings.appointments.toast.errorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
+      showGenericErrorToast();
     } finally {
       // Go back to previous screen
       handleBack(returnTo || '');
@@ -301,22 +279,14 @@ export default function AppointmentDetailsScreen() {
       }
     } catch {
       // Show error toast
-      Toast.show({
-        type: 'error',
-        text1: Strings.appointments.toast.errorTitle,
-        text2: Strings.appointments.toast.errorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
+      showGenericErrorToast();
     } finally {
       // Go back to previous screen
       handleBack(returnTo || '');
     }
   };
 
-  if (loadingAppointment || loadingInterpreter || loadingUser || patchLoading) {
+  if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={colors.primaryOrange} />
@@ -422,6 +392,7 @@ export default function AppointmentDetailsScreen() {
           {user?.type === UserType.INTERPRETER ? (
             <TouchableOpacity
               activeOpacity={1}
+              disabled={appointment.status !== AppointmentStatus.ACCEPTED}
               className={`basis-1/2 pb-2 items-center ${section === 'requester' ? 'border-b-2 border-primary-blue-light' : ''}`}
               onPress={() => setSection('requester')}
             >
@@ -444,6 +415,7 @@ export default function AppointmentDetailsScreen() {
           ) : (
             <TouchableOpacity
               activeOpacity={1}
+              disabled={appointment.status !== AppointmentStatus.ACCEPTED}
               className={`basis-1/2 pb-2 items-center ${section === 'professional' ? 'border-b-2 border-primary-blue-light' : ''}`}
               onPress={() => setSection('professional')}
             >
@@ -550,7 +522,7 @@ export default function AppointmentDetailsScreen() {
       </ScrollView>
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
-          <View className="w-full px-6 pt-6 pb-4 gap-4 border-t border-typography-200 dark:border-typography-700">
+          <View className="w-full px-6 pt-6 pb-2 gap-4 border-t border-typography-200 dark:border-typography-700">
             <Button
               size="md"
               onPress={handleAcceptPending}
