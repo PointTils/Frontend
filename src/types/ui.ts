@@ -41,3 +41,5 @@ export type AppliedFilters = {
   city?: string;
   state?: string;
 };
+
+export type DateTimeSelection = { date: string; time: string };

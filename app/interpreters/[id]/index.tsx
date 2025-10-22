@@ -18,6 +18,7 @@ import type {
   UserResponse,
   RatingsResponse,
 } from '@/src/types/api';
+import type { DateTimeSelection } from '@/src/types/ui';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
@@ -43,16 +44,16 @@ import {
 } from 'react-native';
 
 type TabKey = keyof typeof Strings.search.tabs;
-type TimeSelection = { date: string; time: string } | null;
 
 export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
 
-  const [section, setSection] = useState<TabKey>('details');
-  const [selectTime, setSelectedTime] = useState<TimeSelection>(null);
   const colors = useColors();
   const router = useRouter();
+
+  const [section, setSection] = useState<TabKey>('details');
+
   const now = new Date();
   const then = new Date(now);
   then.setDate(now.getDate() + 30);
@@ -107,6 +108,16 @@ export default function InterpreterDetails() {
       </View>
     );
   }
+
+  const handleSelectedTime = (dateTime: DateTimeSelection) => {
+    router.push({
+      pathname: '/interpreters/[id]/to-schedule',
+      params: {
+        id: interpreterId,
+        startTime: new Date(`${dateTime.date}T${dateTime.time}`).toISOString(),
+      },
+    });
+  };
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
 
@@ -263,8 +274,7 @@ export default function InterpreterDetails() {
                   <View className="mb-4">
                     <InterpreterCalendar
                       schedules={schedules?.data ?? []}
-                      selectedTime={selectTime}
-                      onTimeSelect={setSelectedTime}
+                      onTimeSelect={handleSelectedTime}
                     />
                   </View>
                 )}
