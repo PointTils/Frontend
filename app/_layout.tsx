@@ -14,6 +14,7 @@ import { useCallback, useState, useEffect } from 'react';
 import ToastManager from 'toastify-react-native';
 
 import 'react-native-reanimated';
+import { AppointmentBadgeProvider } from '@/src/contexts/ApptBadgeProvider';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
@@ -165,7 +166,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <AppContent />
+        <AppointmentBadgeProvider>
+          <AppContent />
+        </AppointmentBadgeProvider>
       </ThemeProvider>
     </AuthProvider>
   );

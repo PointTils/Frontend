@@ -3,15 +3,16 @@ import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
+import { useAppointmentBadge } from '@/src/contexts/ApptBadgeProvider';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -25,6 +26,7 @@ type TabKey = keyof typeof Strings.appointments.states;
 export default function AppointmentsScreen() {
   const colors = useColors();
   const { user, isAuthenticated } = useAuth();
+  const { markPendingAsSeen, checkForNewPending } = useAppointmentBadge();
 
   const [tab, setTab] = React.useState<TabKey>('active');
 
@@ -103,6 +105,25 @@ export default function AppointmentsScreen() {
   const pending = useMemo<Appointment[]>(() => {
     return Array.isArray(apptPending?.data) ? apptPending.data : empty;
   }, [apptPending?.data, empty]);
+
+  // Check for new pending appointments when data loads
+  useEffect(() => {
+    if (!loadPending && apptPending?.success && pending) {
+      const pendingIds = pending
+        .map((appt) => appt.id)
+        .filter((id): id is string => typeof id === 'string');
+      checkForNewPending(pendingIds);
+    }
+  }, [loadPending, apptPending?.success, pending, checkForNewPending]);
+
+  // Mark as seen when user focuses on pending tab
+  useFocusEffect(
+    React.useCallback(() => {
+      if (tab === 'pending') {
+        markPendingAsSeen();
+      }
+    }, [tab, markPendingAsSeen]),
+  );
 
   // Combine and sort appointments based on selected tab
   // Sorted by date descending, then by start_time descending

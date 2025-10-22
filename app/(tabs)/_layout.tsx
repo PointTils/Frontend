@@ -2,6 +2,7 @@ import HapticTab from '@/src/components/HapticTab';
 import { Text } from '@/src/components/ui/text';
 import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
+import { useAppointmentBadge } from '@/src/contexts/ApptBadgeProvider';
 import { useColors } from '@/src/hooks/useColors';
 import { router, Tabs, useSegments } from 'expo-router';
 import { HistoryIcon, House, User } from 'lucide-react-native';
@@ -10,6 +11,8 @@ import React from 'react';
 export default function TabLayout() {
   const colors = useColors();
   const segments = useSegments();
+  const { hasPendingBadge } = useAppointmentBadge();
+
   const hideTabBar = [...segments].some((segment) =>
     HIDE_TABBAR_SEGMENTS.includes(segment),
   );
@@ -46,6 +49,15 @@ export default function TabLayout() {
           },
         }}
         options={{
+          tabBarBadge: hasPendingBadge ? '0' : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: colors.mandatory,
+            maxWidth: 12,
+            maxHeight: 12,
+            fontSize: 8,
+            lineHeight: 9,
+            marginTop: 4,
+          },
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>
               {Strings.appointments.tabBar}
@@ -72,3 +84,14 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    backgroundColor: colors.mandatory,
+    maxWidth: 12,
+    maxHeight: 12,
+    fontSize: 8,
+    lineHeight: 9,
+    marginTop: 4,
+  },
+});
