@@ -102,7 +102,7 @@ export interface UserResponse {
   data: UserResponseData;
 }
 
-export interface InterpreterListResponse {
+export interface InterpretersResponse {
   success: boolean;
   message: string;
   data: InterpreterResponseData[];

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 export function useCheckFeedback(user: any) {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [appointmentForFeedback, setAppointmentForFeedback] = useState<Appointment | null>(null);
+  const [interpreterName, setInterpreterName] = useState<string | null>(null);
 
   const completedRoute = useMemo(() => {
     if (!user?.id) return '';
@@ -30,10 +31,13 @@ export function useCheckFeedback(user: any) {
     const list: Appointment[] = Array.isArray(apptCompleted?.data) ? apptCompleted.data : [];
 
     if (list.length > 0) {
+      const firstAppointment = list[0];
       setAppointmentForFeedback(list[0]);
+      const name = firstAppointment?.contact_data?.name || null;
+      setInterpreterName(name);
       setShowFeedbackModal(true);
     }
   }, [user, apptCompleted, loadCompleted, errorCompleted]);
 
-  return { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback };
+  return { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback, interpreterName };
 }

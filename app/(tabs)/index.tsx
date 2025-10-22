@@ -16,14 +16,14 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import { CalendarDays } from 'lucide-react-native';
+import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const colors = useColors();
-  const { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback } = useCheckFeedback(user);
+  const { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback, interpreterName } = useCheckFeedback(user);
 
   const renderItem = useMemo(
     () =>
@@ -34,25 +34,16 @@ export default function HomeScreen() {
     [user?.type],
   );
 
-  const appointmentsRoute = useMemo(() => {
-    if (!user?.id) return '';
-
-    const baseUrl = ApiRoutes.appointments.filter;
-    const params = new URLSearchParams();
-
-    if (user.type === UserType.INTERPRETER) {
-      params.append('interpreterId', user.id);
-    } else {
-      params.append('userId', user.id);
-    }
-
-    params.append('status', AppointmentStatus.ACCEPTED);
-
-    return `${baseUrl}?${params.toString()}`;
-  }, [user?.id, user?.type]);
-
   const { data: appointmentsData, loading: appointmentsLoading } =
-    useApiGet<AppointmentsResponse>(appointmentsRoute);
+    useApiGet<AppointmentsResponse>(
+      ApiRoutes.appointments.byStatus(
+        user?.id || '',
+        user?.type || UserType.PERSON,
+        AppointmentStatus.ACCEPTED,
+        false,
+        5
+      ),
+    );
 
   const appointments = useMemo<Appointment[]>(
     () => (Array.isArray(appointmentsData?.data) ? appointmentsData.data : []),
@@ -88,7 +79,7 @@ export default function HomeScreen() {
   return (
     <View className="flex-1">
       <View className="pt-16">
-        <View className="flex-row px-2 pb-6 items-center gap-2">
+        <View className="flex-row px-4 pb-6 items-center gap-2">
           <DarkBlueLogo width={85} height={50} />
           <Text className="text-left text-2xl font-ifood-medium text-text max-w-[65%]">
             {welcomeMessage}
@@ -97,23 +88,16 @@ export default function HomeScreen() {
 
         <SearchFilterBar onData={() => { }} navigateOnSearch />
 
-        <View
-          className="h-px w-full mt-4"
-          style={{ backgroundColor: colors.fieldGray }}
-        />
-        <View className="flex-row items-center gap-3 pl-6 pt-4">
+        {/* Divider */}
+        <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+        <View className="flex-row items-center gap-3 px-4">
           <CalendarDays color={colors.primaryBlue} />
-          <Text
-            className="text-center font-ifood-medium"
-            style={{ color: colors.text }}
-          >
+          <Text className="text-text-light font-ifood-medium">
             {Strings.home.nextAppointments}
           </Text>
         </View>
-        <View
-          className="h-px w-full mt-4"
-          style={{ backgroundColor: colors.fieldGray }}
-        />
+        {/* Divider */}
+        <View className="w-full h-px bg-gray-200 mt-4" />
       </View>
 
       <View className="flex-1">
@@ -127,12 +111,10 @@ export default function HomeScreen() {
             ItemSeparatorComponent={() => <View className="h-3" />}
           />
         ) : (
-          <View className="flex-1 justify-center items-center py-8">
-            <Text
-              className="text-center font-ifood-regular"
-              style={{ color: colors.detailsGray }}
-            >
-              {Strings.common.noData}
+          <View className="flex-1 justify-center gap-y-4 items-center">
+            <PackageSearchIcon size={38} color={colors.detailsGray} />
+            <Text className="font-ifood-regular text-typography-400 text-md">
+              {Strings.common.noResults}
             </Text>
           </View>
         )}
@@ -142,6 +124,7 @@ export default function HomeScreen() {
         visible={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
         appointmentId={appointmentForFeedback?.id || ''}
+        interpreterName={interpreterName ?? ''}
       />
     </View>
   );

@@ -21,7 +21,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         // Used to hide tab bar on specific screens
-        tabBarStyle: { display: hideTabBar ? 'none' : 'flex' },
+        tabBarStyle: { display: hideTabBar ? 'none' : 'flex', height: 60 },
       }}
     >
       <Tabs.Screen
