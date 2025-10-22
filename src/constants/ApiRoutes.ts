@@ -58,5 +58,7 @@ export const ApiRoutes = {
     byInterpreter: (interpreterId: string) =>
       `/ratings?interpreterId=${interpreterId}`,
     create: (appointmentId: string) => `/ratings/${appointmentId}`,
+    needRating: (dayLimit: number = 5) =>
+      `/ratings?hasRating=false&dayLimit=${dayLimit}`,
   },
 } as const;
