@@ -8,42 +8,32 @@ import { useEffect, useMemo, useState } from 'react';
 
 export function useCheckFeedback(user: any) {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [appointmentForFeedback, setAppointmentForFeedback] = useState<Appointment | null>(null);
 
   const completedRoute = useMemo(() => {
-    if (!user?.id) return null;
+    if (!user?.id) return '';
     return ApiRoutes.appointments.byStatus(
       user.id,
       user.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
+      false,
+      5
     );
   }, [user?.id, user?.type]);
 
-  const {
-    data: apptCompleted,
-    loading: loadCompleted,
-    error: errorCompleted,
-  } = useApiGet<AppointmentsResponse>(completedRoute || '');
+  const { data: apptCompleted, loading: loadCompleted, error: errorCompleted } =
+    useApiGet<AppointmentsResponse>(completedRoute);
 
   useEffect(() => {
     if (!user || loadCompleted || errorCompleted) return;
-    (async () => {
-      const alreadyChecked = await AsyncStorage.getItem('@reviewCheckDone');
 
-      if (alreadyChecked) return;
-      const list: Appointment[] = Array.isArray(apptCompleted?.data)
-        ? apptCompleted!.data
-        : [];
-      const hasPending = list.some(
-        (a) =>
-          a.contact_data &&
-          typeof a.contact_data.rating === 'number' &&
-          a.contact_data.rating === 0,
-      );
-      console.log(hasPending);
-      if (hasPending) setShowFeedbackModal(true);
-      await AsyncStorage.setItem('@reviewCheckDone', 'true');
-    })();
+    const list: Appointment[] = Array.isArray(apptCompleted?.data) ? apptCompleted.data : [];
+
+    if (list.length > 0) {
+      setAppointmentForFeedback(list[0]);
+      setShowFeedbackModal(true);
+    }
   }, [user, apptCompleted, loadCompleted, errorCompleted]);
 
-  return { showFeedbackModal, setShowFeedbackModal };
+  return { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback };
 }

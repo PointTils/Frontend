@@ -23,7 +23,7 @@ import { ActivityIndicator, FlatList } from 'react-native';
 export default function HomeScreen() {
   const { user } = useAuth();
   const colors = useColors();
-  const { showFeedbackModal, setShowFeedbackModal } = useCheckFeedback(user);
+  const { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback } = useCheckFeedback(user);
 
   const renderItem = useMemo(
     () =>
@@ -95,7 +95,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <SearchFilterBar onData={() => {}} navigateOnSearch />
+        <SearchFilterBar onData={() => { }} navigateOnSearch />
 
         <View
           className="h-px w-full mt-4"
@@ -141,9 +141,7 @@ export default function HomeScreen() {
       <FeedbackModal
         visible={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
-        onSubmit={() => {
-          setShowFeedbackModal(false);
-        }}
+        appointmentId={appointmentForFeedback?.id || ''}
       />
     </View>
   );
