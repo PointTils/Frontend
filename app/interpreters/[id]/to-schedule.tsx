@@ -196,7 +196,7 @@ export default function ToScheduleScreen() {
   // Fetch available schedules for the selected day
   const { data: daySchedule, loading: loadingDaySchedule } =
     useApiGet<ScheduleResponse>(
-      ApiRoutes.schedules.interpreterSchedule(
+      ApiRoutes.schedules.availabilityPerDay(
         id as string,
         selectedDateStr,
         selectedDateStr,

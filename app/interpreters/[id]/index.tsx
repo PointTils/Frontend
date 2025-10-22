@@ -71,7 +71,7 @@ export default function InterpreterDetails() {
     loading: loadingSchedule,
     error: errorSchedule,
   } = useApiGet<ScheduleResponse>(
-    ApiRoutes.schedules.interpreterSchedule(
+    ApiRoutes.schedules.availabilityPerDay(
       interpreterId,
       now.toISOString().split('T')[0],
       then.toISOString().split('T')[0],
