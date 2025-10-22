@@ -4,11 +4,7 @@ import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import type {
-  InterpretersResponse,
-  Gender,
-  Modality,
-} from '@/src/types/api';
+import type { InterpretersResponse, Gender, Modality } from '@/src/types/api';
 import type { AppliedFilters } from '@/src/types/ui';
 import { formatDateToISO, mapModality } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';

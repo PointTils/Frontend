@@ -203,6 +203,7 @@ export const Strings = {
     tabBar: 'Agendamentos',
     details: 'Dados do agendamento',
     noDescription: 'Nenhuma descrição fornecida.',
+    description: 'Serviços e experiência',
 
     headers: {
       myAppointments: 'Meus Agendamentos',
@@ -223,9 +224,12 @@ export const Strings = {
       requester: 'Solicitante',
     },
 
-    accept: 'Aceitar',
-    reject: 'Recusar',
-    cancelAppointment: 'Cancelar Agendamento',
+    cta: {
+      whatsapp: 'WhatsApp',
+      cancel: 'Cancelar agendamento',
+      accept: 'Aceitar',
+      reject: 'Recusar',
+    },
 
     toast: {
       acceptTitle: 'Solicitação Aprovada',
@@ -319,60 +323,5 @@ export const Strings = {
     guideInterpreterOfLibras: 'Guia-intérprete de Libras',
     tactileInterpreter: 'Intérprete Tátil',
     internationalSignInterpreter: 'Intérprete de Sinais Internacionais',
-  },
-
-  detalhesAgendamento: {
-    header: 'Detalhes do agendamento',
-    tabs: {
-      agendamento: 'Agendamento',
-      solicitante: 'Solicitante',
-    },
-    sections: {
-      description: 'Descrição',
-      services: 'Serviços e experiência',
-      date: 'Data',
-      location: 'Localização',
-      phone: 'Telefone',
-      email: 'E-mail',
-    },
-    cta: {
-      cancel: 'Cancelar agendamento',
-      whatsapp: 'WhatsApp',
-      // CHAVES ADICIONADAS
-      accept: 'Aceitar',
-      reject: 'Recusar',
-    },
-    toast: {
-      errorNoIdTitle: 'Erro',
-      errorNoIdDescription: 'ID do agendamento não fornecido',
-      errorLoadTitle: 'Erro ao carregar',
-      errorLoadDescription: 'Não foi possível carregar os detalhes',
-      successCancelTitle: 'Cancelado',
-      successCancelDescription: 'Agendamento cancelado com sucesso',
-      errorCancelTitle: 'Erro ao cancelar',
-      errorCancelDescription: 'Não foi possível cancelar o agendamento',
-      noPhoneTitle: 'Erro',
-      noPhoneDescription: 'Telefone não disponível para contato',
-    },
-  },
-
-  detalhesAgendamentoUsuario: {
-    header: 'Detalhes do agendamento',
-    tabs: {
-      agendamento: 'Agendamento',
-      profissional: 'Profissional',
-    },
-    sections: {
-      description: 'Descrição',
-      services: 'Serviços e experiência',
-      date: 'Data',
-      location: 'Localização',
-      phone: 'Telefone',
-      email: 'E-mail',
-    },
-    cta: {
-      cancel: 'Cancelar agendamento',
-      whatsapp: 'WhatsApp',
-    },
   },
 } as const;

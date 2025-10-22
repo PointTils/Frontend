@@ -504,7 +504,7 @@ export default function AppointmentDetailsScreen() {
             {user?.type !== UserType.INTERPRETER && (
               <InfoRow
                 icon={<SquarePen size={16} color={colors.text} />}
-                label={Strings.detalhesAgendamento.sections.services}
+                label={Strings.appointments.description}
                 value={interpreter?.professional_data?.description}
                 valueColor="text-typography-600"
               />
@@ -527,10 +527,10 @@ export default function AppointmentDetailsScreen() {
 
               <Pressable
                 onPress={handleOpenWhatsApp}
-                accessibilityLabel={Strings.detalhesAgendamento.cta.whatsapp}
+                accessibilityLabel={Strings.appointments.cta.whatsapp}
               >
                 <Text className="text-success-300 border-success-300 px-4 py-2 border rounded">
-                  {Strings.detalhesAgendamento.cta.whatsapp}
+                  {Strings.appointments.cta.whatsapp}
                 </Text>
               </Pressable>
             </View>
@@ -559,7 +559,7 @@ export default function AppointmentDetailsScreen() {
             >
               <ButtonIcon as={CheckIcon} className="text-white" />
               <Text className="font-ifood-regular text-text-dark">
-                {Strings.appointments.accept}
+                {Strings.appointments.cta.accept}
               </Text>
             </Button>
 
@@ -570,7 +570,7 @@ export default function AppointmentDetailsScreen() {
             >
               <XIcon color={colors.primaryOrange} />
               <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                {Strings.appointments.reject}
+                {Strings.appointments.cta.reject}
               </Text>
             </HapticTab>
           </View>
@@ -583,7 +583,7 @@ export default function AppointmentDetailsScreen() {
             >
               <ButtonIcon as={XCircleIcon} className="text-white" />
               <Text className="font-ifood-regular text-text-dark">
-                {Strings.appointments.cancelAppointment}
+                {Strings.appointments.cta.cancel}
               </Text>
             </Button>
           </View>
@@ -597,7 +597,7 @@ export default function AppointmentDetailsScreen() {
           >
             <ButtonIcon as={XCircleIcon} className="text-white" />
             <Text className="font-ifood-regular text-text-dark">
-              {Strings.appointments.cancelAppointment}
+              {Strings.appointments.cta.cancel}
             </Text>
           </Button>
         </View>
