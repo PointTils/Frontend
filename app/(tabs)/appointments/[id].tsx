@@ -550,7 +550,7 @@ export default function AppointmentDetailsScreen() {
       </ScrollView>
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
-          <View className="w-full px-6 pt-6 pb-2 gap-4 border-t border-typography-200 dark:border-typography-700">
+          <View className="w-full px-6 pt-6 pb-4 gap-4 border-t border-typography-200 dark:border-typography-700">
             <Button
               size="md"
               onPress={handleAcceptPending}
