@@ -24,8 +24,9 @@ import { getSafeAvatarUri, toBoolean, toFloat } from '@/src/utils/helpers';
 import {
   formatAppointmentLocation,
   formatDate,
-  formatPhoneOnlyDigits,
+  formatPhone,
   formatTime,
+  validateCnpj,
 } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -90,35 +91,33 @@ export default function AppointmentDetailsScreen() {
   } = useApiGet<AppointmentResponse>(ApiRoutes.appointments.byId(id));
 
   // Fetch interpreter data
-  const interpreterId = appointmentData?.data?.interpreter_id;
-
   const {
     data: interpreterData,
     loading: loadingInterpreter,
     error: interpreterError,
   } = useApiGet<UserResponse>(
-    ApiRoutes.interpreters.profile(interpreterId!),
+    ApiRoutes.interpreters.profile(appointmentData?.data?.interpreter_id!),
     {},
-    { enabled: !!interpreterId },
+    { enabled: user?.type !== UserType.INTERPRETER && !isPendingBool },
   );
+  const interpreter = interpreterData?.data as InterpreterResponseData;
 
-  // Fetch user data
-  const userId = appointmentData?.data?.user_id;
-
+  // Fetch Person or Enterprise data
+  const route = validateCnpj(userDocument)
+    ? ApiRoutes.enterprises.profile(appointmentData?.data?.user_id!)
+    : ApiRoutes.person.profile(appointmentData?.data?.user_id!);
   const {
     data: userData,
     loading: loadingUser,
     error: userError,
   } = useApiGet<UserResponse>(
-    ApiRoutes.person.profile(userId!),
+    route,
     {},
-    { enabled: !!userId },
+    { enabled: user?.type === UserType.INTERPRETER && !isPendingBool },
   );
-
-  const interpreter = interpreterData?.data as InterpreterResponseData;
-  const userTypeData =
+  const userPerEnt =
     user?.type === UserType.ENTERPRISE
-      ? (interpreterData?.data as EnterpriseResponseData)
+      ? (userData?.data as EnterpriseResponseData)
       : (userData?.data as PersonResponseData);
 
   // Hook to PATCH appointment
@@ -134,8 +133,8 @@ export default function AppointmentDetailsScreen() {
   const everythingLoaded =
     loadingAppointment ||
     patchLoading ||
-    (!!interpreterId && !interpreterData && !interpreterError) ||
-    (!!userId && !userData && !userError);
+    (!interpreterData && !interpreterError) ||
+    (!userData && !userError);
 
   const handleBack = (returnTo: string) => {
     const target =
@@ -189,12 +188,12 @@ export default function AppointmentDetailsScreen() {
   ]);
 
   const handleOpenWhatsApp = () => {
-    const phone = formatPhoneOnlyDigits(
+    const phone =
       user?.type === UserType.INTERPRETER
-        ? interpreter?.phone
-        : userTypeData?.phone,
-    );
-    const message = `Olá, ${user?.name}.`;
+        ? userPerEnt?.phone
+        : interpreter?.phone;
+
+    const message = Strings.home.welcome.replace('{User}', userName);
     Linking.openURL(
       `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
     );
@@ -336,7 +335,8 @@ export default function AppointmentDetailsScreen() {
   const formattedDate = `${formatDate(appointment.date)} ${formatTime(appointment.start_time)} - ${formatTime(appointment.end_time)}`;
   const formattedLocation = formatAppointmentLocation(appointment);
   const formattedDescription =
-    appointment.description || 'Nenhuma descrição fornecida';
+    appointment.description || Strings.appointments.noDescription;
+
   return (
     <>
       <View className="mt-12 pb-2">
@@ -388,7 +388,7 @@ export default function AppointmentDetailsScreen() {
       </View>
 
       {/* Section selector */}
-      {appointment.status !== AppointmentStatus.ACCEPTED ? (
+      {isPendingBool ? (
         <View className="w-full px-6">
           <Text className="text-text-light font-ifood-medium text-lg mb-2">
             {Strings.appointments.details}
@@ -516,11 +516,11 @@ export default function AppointmentDetailsScreen() {
                 <InfoRow
                   icon={<Phone size={16} color={colors.text} />}
                   label={Strings.common.fields.phone}
-                  value={
+                  value={formatPhone(
                     user?.type === UserType.INTERPRETER
-                      ? userTypeData?.phone
-                      : interpreter?.phone
-                  }
+                      ? userPerEnt?.phone
+                      : interpreter?.phone,
+                  )}
                   valueColor="text-typography-600"
                 />
               </View>
@@ -540,7 +540,7 @@ export default function AppointmentDetailsScreen() {
               label={Strings.common.fields.phone}
               value={
                 user?.type === UserType.INTERPRETER
-                  ? userTypeData?.email
+                  ? userPerEnt?.email
                   : interpreter?.email
               }
               valueColor="text-typography-600"
@@ -550,7 +550,7 @@ export default function AppointmentDetailsScreen() {
       </ScrollView>
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
-          <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
+          <View className="w-full px-6 pt-6 pb-2 gap-4 border-t border-typography-200 dark:border-typography-700">
             <Button
               size="md"
               onPress={handleAcceptPending}

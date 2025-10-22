@@ -31,25 +31,14 @@ export default function HomeScreen() {
     [user?.type],
   );
 
-  const appointmentsRoute = useMemo(() => {
-    if (!user?.id) return '';
-
-    const baseUrl = ApiRoutes.appointments.filter;
-    const params = new URLSearchParams();
-
-    if (user.type === UserType.INTERPRETER) {
-      params.append('interpreterId', user.id);
-    } else {
-      params.append('userId', user.id);
-    }
-
-    params.append('status', AppointmentStatus.ACCEPTED);
-
-    return `${baseUrl}?${params.toString()}`;
-  }, [user?.id, user?.type]);
-
   const { data: appointmentsData, loading: appointmentsLoading } =
-    useApiGet<AppointmentsResponse>(appointmentsRoute);
+    useApiGet<AppointmentsResponse>(
+      ApiRoutes.appointments.byStatus(
+        user?.id || '',
+        user?.type || UserType.PERSON,
+        AppointmentStatus.ACCEPTED,
+      ),
+    );
 
   const appointments = useMemo<Appointment[]>(
     () => (Array.isArray(appointmentsData?.data) ? appointmentsData.data : []),

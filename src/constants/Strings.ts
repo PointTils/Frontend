@@ -202,6 +202,7 @@ export const Strings = {
   appointments: {
     tabBar: 'Agendamentos',
     details: 'Dados do agendamento',
+    noDescription: 'Nenhuma descrição fornecida.',
 
     headers: {
       myAppointments: 'Meus Agendamentos',

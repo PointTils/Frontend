@@ -127,13 +127,6 @@ export const formatDateToISO = (dateString: string | undefined): string => {
   return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 };
 
-export const formatPhoneOnlyDigits = (phone?: string | null) => {
-  // Returns "YYXXXXXXXXX"
-  if (!phone) return '';
-  const formatted = phone?.replace(/\D/g, '');
-  return formatted;
-};
-
 export const formatPhone = (phone?: string | null) => {
   // Returns "(XX) XXXXX-XXXX"
   if (!phone) return '';
