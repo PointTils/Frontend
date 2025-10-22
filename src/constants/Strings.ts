@@ -202,6 +202,8 @@ export const Strings = {
   appointments: {
     tabBar: 'Agendamentos',
     details: 'Dados do agendamento',
+    noDescription: 'Nenhuma descrição fornecida.',
+    description: 'Serviços e experiência',
 
     headers: {
       myAppointments: 'Meus Agendamentos',
@@ -222,9 +224,12 @@ export const Strings = {
       requester: 'Solicitante',
     },
 
-    accept: 'Aceitar',
-    reject: 'Recusar',
-    cancelAppointment: 'Cancelar Agendamento',
+    cta: {
+      whatsapp: 'WhatsApp',
+      cancel: 'Cancelar agendamento',
+      accept: 'Aceitar',
+      reject: 'Recusar',
+    },
 
     toast: {
       acceptTitle: 'Solicitação Aprovada',
@@ -233,8 +238,6 @@ export const Strings = {
       rejectDescription: 'A solicitação foi recusada com sucesso!',
       cancelTitle: 'Solicitação Cancelada',
       cancelDescription: 'A solicitação foi cancelada com sucesso!',
-      errorTitle: 'Erro',
-      errorDescription: 'Não foi possível processar a solicitação',
     },
   },
 

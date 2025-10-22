@@ -19,13 +19,13 @@ import { useColors } from '../hooks/useColors';
 import {
   type UserSpecialty,
   type UserSpecialtyResponse,
-  type InterpreterListResponse,
+  type InterpretersResponse,
   Modality,
 } from '../types/api';
 import type { AppliedFilters, OptionItem } from '../types/ui';
 
 interface SearchFilterBarProps {
-  onData: (data: InterpreterListResponse) => void;
+  onData: (data: InterpretersResponse) => void;
   navigateOnSearch?: boolean;
   initialQuery?: string;
   initialFilters?: AppliedFilters;
@@ -181,7 +181,7 @@ export default function SearchFilterBar({
     return query;
   };
 
-  const { data, error } = useApiGet<InterpreterListResponse>(
+  const { data, error } = useApiGet<InterpretersResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
