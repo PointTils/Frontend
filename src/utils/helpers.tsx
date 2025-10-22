@@ -5,6 +5,7 @@ import type { ImagePickerAsset } from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { View } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 import {
   formatAppointmentLocation,
@@ -223,6 +224,7 @@ const modalityToSend = (modality: Modality[]) => {
   return modalityToSend;
 };
 
+// Functions interacting with native APIs
 export const clearAsyncStorage = async () => {
   try {
     await AsyncStorage.clear();
@@ -271,6 +273,19 @@ export const pickFile = async () => {
     console.error(error);
     return null;
   }
+};
+
+// Rendering helpers
+export const showGenericErrorToast = () => {
+  return Toast.show({
+    type: 'error',
+    text1: Strings.common.toast.errorUnknownTitle,
+    text2: Strings.common.toast.errorUnknownDescription,
+    position: 'top',
+    visibilityTime: 2000,
+    autoHide: true,
+    closeIconSize: 1,
+  });
 };
 
 export const getSafeAvatarUri = ({
