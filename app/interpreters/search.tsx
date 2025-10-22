@@ -5,7 +5,7 @@ import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
 import type {
-  InterpreterListResponse,
+  InterpretersResponse,
   Gender,
   Modality,
 } from '@/src/types/api';
@@ -30,7 +30,7 @@ export default function SearchScreen() {
   }>();
 
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<InterpreterListResponse | null>(null);
+  const [result, setResult] = useState<InterpretersResponse | null>(null);
 
   // Prepare initial filters from URL params
   const initialFilters: AppliedFilters = {
@@ -42,7 +42,7 @@ export default function SearchScreen() {
     modality: (params.modality as Modality) || undefined,
   };
 
-  const handleData = (data: InterpreterListResponse) => {
+  const handleData = (data: InterpretersResponse) => {
     setLoading(true);
     setTimeout(() => {
       setResult(data);
