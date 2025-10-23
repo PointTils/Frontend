@@ -69,6 +69,8 @@ export const Strings = {
       professionalArea: 'Área profissional',
       date: 'Data',
       time: 'Hora',
+      start: 'Início',
+      end: 'Fim',
       uploadFile: 'Adicionar arquivo',
 
       errors: {
@@ -174,7 +176,7 @@ export const Strings = {
     subtitle:
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
 
-    calendarNoAvailable: 'Nenhum horário disponível.',
+    noCalendarAvailable: 'Nenhum horário disponível.',
 
     toast: {
       errorTitle: 'Erro ao criar agendamento',

@@ -1,5 +1,5 @@
-export interface Review {
-  id: number;
+export interface Rating {
+  id: string;
   stars: number;
   description: string;
   date: string;
@@ -10,30 +10,20 @@ export interface Review {
   };
 }
 
-export interface ReviewResponse {
-  success: boolean;
-  message: string;
-  data: Review[];
-}
-
 export interface RatingRequest {
   stars: number;
   description?: string | null;
   user_id: string;
 }
 
+export interface RatingsResponse {
+  success: boolean;
+  message: string;
+  data: Rating[];
+}
+
 export interface RatingResponse {
   success: boolean;
   message: string;
-  data: {
-    id: number;
-    stars: number;
-    description: string;
-    date: string;
-    user: {
-      id: string;
-      name: string;
-      picture: string;
-    };
-  };
+  data: Rating;
 }
