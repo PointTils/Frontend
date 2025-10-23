@@ -68,17 +68,6 @@ export default function HomeScreen() {
     ? Strings.home.welcome.replace('{User}', user.name)
     : Strings.home.welcome;
 
-  if (appointmentsLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1">
       <View className="pt-16">
