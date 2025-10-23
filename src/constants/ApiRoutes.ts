@@ -45,7 +45,7 @@ export const ApiRoutes = {
   },
   schedules: {
     base: '/schedules',
-    interpreterSchedule: (
+    availabilityPerDay: (
       interpreterId: string,
       dateFrom: string,
       dateTo: string,

@@ -34,6 +34,7 @@ import {
   type AppointmentResponse,
   type StateAndCityResponse,
   Modality,
+  type ScheduleResponse,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -66,14 +67,22 @@ type ScheduleValidationContext = {
 };
 
 export default function ToScheduleScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>(); // Interpreter ID from route params
+  const { id, startTime } = useLocalSearchParams<{
+    id: string;
+    startTime: string;
+  }>(); // Interpreter ID from route params
   const { user } = useAuth();
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [time, setTime] = useState(new Date());
+  const [date, setDate] = useState(
+    startTime ? new Date(startTime) : new Date(),
+  );
+
+  const selectedDateStr = useMemo(
+    () => date.toISOString().split('T')[0],
+    [date],
+  );
 
   const appointmentApi = useApiPost<AppointmentResponse, AppointmentRequest>(
     ApiRoutes.appointments.base,
@@ -98,16 +107,22 @@ export default function ToScheduleScreen() {
         !value.trim() ? buildRequiredFieldError('more') : null,
     },
     date: {
-      value: '',
+      value: formatDate(startTime) || '',
       error: '',
       validate: (value: string): string | null =>
         !value.trim() ? buildRequiredFieldError('date') : null,
     },
-    time: {
+    startTime: {
+      value: formatTime(new Date(startTime)) || '',
+      error: '',
+      validate: (value: string): string | null =>
+        !value.trim() ? buildRequiredFieldError('start') : null,
+    },
+    endTime: {
       value: '',
       error: '',
       validate: (value: string): string | null =>
-        !value.trim() ? buildRequiredFieldError('time') : null,
+        !value.trim() ? buildRequiredFieldError('end') : null,
     },
     modality: {
       value: [Modality.PERSONALLY],
@@ -178,6 +193,51 @@ export default function ToScheduleScreen() {
     },
   });
 
+  // Fetch available schedules for the selected day
+  const { data: daySchedule, loading: loadingDaySchedule } =
+    useApiGet<ScheduleResponse>(
+      ApiRoutes.schedules.availabilityPerDay(
+        id as string,
+        selectedDateStr,
+        selectedDateStr,
+      ),
+      undefined,
+      {
+        enabled: !!id && !!fields.date.value,
+      },
+    );
+
+  // Build time options from fetched schedule
+  const startTimeOptions = useMemo(() => {
+    const items = daySchedule?.data ?? [];
+    const forDay = items.find((s) => s.date?.slice(0, 10) === selectedDateStr);
+    const slots = forDay?.time_slots ?? [];
+    const hhmm = Array.from(
+      new Set(
+        slots
+          .map((t) => t.start_time?.slice(0, 5))
+          .filter((v): v is string => !!v),
+      ),
+    ).sort();
+    return hhmm.map((t) => ({ label: t, value: t }));
+  }, [daySchedule, selectedDateStr]);
+
+  const endTimeOptions = useMemo(() => {
+    const items = startTimeOptions ?? [];
+    const startIndex = items.findIndex(
+      (t) => t.value === fields.startTime.value,
+    );
+    const hhmm = Array.from(
+      new Set(
+        items
+          .slice(startIndex + 1)
+          .map((t) => t.value)
+          .filter((v): v is string => !!v),
+      ),
+    ).sort();
+    return hhmm.map((t) => ({ label: t, value: t }));
+  }, [startTimeOptions, fields.startTime.value]);
+
   // Fetch all states
   const [selectedState, setselectedState] = useState(fields.state.value);
   const { data: states } = useApiGet<StateAndCityResponse>(
@@ -195,6 +255,11 @@ export default function ToScheduleScreen() {
   // Fetch cities based on selected state
   const { data: cities } = useApiGet<StateAndCityResponse>(
     ApiRoutes.states.cities(selectedState),
+    undefined,
+    {
+      enabled:
+        fields.modality.value[0] === Modality.PERSONALLY && !!selectedState,
+    },
   );
 
   let cityOptions: OptionItem[] = [];
@@ -210,14 +275,8 @@ export default function ToScheduleScreen() {
     if (selectedDate) {
       setDate(selectedDate);
       setValue('date', formatDate(selectedDate));
-    }
-  };
-
-  const handleTimeChange = (_event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      setTime(selectedTime);
-      setValue('time', formatTime(selectedTime));
+      setValue('startTime', ''); // force user to pick an available slot for the new date
+      setValue('endTime', '');
     }
   };
 
@@ -269,7 +328,7 @@ export default function ToScheduleScreen() {
       return;
     }
 
-    router.replace('/');
+    router.replace('/(tabs)');
     Toast.show({
       type: 'success',
       text1: Strings.toSchedule.toast.successTitle,
@@ -345,86 +404,111 @@ export default function ToScheduleScreen() {
               </FormControlError>
             </FormControl>
 
-            <View className="flex-row justify-between gap-2 mb-4">
-              {/* Date */}
+            {/* Date */}
+            <FormControl isRequired isInvalid={!!fields.date.error}>
+              <FormControlLabel>
+                <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                  {Strings.common.fields.date}
+                </FormControlLabelText>
+              </FormControlLabel>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <Input pointerEvents="none">
+                  <InputField
+                    placeholder="DD/MM/AAAA"
+                    className="font-ifood-regular"
+                    value={fields.date.value}
+                    editable={false}
+                  />
+                </Input>
+              </TouchableOpacity>
+              <FormControlError>
+                <FormControlErrorIcon
+                  as={AlertCircleIcon}
+                  className="text-red-600"
+                />
+                <FormControlErrorText>{fields.date.error}</FormControlErrorText>
+              </FormControlError>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="calendar"
+                  minimumDate={minDate}
+                  onChange={handleDateChange}
+                />
+              )}
+            </FormControl>
+
+            <View className="flex-row justify-between gap-4 my-4">
+              {/* Start and End time constrained by availability */}
               <FormControl
                 isRequired
-                isInvalid={!!fields.date.error}
+                isInvalid={!!fields.startTime.error}
                 className="flex-1"
               >
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.fields.date}
+                    {Strings.common.fields.start}
                   </FormControlLabelText>
                 </FormControlLabel>
-                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                  <Input pointerEvents="none">
-                    <InputField
-                      placeholder="DD/MM/AAAA"
-                      className="font-ifood-regular"
-                      value={fields.date.value}
-                      editable={false}
-                    />
-                  </Input>
-                </TouchableOpacity>
+                <ModalSingleSelection
+                  items={startTimeOptions}
+                  selectedValue={fields.startTime.value}
+                  onSelectionChange={(value) => setValue('startTime', value)}
+                  placeholderText={
+                    loadingDaySchedule
+                      ? Strings.common.loading
+                      : Strings.common.fields.select
+                  }
+                  hasError={!!fields.startTime.error}
+                  hasTimeSlots={
+                    !loadingDaySchedule && startTimeOptions.length > 0
+                  }
+                />
                 <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
                   />
                   <FormControlErrorText>
-                    {fields.date.error}
+                    {fields.startTime.error}
                   </FormControlErrorText>
                 </FormControlError>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="calendar"
-                    minimumDate={minDate}
-                    onChange={handleDateChange}
-                  />
-                )}
               </FormControl>
 
-              {/* Time */}
               <FormControl
                 isRequired
-                isInvalid={!!fields.time.error}
-                className="w-28"
+                isInvalid={!!fields.endTime.error}
+                className="flex-1"
               >
                 <FormControlLabel>
                   <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.fields.time}
+                    {Strings.common.fields.end}
                   </FormControlLabelText>
                 </FormControlLabel>
-                <TouchableOpacity onPress={() => setShowTimePicker(true)}>
-                  <Input pointerEvents="none">
-                    <InputField
-                      placeholder="HH:MM"
-                      className="font-ifood-regular"
-                      value={fields.time.value}
-                      editable={false}
-                    />
-                  </Input>
-                </TouchableOpacity>
+                <ModalSingleSelection
+                  items={endTimeOptions}
+                  selectedValue={fields.endTime.value}
+                  onSelectionChange={(value) => setValue('endTime', value)}
+                  placeholderText={
+                    loadingDaySchedule
+                      ? Strings.common.loading
+                      : Strings.common.fields.select
+                  }
+                  hasError={!!fields.endTime.error}
+                  hasTimeSlots={
+                    !loadingDaySchedule && endTimeOptions.length > 0
+                  }
+                />
                 <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
                   />
                   <FormControlErrorText>
-                    {fields.time.error}
+                    {fields.endTime.error}
                   </FormControlErrorText>
                 </FormControlError>
-                {showTimePicker && (
-                  <DateTimePicker
-                    value={time}
-                    mode="time"
-                    display="spinner"
-                    onChange={handleTimeChange}
-                  />
-                )}
               </FormControl>
             </View>
 
