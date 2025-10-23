@@ -45,6 +45,7 @@ import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
 import {
+  type UserPictureResponse,
   type UserRequest,
   type UserResponse,
   type UserResponseData,
@@ -150,7 +151,7 @@ export default function EditProfileScreen() {
     UserSpecialtyResponse,
     UserSpecialtyRequest
   >(ApiRoutes.userSpecialties.byUser(profile?.id || ''));
-  const userPictureApi = useApiPost<UserResponse, FormData>(
+  const userPictureApi = useApiPost<UserPictureResponse, FormData>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
 
@@ -474,7 +475,7 @@ export default function EditProfileScreen() {
     const profilePromise = api.patch(payload);
     const specialtyPromise = userSpecialtyApi.post(specialtiesPayload);
 
-    let picturePromise: Promise<UserResponse | null>;
+    let picturePromise: Promise<UserPictureResponse | null>;
     if (selectedImage) {
       picturePromise = userPictureApi.post(buildAvatarFormData(selectedImage));
     } else {
@@ -487,9 +488,8 @@ export default function EditProfileScreen() {
 
     if (
       !profileResponse?.success ||
-      !profileResponse?.data ||
       !specialtyResponse?.success ||
-      (selectedImage && !pictureResponse?.success)
+      (selectedImage && !pictureResponse?.picture)
     ) {
       router.replace('/(tabs)/(profile)');
       await new Promise((resolve) => setTimeout(resolve, 300));
