@@ -70,6 +70,7 @@ export const Strings = {
       date: 'Data',
       time: 'Hora',
       uploadFile: 'Adicionar arquivo',
+      certificate: 'Certificado',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',

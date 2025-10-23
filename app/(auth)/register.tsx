@@ -20,6 +20,7 @@ import {
 } from '@/src/components/ui/radio';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import UploadInput from '@/src/components/UploadInput';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { genders } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
@@ -63,6 +64,12 @@ import {
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
+type FileType = {
+  uri: string;
+  name: string;
+  type?: string;
+};
+
 export default function RegisterScreen() {
   const colors = useColors();
   const [type, setType] = useState(UserType.PERSON);
@@ -79,6 +86,7 @@ export default function RegisterScreen() {
   const interpreterApi = useApiPost<UserResponse, UserRequest>(
     ApiRoutes.interpreters.register,
   );
+  const [document, setDocument] = useState<any[]>([]);
 
   const handleChangeType = (newType: UserType) => {
     setType(newType);
@@ -180,7 +188,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
-        !value.trim()
+          !value.trim()
           ? buildRequiredFieldError('gender')
           : null,
     },
@@ -662,6 +670,31 @@ export default function RegisterScreen() {
                   </FormControlErrorText>
                 </FormControlError>
               </FormControl>
+
+              {/* Interpreter Load File */}
+              {type === UserType.INTERPRETER && (
+                <View className="gap-3 mt-3">
+                  <FormControl>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.certificate}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+
+                    <UploadInput
+                      multiple={false}
+                      maxFiles={1}
+                      onChange={(files) => setDocument(files)}
+                    />
+
+                    {document?.length > 0 && (
+                      <Text className="text-text-light dark:text-text-dark mt-2">
+                        Arquivo selecionado: {document[0].name}
+                      </Text>
+                    )}
+                  </FormControl>
+                </View>
+              )}
             </View>
 
             {/* Bottom buttons */}
