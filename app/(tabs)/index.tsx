@@ -23,7 +23,12 @@ import { ActivityIndicator, FlatList } from 'react-native';
 export default function HomeScreen() {
   const { user } = useAuth();
   const colors = useColors();
-  const { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback, interpreterName } = useCheckFeedback(user);
+  const {
+    showFeedbackModal,
+    setShowFeedbackModal,
+    appointmentForFeedback,
+    interpreterName,
+  } = useCheckFeedback(user);
 
   const renderItem = useMemo(
     () =>
@@ -36,12 +41,10 @@ export default function HomeScreen() {
 
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
-      ApiRoutes.appointments.byStatus(
+      ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
-        false,
-        5
       ),
     );
 
@@ -86,7 +89,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <SearchFilterBar onData={() => { }} navigateOnSearch />
+        <SearchFilterBar onData={() => {}} navigateOnSearch />
 
         {/* Divider */}
         <View className="w-full h-px bg-gray-200 mb-4 mt-6" />

@@ -1,35 +1,33 @@
-// src/hooks/useCheckFeedback.ts
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { useApiGet } from '@/src/hooks/useApi';
 import type { AppointmentsResponse, Appointment } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useMemo, useState } from 'react';
 
 export function useCheckFeedback(user: any) {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [appointmentForFeedback, setAppointmentForFeedback] = useState<Appointment | null>(null);
+  const [appointmentForFeedback, setAppointmentForFeedback] =
+    useState<Appointment | null>(null);
   const [interpreterName, setInterpreterName] = useState<string | null>(null);
   const [shouldFetch, setShouldFetch] = useState(false);
 
   const completedRoute = useMemo(() => {
     if (!user?.id) return '';
-    return ApiRoutes.appointments.byStatus(
+
+    return ApiRoutes.appointments.filters(
       user.id,
       user.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
       false,
-      5
+      5,
     );
   }, [user?.id, user?.type]);
 
   const {
     data: apptCompleted,
-    loading: loadCompleted,
-    error: errorCompleted,
-  } = useApiGet<AppointmentsResponse>(
-    shouldFetch ? completedRoute : '',
-  );
+    loading: loading,
+    error: error,
+  } = useApiGet<AppointmentsResponse>(shouldFetch ? completedRoute : '');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,11 +37,12 @@ export function useCheckFeedback(user: any) {
     return () => clearTimeout(timer);
   }, []);
 
-
   useEffect(() => {
-    if (!user || loadCompleted || errorCompleted) return;
+    if (!user || loading || error) return;
 
-    const list: Appointment[] = Array.isArray(apptCompleted?.data) ? apptCompleted.data : [];
+    const list: Appointment[] = Array.isArray(apptCompleted?.data)
+      ? apptCompleted.data
+      : [];
 
     if (list.length > 0) {
       const firstAppointment = list[0];
@@ -52,7 +51,12 @@ export function useCheckFeedback(user: any) {
       setInterpreterName(name);
       setShowFeedbackModal(true);
     }
-  }, [user, apptCompleted, loadCompleted, errorCompleted]);
+  }, [user, apptCompleted, loading, error]);
 
-  return { showFeedbackModal, setShowFeedbackModal, appointmentForFeedback, interpreterName };
+  return {
+    showFeedbackModal,
+    setShowFeedbackModal,
+    appointmentForFeedback,
+    interpreterName,
+  };
 }
