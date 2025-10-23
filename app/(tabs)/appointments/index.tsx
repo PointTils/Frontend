@@ -42,7 +42,7 @@ export default function AppointmentsScreen() {
     loading: loadActive,
     error: errorActive,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.ACCEPTED,
@@ -54,7 +54,7 @@ export default function AppointmentsScreen() {
     loading: loadCompleted,
     error: errorCompleted,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
@@ -66,7 +66,7 @@ export default function AppointmentsScreen() {
     loading: loadCanceled,
     error: errorCanceled,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.CANCELED,
@@ -78,7 +78,7 @@ export default function AppointmentsScreen() {
     loading: loadPending,
     error: errorPending,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.PENDING,

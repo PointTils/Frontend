@@ -1,4 +1,5 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
+import FeedbackModal from '@/src/components/FeedbackModal';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -7,6 +8,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
   type Appointment,
@@ -21,6 +23,12 @@ import { ActivityIndicator, FlatList } from 'react-native';
 export default function HomeScreen() {
   const { user } = useAuth();
   const colors = useColors();
+  const {
+    showFeedbackModal,
+    setShowFeedbackModal,
+    appointmentForFeedback,
+    interpreterName,
+  } = useCheckFeedback(user);
 
   const renderItem = useMemo(
     () =>
@@ -33,7 +41,7 @@ export default function HomeScreen() {
 
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
-      ApiRoutes.appointments.byStatus(
+      ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
@@ -103,6 +111,13 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
+
+      <FeedbackModal
+        visible={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        appointmentId={appointmentForFeedback?.id || ''}
+        interpreterName={interpreterName ?? ''}
+      />
     </View>
   );
 }

@@ -19,7 +19,7 @@ import type {
   RatingsResponse,
 } from '@/src/types/api';
 import type { DateTimeSelection } from '@/src/types/ui';
-import { getSafeAvatarUri } from '@/src/utils/helpers';
+import { getSafeAvatarUri, showGenericErrorToast } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -102,11 +102,9 @@ export default function InterpreterDetails() {
   }
 
   if (isError) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-red-500">{Strings.common.noResults}</Text>
-      </View>
-    );
+    router.back();
+    showGenericErrorToast();
+    return null;
   }
 
   const handleSelectedTime = (dateTime: DateTimeSelection) => {
