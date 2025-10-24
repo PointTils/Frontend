@@ -46,13 +46,6 @@ export const ApiRoutes = {
       dayLimit?: number,
     ) => {
       const params = new URLSearchParams();
-      console.log('Generating appointment filter route with:', {
-        userId,
-        type,
-        status,
-        hasRating,
-        dayLimit,
-      });
 
       params.set(
         type === UserType.INTERPRETER
