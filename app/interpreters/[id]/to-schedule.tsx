@@ -79,10 +79,12 @@ export default function ToScheduleScreen() {
     startTime ? new Date(startTime) : new Date(),
   );
 
-  const selectedDateStr = useMemo(
-    () => date.toISOString().split('T')[0],
-    [date],
-  );
+  const selectedDateStr = useMemo(() => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, [date]);
 
   const appointmentApi = useApiPost<AppointmentResponse, AppointmentRequest>(
     ApiRoutes.appointments.base,
@@ -223,20 +225,29 @@ export default function ToScheduleScreen() {
   }, [daySchedule, selectedDateStr]);
 
   const endTimeOptions = useMemo(() => {
-    const items = startTimeOptions ?? [];
-    const startIndex = items.findIndex(
-      (t) => t.value === fields.startTime.value,
-    );
-    const hhmm = Array.from(
+    if (!fields.startTime.value) return []; // No start time selected yet
+
+    const items = daySchedule?.data ?? [];
+    const forDay = items.find((s) => s.date?.slice(0, 10) === selectedDateStr);
+    const slots = forDay?.time_slots ?? [];
+
+    // All end times for the day
+    const allEnds = Array.from(
       new Set(
-        items
-          .slice(startIndex + 1)
-          .map((t) => t.value)
+        slots
+          .map((t) => t.end_time?.slice(0, 5))
           .filter((v): v is string => !!v),
       ),
     ).sort();
-    return hhmm.map((t) => ({ label: t, value: t }));
-  }, [startTimeOptions, fields.startTime.value]);
+
+    // Keep only end times strictly after the selected start time
+    const selectedStart = fields.startTime.value;
+    const filtered = selectedStart
+      ? allEnds.filter((end) => end > selectedStart)
+      : allEnds;
+
+    return filtered.map((t) => ({ label: t, value: t }));
+  }, [daySchedule, selectedDateStr, fields.startTime.value]);
 
   // Fetch all states
   const [selectedState, setselectedState] = useState(fields.state.value);
@@ -454,7 +465,10 @@ export default function ToScheduleScreen() {
                 <ModalSingleSelection
                   items={startTimeOptions}
                   selectedValue={fields.startTime.value}
-                  onSelectionChange={(value) => setValue('startTime', value)}
+                  onSelectionChange={(value) => {
+                    setValue('startTime', value);
+                    setValue('endTime', '');
+                  }}
                   placeholderText={
                     loadingDaySchedule
                       ? Strings.common.loading
