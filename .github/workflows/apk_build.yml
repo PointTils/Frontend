@@ -1,8 +1,8 @@
-name: Nightly Build
+name: APK Build
 
 on:
-  schedule:
-    - cron: '0 6 */3 * *' # 6AM UTC (03:00 BRT) a cada 3 dias
+  # schedule:
+  #   - cron: '0 6 */3 * *' # 6AM UTC (03:00 BRT) a cada 3 dias
   workflow_dispatch:
     inputs:
       branch:
@@ -27,7 +27,7 @@ jobs:
       build_id: ${{ steps.build-step.outputs.build_id }}
       build_status: ${{ steps.build-status.outputs.build_status }}
       build_url: ${{ steps.build-status.outputs.build_url }}
-      nightly_version: ${{ steps.build-step.outputs.nightly_version }}
+      build_version: ${{ steps.build-step.outputs.build_version }}
       original_version: ${{ steps.build-step.outputs.original_version }}
 
     steps:
@@ -75,32 +75,32 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "🌙 Generating nightly build..."
+          echo "🌙 Generating build..."
           ORIGINAL_VERSION=$(node -p "require('./package.json').version")
 
-          LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}-nightly.*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'-nightly\.([0-9]+)$/\1/' | sort -n | tail -n1)
+          LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}.[0-9]*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'\.([0-9]+)$/\1/' | sort -n | tail -n1)
           if [ -z "$LAST_SEQ" ]; then
             SEQ=1
           else
             SEQ=$((LAST_SEQ + 1))
           fi
-          NIGHTLY_VERSION="${ORIGINAL_VERSION}-nightly.${SEQ}"
+          BUILD_VERSION="${ORIGINAL_VERSION}.${SEQ}"
 
           echo "original_version=${ORIGINAL_VERSION}" >> $GITHUB_OUTPUT
-          echo "nightly_version=${NIGHTLY_VERSION}" >> $GITHUB_OUTPUT
+          echo "build_version=${BUILD_VERSION}" >> $GITHUB_OUTPUT
 
           # Backup original app.json
           cp app.json app.json.backup
 
-          # Modify app.json for nightly build
+          # Modify app.json for build
           node -e "
             const fs = require('fs');
             const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-            appJson.expo.version = '${NIGHTLY_VERSION}';
+            appJson.expo.version = '${BUILD_VERSION}';
             fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2));
           "
 
-          echo "🚀 Starting build for version: ${NIGHTLY_VERSION}"
+          echo "🚀 Starting build for version: ${BUILD_VERSION}"
 
           # Capture build ID and URL from JSON output
           BUILD_JSON=$(eas build --platform android --profile ${{ github.event.inputs.profile || 'preview' }} --non-interactive --no-wait --json)
@@ -229,11 +229,11 @@ jobs:
 
           if [ "$PROFILE" = "production" ]; then
             # For production builds, get the two most recent production tags
-            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
             echo "📦 Production build - comparing ${LATEST_TAG:-none} with HEAD"
           else
-            # For preview builds, get the two most recent nightly tags
-            LATEST_TAG=$(git tag -l "v*-nightly.*" --sort=-version:refname | head -n 1)
+            # For preview builds, get the two most recent tags
+            LATEST_TAG=$(git tag -l "v*.*" --sort=-version:refname | head -n 1)
             echo "🌙 Preview build - comparing ${LATEST_TAG:-none} with HEAD"
           fi
 
@@ -267,9 +267,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
-          tag_name: v${{ needs.build.outputs.nightly_version }}
+          tag_name: v${{ needs.build.outputs.build_version }}
           commitish: ${{ github.event.inputs.branch || 'dev' }}
-          release_name: Point Tils ${{ needs.build.outputs.nightly_version }} [${{ github.event.inputs.profile || 'preview' }}]
+          release_name: Point Tils ${{ needs.build.outputs.build_version }} [${{ github.event.inputs.profile || 'preview' }}]
           draft: false
           prerelease: ${{ (github.event.inputs.profile || 'preview') == 'preview' }}
           body: |
@@ -291,7 +291,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build.apk
-          asset_name: point-tils-v${{ needs.build.outputs.nightly_version }}.apk
+          asset_name: point-tils-v${{ needs.build.outputs.build_version }}.apk
           asset_content_type: application/vnd.android.package-archive
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
@@ -323,5 +323,5 @@ jobs:
           RELEASE_URL=${{ needs.publish-release.outputs.release_url || 'N/A' }}
 
           curl -H "Content-Type: application/json" -X POST -d "{
-            \"content\": \"$ICON **Nightly Build $RESULT**\n\n📱 **Projeto:** Point Tils\n📊 **Status:** ${{ needs.build.result }}\n⚙️ **GitHub Release:** $RELEASE_URL\n📝 **Logs:** ${LOGS_URL:-None}\"
+            \"content\": \"$ICON **Build $RESULT**\n\n📊 **Status:** ${{ needs.build.result }}\n⚙️ **GitHub Release:** $RELEASE_URL\n📝 **Logs:** ${LOGS_URL:-None}\"
           }" "${{ secrets.DISCORD_RELEASE_WEBHOOK }}"

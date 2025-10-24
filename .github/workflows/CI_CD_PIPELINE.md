@@ -42,7 +42,7 @@ This repository implements a robust CI/CD pipeline to ensure code quality in Pul
 - ✅ Detects compatibility issues
 - ⏱️ ~1-2 minutes
 
-## 🌙 Nightly Build
+## 🌙 APK Build
 
 ### Automated Workflow:
 
