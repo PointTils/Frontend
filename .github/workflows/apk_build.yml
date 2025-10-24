@@ -78,7 +78,7 @@ jobs:
           echo "🌙 Generating build..."
           ORIGINAL_VERSION=$(node -p "require('./package.json').version")
 
-          LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}.*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'\.([0-9]+)$/\1/' | sort -n | tail -n1)
+          LAST_SEQ=$(git tag -l "v${ORIGINAL_VERSION}.[0-9]*" | sed -E 's/^v'"${ORIGINAL_VERSION}"'\.([0-9]+)$/\1/' | sort -n | tail -n1)
           if [ -z "$LAST_SEQ" ]; then
             SEQ=1
           else
