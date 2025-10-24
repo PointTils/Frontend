@@ -30,6 +30,7 @@ export default function InterpreterCalendar({
 
   const days = useMemo(() => {
     if (!schedules) return [];
+
     const daysMap = schedules.reduce(
       (acc, currentSchedule) => {
         const dateStr = currentSchedule.date;
@@ -37,14 +38,8 @@ export default function InterpreterCalendar({
           acc[dateStr] = { date: dateStr, times: new Set<string>() };
         }
         currentSchedule.time_slots.forEach((slot) => {
-          let start = new Date(`1970-01-01T${slot.start_time}Z`);
-          const end = new Date(`1970-01-01T${slot.end_time}Z`);
-          while (start < end) {
-            const hours = start.getUTCHours().toString().padStart(2, '0');
-            const minutes = start.getUTCMinutes().toString().padStart(2, '0');
-            acc[dateStr].times.add(`${hours}:${minutes}`);
-            start.setUTCMinutes(start.getUTCMinutes() + 30);
-          }
+          // Use exactly the provided start_time (HH:mm)
+          acc[dateStr].times.add(slot.start_time.slice(0, 5));
         });
         return acc;
       },
