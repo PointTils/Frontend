@@ -509,7 +509,7 @@ export default function AppointmentDetailsScreen() {
             {/* Email */}
             <InfoRow
               icon={<AtSign size={16} color={colors.text} />}
-              label={Strings.common.fields.phone}
+              label={Strings.common.fields.email}
               value={
                 user?.type === UserType.INTERPRETER
                   ? userPerEnt?.email
