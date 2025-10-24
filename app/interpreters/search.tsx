@@ -4,19 +4,41 @@ import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import type { InterpreterListResponse } from '@/src/types/api';
-import { mapModality } from '@/src/utils/masks';
-import { router } from 'expo-router';
+import type { InterpretersResponse, Gender, Modality } from '@/src/types/api';
+import type { AppliedFilters } from '@/src/types/ui';
+import { formatDateToISO, mapModality } from '@/src/utils/masks';
+import { router, useLocalSearchParams } from 'expo-router';
+import { PackageSearchIcon } from 'lucide-react-native';
 import React, { Fragment, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text } from 'react-native';
 
 export default function SearchScreen() {
   const colors = useColors();
 
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<InterpreterListResponse | null>(null);
+  const params = useLocalSearchParams<{
+    name?: string;
+    specialty?: string;
+    date?: string;
+    gender?: string;
+    city?: string;
+    uf?: string;
+    modality?: string;
+  }>();
 
-  const handleData = (data: InterpreterListResponse) => {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<InterpretersResponse | null>(null);
+
+  // Prepare initial filters from URL params
+  const initialFilters: AppliedFilters = {
+    specialty: params.specialty ? params.specialty.split(',') : [],
+    availableDates: formatDateToISO(params.date),
+    gender: (params.gender as Gender) || undefined,
+    city: params.city || undefined,
+    state: params.uf || undefined,
+    modality: (params.modality as Modality) || undefined,
+  };
+
+  const handleData = (data: InterpretersResponse) => {
     setLoading(true);
     setTimeout(() => {
       setResult(data);
@@ -34,7 +56,11 @@ export default function SearchScreen() {
         />
       </View>
 
-      <SearchFilterBar onData={handleData} />
+      <SearchFilterBar
+        onData={handleData}
+        initialQuery={params.name || ''}
+        initialFilters={initialFilters}
+      />
 
       {/* Divider */}
       <View className="w-full h-[1px] bg-gray-200" />
@@ -66,11 +92,6 @@ export default function SearchScreen() {
                   modality={
                     mapModality(item?.professional_data?.modality) || ''
                   }
-                  priceRange={
-                    item?.professional_data
-                      ? `R$ ${item.professional_data?.min_value ?? '0,00'} - R$ ${item.professional_data?.max_value ?? '0,00'}`
-                      : ''
-                  }
                   location={
                     item?.locations?.[0]
                       ? `${item.locations[0].city}, ${item.locations[0].uf}`
@@ -89,9 +110,12 @@ export default function SearchScreen() {
           </View>
         </ScrollView>
       ) : (
-        <Text className="text-gray-500 text-center mt-6">
-          {Strings.common.noResults}
-        </Text>
+        <View className="flex-1 justify-center gap-y-4 items-center">
+          <PackageSearchIcon size={38} color={colors.detailsGray} />
+          <Text className="font-ifood-regular text-typography-400 text-md">
+            {Strings.common.noResults}
+          </Text>
+        </View>
       )}
     </View>
   );

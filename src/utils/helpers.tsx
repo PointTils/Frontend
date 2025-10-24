@@ -1,9 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Fragment } from 'react';
 import { View } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 import {
   formatAppointmentLocation,
@@ -18,6 +20,7 @@ import {
   type Appointment,
   type AppointmentRequest,
   type UserRequest,
+  AppointmentStatus,
   Modality,
   UserType,
 } from '../types/api';
@@ -49,6 +52,27 @@ export const getModality = (modality: Modality | undefined): Modality[] => {
   return [modality];
 };
 
+export const toBoolean = (value?: string | null): boolean | undefined => {
+  if (value == null) return undefined;
+  const v = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on', 'sim', 's'].includes(v)) return true;
+  if (['false', '0', 'no', 'n', 'off', 'nao', 'não'].includes(v)) return false;
+  return undefined;
+};
+
+export const toFloat = (
+  value?: string | null,
+  clamp?: { min?: number; max?: number },
+): number | undefined => {
+  if (value == null) return undefined;
+  const n = Number.parseFloat(value.replace(',', '.').trim());
+  if (!Number.isFinite(n)) return undefined;
+  const min = clamp?.min ?? -Infinity;
+  const max = clamp?.max ?? Infinity;
+  return Math.max(min, Math.min(max, n));
+};
+
+// Payload builders
 export const buildRegisterPayload = (
   type: string,
   fields: any,
@@ -57,7 +81,6 @@ export const buildRegisterPayload = (
     case UserType.PERSON:
       return {
         name: fields.name.value,
-        picture: '',
         email: fields.email.value,
         password: fields.password.value,
         phone: fields.phone.value.replace(/\D/g, ''),
@@ -68,7 +91,6 @@ export const buildRegisterPayload = (
     case UserType.ENTERPRISE:
       return {
         corporate_reason: fields.reason.value,
-        picture: '',
         cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         password: fields.password.value,
@@ -79,7 +101,6 @@ export const buildRegisterPayload = (
         name: fields.name.value,
         email: fields.email.value,
         password: fields.password.value,
-        picture: '',
         phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
@@ -102,7 +123,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.ENTERPRISE:
       return {
@@ -110,7 +130,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         cnpj: fields.cnpj.value.replace(/\D/g, ''),
         email: fields.email.value,
         phone: fields.phone.value.replace(/\D/g, ''),
-        picture: '',
       };
     case UserType.INTERPRETER:
       const neighborhoods = (fields.neighborhoods.value ?? []) as string[];
@@ -126,7 +145,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
         phone: fields.phone.value.replace(/\D/g, ''),
         gender: fields.gender.value,
         birthday: formatDateToISO(fields.birthday.value),
-        picture: '',
         ...(locations.length > 0 ? { locations } : {}),
         professional_data: {
           ...(fields.cnpj.value
@@ -136,8 +154,6 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
-          min_value: Number(fields.minPrice.value),
-          max_value: Number(fields.maxPrice.value),
         },
       };
     default:
@@ -152,11 +168,9 @@ export const buildAppointmentPayload = (
 ): AppointmentRequest => {
   const isOnline = fields.modality.value.includes(Modality.ONLINE);
 
-  // Calculate end time as one hour after start time
-  const [hours, minutes] = fields.time.value.split(':');
-  const startTime = `${fields.time.value}:00`;
-  const endHour = parseInt(hours) + 1;
-  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
+  // format times to HH:MM:SS
+  const startTime = `${fields.startTime.value}:00`;
+  const endTime = `${fields.endTime.value}:00`;
 
   return {
     interpreter_id: interpreterId,
@@ -179,6 +193,20 @@ export const buildAppointmentPayload = (
   } as AppointmentRequest;
 };
 
+export const buildAvatarFormData = (image: ImagePickerAsset) => {
+  const form = new FormData();
+  const inferredExt = image.mimeType?.split('/')?.[1] || 'jpg';
+  const name = image.fileName || `profile_${Date.now()}.${inferredExt}`;
+  const type = `image/${inferredExt}`;
+
+  form.append('file', {
+    uri: image.uri,
+    name,
+    type,
+  } as any);
+  return form;
+};
+
 const modalityToSend = (modality: Modality[]) => {
   // If both are checked, send 'ALL', else send the single value
   let modalityToSend: Modality;
@@ -194,6 +222,7 @@ const modalityToSend = (modality: Modality[]) => {
   return modalityToSend;
 };
 
+// Functions interacting with native APIs
 export const clearAsyncStorage = async () => {
   try {
     await AsyncStorage.clear();
@@ -244,6 +273,39 @@ export const pickFile = async () => {
   }
 };
 
+// Rendering helpers
+export const showGenericErrorToast = () => {
+  return Toast.show({
+    type: 'error',
+    text1: Strings.common.toast.errorUnknownTitle,
+    text2: Strings.common.toast.errorUnknownDescription,
+    position: 'top',
+    visibilityTime: 2000,
+    autoHide: true,
+    closeIconSize: 1,
+  });
+};
+
+export const getSafeAvatarUri = ({
+  selectedUri,
+  remoteUrl,
+  fallback = 'https://gravatar.com/avatar/ff18d48bfe44336236f01212d96c67f0?s=400&d=mp&r=x',
+}: {
+  selectedUri?: string | null;
+  remoteUrl?: string | null;
+  fallback?: string;
+}): string => {
+  if (selectedUri && selectedUri.trim()) return selectedUri;
+  if (remoteUrl && remoteUrl.trim()) {
+    try {
+      return encodeURI(remoteUrl);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+};
+
 type RenderApptItemOptions = {
   userType?: UserType;
   returnTo?: string;
@@ -260,10 +322,32 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
         opts.onPress(appt);
         return;
       }
-      const params: { id: string | number; returnTo?: string } = {
+
+      const params: {
+        id: string | number;
+        userPhoto: string;
+        userName: string;
+        userDocument: string;
+        rating?: string;
+        isPending?: string;
+        isActive?: string;
+        returnTo?: string;
+      } = {
         id: appt.id || '',
+        userPhoto: appt.contact_data?.picture || '',
+        userName: appt.contact_data?.name || '',
+        userDocument: appt.contact_data
+          ? formatCpfOrCnpj(appt.contact_data.document)
+          : '',
+        rating: appt.contact_data?.rating
+          ? String(appt.contact_data.rating)
+          : '',
+        isPending: appt.status === AppointmentStatus.PENDING ? 'true' : 'false',
+        isActive: appt.status === AppointmentStatus.ACCEPTED ? 'true' : 'false',
       };
+
       if (opts.returnTo) params.returnTo = opts.returnTo;
+
       router.push({ pathname: '/appointments/[id]', params });
     };
 
@@ -282,6 +366,7 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
           rating={!isInterpreter ? appt.contact_data?.rating || 0 : 0}
           date={`${formatDate(appt.date)}  ${formatTime(appt.start_time)} - ${formatTime(appt.end_time)}`}
           location={formatAppointmentLocation(appt)}
+          pending={appt.status === AppointmentStatus.PENDING}
           onPress={handlePress}
         />
         <View className="w-full h-px bg-gray-200" />

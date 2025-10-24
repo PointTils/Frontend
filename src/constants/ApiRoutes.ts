@@ -3,6 +3,7 @@
  * Update here if any route changes.
  */
 
+import type { AppointmentStatus } from '../types/api';
 import { UserType } from '../types/api';
 
 export const ApiRoutes = {
@@ -32,12 +33,52 @@ export const ApiRoutes = {
     cities: (stateId: string) => `/states/${stateId}/cities`,
   },
   userSpecialties: {
-    userSpecialties: (userId: string) => `/users/${userId}/specialties`,
+    byUser: (userId: string) => `/users/${userId}/specialties`,
   },
   appointments: {
     base: '/appointments',
-    byStatus: (id: string, type: UserType, status: string) =>
-      `/appointments/filter?${type === UserType.INTERPRETER ? 'interpreterId' : 'userId'}=${id}&status=${status}`,
-    filter: '/appointments/filter',
+    byId: (appointmentId: string) => `/appointments/${appointmentId}`,
+    filters: (
+      userId: string,
+      type: UserType,
+      status: AppointmentStatus,
+      hasRating?: boolean,
+      dayLimit?: number,
+    ) => {
+      const params = new URLSearchParams();
+
+      params.set(
+        type === UserType.INTERPRETER ? 'interpreterId' : 'userId',
+        userId,
+      );
+      params.set('status', String(status));
+
+      if (hasRating !== undefined) {
+        params.set('hasRating', String(hasRating));
+      }
+      if (dayLimit !== undefined) {
+        params.set('dayLimit', String(dayLimit));
+      }
+
+      return `/appointments/filter?${params.toString()}`;
+    },
+  },
+  userPicture: {
+    upload: (userId: string) => `/users/${userId}/picture`,
+  },
+  schedules: {
+    base: '/schedules',
+    availabilityPerDay: (
+      interpreterId: string,
+      dateFrom: string,
+      dateTo: string,
+    ) =>
+      `/schedules/available?interpreterId=${interpreterId}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  },
+  ratings: {
+    base: '/ratings',
+    byInterpreter: (interpreterId: string) =>
+      `/ratings?interpreterId=${interpreterId}`,
+    create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
 } as const;

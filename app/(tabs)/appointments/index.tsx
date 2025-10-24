@@ -12,21 +12,27 @@ import { renderApptItem } from '@/src/utils/helpers';
 import { router } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
 import React, { useMemo } from 'react';
-import { ActivityIndicator, FlatList, Pressable } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
-type TabKey = 'active' | 'completed' | 'canceled';
+type TabKey = keyof typeof Strings.appointments.states;
 
 export default function AppointmentsScreen() {
   const colors = useColors();
   const { user, isAuthenticated } = useAuth();
+
   const [tab, setTab] = React.useState<TabKey>('active');
 
   const renderItem = useMemo(
     () =>
       renderApptItem({
         userType: user?.type,
-        returnTo: '/appointments',
+        returnTo: ApiRoutes.appointments.base,
       }),
     [user?.type],
   );
@@ -36,7 +42,7 @@ export default function AppointmentsScreen() {
     loading: loadActive,
     error: errorActive,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.ACCEPTED,
@@ -48,7 +54,7 @@ export default function AppointmentsScreen() {
     loading: loadCompleted,
     error: errorCompleted,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
@@ -60,15 +66,31 @@ export default function AppointmentsScreen() {
     loading: loadCanceled,
     error: errorCanceled,
   } = useApiGet<AppointmentsResponse>(
-    ApiRoutes.appointments.byStatus(
+    ApiRoutes.appointments.filters(
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.CANCELED,
     ),
   );
 
+  const {
+    data: apptPending,
+    loading: loadPending,
+    error: errorPending,
+  } = useApiGet<AppointmentsResponse>(
+    ApiRoutes.appointments.filters(
+      user?.id || '',
+      user?.type || UserType.PERSON,
+      AppointmentStatus.PENDING,
+    ),
+  );
+
   // Ensure stable refs for dependencies
   const empty = useMemo<Appointment[]>(() => [], []);
+
+  const active = useMemo<Appointment[]>(() => {
+    return Array.isArray(apptActive?.data) ? apptActive.data : empty;
+  }, [apptActive?.data, empty]);
 
   const completed = useMemo<Appointment[]>(() => {
     return Array.isArray(apptCompleted?.data) ? apptCompleted.data : empty;
@@ -78,21 +100,27 @@ export default function AppointmentsScreen() {
     return Array.isArray(apptCanceled?.data) ? apptCanceled.data : empty;
   }, [apptCanceled?.data, empty]);
 
-  const active = useMemo<Appointment[]>(() => {
-    return Array.isArray(apptActive?.data) ? apptActive.data : empty;
-  }, [apptActive?.data, empty]);
+  const pending = useMemo<Appointment[]>(() => {
+    return Array.isArray(apptPending?.data) ? apptPending.data : empty;
+  }, [apptPending?.data, empty]);
 
   // Combine and sort appointments based on selected tab
   // Sorted by date descending, then by start_time descending
   const current = useMemo(() => {
     const source =
-      tab === 'active' ? active : tab === 'completed' ? completed : canceled;
+      tab === 'active'
+        ? active
+        : tab === 'completed'
+          ? completed
+          : tab === 'canceled'
+            ? canceled
+            : pending;
     return [...source].sort((a, b) => {
       const dateCmp = b.date.localeCompare(a.date);
       if (dateCmp !== 0) return dateCmp;
       return (b.start_time || '').localeCompare(a.start_time || '');
     });
-  }, [tab, active, completed, canceled]);
+  }, [tab, active, completed, canceled, pending]);
 
   function TabButton({ k, label }: { k: TabKey; label: string }) {
     const selected = tab === k;
@@ -115,7 +143,7 @@ export default function AppointmentsScreen() {
   // Early return if not authenticated or user not loaded
   if (!isAuthenticated || !user) return null;
 
-  if (loadCompleted || loadCanceled || loadActive) {
+  if (loadCompleted || loadCanceled || loadActive || loadPending) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="small" />
@@ -131,12 +159,15 @@ export default function AppointmentsScreen() {
     errorCompleted ||
     errorCanceled ||
     errorActive ||
+    errorPending ||
     !apptCompleted?.success ||
     !apptCompleted.data ||
     !apptCanceled?.success ||
     !apptCanceled.data ||
     !apptActive?.success ||
-    !apptActive.data
+    !apptActive.data ||
+    !apptPending?.success ||
+    !apptPending.data
   ) {
     router.replace('/');
     Toast.show({
@@ -154,16 +185,35 @@ export default function AppointmentsScreen() {
   return (
     <View className="flex-1">
       <View className="mt-12 pb-4">
-        <Header title={Strings.appointments.tabBar} showBackButton={false} />
+        <Header
+          title={Strings.appointments.headers.myAppointments}
+          showBackButton={false}
+        />
       </View>
 
       {/* Segmented tabs */}
-      <View className="px-6 pt-2">
-        <View className="flex-row gap-x-2">
-          <TabButton k="active" label={Strings.appointments.active} />
-          <TabButton k="completed" label={Strings.appointments.completed} />
-          <TabButton k="canceled" label={Strings.appointments.canceled} />
-        </View>
+      <View className="pt-2">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="px-4"
+        >
+          <View className="flex-row gap-x-2">
+            <TabButton k="active" label={Strings.appointments.states.active} />
+            <TabButton
+              k="pending"
+              label={Strings.appointments.states.pending}
+            />
+            <TabButton
+              k="completed"
+              label={Strings.appointments.states.completed}
+            />
+            <TabButton
+              k="canceled"
+              label={Strings.appointments.states.canceled}
+            />
+          </View>
+        </ScrollView>
       </View>
 
       <View className="flex-1 mt-2">
@@ -171,7 +221,7 @@ export default function AppointmentsScreen() {
         {current.length === 0 ? (
           <View className="flex-1 justify-center gap-y-4 items-center">
             <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="text-typography-600 text-md">
+            <Text className="font-ifood-regular text-typography-400 text-md">
               {Strings.common.noResults}
             </Text>
           </View>

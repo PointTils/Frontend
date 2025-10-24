@@ -86,11 +86,45 @@ export const formatDate = (date?: string | Date | null) => {
   return `${day}/${mon}/${year}`;
 };
 
-export const formatDateToISO = (dateString: string): string => {
-  // Expects "DD/MM/AAAA" and returns "AAAA-MM-DD"
-  const [day, month, year] = dateString.split('/');
-  if (!day || !month || !year) return '';
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+export const formatDateToISO = (dateString: string | undefined): string => {
+  // - "DD/MM/YYYY" -> returns "YYYY-MM-DD"
+  // - "DD/MM/YYYY HH:mm[:ss]" -> returns full ISO datetime
+  // - "YYYY-MM-DD" -> returns same
+  // - "YYYY-MM-DD HH:mm[:ss]" or ISO -> returns full ISO datetime
+  if (!dateString) return '';
+  const s = dateString.trim();
+
+  // Already ISO date-only
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  // ISO-like with time or "YYYY-MM-DD HH:mm"
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(s)) {
+    const d = new Date(s.replace(' ', 'T'));
+    return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+  }
+
+  // "DD/MM/YYYY" with optional time
+  const m = s.match(
+    /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/,
+  );
+  if (!m) return '';
+  const [, dd, mm, yyyy, hh, min, ss] = m;
+
+  // With time -> full ISO
+  if (hh && min) {
+    const d = new Date(
+      Number(yyyy),
+      Number(mm) - 1,
+      Number(dd),
+      Number(hh),
+      Number(min),
+      ss ? Number(ss) : 0,
+    );
+    return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+  }
+
+  // Date only -> YYYY-MM-DD
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 };
 
 export const formatPhone = (phone?: string | null) => {
@@ -101,12 +135,6 @@ export const formatPhone = (phone?: string | null) => {
     .replace(/^(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
   return formatted;
-};
-
-export const formatValueRange = (min?: number, max?: number) => {
-  // Returns "R$ X - R$ Y"
-  if (min === undefined && max === undefined) return '-';
-  return `R$ ${min ?? 0} - R$ ${max ?? 0}`;
 };
 
 export const formatCnpj = (cnpj?: string | null) => {

@@ -15,6 +15,7 @@ interface ModalSingleSelectionProps {
   hasError?: boolean;
   scrollableHeight?: number;
   minWidth?: number;
+  hasTimeSlots?: boolean;
 }
 
 /**
@@ -27,6 +28,9 @@ interface ModalSingleSelectionProps {
  * @param placeholderText - Text shown when no item is selected
  * @param hasError - Whether to show error styling (red border)
  * @param scrollableHeight - Maximum height of the scrollable modal content
+ * @param minWidth - Minimum width of the trigger button
+ * @param hasTimeSlots - Whether there are time slots available to show
+ *
  * @returns A touchable trigger with modal for single selection
  *
  * @example
@@ -53,6 +57,7 @@ export default function ModalSingleSelection({
   hasError = false,
   scrollableHeight = 280,
   minWidth = 44,
+  hasTimeSlots = true,
 }: ModalSingleSelectionProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const colors = useColors();
@@ -106,7 +111,9 @@ export default function ModalSingleSelection({
       >
         <Text
           className="font-ifood-regular"
-          style={{ color: currentSelection ? colors.text : colors.detailsGray }}
+          style={{
+            color: currentSelection ? colors.text : colors.detailsGray,
+          }}
         >
           {currentSelection ? currentSelection.label : placeholderText}
         </Text>
@@ -128,35 +135,40 @@ export default function ModalSingleSelection({
             className="mx-4 mb-8 rounded-xl overflow-hidden"
             style={{ backgroundColor: colors.background }}
           >
-            <ScrollView
-              showsVerticalScrollIndicator={true}
-              bounces={false}
-              style={{ maxHeight: scrollableHeight }}
-            >
-              {items.map((item, idx) => (
-                <TouchableOpacity
-                  key={item.value}
-                  onPress={() => handleItemSelection(item.value)}
-                  className="p-4"
-                  activeOpacity={1}
-                  style={{
-                    backgroundColor: getItemBackgroundColor(item.value),
-                    ...getBorderBottomStyle(idx),
-                  }}
-                >
-                  <Text
-                    className="text-center font-ifood-regular"
+            {hasTimeSlots ? (
+              <ScrollView
+                showsVerticalScrollIndicator={true}
+                bounces={false}
+                style={{ maxHeight: scrollableHeight }}
+              >
+                {items.map((item, idx) => (
+                  <TouchableOpacity
+                    key={item.value}
+                    onPress={() => handleItemSelection(item.value)}
+                    className="p-4"
+                    activeOpacity={1}
                     style={{
-                      color: getItemTextColor(item.value),
-                      fontWeight: getItemFontWeight(item.value),
+                      backgroundColor: getItemBackgroundColor(item.value),
+                      ...getBorderBottomStyle(idx),
                     }}
                   >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
+                    <Text
+                      className="text-center font-ifood-regular"
+                      style={{
+                        color: getItemTextColor(item.value),
+                        fontWeight: getItemFontWeight(item.value),
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <Text className="text-center font-ifood-regular text-typography-500 py-4">
+                {Strings.toSchedule.noCalendarAvailable}
+              </Text>
+            )}
             <TouchableOpacity
               onPress={closeModal}
               className="p-4 border-t"

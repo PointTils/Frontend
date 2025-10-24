@@ -34,6 +34,11 @@ export const Strings = {
       inPerson: 'Presencial',
     },
 
+    values: {
+      combined: 'A combinar',
+      notInformed: 'Não informado',
+    },
+
     fields: {
       select: 'Selecione',
       selected: '{count} selecionados',
@@ -46,11 +51,9 @@ export const Strings = {
       phone: 'Telefone',
       email: 'Email',
       password: 'Senha',
-      description: 'Descrição',
+      more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
-      valueRange: 'Faixa de valores',
-      min: 'Mínimo',
-      max: 'Máximo',
+      values: 'Valores',
       modality: 'Modalidade',
       location: 'Localização',
       state: 'UF',
@@ -66,6 +69,9 @@ export const Strings = {
       professionalArea: 'Área profissional',
       date: 'Data',
       time: 'Hora',
+      start: 'Início',
+      end: 'Fim',
+      uploadFile: 'Adicionar arquivo',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
@@ -170,7 +176,7 @@ export const Strings = {
     subtitle:
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
 
-    calendarNoAvailable: 'Nenhum horário disponível.',
+    noCalendarAvailable: 'Nenhum horário disponível.',
 
     toast: {
       errorTitle: 'Erro ao criar agendamento',
@@ -195,26 +201,56 @@ export const Strings = {
     },
   },
 
-  requests: {
-    request: 'Solicitação',
-    requests: 'Solicitações',
-    title: 'Gerencie suas solicitações',
-    subtitle:
-      'Aceite ou recuse os agendamentos recebidos conforme sua disponibilidade.',
-  },
-
   appointments: {
-    tabBar: 'Histórico',
-    appointment: 'Agendamento',
-    active: 'Ativos',
-    completed: 'Encerrados',
-    canceled: 'Cancelados',
+    tabBar: 'Agendamentos',
+    details: 'Dados do agendamento',
+    noDescription: 'Nenhuma descrição fornecida.',
+    description: 'Serviços e experiência',
+
+    headers: {
+      myAppointments: 'Meus Agendamentos',
+      appointment: 'Agendamento',
+      request: 'Solicitação',
+    },
+
+    states: {
+      active: 'Ativos',
+      completed: 'Encerrados',
+      canceled: 'Cancelados',
+      pending: 'Pendentes',
+    },
+
+    tabs: {
+      appointment: 'Agendamento',
+      professional: 'Profissional',
+      requester: 'Solicitante',
+    },
+
+    cta: {
+      whatsapp: 'WhatsApp',
+      cancel: 'Cancelar agendamento',
+      accept: 'Aceitar',
+      reject: 'Recusar',
+    },
+
+    toast: {
+      acceptTitle: 'Solicitação Aprovada',
+      acceptDescription: 'A solicitação foi aceita com sucesso!',
+      rejectTitle: 'Solicitação Recusada',
+      rejectDescription: 'A solicitação foi recusada com sucesso!',
+      cancelTitle: 'Solicitação Cancelada',
+      cancelDescription: 'A solicitação foi cancelada com sucesso!',
+    },
   },
 
   search: {
     header: 'PESQUISA',
-    details: 'Dados',
-    reviews: 'Avaliações',
+
+    tabs: {
+      details: 'Dados',
+      reviews: 'Avaliações',
+    },
+
     createAppointment: 'Fazer solicitação',
     description: 'Serviços e experiência',
     calendar: 'Calendário',
@@ -222,10 +258,40 @@ export const Strings = {
     selectCity: 'Selecione um estado primeiro',
     filter: 'Filtro',
     datesAvailable: 'Datas disponíveis',
+    noReviewsFound: 'Nenhuma avaliação encontrada.',
 
     toast: {
       errorGetTitle: 'Erro ao obter dados.',
       errorGetText: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
+  // Components
+  upload: {
+    toast: {
+      errorTitle: 'Falha no upload',
+      errorDescription: 'Erro ao adicionar arquivo. Tente novamente',
+      duplicatedTitle: 'Arquivo duplicado',
+      duplicatedDescription: 'Este arquivo já foi adicionado.',
+      limitTitle: 'Limite de arquivos atingido',
+      limitDescription: 'Você pode adicionar até {max} arquivos.',
+    },
+  },
+
+  feedbackModal: {
+    title: 'Queremos saber sua opinião!',
+    subtitle:
+      'Avalie sua experiência no atendimento realizado pelo intérprete ',
+    placeholder: 'Escreva mais detalhes',
+    submitButton: 'Avaliar',
+
+    toast: {
+      noRatingTitle: 'Avaliação necessária',
+      noRatingDescription: 'Por favor, selecione uma nota antes de enviar.',
+      errorTitle: 'Erro ao enviar avaliação',
+      errorDescription: 'Tente novamente mais tarde.',
+      successTitle: 'Avaliação enviada',
+      successDescription: 'Seu feedback foi enviado com sucesso!',
     },
   },
 

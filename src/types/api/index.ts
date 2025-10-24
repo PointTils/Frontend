@@ -7,4 +7,6 @@ export * from './auth';
 export * from './user';
 export * from './specialty';
 export * from './appointment';
+export * from './rating';
+export * from './schedule';
 export * from './common';

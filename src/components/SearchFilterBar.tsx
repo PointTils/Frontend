@@ -16,13 +16,19 @@ import { Strings } from '../constants/Strings';
 import { useAuth } from '../contexts/AuthProvider';
 import { useApiGet } from '../hooks/useApi';
 import { useColors } from '../hooks/useColors';
-import type { InterpreterListResponse } from '../types/api';
-import { Modality } from '../types/api/common';
-import type { AppliedFilters } from '../types/ui';
+import {
+  type UserSpecialty,
+  type UserSpecialtyResponse,
+  type InterpretersResponse,
+  Modality,
+} from '../types/api';
+import type { AppliedFilters, OptionItem } from '../types/ui';
 
 interface SearchFilterBarProps {
-  onData: (data: InterpreterListResponse) => void;
-  interactive?: boolean;
+  onData: (data: InterpretersResponse) => void;
+  navigateOnSearch?: boolean;
+  initialQuery?: string;
+  initialFilters?: AppliedFilters;
 }
 
 /**
@@ -43,20 +49,93 @@ interface SearchFilterBarProps {
  */
 export default function SearchFilterBar({
   onData,
-  interactive = true,
+  navigateOnSearch = false,
+  initialQuery,
+  initialFilters,
 }: SearchFilterBarProps) {
+  const { user, isAuthenticated } = useAuth();
   const colors = useColors();
-  const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<AppliedFilters>({});
+
+  const [preSelectedSpecialty, setPreSelectedSpecialty] = useState<string[]>(
+    [],
+  );
+  const [query, setQuery] = useState(() => initialQuery ?? '');
+  const [filters, setFilters] = useState<AppliedFilters>(
+    () => initialFilters ?? {},
+  );
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [initialFocus, setInitialFocus] = useState<
     'date' | 'modality' | undefined
   >(undefined);
-  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(
+    () => !!initialQuery?.trim(),
+  );
+
+  // Load specialties for filter options
+  const { data: specialtiesData, error: specialtiesError } =
+    useApiGet<UserSpecialtyResponse>(
+      ApiRoutes.userSpecialties.byUser(user?.id || ''),
+    );
+
+  useEffect(() => {
+    if (
+      specialtiesError ||
+      !specialtiesData?.success ||
+      !specialtiesData?.data ||
+      specialtiesData?.data.length === 0
+    )
+      return;
+
+    const options: OptionItem[] = specialtiesData.data.map(
+      (item: UserSpecialty) => ({
+        value: item.specialty_id,
+        label: item.specialty_name,
+      }),
+    );
+
+    // Preselect specialties if provided
+    setPreSelectedSpecialty(options.map((o) => o.value as string));
+  }, [specialtiesData, specialtiesError]);
+
+  const isNonEmpty = (v: unknown) => {
+    if (Array.isArray(v)) return v.length > 0;
+    return v !== undefined && v !== null && v !== '';
+  };
+
+  const hasActiveSearch = (f: AppliedFilters, q: string) =>
+    q.trim().length > 0 || Object.values(f).some((v) => isNonEmpty(v));
+
+  const paramsToObject = (p: URLSearchParams) => {
+    const obj: Record<string, string> = {};
+    p.forEach((value, key) => {
+      obj[key] = value;
+    });
+    return obj;
+  };
+
+  const maybeNavigate = (
+    nextFilters: AppliedFilters = filters,
+    nextQuery: string = query,
+  ) => {
+    if (!navigateOnSearch) return;
+
+    if (hasActiveSearch(nextFilters, nextQuery)) {
+      const qs = buildQuery(nextFilters, nextQuery);
+      router.push({
+        pathname: '/interpreters/search',
+        params: paramsToObject(qs),
+      });
+      // Clear local state after navigating
+      setQuery('');
+      setFilters({});
+      setIsSearchSubmitted(false);
+    }
+  };
 
   const handleApplyFilters = (appliedFilters: AppliedFilters) => {
     setFilters(appliedFilters);
     setSheetVisible(false);
+    maybeNavigate(appliedFilters, query);
   };
 
   const handlerOnlineButton = (data?: Modality) =>
@@ -79,8 +158,6 @@ export default function SearchFilterBar({
     return count === 0 ? '' : count;
   };
 
-  const { user, isAuthenticated } = useAuth();
-
   const buildQuery = (filters: AppliedFilters, queryText?: string) => {
     const query = new URLSearchParams();
     if (queryText && queryText.trim().length > 0) {
@@ -88,6 +165,8 @@ export default function SearchFilterBar({
     }
     if (filters.specialty?.length)
       query.append('specialty', filters.specialty.join(','));
+    else if (preSelectedSpecialty.length)
+      query.append('specialty', preSelectedSpecialty.join(','));
     if (filters.availableDates) {
       const date = new Date(filters.availableDates);
       const pad = (n: number) => n.toString().padStart(2, '0');
@@ -102,7 +181,7 @@ export default function SearchFilterBar({
     return query;
   };
 
-  const { data, error } = useApiGet<InterpreterListResponse>(
+  const { data, error } = useApiGet<InterpretersResponse>(
     user?.id && isAuthenticated
       ? ApiRoutes.interpreters.base(buildQuery(filters, query))
       : '',
@@ -140,6 +219,7 @@ export default function SearchFilterBar({
     if (query.trim().length > 0) {
       setIsSearchSubmitted(true);
       Keyboard.dismiss();
+      maybeNavigate(filters, query);
     }
   };
 
@@ -150,7 +230,7 @@ export default function SearchFilterBar({
   };
 
   return (
-    <View className="px-4 py-2" pointerEvents={interactive ? 'auto' : 'none'}>
+    <View className="px-4 py-2">
       <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
         {isSearchSubmitted ? (
           <TouchableOpacity
@@ -212,16 +292,16 @@ export default function SearchFilterBar({
                 ? colors.primaryBlue
                 : colors.fieldGray,
           }}
-          onPress={() =>
-            setFilters({
-              ...filters,
-              modality:
-                filters.modality === Modality.ONLINE ||
-                filters.modality === Modality.ALL
-                  ? null
-                  : Modality.ONLINE,
-            })
-          }
+          onPress={() => {
+            const nextModality =
+              filters.modality === Modality.ONLINE ||
+              filters.modality === Modality.ALL
+                ? null
+                : Modality.ONLINE;
+            const nextFilters = { ...filters, modality: nextModality };
+            setFilters(nextFilters);
+            maybeNavigate(nextFilters, query);
+          }}
         >
           <Text
             className={`${handlerOnlineText(filters.modality ?? undefined)} font-ifood-regular`}
@@ -263,6 +343,7 @@ export default function SearchFilterBar({
       {isSheetVisible && (
         <FilterSheet
           filter={filters}
+          preSelectedSpecialty={preSelectedSpecialty}
           onApply={handleApplyFilters}
           initialFocus={initialFocus}
           onClose={() => {
