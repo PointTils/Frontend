@@ -229,7 +229,7 @@ jobs:
 
           if [ "$PROFILE" = "production" ]; then
             # For production builds, get the two most recent production tags
-            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
             echo "📦 Production build - comparing ${LATEST_TAG:-none} with HEAD"
           else
             # For preview builds, get the two most recent tags
