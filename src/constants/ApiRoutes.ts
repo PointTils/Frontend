@@ -48,7 +48,11 @@ export const ApiRoutes = {
       const params = new URLSearchParams();
 
       params.set(
-        type === UserType.INTERPRETER ? 'interpreterId' : 'userId',
+        type === UserType.INTERPRETER
+          ? hasRating !== undefined && !hasRating
+            ? 'userId'
+            : 'interpreterId'
+          : 'userId',
         userId,
       );
       params.set('status', String(status));
