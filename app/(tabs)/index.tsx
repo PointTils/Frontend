@@ -1,5 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import FeedbackModal from '@/src/components/FeedbackModal';
+import HapticTab from '@/src/components/HapticTab';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -16,6 +17,7 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
+import { router } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
@@ -79,6 +81,17 @@ export default function HomeScreen() {
         </View>
 
         <SearchFilterBar onData={() => {}} navigateOnSearch />
+
+        {/* Divider */}
+        <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+        <HapticTab
+          onPress={() => router.push('/(tabs)/(profile)')}
+          className="flex-row items-center gap-3 px-4 py-2"
+        >
+          <Text className="text-text-light font-ifood-medium">
+            {'Complete seu perfil'}
+          </Text>
+        </HapticTab>
 
         {/* Divider */}
         <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
