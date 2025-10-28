@@ -198,6 +198,9 @@ export const Strings = {
       errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
       successTitle: 'Perfil atualizado com sucesso!',
       successDescription: 'As alterações foram salvas.',
+      scheduleErrorTitle: 'Erro ao atualizar horários',
+      scheduleErrorDescription:
+        'Verifique os horários preenchidos. Tente novamente.',
     },
   },
 

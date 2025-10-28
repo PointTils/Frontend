@@ -45,6 +45,9 @@ import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
 import {
+  type ScheduleResponse,
+  type ScheduleRequest,
+  type WeekSchedule,
   type UserPictureResponse,
   type UserRequest,
   type UserResponse,
@@ -54,6 +57,7 @@ import {
   type StateAndCityResponse,
   Modality,
   UserType,
+  Days,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -66,12 +70,14 @@ import {
   pickImage,
 } from '@/src/utils/helpers';
 import {
+  emptyWeekSchedule,
   formatCnpj,
   formatDate,
   formatPhone,
   handleCnpjChange,
   handlePhoneChange,
   mapImageRights,
+  mapWeekDay,
   validateBirthday,
   validateCnpj,
   validateEmail,
@@ -92,7 +98,7 @@ import {
   PlusIcon,
   MinusIcon,
 } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -119,23 +125,40 @@ export default function EditProfileScreen() {
     null,
   );
 
-  // Temporary schedule state - backend integration pending
-  const [schedule, setSchedule] = useState<
-    Record<string, { from: string; to: string }>
-  >(
-    Object.keys(Strings.days).reduce(
-      (acc, key) => {
-        acc[key] = { from: '', to: '' };
-        return acc;
-      },
-      {} as Record<string, { from: string; to: string }>,
-    ),
-  );
+  // Schedule state
+  const [schedule, setSchedule] =
+    useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
+
+  // Keep initial values to detect which days were changed
+  const initialScheduleRef =
+    useRef<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
   // Parse the profile data from params if available
-  let profile = params.data
-    ? (JSON.parse(params.data as string) as UserResponseData)
+  let profile = params.profile
+    ? (JSON.parse(params.profile as string) as UserResponseData)
     : null;
+
+  const scheduleData = useMemo(
+    () =>
+      SCHEDULE_ENABLED && params.schedule
+        ? (JSON.parse(params.schedule as string) as WeekSchedule)
+        : emptyWeekSchedule(),
+    [params.schedule],
+  );
+
+  useEffect(() => {
+    setSchedule(scheduleData);
+    initialScheduleRef.current = JSON.parse(JSON.stringify(scheduleData));
+    console.log('Initial schedule from params:', scheduleData);
+  }, [scheduleData]);
+
+  const scheduleIds = useMemo(() => {
+    const ids = {} as Record<Days, string | null>;
+    (Object.keys(Days) as Days[]).forEach((day) => {
+      ids[day] = (scheduleData as any)?.[day]?.id ?? null;
+    });
+    return ids;
+  }, [scheduleData]);
 
   // API hooks for different user types
   const personApi = useApiPatch<UserResponse, UserRequest>(
@@ -154,6 +177,7 @@ export default function EditProfileScreen() {
   const userPictureApi = useApiPost<UserPictureResponse, FormData>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
+  const scheduleApi = useApiPatch<ScheduleResponse, ScheduleRequest>('');
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
@@ -503,6 +527,64 @@ export default function EditProfileScreen() {
         closeIconSize: 1,
       });
       return;
+    }
+
+    // Patch schedules for changed days only
+    if (SCHEDULE_ENABLED && profile.type === UserType.INTERPRETER) {
+      const keys = Object.keys(Days) as Days[];
+
+      const updates: { id: string; payload: ScheduleRequest }[] = [];
+      for (const key of keys) {
+        const curr = schedule[key];
+        const init = initialScheduleRef.current[key];
+        const changed =
+          (curr?.from ?? '') !== (init?.from ?? '') ||
+          (curr?.to ?? '') !== (init?.to ?? '');
+
+        if (!changed || !curr?.from || !curr?.to) continue;
+
+        const id = scheduleIds[key];
+        if (!id) {
+          console.warn(`Missing scheduleId for day ${key}, skipping PATCH.`);
+          continue;
+        }
+
+        updates.push({
+          id,
+          payload: {
+            day: key,
+            interpreter_id: profile.id!,
+            start_time: `${curr.from}:00`,
+            end_time: `${curr.to}:00`,
+          },
+        });
+        console.log('PUSHING UPDATE FOR DAY', key, updates[updates.length - 1]);
+      }
+
+      if (updates.length > 0) {
+        const results = await Promise.all(
+          updates.map(({ id, payload }) =>
+            scheduleApi.patchAt(ApiRoutes.schedules.updatePerDay(id), payload),
+          ),
+        );
+        const failed = results.some((r) => !r?.success);
+        console.log('RESULTS', results);
+
+        if (failed) {
+          router.replace('/(tabs)/(profile)');
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          Toast.show({
+            type: 'error',
+            text1: Strings.edit.toast.scheduleErrorTitle,
+            text2: Strings.edit.toast.scheduleErrorDescription,
+            position: 'top',
+            visibilityTime: 2000,
+            autoHide: true,
+            closeIconSize: 1,
+          });
+          return;
+        }
+      }
     }
 
     // Successful update logic (e.g., navigate to profile)
@@ -1166,19 +1248,24 @@ export default function EditProfileScreen() {
                         {Strings.hours.title}
                       </Text>
                       <View className="flex-col gap-2">
-                        {Object.entries(Strings.days).map(([key, label]) => (
+                        {Object.entries(Days).map(([key, label]) => (
                           <FormControl key={key} className="mb-2">
                             <View className="flex-row items-center gap-1">
                               <Text className="w-32 font-ifood-regular text-text-light dark:text-text-dark">
-                                {label}
+                                {mapWeekDay(label)}
                               </Text>
                               <ModalSingleSelection
                                 items={hourOptions}
-                                selectedValue={schedule[key].from}
+                                selectedValue={
+                                  schedule[key as keyof typeof schedule].from
+                                }
                                 onSelectionChange={(value) =>
                                   setSchedule((prev) => ({
                                     ...prev,
-                                    [key]: { ...prev[key], from: value },
+                                    [key]: {
+                                      ...prev[key as keyof typeof schedule],
+                                      from: value,
+                                    },
                                   }))
                                 }
                                 placeholderText={Strings.hours.from}
@@ -1190,11 +1277,16 @@ export default function EditProfileScreen() {
                               </Text>
                               <ModalSingleSelection
                                 items={hourOptions}
-                                selectedValue={schedule[key].to}
+                                selectedValue={
+                                  schedule[key as keyof typeof schedule].to
+                                }
                                 onSelectionChange={(value) =>
                                   setSchedule((prev) => ({
                                     ...prev,
-                                    [key]: { ...prev[key], to: value },
+                                    [key]: {
+                                      ...prev[key as keyof typeof schedule],
+                                      to: value,
+                                    },
                                   }))
                                 }
                                 placeholderText={Strings.hours.to}
