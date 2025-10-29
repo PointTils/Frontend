@@ -1,6 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import FeedbackModal from '@/src/components/FeedbackModal';
-import HapticTab from '@/src/components/HapticTab';
+import ModalBannerHome from '@/src/components/ModalBannerHome';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -10,6 +10,7 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
   type AppointmentsResponse,
   type Appointment,
@@ -31,6 +32,7 @@ export default function HomeScreen() {
     appointmentForFeedback,
     interpreterName,
   } = useCheckFeedback(user);
+  const { showBanner } = useProfileCompletion(user?.id);
 
   const renderItem = useMemo(
     () =>
@@ -84,17 +86,23 @@ export default function HomeScreen() {
 
         {/* Divider */}
         <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
-        <HapticTab
-          onPress={() => router.push('/(tabs)/(profile)')}
-          className="flex-row items-center gap-3 px-4 py-2"
-        >
-          <Text className="text-text-light font-ifood-medium">
-            {'Complete seu perfil'}
-          </Text>
-        </HapticTab>
 
-        {/* Divider */}
-        <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+        {showBanner && (
+          <>
+            <ModalBannerHome
+              title={
+                user?.type === UserType.INTERPRETER
+                  ? Strings.home.banner.interpreter
+                  : Strings.home.banner.person
+              }
+              backgroundColor={colors.primaryBlue}
+              onPress={() => router.push('/(tabs)/(profile)')}
+            />
+
+            {/* Divider */}
+            <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+          </>
+        )}
         <View className="flex-row items-center gap-3 px-4">
           <CalendarDays color={colors.primaryBlue} />
           <Text className="text-text-light font-ifood-medium">

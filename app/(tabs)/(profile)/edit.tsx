@@ -43,6 +43,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import type { FormFields } from '@/src/hooks/useFormValidation';
 import {
   type UserPictureResponse,
@@ -133,11 +134,19 @@ export default function EditProfileScreen() {
   );
 
   // Parse the profile data from params if available
-  let profile = params.data
+  const profile = params.data
     ? (JSON.parse(params.data as string) as UserResponseData)
     : null;
 
-  // API hooks for different user types
+  const { markProfileAsCompleted } = useProfileCompletion(profile?.id);
+
+  // Mark profile as completed for non-interpreter users when they access edit screen
+  useEffect(() => {
+    if (profile && profile.type !== UserType.INTERPRETER) {
+      markProfileAsCompleted();
+    }
+  }, [profile?.id, profile?.type]);
+
   const personApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.person.profile(profile?.id || ''),
   );
@@ -505,7 +514,8 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // Successful update logic (e.g., navigate to profile)
+    // Mark profile as completed and navigate
+    await markProfileAsCompleted();
     router.replace('/(tabs)/(profile)');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
