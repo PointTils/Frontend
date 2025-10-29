@@ -124,8 +124,6 @@ export default function EditProfileScreen() {
   const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
     null,
   );
-
-  // Schedule state
   const [schedule, setSchedule] =
     useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
@@ -138,6 +136,23 @@ export default function EditProfileScreen() {
     ? (JSON.parse(params.profile as string) as UserResponseData)
     : null;
 
+  // Early return if no profile data
+  useEffect(() => {
+    if (!profile) {
+      console.error('No profile data provided in params');
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.errorTitle,
+        text2: Strings.edit.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      router.back();
+    }
+  }, [profile]);
+
   const scheduleData = useMemo(
     () =>
       SCHEDULE_ENABLED && params.schedule
@@ -149,7 +164,6 @@ export default function EditProfileScreen() {
   useEffect(() => {
     setSchedule(scheduleData);
     initialScheduleRef.current = JSON.parse(JSON.stringify(scheduleData));
-    console.log('Initial schedule from params:', scheduleData);
   }, [scheduleData]);
 
   const scheduleIds = useMemo(() => {
@@ -159,6 +173,13 @@ export default function EditProfileScreen() {
     });
     return ids;
   }, [scheduleData]);
+
+  const maxDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    return d;
+  }, []);
 
   // API hooks for different user types
   const personApi = useApiPatch<UserResponse, UserRequest>(
@@ -177,7 +198,10 @@ export default function EditProfileScreen() {
   const userPictureApi = useApiPost<UserPictureResponse, FormData>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
-  const scheduleApi = useApiPatch<ScheduleResponse, ScheduleRequest>('');
+  const scheduleApiPatch = useApiPatch<ScheduleResponse, ScheduleRequest>('');
+  const scheduleApiPost = useApiPost<ScheduleResponse, ScheduleRequest>(
+    ApiRoutes.schedules.register,
+  );
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
@@ -381,30 +405,6 @@ export default function EditProfileScreen() {
     },
   });
 
-  const maxDate = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - 1);
-    return d;
-  }, []);
-
-  // Early return if no profile data
-  useEffect(() => {
-    if (!profile) {
-      console.error('No profile data provided in params');
-      Toast.show({
-        type: 'error',
-        text1: Strings.edit.toast.errorTitle,
-        text2: Strings.edit.toast.errorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
-      router.back();
-    }
-  }, [profile]);
-
   // Fetch all states
   const isInterpreter = profile?.type === UserType.INTERPRETER;
 
@@ -452,6 +452,12 @@ export default function EditProfileScreen() {
     if (image) {
       setSelectedImage(image);
     }
+  };
+
+  const toMinutes = (time?: string): number => {
+    if (!time) return -1;
+    const [h, m] = time.split(':').map(Number);
+    return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
   };
 
   function handleBack() {
@@ -529,11 +535,13 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // Patch schedules for changed days only
-    if (SCHEDULE_ENABLED && profile.type === UserType.INTERPRETER) {
+    // Patch/Post schedules for changed days only
+    if (SCHEDULE_ENABLED && isInterpreter) {
       const keys = Object.keys(Days) as Days[];
 
       const updates: { id: string; payload: ScheduleRequest }[] = [];
+      const creates: ScheduleRequest[] = [];
+
       for (const key of keys) {
         const curr = schedule[key];
         const init = initialScheduleRef.current[key];
@@ -544,46 +552,58 @@ export default function EditProfileScreen() {
         if (!changed || !curr?.from || !curr?.to) continue;
 
         const id = scheduleIds[key];
-        if (!id) {
-          console.warn(`Missing scheduleId for day ${key}, skipping PATCH.`);
-          continue;
-        }
 
-        updates.push({
-          id,
-          payload: {
-            day: key,
-            interpreter_id: profile.id!,
-            start_time: `${curr.from}:00`,
-            end_time: `${curr.to}:00`,
-          },
-        });
-        console.log('PUSHING UPDATE FOR DAY', key, updates[updates.length - 1]);
+        const payload: ScheduleRequest = {
+          day: key as Days,
+          interpreter_id: profile.id!,
+          start_time: `${curr.from}:00`,
+          end_time: `${curr.to}:00`,
+        };
+
+        if (id) {
+          updates.push({ id, payload });
+        } else {
+          creates.push(payload);
+        }
       }
 
+      // PATCH
+      let patchResults: (ScheduleResponse | null)[] = [];
       if (updates.length > 0) {
-        const results = await Promise.all(
+        patchResults = await Promise.all(
           updates.map(({ id, payload }) =>
-            scheduleApi.patchAt(ApiRoutes.schedules.updatePerDay(id), payload),
+            scheduleApiPatch.patchAt(
+              ApiRoutes.schedules.updatePerDay(id),
+              payload,
+            ),
           ),
         );
-        const failed = results.some((r) => !r?.success);
-        console.log('RESULTS', results);
+      }
 
-        if (failed) {
-          router.replace('/(tabs)/(profile)');
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          Toast.show({
-            type: 'error',
-            text1: Strings.edit.toast.scheduleErrorTitle,
-            text2: Strings.edit.toast.scheduleErrorDescription,
-            position: 'top',
-            visibilityTime: 2000,
-            autoHide: true,
-            closeIconSize: 1,
-          });
-          return;
-        }
+      // POST
+      let createResults: (ScheduleResponse | null)[] = [];
+      if (creates.length > 0) {
+        createResults = await Promise.all(
+          creates.map((payload) => scheduleApiPost.post(payload)),
+        );
+      }
+
+      const failedPatch = patchResults.some((r) => !r?.success);
+      const failedCreate = createResults.some((r) => !r?.success);
+
+      if (failedPatch || failedCreate) {
+        router.replace('/(tabs)/(profile)');
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        Toast.show({
+          type: 'error',
+          text1: Strings.edit.toast.scheduleErrorTitle,
+          text2: Strings.edit.toast.scheduleErrorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
       }
     }
 
@@ -721,8 +741,7 @@ export default function EditProfileScreen() {
               )}
 
               {/* Person and Interpreter fields */}
-              {(profile?.type === UserType.PERSON ||
-                profile?.type === UserType.INTERPRETER) && (
+              {(profile?.type === UserType.PERSON || isInterpreter) && (
                 <View className="gap-3">
                   <FormControl isRequired isInvalid={!!fields.name.error}>
                     <FormControlLabel>
@@ -873,7 +892,7 @@ export default function EditProfileScreen() {
 
               {/* Preferences or Professional Area */}
               <View className="flex-row self-start mt-10 gap-2">
-                {profile?.type === UserType.INTERPRETER ? (
+                {isInterpreter ? (
                   <>
                     <BriefcaseBusiness />
                     <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -919,7 +938,7 @@ export default function EditProfileScreen() {
                 </FormControlError>
               </FormControl>
 
-              {profile?.type === UserType.INTERPRETER && (
+              {isInterpreter && (
                 <>
                   <FormControl isInvalid={!!fields.cnpj.error} className="mt-4">
                     <FormControlLabel>
@@ -1276,7 +1295,18 @@ export default function EditProfileScreen() {
                                 -
                               </Text>
                               <ModalSingleSelection
-                                items={hourOptions}
+                                items={((): typeof hourOptions => {
+                                  const from =
+                                    schedule[key as keyof typeof schedule].from;
+                                  const fromMins = toMinutes(from);
+                                  return fromMins >= 0
+                                    ? hourOptions.filter(
+                                        (opt) =>
+                                          toMinutes(String(opt.value)) >
+                                          fromMins,
+                                      )
+                                    : hourOptions;
+                                })()}
                                 selectedValue={
                                   schedule[key as keyof typeof schedule].to
                                 }
