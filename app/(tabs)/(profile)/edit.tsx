@@ -40,12 +40,16 @@ import {
   hourOptions,
 } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
+  type ScheduleResponse,
+  type ScheduleRequest,
+  type WeekSchedule,
   type UserPictureResponse,
   type UserRequest,
   type UserResponse,
@@ -55,6 +59,7 @@ import {
   type StateAndCityResponse,
   Modality,
   UserType,
+  Days,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -67,12 +72,14 @@ import {
   pickImage,
 } from '@/src/utils/helpers';
 import {
+  emptyWeekSchedule,
   formatCnpj,
   formatDate,
   formatPhone,
   handleCnpjChange,
   handlePhoneChange,
   mapImageRights,
+  mapWeekDay,
   validateBirthday,
   validateCnpj,
   validateEmail,
@@ -93,7 +100,7 @@ import {
   PlusIcon,
   MinusIcon,
 } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -112,6 +119,7 @@ type EditProfileValidationContext = {
 
 export default function EditProfileScreen() {
   const params = useLocalSearchParams();
+  const { logout, updateUser } = useAuth();
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -119,26 +127,64 @@ export default function EditProfileScreen() {
   const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
     null,
   );
+  const [schedule, setSchedule] =
+    useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
-  // Temporary schedule state - backend integration pending
-  const [schedule, setSchedule] = useState<
-    Record<string, { from: string; to: string }>
-  >(
-    Object.keys(Strings.days).reduce(
-      (acc, key) => {
-        acc[key] = { from: '', to: '' };
-        return acc;
-      },
-      {} as Record<string, { from: string; to: string }>,
-    ),
-  );
+  // Keep initial values to detect which days were changed
+  const initialScheduleRef =
+    useRef<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
   // Parse the profile data from params if available
-  const profile = params.data
-    ? (JSON.parse(params.data as string) as UserResponseData)
+  const profile = params.profile
+    ? (JSON.parse(params.profile as string) as UserResponseData)
     : null;
 
   const { markProfileAsCompleted } = useProfileCompletion(profile?.id);
+
+  // Early return if no profile data
+  useEffect(() => {
+    if (!profile) {
+      console.error('No profile data provided in params');
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.errorTitle,
+        text2: Strings.edit.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      router.back();
+    }
+  }, [profile]);
+
+  const scheduleData = useMemo(
+    () =>
+      SCHEDULE_ENABLED && params.schedule
+        ? (JSON.parse(params.schedule as string) as WeekSchedule)
+        : emptyWeekSchedule(),
+    [params.schedule],
+  );
+
+  useEffect(() => {
+    setSchedule(scheduleData);
+    initialScheduleRef.current = JSON.parse(JSON.stringify(scheduleData));
+  }, [scheduleData]);
+
+  const scheduleIds = useMemo(() => {
+    const ids = {} as Record<Days, string | null>;
+    (Object.keys(Days) as Days[]).forEach((day) => {
+      ids[day] = (scheduleData as any)?.[day]?.id ?? null;
+    });
+    return ids;
+  }, [scheduleData]);
+
+  const maxDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    return d;
+  }, []);
 
   // Mark profile as completed for non-interpreter users when they access edit screen
   useEffect(() => {
@@ -162,6 +208,10 @@ export default function EditProfileScreen() {
   >(ApiRoutes.userSpecialties.byUser(profile?.id || ''));
   const userPictureApi = useApiPost<UserPictureResponse, FormData>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
+  );
+  const scheduleApiPatch = useApiPatch<ScheduleResponse, ScheduleRequest>('');
+  const scheduleApiPost = useApiPost<ScheduleResponse, ScheduleRequest>(
+    ApiRoutes.schedules.register,
   );
 
   // Forms validation - verify each field based on user type
@@ -366,30 +416,6 @@ export default function EditProfileScreen() {
     },
   });
 
-  const maxDate = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - 1);
-    return d;
-  }, []);
-
-  // Early return if no profile data
-  useEffect(() => {
-    if (!profile) {
-      console.error('No profile data provided in params');
-      Toast.show({
-        type: 'error',
-        text1: Strings.edit.toast.errorTitle,
-        text2: Strings.edit.toast.errorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
-      router.back();
-    }
-  }, [profile]);
-
   // Fetch all states
   const isInterpreter = profile?.type === UserType.INTERPRETER;
 
@@ -439,6 +465,12 @@ export default function EditProfileScreen() {
     }
   };
 
+  const toMinutes = (time?: string): number => {
+    if (!time) return -1;
+    const [h, m] = time.split(':').map(Number);
+    return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
+  };
+
   function handleBack() {
     clearErrors();
     router.back();
@@ -454,6 +486,17 @@ export default function EditProfileScreen() {
       })
     )
       return;
+
+    // Detect if email was changed
+    const emailChanged =
+      fields.email.value.trim().toLowerCase() !==
+      (profile.email || '').trim().toLowerCase();
+
+    const nameChanged =
+      fields.name.value.trim().toLowerCase() !==
+        (profile.type !== UserType.ENTERPRISE
+          ? profile.name
+          : profile.corporate_reason) || ''.trim().toLowerCase();
 
     // Build payloads based on user type
     const payload = buildEditPayload(profile.type as UserType, fields);
@@ -508,6 +551,204 @@ export default function EditProfileScreen() {
         text2: Strings.edit.toast.errorDescription,
         position: 'top',
         visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
+    }
+
+    // Patch/Post schedules for changed days only
+    if (SCHEDULE_ENABLED && isInterpreter) {
+      const keys = Object.keys(Days) as Days[];
+
+      const updates: { id: string; payload: ScheduleRequest }[] = [];
+      const creates: ScheduleRequest[] = [];
+
+      for (const key of keys) {
+        const curr = schedule[key];
+        const init = initialScheduleRef.current[key];
+        const changed =
+          (curr?.from ?? '') !== (init?.from ?? '') ||
+          (curr?.to ?? '') !== (init?.to ?? '');
+
+        if (!changed || !curr?.from || !curr?.to) continue;
+
+        const id = scheduleIds[key];
+
+        const payload: ScheduleRequest = {
+          day: key as Days,
+          interpreter_id: profile.id!,
+          start_time: `${curr.from}:00`,
+          end_time: `${curr.to}:00`,
+        };
+
+        if (id) {
+          updates.push({ id, payload });
+        } else {
+          creates.push(payload);
+        }
+      }
+
+      // PATCH
+      let patchResults: (ScheduleResponse | null)[] = [];
+      if (updates.length > 0) {
+        patchResults = await Promise.all(
+          updates.map(({ id, payload }) =>
+            scheduleApiPatch.patchAt(
+              ApiRoutes.schedules.updatePerDay(id),
+              payload,
+            ),
+          ),
+        );
+      }
+
+      // POST
+      let createResults: (ScheduleResponse | null)[] = [];
+      if (creates.length > 0) {
+        createResults = await Promise.all(
+          creates.map((payload) => scheduleApiPost.post(payload)),
+        );
+      }
+
+      const failedPatch = patchResults.some((r) => !r?.success);
+      const failedCreate = createResults.some((r) => !r?.success);
+
+      if (failedPatch || failedCreate) {
+        router.replace('/(tabs)/(profile)');
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        Toast.show({
+          type: 'error',
+          text1: Strings.edit.toast.scheduleErrorTitle,
+          text2: Strings.edit.toast.scheduleErrorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+    }
+
+    if (nameChanged || emailChanged) {
+      // Keep AuthContext user in sync
+      await updateUser({
+        name:
+          profile.type === UserType.ENTERPRISE
+            ? fields.reason.value
+            : fields.name.value,
+        email: fields.email.value,
+      });
+    }
+
+    // If email changed, force re-login to renew tokens
+    if (emailChanged) {
+      logout();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      Toast.show({
+        type: 'info',
+        text1: Strings.edit.toast.emailChangedTitle,
+        text2: Strings.edit.toast.emailChangedDescription,
+        position: 'top',
+        visibilityTime: 2500,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
+    }
+
+    // Patch/Post schedules for changed days only
+    if (SCHEDULE_ENABLED && isInterpreter) {
+      const keys = Object.keys(Days) as Days[];
+
+      const updates: { id: string; payload: ScheduleRequest }[] = [];
+      const creates: ScheduleRequest[] = [];
+
+      for (const key of keys) {
+        const curr = schedule[key];
+        const init = initialScheduleRef.current[key];
+        const changed =
+          (curr?.from ?? '') !== (init?.from ?? '') ||
+          (curr?.to ?? '') !== (init?.to ?? '');
+
+        if (!changed || !curr?.from || !curr?.to) continue;
+
+        const id = scheduleIds[key];
+
+        const payload: ScheduleRequest = {
+          day: key as Days,
+          interpreter_id: profile.id!,
+          start_time: `${curr.from}:00`,
+          end_time: `${curr.to}:00`,
+        };
+
+        if (id) {
+          updates.push({ id, payload });
+        } else {
+          creates.push(payload);
+        }
+      }
+
+      // PATCH
+      let patchResults: (ScheduleResponse | null)[] = [];
+      if (updates.length > 0) {
+        patchResults = await Promise.all(
+          updates.map(({ id, payload }) =>
+            scheduleApiPatch.patchAt(
+              ApiRoutes.schedules.updatePerDay(id),
+              payload,
+            ),
+          ),
+        );
+      }
+
+      // POST
+      let createResults: (ScheduleResponse | null)[] = [];
+      if (creates.length > 0) {
+        createResults = await Promise.all(
+          creates.map((payload) => scheduleApiPost.post(payload)),
+        );
+      }
+
+      const failedPatch = patchResults.some((r) => !r?.success);
+      const failedCreate = createResults.some((r) => !r?.success);
+
+      if (failedPatch || failedCreate) {
+        router.replace('/(tabs)/(profile)');
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        Toast.show({
+          type: 'error',
+          text1: Strings.edit.toast.scheduleErrorTitle,
+          text2: Strings.edit.toast.scheduleErrorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+    }
+
+    if (nameChanged || emailChanged) {
+      // Keep AuthContext user in sync
+      await updateUser({
+        name:
+          profile.type === UserType.ENTERPRISE
+            ? fields.reason.value
+            : fields.name.value,
+        email: fields.email.value,
+      });
+    }
+
+    // If email changed, force re-login to renew tokens
+    if (emailChanged) {
+      logout();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      Toast.show({
+        type: 'info',
+        text1: Strings.edit.toast.emailChangedTitle,
+        text2: Strings.edit.toast.emailChangedDescription,
+        position: 'top',
+        visibilityTime: 2500,
         autoHide: true,
         closeIconSize: 1,
       });
@@ -649,8 +890,7 @@ export default function EditProfileScreen() {
               )}
 
               {/* Person and Interpreter fields */}
-              {(profile?.type === UserType.PERSON ||
-                profile?.type === UserType.INTERPRETER) && (
+              {(profile?.type === UserType.PERSON || isInterpreter) && (
                 <View className="gap-3">
                   <FormControl isRequired isInvalid={!!fields.name.error}>
                     <FormControlLabel>
@@ -801,7 +1041,7 @@ export default function EditProfileScreen() {
 
               {/* Preferences or Professional Area */}
               <View className="flex-row self-start mt-10 gap-2">
-                {profile?.type === UserType.INTERPRETER ? (
+                {isInterpreter ? (
                   <>
                     <BriefcaseBusiness />
                     <Text className="text-lg font-ifood-medium text-text-light dark:text-text-dark">
@@ -847,7 +1087,7 @@ export default function EditProfileScreen() {
                 </FormControlError>
               </FormControl>
 
-              {profile?.type === UserType.INTERPRETER && (
+              {isInterpreter && (
                 <>
                   <FormControl isInvalid={!!fields.cnpj.error} className="mt-4">
                     <FormControlLabel>
@@ -1176,19 +1416,24 @@ export default function EditProfileScreen() {
                         {Strings.hours.title}
                       </Text>
                       <View className="flex-col gap-2">
-                        {Object.entries(Strings.days).map(([key, label]) => (
+                        {Object.entries(Days).map(([key, label]) => (
                           <FormControl key={key} className="mb-2">
                             <View className="flex-row items-center gap-1">
                               <Text className="w-32 font-ifood-regular text-text-light dark:text-text-dark">
-                                {label}
+                                {mapWeekDay(label)}
                               </Text>
                               <ModalSingleSelection
                                 items={hourOptions}
-                                selectedValue={schedule[key].from}
+                                selectedValue={
+                                  schedule[key as keyof typeof schedule].from
+                                }
                                 onSelectionChange={(value) =>
                                   setSchedule((prev) => ({
                                     ...prev,
-                                    [key]: { ...prev[key], from: value },
+                                    [key]: {
+                                      ...prev[key as keyof typeof schedule],
+                                      from: value,
+                                    },
                                   }))
                                 }
                                 placeholderText={Strings.hours.from}
@@ -1199,12 +1444,28 @@ export default function EditProfileScreen() {
                                 -
                               </Text>
                               <ModalSingleSelection
-                                items={hourOptions}
-                                selectedValue={schedule[key].to}
+                                items={((): typeof hourOptions => {
+                                  const from =
+                                    schedule[key as keyof typeof schedule].from;
+                                  const fromMins = toMinutes(from);
+                                  return fromMins >= 0
+                                    ? hourOptions.filter(
+                                        (opt) =>
+                                          toMinutes(String(opt.value)) >
+                                          fromMins,
+                                      )
+                                    : hourOptions;
+                                })()}
+                                selectedValue={
+                                  schedule[key as keyof typeof schedule].to
+                                }
                                 onSelectionChange={(value) =>
                                   setSchedule((prev) => ({
                                     ...prev,
-                                    [key]: { ...prev[key], to: value },
+                                    [key]: {
+                                      ...prev[key as keyof typeof schedule],
+                                      to: value,
+                                    },
                                   }))
                                 }
                                 placeholderText={Strings.hours.to}
