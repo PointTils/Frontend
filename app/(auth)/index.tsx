@@ -1,5 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import HapticTab from '@/src/components/HapticTab';
+import ModalWarning from '@/src/components/ModalWarning';
 import { Button } from '@/src/components/ui/button';
 import {
   FormControl,
@@ -20,11 +21,12 @@ import type { LoginCredentials } from '@/src/types/api';
 import {
   buildInvalidFieldError,
   buildRequiredFieldError,
+  toBoolean,
 } from '@/src/utils/helpers';
 import { validateEmail } from '@/src/utils/masks';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -35,6 +37,19 @@ import { Toast } from 'toastify-react-native';
 export default function LoginScreen() {
   const { login, isLoggingIn, loginError, setLoginError } = useAuth();
   const colors = useColors();
+  const { registeredAsInterpreter } = useLocalSearchParams<{
+    registeredAsInterpreter?: string;
+  }>();
+
+  const [isInterpreterModalVisible, setInterpreterModalVisibility] =
+    useState(false);
+
+  useEffect(() => {
+    // Show interpreter modal if the user just registered as an interpreter
+    if (toBoolean(registeredAsInterpreter)) {
+      setInterpreterModalVisibility(true);
+    }
+  }, [registeredAsInterpreter]);
 
   useEffect(() => {
     if (loginError) {
@@ -89,6 +104,14 @@ export default function LoginScreen() {
       className="flex-1 items-center justify-center"
       accessibilityLabel={Strings.auth.login}
     >
+      <ModalWarning
+        visible={isInterpreterModalVisible}
+        onClose={() => setInterpreterModalVisibility(false)}
+        title={Strings.auth.toast.interpreterRegisterTitle}
+        text={Strings.auth.toast.interpreterRegisterDescription}
+        buttonTitle={Strings.common.buttons.understood}
+      />
+      {/* Main content */}
       <KeyboardAvoidingView
         className="items-center justify-center"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

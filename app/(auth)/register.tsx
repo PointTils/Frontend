@@ -259,9 +259,6 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Successful registration (e.g., navigate to login)
-    router.back();
-    await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
       type: 'success',
       text1: Strings.register.toast.successTitle,
@@ -270,6 +267,13 @@ export default function RegisterScreen() {
       visibilityTime: 2000,
       autoHide: true,
       closeIconSize: 1, // To "hide" the close icon
+    });
+    // Successful registration (e.g., navigate to login)
+    router.replace({
+      pathname: '/(auth)',
+      params: {
+        registeredAsInterpreter: String(type === UserType.INTERPRETER),
+      },
     });
   }
 
