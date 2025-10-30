@@ -1,9 +1,10 @@
+import { ArrowRight } from 'lucide-react-native';
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { ArrowRight } from 'lucide-react-native';
+
 import BannerHome from '../assets/svgs/BannerHome';
-import { useTheme } from '../contexts/ThemeProvider';
 import { Colors } from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeProvider';
 
 interface ModalBannerHome {
   title: string;

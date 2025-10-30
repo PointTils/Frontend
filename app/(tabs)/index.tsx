@@ -9,8 +9,8 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
+import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
   type Appointment,

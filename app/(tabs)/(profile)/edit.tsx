@@ -43,8 +43,8 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
-import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import type { FormFields } from '@/src/hooks/useFormValidation';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
   type UserPictureResponse,
   type UserRequest,

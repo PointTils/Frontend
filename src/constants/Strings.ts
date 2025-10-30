@@ -129,10 +129,10 @@ export const Strings = {
     tabBar: 'Início',
     welcome: 'Olá, {User}!',
     nextAppointments: 'Próximos agendamentos',
-    banner:{
+    banner: {
       interpreter: 'Complete o seu perfil profissional',
-      person: 'Complete o seu perfil'
-    }
+      person: 'Complete o seu perfil',
+    },
   },
 
   profile: {
