@@ -57,12 +57,8 @@ export const ApiRoutes = {
       );
       params.set('status', String(status));
 
-      if (hasRating !== undefined) {
-        params.set('hasRating', String(hasRating));
-      }
-      if (dayLimit !== undefined) {
-        params.set('dayLimit', String(dayLimit));
-      }
+      if (hasRating !== undefined) params.set('hasRating', String(hasRating));
+      if (dayLimit !== undefined) params.set('dayLimit', String(dayLimit));
 
       return `/appointments/filter?${params.toString()}`;
     },
@@ -72,12 +68,34 @@ export const ApiRoutes = {
   },
   schedules: {
     base: '/schedules',
+    register: '/schedules/register',
     availabilityPerDay: (
       interpreterId: string,
       dateFrom: string,
       dateTo: string,
     ) =>
       `/schedules/available?interpreterId=${interpreterId}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
+    byInterpreterPaginated: (
+      page: number = 0,
+      size: number = 10,
+      interpreterId: string,
+      day?: string,
+      dateFrom?: string,
+      dateTo?: string,
+    ) => {
+      const params = new URLSearchParams();
+
+      if (page !== undefined) params.set('page', String(page));
+      if (size !== undefined) params.set('size', String(size));
+      if (interpreterId) params.set('interpreterId', String(interpreterId));
+      if (day) params.set('day', String(day));
+      if (dateFrom) params.set('dateFrom', String(dateFrom));
+      if (dateTo) params.set('dateTo', String(dateTo));
+
+      const qs = params.toString();
+      return `/schedules${qs ? `?${qs}` : ''}`;
+    },
+    updatePerDay: (scheduleId: string) => `/schedules/${scheduleId}`,
   },
   ratings: {
     base: '/ratings',

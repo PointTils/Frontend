@@ -11,20 +11,24 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import {
+  type ScheduleResponse,
+  type SchedulePaginated,
   type UserResponse,
-  type Day,
   Modality,
   UserType,
+  Days,
 } from '@/src/types/api';
 import { getSafeAvatarUri } from '@/src/utils/helpers';
 import {
   formatDate,
-  formatDaySchedule,
+  formatRangeDaySchedule,
   handleCnpjChange,
   handlePhoneChange,
   mapGender,
   mapImageRights,
   mapModality,
+  formatWeekSchedule,
+  mapWeekDay,
 } from '@/src/utils/masks';
 import { router } from 'expo-router';
 import {
@@ -57,13 +61,24 @@ export default function ProfileScreen() {
 
   // Integration with API to fetch profile data
   const { data, loading, error } = useApiGet<UserResponse>(route);
+  const {
+    data: scheduleData,
+    loading: scheduleLoading,
+    error: scheduleError,
+  } = useApiGet<ScheduleResponse>(
+    ApiRoutes.schedules.byInterpreterPaginated(0, 10, user?.id || ''),
+    undefined,
+    {
+      enabled: SCHEDULE_ENABLED && user?.type === UserType.INTERPRETER,
+    },
+  );
 
   // Early return if not authenticated
   if (!isAuthenticated || !user) {
     return null;
   }
 
-  if (loading) {
+  if (loading || scheduleLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator color={colors.primaryBlue} size="small" />
@@ -75,7 +90,14 @@ export default function ProfileScreen() {
   }
 
   // Redirect to home if no profile data or error occurs
-  if (error || !data?.success || !data.data) {
+  if (
+    error ||
+    !data?.success ||
+    !data.data ||
+    (user.type === UserType.INTERPRETER &&
+      SCHEDULE_ENABLED &&
+      (scheduleError || !scheduleData?.success || !scheduleData.data))
+  ) {
     router.push('/');
     Toast.show({
       type: 'error',
@@ -90,8 +112,8 @@ export default function ProfileScreen() {
   }
 
   const profile = data.data;
-  const chipsItems = profile.specialties?.map((item) => item.name) ?? [];
 
+  const chipsItems = profile.specialties?.map((item) => item.name) ?? [];
   const showLocation =
     profile.type === UserType.INTERPRETER
       ? profile.professional_data?.modality === Modality.ALL ||
@@ -110,16 +132,12 @@ export default function ProfileScreen() {
         )
       : [];
 
-  // Simple schedule mock - remove when API supports it
-  const scheduleMock: Record<string, { from?: string; to?: string }> = {
-    monday: { from: '08:00', to: '12:00' },
-    tuesday: { from: '09:00', to: '17:00' },
-    wednesday: { from: '09:00', to: '17:00' },
-    thursday: { from: '09:00', to: '17:00' },
-    friday: { from: '09:00', to: '16:00' },
-    saturday: { from: '', to: '' },
-    sunday: { from: '', to: '' },
-  };
+  const schedule = scheduleData?.data as SchedulePaginated;
+  const scheduleMapped =
+    SCHEDULE_ENABLED &&
+    profile.type === UserType.INTERPRETER &&
+    schedule.items?.length > 0 &&
+    formatWeekSchedule(schedule.items as any);
 
   return (
     <View className="flex-1 justify-center items-center mt-8 px-4">
@@ -276,15 +294,17 @@ export default function ProfileScreen() {
                     {Strings.hours.title}
                   </Text>
 
-                  {Object.entries(Strings.days).map(([day, label]) => {
-                    const value = formatDaySchedule(scheduleMock[day as Day]);
+                  {Object.entries(Days).map(([day, label]) => {
+                    const value = formatRangeDaySchedule(
+                      scheduleMapped[day as keyof typeof scheduleMapped],
+                    );
                     return (
                       <View
                         key={day}
                         className="w-full flex-row items-center justify-between px-2 py-1"
                       >
                         <Text className="font-ifood-regular text-primary-800">
-                          {label}
+                          {mapWeekDay(label)}
                         </Text>
                         <Text className="font-ifood-regular text-primary-800">
                           {value}
@@ -306,7 +326,10 @@ export default function ProfileScreen() {
               router.push({
                 pathname: '/(tabs)/(profile)/edit',
                 params: {
-                  data: JSON.stringify(profile),
+                  profile: JSON.stringify(profile),
+                  schedule: SCHEDULE_ENABLED
+                    ? JSON.stringify(scheduleMapped)
+                    : undefined,
                 },
               })
             }
