@@ -204,6 +204,9 @@ export const Strings = {
       scheduleErrorTitle: 'Erro ao atualizar horários',
       scheduleErrorDescription:
         'Verifique os horários preenchidos. Tente novamente.',
+      emailChangedTitle: 'Conta atualizada com sucesso!',
+      emailChangedDescription:
+        'Necessário realizar login novamente. Por favor, entre com suas novas credenciais.',
     },
   },
 

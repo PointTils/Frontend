@@ -1,14 +1,4 @@
 import api from '@/src/api';
-import {
-  AlertDialog,
-  AlertDialogBackdrop,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-} from '@/src/components/ui/alert-dialog';
-import { Button, ButtonText } from '@/src/components/ui/button';
-import { Text } from '@/src/components/ui/text';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { StorageKeys } from '@/src/constants/StorageKeys';
 import { Strings } from '@/src/constants/Strings';
@@ -19,7 +9,6 @@ import type {
   User,
 } from '@/src/types/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import {
   createContext,
@@ -44,6 +33,7 @@ interface AuthContextData {
   setLoginError: (error: string | null) => void;
   setIsFirstTime: (value: boolean) => void;
   completeOnboarding: () => Promise<void>;
+  updateUser: (patch: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -58,17 +48,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [showLogoutAlertDialog, setShowLogoutAlertDialog] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState<boolean>(false);
 
   const isAuthenticated = !!user;
 
   const initialLoadRef = useRef(false);
-
-  const handleCloseLogoutAlertDialog = () => {
-    setShowLogoutAlertDialog(false);
-    router.replace('/(auth)');
-  };
 
   async function loadStoredAuth() {
     if (initialLoadRef.current) return;
@@ -155,7 +139,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else {
             // Refresh failed, logout user and redirect to login
             await logout();
-            setShowLogoutAlertDialog(true);
             return Promise.reject(error);
           }
         }
@@ -299,6 +282,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsFirstTime(false);
   }
 
+  // Keep user state and storage in sync after profile updates
+  const updateUser = useCallback(
+    async (patch: Partial<User>) => {
+      if (!user) return;
+      const next = { ...user, ...patch };
+      setUser(next);
+      try {
+        await AsyncStorage.setItem(StorageKeys.user_data, JSON.stringify(next));
+      } catch (error) {
+        console.error('Failed to update stored user data: ', error);
+      }
+    },
+    [user],
+  );
+
   const value: AuthContextData = {
     user,
     isLoading,
@@ -313,48 +311,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoginError,
     setIsFirstTime,
     completeOnboarding,
+    updateUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-
-      <AlertDialog
-        isOpen={showLogoutAlertDialog}
-        onClose={handleCloseLogoutAlertDialog}
-      >
-        <AlertDialogBackdrop />
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <Text
-              className="font-ifood-medium text-text-light dark:text-text-dark"
-              size="md"
-            >
-              {Strings.auth.sessionExpired}
-            </Text>
-          </AlertDialogHeader>
-          <AlertDialogBody className="mt-3 mb-4">
-            <Text
-              size="sm"
-              className="font-ifood-regular text-text-light dark:text-text-dark"
-            >
-              {Strings.auth.sessionExpiredMessage}
-            </Text>
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button
-              variant="solid"
-              action="primary"
-              onPress={handleCloseLogoutAlertDialog}
-              size="sm"
-            >
-              <ButtonText>{Strings.common.buttons.understood}</ButtonText>
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextData {

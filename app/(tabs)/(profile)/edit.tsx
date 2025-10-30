@@ -40,6 +40,7 @@ import {
   hourOptions,
 } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
@@ -117,6 +118,7 @@ type EditProfileValidationContext = {
 
 export default function EditProfileScreen() {
   const params = useLocalSearchParams();
+  const { logout, updateUser } = useAuth();
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -476,6 +478,17 @@ export default function EditProfileScreen() {
     )
       return;
 
+    // Detect if email was changed
+    const emailChanged =
+      fields.email.value.trim().toLowerCase() !==
+      (profile.email || '').trim().toLowerCase();
+
+    const nameChanged =
+      fields.name.value.trim().toLowerCase() !==
+        (profile.type !== UserType.ENTERPRISE
+          ? profile.name
+          : profile.corporate_reason) || ''.trim().toLowerCase();
+
     // Build payloads based on user type
     const payload = buildEditPayload(profile.type as UserType, fields);
     if (!payload) return;
@@ -605,6 +618,33 @@ export default function EditProfileScreen() {
         });
         return;
       }
+    }
+
+    if (nameChanged || emailChanged) {
+      // Keep AuthContext user in sync
+      await updateUser({
+        name:
+          profile.type === UserType.ENTERPRISE
+            ? fields.reason.value
+            : fields.name.value,
+        email: fields.email.value,
+      });
+    }
+
+    // If email changed, force re-login to renew tokens
+    if (emailChanged) {
+      logout();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      Toast.show({
+        type: 'info',
+        text1: Strings.edit.toast.emailChangedTitle,
+        text2: Strings.edit.toast.emailChangedDescription,
+        position: 'top',
+        visibilityTime: 2500,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+      return;
     }
 
     // Successful update logic (e.g., navigate to profile)

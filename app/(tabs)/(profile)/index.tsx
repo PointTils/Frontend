@@ -135,6 +135,7 @@ export default function ProfileScreen() {
   const schedule = scheduleData?.data as SchedulePaginated;
   const scheduleMapped =
     SCHEDULE_ENABLED &&
+    profile.type === UserType.INTERPRETER &&
     schedule.items?.length > 0 &&
     formatWeekSchedule(schedule.items as any);
 
