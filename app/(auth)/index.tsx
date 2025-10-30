@@ -25,12 +25,13 @@ import {
 } from '@/src/utils/helpers';
 import { validateEmail } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
-import { AlertCircleIcon } from 'lucide-react-native';
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
@@ -41,6 +42,7 @@ export default function LoginScreen() {
     registeredAsInterpreter?: string;
   }>();
 
+  const [showPassword, setShowPassword] = useState(false);
   const [isInterpreterModalVisible, setInterpreterModalVisibility] =
     useState(false);
 
@@ -173,15 +175,25 @@ export default function LoginScreen() {
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
               <InputField
-                type="password"
                 className="font-ifood-regular"
                 placeholder="********"
                 onChangeText={(text) => setValue('password', text)}
                 value={fields.password.value}
                 autoCapitalize="none"
-                autoComplete="password"
+                secureTextEntry={!showPassword}
+                maxLength={25}
               />
             </Input>
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-9"
+            >
+              {showPassword ? (
+                <EyeOffIcon color={colors.disabled} />
+              ) : (
+                <EyeIcon color={colors.disabled} />
+              )}
+            </TouchableOpacity>
             <FormControlError>
               <FormControlErrorIcon
                 as={AlertCircleIcon}
