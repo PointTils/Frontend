@@ -6,7 +6,7 @@ import BannerHome from '../assets/svgs/BannerHome';
 import { Colors } from '../constants/Colors';
 import { useTheme } from '../contexts/ThemeProvider';
 
-interface ModalBannerHome {
+interface ModalBannerHomeProps {
   title: string;
   backgroundColor: string;
   onPress?: () => void;
@@ -16,14 +16,14 @@ export default function ModalBannerHome({
   backgroundColor,
   title,
   onPress,
-}: ModalBannerHome) {
+}: ModalBannerHomeProps) {
   const { colorScheme } = useTheme();
   const colors = Colors[colorScheme];
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center justify-between h-[100px] rounded-sm p-4 mx-4 my-2"
+      className="flex-row items-center justify-between h-[100px] rounded-md p-4 mx-4 my-2"
       style={{ backgroundColor }}
       activeOpacity={0.8}
     >

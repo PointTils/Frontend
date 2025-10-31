@@ -191,7 +191,7 @@ export default function EditProfileScreen() {
     if (profile && profile.type !== UserType.INTERPRETER) {
       markProfileAsCompleted();
     }
-  }, [profile?.id, profile?.type]);
+  }, [profile, profile?.type, markProfileAsCompleted]);
 
   const personApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.person.profile(profile?.id || ''),

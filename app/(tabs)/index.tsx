@@ -100,7 +100,7 @@ export default function HomeScreen() {
             />
 
             {/* Divider */}
-            <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+            <View className="w-full h-px bg-gray-200 mb-4 mt-4" />
           </>
         )}
         <View className="flex-row items-center gap-3 px-4">
