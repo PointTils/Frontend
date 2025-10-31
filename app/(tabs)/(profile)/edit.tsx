@@ -158,6 +158,13 @@ export default function EditProfileScreen() {
     }
   }, [profile]);
 
+  // Mark profile as completed for non-interpreter users when they access edit screen
+  useEffect(() => {
+    if (profile && profile.type !== UserType.INTERPRETER) {
+      markProfileAsCompleted();
+    }
+  }, [profile, profile?.type, markProfileAsCompleted]);
+
   const scheduleData = useMemo(
     () =>
       SCHEDULE_ENABLED && params.schedule
@@ -186,13 +193,7 @@ export default function EditProfileScreen() {
     return d;
   }, []);
 
-  // Mark profile as completed for non-interpreter users when they access edit screen
-  useEffect(() => {
-    if (profile && profile.type !== UserType.INTERPRETER) {
-      markProfileAsCompleted();
-    }
-  }, [profile, profile?.type, markProfileAsCompleted]);
-
+  // API hooks for different user types
   const personApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.person.profile(profile?.id || ''),
   );
@@ -656,107 +657,9 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // Patch/Post schedules for changed days only
-    if (SCHEDULE_ENABLED && isInterpreter) {
-      const keys = Object.keys(Days) as Days[];
-
-      const updates: { id: string; payload: ScheduleRequest }[] = [];
-      const creates: ScheduleRequest[] = [];
-
-      for (const key of keys) {
-        const curr = schedule[key];
-        const init = initialScheduleRef.current[key];
-        const changed =
-          (curr?.from ?? '') !== (init?.from ?? '') ||
-          (curr?.to ?? '') !== (init?.to ?? '');
-
-        if (!changed || !curr?.from || !curr?.to) continue;
-
-        const id = scheduleIds[key];
-
-        const payload: ScheduleRequest = {
-          day: key as Days,
-          interpreter_id: profile.id!,
-          start_time: `${curr.from}:00`,
-          end_time: `${curr.to}:00`,
-        };
-
-        if (id) {
-          updates.push({ id, payload });
-        } else {
-          creates.push(payload);
-        }
-      }
-
-      // PATCH
-      let patchResults: (ScheduleResponse | null)[] = [];
-      if (updates.length > 0) {
-        patchResults = await Promise.all(
-          updates.map(({ id, payload }) =>
-            scheduleApiPatch.patchAt(
-              ApiRoutes.schedules.updatePerDay(id),
-              payload,
-            ),
-          ),
-        );
-      }
-
-      // POST
-      let createResults: (ScheduleResponse | null)[] = [];
-      if (creates.length > 0) {
-        createResults = await Promise.all(
-          creates.map((payload) => scheduleApiPost.post(payload)),
-        );
-      }
-
-      const failedPatch = patchResults.some((r) => !r?.success);
-      const failedCreate = createResults.some((r) => !r?.success);
-
-      if (failedPatch || failedCreate) {
-        router.replace('/(tabs)/(profile)');
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        Toast.show({
-          type: 'error',
-          text1: Strings.edit.toast.scheduleErrorTitle,
-          text2: Strings.edit.toast.scheduleErrorDescription,
-          position: 'top',
-          visibilityTime: 2000,
-          autoHide: true,
-          closeIconSize: 1,
-        });
-        return;
-      }
-    }
-
-    if (nameChanged || emailChanged) {
-      // Keep AuthContext user in sync
-      await updateUser({
-        name:
-          profile.type === UserType.ENTERPRISE
-            ? fields.reason.value
-            : fields.name.value,
-        email: fields.email.value,
-      });
-    }
-
-    // If email changed, force re-login to renew tokens
-    if (emailChanged) {
-      logout();
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      Toast.show({
-        type: 'info',
-        text1: Strings.edit.toast.emailChangedTitle,
-        text2: Strings.edit.toast.emailChangedDescription,
-        position: 'top',
-        visibilityTime: 2500,
-        autoHide: true,
-        closeIconSize: 1,
-      });
-      return;
-    }
-
-    // Mark profile as completed and navigate
     await markProfileAsCompleted();
+
+    // Successful update logic (e.g., navigate to profile)
     router.replace('/(tabs)/(profile)');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
