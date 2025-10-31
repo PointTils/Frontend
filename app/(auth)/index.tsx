@@ -13,11 +13,17 @@ import {
 import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
+import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { LoginCredentials } from '@/src/types/api';
+import {
+  RegisterTokenPayload,
+  RegisterTokenResponse,
+} from '@/src/types/api/notification';
 import {
   buildInvalidFieldError,
   buildRequiredFieldError,
@@ -34,14 +40,25 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
+import { registerForPushNotificationsAsync } from '@/src/services/notifications';
+import DeviceInfo from 'react-native-device-info';
 
 export default function LoginScreen() {
-  const { login, isLoggingIn, loginError, setLoginError } = useAuth();
+  const {
+    login,
+    isLoggingIn,
+    loginError,
+    setLoginError,
+    user: currentUser,
+  } = useAuth();
   const colors = useColors();
   const { registeredAsInterpreter } = useLocalSearchParams<{
     registeredAsInterpreter?: string;
   }>();
-
+  const { post: registerToken } = useApiPost<
+    RegisterTokenResponse,
+    RegisterTokenPayload
+  >(ApiRoutes.userApps.base);
   const [showPassword, setShowPassword] = useState(false);
   const [isInterpreterModalVisible, setInterpreterModalVisibility] =
     useState(false);
@@ -52,6 +69,10 @@ export default function LoginScreen() {
       setInterpreterModalVisibility(true);
     }
   }, [registeredAsInterpreter]);
+
+  const registerNotificationTokenAPI = useApiPost<any, RegisterTokenPayload>(
+    ApiRoutes.userApps.base,
+  );
 
   useEffect(() => {
     if (loginError) {
@@ -99,6 +120,22 @@ export default function LoginScreen() {
     };
 
     await login(data);
+
+    if (currentUser) {
+      const expoToken = await registerForPushNotificationsAsync();
+      if (expoToken) {
+        const deviceId = await DeviceInfo.getUniqueId();
+
+        const payload: RegisterTokenPayload = {
+          token: expoToken,
+          platform: 'android',
+          user_id: currentUser.id,
+          device_id: deviceId,
+        };
+
+        await registerToken(payload);
+      }
+    }
   }
 
   return (
