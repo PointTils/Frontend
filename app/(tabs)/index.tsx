@@ -1,5 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import FeedbackModal from '@/src/components/FeedbackModal';
+import ModalBannerHome from '@/src/components/ModalBannerHome';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -8,6 +9,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
@@ -16,6 +18,7 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
+import { router } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
@@ -29,6 +32,7 @@ export default function HomeScreen() {
     appointmentForFeedback,
     interpreterName,
   } = useCheckFeedback(user);
+  const { showBanner } = useProfileCompletion(user?.id);
 
   const renderItem = useMemo(
     () =>
@@ -82,6 +86,23 @@ export default function HomeScreen() {
 
         {/* Divider */}
         <View className="w-full h-px bg-gray-200 mb-4 mt-6" />
+
+        {showBanner && (
+          <>
+            <ModalBannerHome
+              title={
+                user?.type === UserType.INTERPRETER
+                  ? Strings.home.banner.interpreter
+                  : Strings.home.banner.person
+              }
+              backgroundColor={colors.primaryBlue}
+              onPress={() => router.push('/(tabs)/(profile)')}
+            />
+
+            {/* Divider */}
+            <View className="w-full h-px bg-gray-200 mb-4 mt-4" />
+          </>
+        )}
         <View className="flex-row items-center gap-3 px-4">
           <CalendarDays color={colors.primaryBlue} />
           <Text className="text-text-light font-ifood-medium">

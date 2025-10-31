@@ -45,6 +45,7 @@ import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
   type ScheduleResponse,
   type ScheduleRequest,
@@ -134,9 +135,11 @@ export default function EditProfileScreen() {
     useRef<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
   // Parse the profile data from params if available
-  let profile = params.profile
+  const profile = params.profile
     ? (JSON.parse(params.profile as string) as UserResponseData)
     : null;
+
+  const { markProfileAsCompleted } = useProfileCompletion(profile?.id);
 
   // Early return if no profile data
   useEffect(() => {
@@ -154,6 +157,13 @@ export default function EditProfileScreen() {
       router.back();
     }
   }, [profile]);
+
+  // Mark profile as completed for non-interpreter users when they access edit screen
+  useEffect(() => {
+    if (profile && profile.type !== UserType.INTERPRETER) {
+      markProfileAsCompleted();
+    }
+  }, [profile, profile?.type, markProfileAsCompleted]);
 
   const scheduleData = useMemo(
     () =>
@@ -646,6 +656,8 @@ export default function EditProfileScreen() {
       });
       return;
     }
+
+    await markProfileAsCompleted();
 
     // Successful update logic (e.g., navigate to profile)
     router.replace('/(tabs)/(profile)');
