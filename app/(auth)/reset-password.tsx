@@ -44,12 +44,9 @@ export default function ResetPasswordScreen() {
 
   // POST para enviar o código
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
-    // se vc depois criar no ApiRoutes:
-    // auth: { passwordResetEmail: (email) => `/v1/email/password-reset/${email}` }
-    ApiRoutes?.auth?.passwordResetEmail
-      ? ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || ''))
-      : `/v1/email/password-reset/${encodeURIComponent(email || '')}`,
+    ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || '')),
   );
+
 
   // POST para redefinir
   const { post: recoverPassword, loading: recovering } = useApiPost(
