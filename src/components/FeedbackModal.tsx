@@ -10,7 +10,6 @@ import { Toast } from 'toastify-react-native';
 
 import { Button } from './ui/button';
 import { ApiRoutes } from '../constants/ApiRoutes';
-import { useAuth } from '../contexts/AuthProvider';
 import { useApiPost } from '../hooks/useApi';
 
 interface FeedbackModalProps {
@@ -44,7 +43,6 @@ export default function FeedbackModal({
   appointmentId,
   interpreterName,
 }: FeedbackModalProps) {
-  const { user } = useAuth();
   const colors = useColors();
 
   const [details, setDetails] = useState('');
