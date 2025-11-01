@@ -51,7 +51,7 @@ export default function FeedbackModal({
   const [rating, setRating] = useState(0);
 
   const { post, loading } = useApiPost<RatingResponse, RatingRequest>(
-    ApiRoutes.ratings.create(appointmentId),
+    ApiRoutes.ratings.create(),
   );
 
   // Reset state when modal is opened
@@ -79,7 +79,7 @@ export default function FeedbackModal({
     const body = {
       stars: rating,
       description: details.trim() || null,
-      user_id: user?.id || '',
+      appointment_id: appointmentId || '',
     };
 
     const response = await post(body);
