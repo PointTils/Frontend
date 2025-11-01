@@ -136,6 +136,11 @@ export const Strings = {
     editProfile: 'Editar Perfil',
     help: 'Ajuda',
     logout: 'Sair',
+    faqTitle: 'PERGUNTAS FREQUENTES',
+    contactTitle: 'Não encontrou sua resposta?',
+    contactDescription:
+      'Entre em contato conosco através do nosso suporte técnico.',
+    contactButton: 'Entrar em Contato',
 
     toast: {
       errorTitle: 'Erro ao obter dados do perfil.',
