@@ -1,4 +1,4 @@
-import { Button, ButtonIcon } from '@/src/components/ui/button';
+import { Button } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
@@ -128,7 +128,6 @@ export default function FAQScreen() {
             className="bg-primary-blue"
             onPress={() => {
               // TODO: Implement contact support functionality
-              console.log('Contact support pressed');
             }}
           >
             <Text className="font-ifood-medium text-white">
