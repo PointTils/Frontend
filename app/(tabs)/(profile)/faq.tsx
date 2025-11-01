@@ -89,7 +89,7 @@ export default function FAQScreen() {
         showsVerticalScrollIndicator={false}
       >
         {faqData.map((item, index) => (
-          <View key={index}>
+          <View key={index} className="mb-2">
             <TouchableOpacity
               onPress={() => toggleExpanded(index)}
               className="py-4 px-2 flex-row items-center justify-between border-b border-gray-200"
