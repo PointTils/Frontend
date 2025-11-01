@@ -271,7 +271,9 @@ export default function InterpreterDetails() {
                 ) : (
                   <View className="mb-4">
                     <InterpreterCalendar
-                      schedules={schedules?.data ?? []}
+                      schedules={
+                        Array.isArray(schedules?.data) ? schedules.data : []
+                      }
                       onTimeSelect={handleSelectedTime}
                     />
                   </View>
@@ -283,16 +285,18 @@ export default function InterpreterDetails() {
 
         {section === 'reviews' &&
           (reviews && reviews.data.length > 0 ? (
-            reviews.data.map((review) => (
-              <InterpreterReviewCard
-                key={review.id}
-                rating={review.stars}
-                reviewDate={review.date}
-                userName={review.user.name}
-                reviewText={review.description}
-                userPhoto={review.user.picture}
-              />
-            ))
+            <View className="-mt-4 pb-6">
+              {reviews.data.map((review) => (
+                <InterpreterReviewCard
+                  key={review.id}
+                  rating={review.stars}
+                  reviewDate={review.date}
+                  userName={review.user.name}
+                  reviewText={review.description}
+                  userPhoto={review.user.picture}
+                />
+              ))}
+            </View>
           ) : (
             <View className="flex-1 justify-center gap-y-4 items-center">
               <PackageSearchIcon size={38} color={colors.detailsGray} />

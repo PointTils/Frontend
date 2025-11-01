@@ -1,5 +1,11 @@
 import { Strings } from '@/src/constants/Strings';
-import { type TimeRange, Gender, Modality } from '@/src/types/api';
+import {
+  type WeekSchedule,
+  type TimeRange,
+  Days,
+  Gender,
+  Modality,
+} from '@/src/types/api';
 
 /**
  * Collection of utility functions for formatting, validating, and mapping data.
@@ -19,6 +25,16 @@ import { type TimeRange, Gender, Modality } from '@/src/types/api';
  * const genderText = mapGender(GenderType.MALE);
  * // Result: 'Masculino'
  */
+
+export const emptyWeekSchedule = (): WeekSchedule => ({
+  [Days.MON]: { id: '', from: '', to: '' },
+  [Days.TUE]: { id: '', from: '', to: '' },
+  [Days.WED]: { id: '', from: '', to: '' },
+  [Days.THU]: { id: '', from: '', to: '' },
+  [Days.FRI]: { id: '', from: '', to: '' },
+  [Days.SAT]: { id: '', from: '', to: '' },
+  [Days.SUN]: { id: '', from: '', to: '' },
+});
 
 // Formatting
 export const handlePhoneChange = (text: string) => {
@@ -163,7 +179,7 @@ export const formatCpf = (cpf?: string | null): string => {
   return formatted;
 };
 
-export const formatDaySchedule = (range?: TimeRange): string => {
+export const formatRangeDaySchedule = (range?: TimeRange): string => {
   // Returns "HH:MM - HH:MM" or "N/A"
   const from = range?.from?.trim();
   const to = range?.to?.trim();
@@ -215,6 +231,30 @@ export const formatCpfOrCnpj = (value: string | undefined): string => {
   const digits = (value ?? '').replace(/\D/g, '');
   if (!digits) return '';
   return digits.length <= 11 ? formatCpf(digits) : formatCnpj(digits);
+};
+
+export const formatWeekSchedule = (
+  items: {
+    day: Days;
+    id: string;
+    start_time: string;
+    end_time: string;
+  }[],
+): WeekSchedule => {
+  // Converts array of schedule items to WeekSchedule object
+  const base = emptyWeekSchedule();
+
+  items.forEach(({ day, id, start_time, end_time }) => {
+    if (day) {
+      base[day] = {
+        id: id,
+        from: start_time.slice(0, 5),
+        to: end_time.slice(0, 5),
+      };
+    }
+  });
+
+  return base;
 };
 
 // Validation
@@ -290,5 +330,26 @@ export const mapModality = (
       return `${Strings.common.options.online} e ${Strings.common.options.inPerson}`;
     default:
       return '-';
+  }
+};
+
+export const mapWeekDay = (day: Days): string => {
+  switch (day) {
+    case Days.MON:
+      return Strings.days.monday;
+    case Days.TUE:
+      return Strings.days.tuesday;
+    case Days.WED:
+      return Strings.days.wednesday;
+    case Days.THU:
+      return Strings.days.thursday;
+    case Days.FRI:
+      return Strings.days.friday;
+    case Days.SAT:
+      return Strings.days.saturday;
+    case Days.SUN:
+      return Strings.days.sunday;
+    default:
+      return '';
   }
 };

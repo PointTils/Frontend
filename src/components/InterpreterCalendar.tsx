@@ -5,11 +5,11 @@ import { View, TouchableOpacity } from 'react-native';
 import { Text } from '../components/ui/text';
 import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
-import type { Schedule } from '../types/api/schedule';
+import type { SchedulePerDate } from '../types/api/schedule';
 import type { DateTimeSelection } from '../types/ui';
 
 type InterpreterCalendarProps = {
-  schedules?: Schedule[];
+  schedules?: SchedulePerDate[];
   onTimeSelect: (selection: DateTimeSelection) => void;
 };
 

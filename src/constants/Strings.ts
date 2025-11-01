@@ -122,6 +122,9 @@ export const Strings = {
     toast: {
       errorTitle: 'Falha no login',
       errorDescription: 'Credenciais inválidas. Tente novamente.',
+      interpreterRegisterTitle: 'Quase lá!',
+      interpreterRegisterDescription:
+        'Recebemos seu cadastro como intérprete. Nossa equipe fará a validação dos dados e, após aprovação, você poderá acessar sua conta.\n\nAvisaremos por e-mail quando estiver tudo pronto.',
     },
   },
 
@@ -129,6 +132,10 @@ export const Strings = {
     tabBar: 'Início',
     welcome: 'Olá, {User}!',
     nextAppointments: 'Próximos agendamentos',
+    banner: {
+      interpreter: 'Complete o seu perfil profissional',
+      person: 'Complete o seu perfil',
+    },
   },
 
   profile: {
@@ -203,6 +210,12 @@ export const Strings = {
       errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
       successTitle: 'Perfil atualizado com sucesso!',
       successDescription: 'As alterações foram salvas.',
+      scheduleErrorTitle: 'Erro ao atualizar horários',
+      scheduleErrorDescription:
+        'Verifique os horários preenchidos. Tente novamente.',
+      emailChangedTitle: 'Conta atualizada com sucesso!',
+      emailChangedDescription:
+        'Necessário realizar login novamente. Por favor, entre com suas novas credenciais.',
     },
   },
 
