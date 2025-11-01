@@ -12,6 +12,8 @@ export const ApiRoutes = {
     login: '/auth/login',
     logout: '/auth/logout',
     refreshToken: '/auth/refresh',
+    passwordResetEmail: (email: string) => `/email/password-reset/${email}`,
+    recoverPassword: '/auth/recover-password',
   },
   person: {
     base: '/person',
@@ -85,4 +87,8 @@ export const ApiRoutes = {
       `/ratings?interpreterId=${interpreterId}`,
     create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
-} as const;
+  email: {
+    passwordReset: (email: string) =>
+      `/email/password-reset/${encodeURIComponent(email)}`,
+  },
+  } as const;
