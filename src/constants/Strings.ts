@@ -108,22 +108,76 @@ export const Strings = {
   },
 
   auth: {
-    login: 'Login',
-    slogan: 'Interpretando o mundo, aproximando pessoas',
-    signIn: 'Entrar',
-    register: 'Cadastrar',
-    forgotPassword: 'Esqueci a senha',
-    signUpPrefix: 'Ainda não possui conta?',
-    signUpAction: 'Criar conta',
-    sessionExpired: 'Sessão Expirada',
-    sessionExpiredMessage:
-      'Sua sessão expirou. Você será redirecionado para o login.',
+  login: 'Login',
+  slogan: 'Interpretando o mundo, aproximando pessoas',
+  signIn: 'Entrar',
+  register: 'Cadastrar',
+  forgotPassword: 'Esqueci a senha',
+  signUpPrefix: 'Ainda não possui conta?',
+  signUpAction: 'Criar conta',
+  sessionExpired: 'Sessão Expirada',
+  sessionExpiredMessage:
+    'Sua sessão expirou. Você será redirecionado para o login.',
 
-    toast: {
-      errorTitle: 'Falha no login',
-      errorDescription: 'Credenciais inválidas. Tente novamente.',
-    },
+  toast: {
+    errorTitle: 'Falha no login',
+    errorDescription: 'Credenciais inválidas. Tente novamente.',
   },
+
+  // Fluxo de Redefinição de Senha
+  reset: {
+    title: 'REDEFINIR SENHA',
+    step: 'Etapa',
+    of: 'de',
+
+    // Passo 1
+    forgotTitle: 'Esqueceu sua senha?',
+    forgotDesc:
+      'Não se preocupe! Informe abaixo seu e-mail cadastrado para enviarmos o código de autenticação.',
+    sendCodeCta: 'Enviar código',
+    invalidEmailTitle: 'E-mail inválido',
+    invalidEmailDesc: 'Informe um e-mail válido para continuar.',
+    emailSentTitle: 'Código enviado',
+    emailSentDesc: 'Confira sua caixa de entrada.',
+    emailFailedTitle: 'Não foi possível enviar',
+    emailFailedDesc: 'Tente novamente em instantes.',
+
+    // Passo 2
+    authTitle: 'Autenticação',
+    authDesc:
+      'Quase lá! Verifique sua caixa de entrada e informe o código enviado.',
+    codeLabel: 'Código',
+    codePlaceholder: 'Digite o código recebido',
+    codeHint: 'Apenas números são permitidos.',
+    verifyCta: 'Verificar',
+    resend: 'Reenviar código',
+    resendIn: 'Reenviar em',
+    resendTitle: 'Código reenviado',
+    resendDesc: 'Verifique seu e-mail novamente.',
+    resendFailedTitle: 'Falha ao reenviar',
+    resendFailedDesc: 'Aguarde um pouco e tente novamente.',
+    tokenMissingTitle: 'Informe o código',
+    tokenMissingDesc: 'Digite o código recebido no e-mail.',
+
+    // Passo 3
+    redefineTitle: 'Redefinir',
+    redefineDesc: 'Defina sua nova senha.',
+    newPwdLabel: 'Nova senha',
+    newPwdPlaceholder: 'Digite a nova senha',
+    confirmPwdLabel: 'Confirmar senha',
+    confirmPwdPlaceholder: 'Repita a nova senha',
+    saveCta: 'Salvar',
+    pwdMissingTitle: 'Campos obrigatórios',
+    pwdMissingDesc: 'Preencha e confirme sua nova senha.',
+    pwdMismatchTitle: 'Senhas não conferem',
+    pwdMismatchDesc: 'As duas senhas devem ser iguais.',
+    successTitle: 'Senha atualizada',
+    successDesc: 'Faça login com sua nova senha.',
+    failedTitle: 'Não foi possível redefinir',
+    failedDesc: 'Verifique o código e tente novamente.',
+  },
+},
+
 
   home: {
     tabBar: 'Início',

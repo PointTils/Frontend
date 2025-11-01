@@ -27,6 +27,7 @@ const MIN_PASSWORD = 8;
 export default function ResetPasswordScreen() {
   const colors = useColors();
 
+  // Query params: suporta deep link /reset-password?token=...&email=...
   const { token: tokenFromUrl, email: emailFromUrl } = useLocalSearchParams<{
     token?: string;
     email?: string;
@@ -41,18 +42,24 @@ export default function ResetPasswordScreen() {
   const [showPwd2, setShowPwd2] = useState(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
+  // POST para enviar o código
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
-    ApiRoutes.auth.passwordResetEmail
+    // se vc depois criar no ApiRoutes:
+    // auth: { passwordResetEmail: (email) => `/v1/email/password-reset/${email}` }
+    ApiRoutes?.auth?.passwordResetEmail
       ? ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || ''))
       : `/v1/email/password-reset/${encodeURIComponent(email || '')}`,
   );
 
+  // POST para redefinir
   const { post: recoverPassword, loading: recovering } = useApiPost(
-    ApiRoutes.auth.recoverPassword ?? '/v1/auth/recover-password',
+    // idem: se tiver ApiRoutes.auth.recoverPassword, usa ele
+    ApiRoutes?.auth?.recoverPassword ?? '/v1/auth/recover-password',
   );
 
   const isLoading = sendingEmail || recovering;
 
+  // se veio via link com token, pula pra etapa 3
   useEffect(() => {
     if (tokenFromUrl && typeof tokenFromUrl === 'string' && tokenFromUrl.length > 0) {
       setResetToken(tokenFromUrl as string);
@@ -60,6 +67,7 @@ export default function ResetPasswordScreen() {
     }
   }, [tokenFromUrl]);
 
+  // cooldown do reenvio
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
@@ -70,6 +78,7 @@ export default function ResetPasswordScreen() {
     router.replace('/login' as any);
   };
 
+  // ========== AÇÕES ==========
   const handleSendCode = async () => {
     if (!email || !email.includes('@')) {
       Toast.show({
@@ -141,6 +150,7 @@ export default function ResetPasswordScreen() {
   const handleRecover = async () => {
     const clean = (resetToken || '').trim();
 
+    // 1) precisa do token de 6 dígitos
     if (clean.length !== TOKEN_LENGTH) {
       Toast.show({
         type: 'error',
@@ -151,6 +161,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
+    // 2) precisa preencher as senhas
     if (!newPassword || !confirmPassword) {
       Toast.show({
         type: 'error',
@@ -161,6 +172,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
+    // 3) mínimo 8 chars
     if (newPassword.length < MIN_PASSWORD) {
       Toast.show({
         type: 'error',
@@ -171,6 +183,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
+    // 4) senhas iguais
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
@@ -182,6 +195,7 @@ export default function ResetPasswordScreen() {
     }
 
     try {
+      // 5) monta o corpo esperado pelo backend
       const body = {
         resetToken: clean,
         newPassword,
@@ -196,11 +210,14 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'success',
         text1: Strings?.auth?.reset?.successTitle ?? 'Senha atualizada',
-        text2: resp?.message || (Strings?.auth?.reset?.successDesc ?? 'Faça login com sua nova senha.'),
+        text2:
+          resp?.message ||
+          (Strings?.auth?.reset?.successDesc ?? 'Faça login com sua nova senha.'),
         position: 'top',
         visibilityTime: 1800,
       });
 
+      // limpar tudo e mandar pro login
       setNewPassword('');
       setConfirmPassword('');
       setResetToken('');
@@ -224,12 +241,14 @@ export default function ResetPasswordScreen() {
     }
   };
 
+  // ========== RENDER ==========
   const Title = useMemo(() => Strings?.auth?.reset?.title ?? 'REDEFINIR SENHA', []);
 
   function StepIndicator({ n }: { n: Step }) {
     return (
       <Text className="text-typography-500 font-ifood-regular mb-2">
-        {(Strings?.auth?.reset?.step ?? 'Etapa')} {n} {(Strings?.auth?.reset?.of ?? 'de')} 3
+        {(Strings?.auth?.reset?.step ?? 'Etapa')} {n}{' '}
+        {(Strings?.auth?.reset?.of ?? 'de')} 3
       </Text>
     );
   }
@@ -251,6 +270,7 @@ export default function ResetPasswordScreen() {
         <Header title={Title} showBackButton handleBack={handleBack} />
       </View>
 
+      {/* padding superior */}
       <View className="w-full h-6" />
 
       <ScrollView
@@ -258,6 +278,7 @@ export default function ResetPasswordScreen() {
         contentContainerClassName="grow px-6 pb-4 pt-2"
         showsVerticalScrollIndicator={false}
       >
+        {/* STEP 1 — EMAIL */}
         {step === 1 && (
           <View className="w-full">
             <StepIndicator n={1} />
@@ -306,6 +327,7 @@ export default function ResetPasswordScreen() {
           </View>
         )}
 
+        {/* STEP 2 — TOKEN */}
         {step === 2 && (
           <View className="w-full">
             <StepIndicator n={2} />
@@ -334,7 +356,8 @@ export default function ResetPasswordScreen() {
             </Input>
 
             <Text className="text-typography-500 mt-1 mb-4">
-              {Strings?.auth?.reset?.codeHint ?? `Apenas números são permitidos. (${TOKEN_LENGTH} dígitos)`}
+              {Strings?.auth?.reset?.codeHint ??
+                `Apenas números são permitidos. (${TOKEN_LENGTH} dígitos)`}
             </Text>
 
             <TouchableOpacity
@@ -350,12 +373,15 @@ export default function ResetPasswordScreen() {
                 />
                 <Text
                   className={`font-ifood-regular ${
-                    resendCooldown > 0 ? 'text-typography-400' : 'text-primary-blue-light'
+                    resendCooldown > 0
+                      ? 'text-typography-400'
+                      : 'text-primary-blue-light'
                   }`}
                 >
                   {resendCooldown > 0
-                    ? (Strings?.auth?.reset?.resendIn ?? 'Reenviar em') + ` ${resendCooldown}s`
-                    : (Strings?.auth?.reset?.resend ?? 'Reenviar código')}
+                    ? (Strings?.auth?.reset?.resendIn ?? 'Reenviar em') +
+                      ` ${resendCooldown}s`
+                    : Strings?.auth?.reset?.resend ?? 'Reenviar código'}
                 </Text>
               </RNView>
             </TouchableOpacity>
@@ -382,6 +408,7 @@ export default function ResetPasswordScreen() {
           </View>
         )}
 
+        {/* STEP 3 — NOVA SENHA */}
         {step === 3 && (
           <View className="w-full">
             <StepIndicator n={3} />
@@ -392,6 +419,7 @@ export default function ResetPasswordScreen() {
               {Strings?.auth?.reset?.redefineDesc ?? 'Defina sua nova senha.'}
             </Text>
 
+            {/* se não veio token no link, mostra o input */}
             {!tokenFromUrl && (
               <>
                 <Text className="font-ifood-medium mb-2">
@@ -422,8 +450,15 @@ export default function ResetPasswordScreen() {
                 secureTextEntry={!showPwd1}
                 autoCapitalize="none"
               />
-              <Pressable onPress={() => setShowPwd1((s) => !s)} className="absolute right-3 top-3">
-                {showPwd1 ? <EyeOff size={18} color={colors.text} /> : <Eye size={18} color={colors.text} />}
+              <Pressable
+                onPress={() => setShowPwd1((s) => !s)}
+                className="absolute right-3 top-3"
+              >
+                {showPwd1 ? (
+                  <EyeOff size={18} color={colors.text} />
+                ) : (
+                  <Eye size={18} color={colors.text} />
+                )}
               </Pressable>
             </Input>
 
@@ -438,8 +473,15 @@ export default function ResetPasswordScreen() {
                 secureTextEntry={!showPwd2}
                 autoCapitalize="none"
               />
-              <Pressable onPress={() => setShowPwd2((s) => !s)} className="absolute right-3 top-3">
-                {showPwd2 ? <EyeOff size={18} color={colors.text} /> : <Eye size={18} color={colors.text} />}
+              <Pressable
+                onPress={() => setShowPwd2((s) => !s)}
+                className="absolute right-3 top-3"
+              >
+                {showPwd2 ? (
+                  <EyeOff size={18} color={colors.text} />
+                ) : (
+                  <Eye size={18} color={colors.text} />
+                )}
               </Pressable>
             </Input>
 

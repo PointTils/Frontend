@@ -206,6 +206,7 @@ export default function LoginScreen() {
           onPress={() => {
             console.warn('Navegar para recuperação de senha');
             clearErrors();
+            router.push('/reset-password');
           }}
         >
           <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark">
