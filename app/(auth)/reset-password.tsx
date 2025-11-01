@@ -3,22 +3,30 @@ import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { Input, InputField, InputIcon } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, RotateCcw } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, TouchableOpacity, View as RNView } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  TouchableOpacity,
+  View as RNView,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
-
 type Step = 1 | 2 | 3;
+
+const TOKEN_LENGTH = 6;
+const MIN_PASSWORD = 8;
 
 export default function ResetPasswordScreen() {
   const colors = useColors();
 
-  // Query params: suporta deep link /reset-password?token=...&email=...
   const { token: tokenFromUrl, email: emailFromUrl } = useLocalSearchParams<{
     token?: string;
     email?: string;
@@ -33,17 +41,18 @@ export default function ResetPasswordScreen() {
   const [showPwd2, setShowPwd2] = useState(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
-  // POST /v1/email/password-reset/{email}
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
-    `/v1/email/password-reset/${encodeURIComponent(email || '')}`,
+    ApiRoutes.auth.passwordResetEmail
+      ? ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || ''))
+      : `/v1/email/password-reset/${encodeURIComponent(email || '')}`,
   );
 
-  // POST /v1/auth/recover-password { resetToken, newPassword }
-  const { post: recoverPassword, loading: recovering } = useApiPost('/v1/auth/recover-password');
+  const { post: recoverPassword, loading: recovering } = useApiPost(
+    ApiRoutes.auth.recoverPassword ?? '/v1/auth/recover-password',
+  );
 
   const isLoading = sendingEmail || recovering;
 
-  // Deep link: se vier token, pula pra etapa 3
   useEffect(() => {
     if (tokenFromUrl && typeof tokenFromUrl === 'string' && tokenFromUrl.length > 0) {
       setResetToken(tokenFromUrl as string);
@@ -51,7 +60,6 @@ export default function ResetPasswordScreen() {
     }
   }, [tokenFromUrl]);
 
-  // Cooldown de 60s pro reenvio
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
@@ -62,7 +70,6 @@ export default function ResetPasswordScreen() {
     router.replace('/login' as any);
   };
 
-  // ---------- Ações ----------
   const handleSendCode = async () => {
     if (!email || !email.includes('@')) {
       Toast.show({
@@ -75,7 +82,7 @@ export default function ResetPasswordScreen() {
     }
 
     try {
-      await sendResetEmail(undefined as any); // sem body
+      await sendResetEmail(undefined as any);
       Toast.show({
         type: 'success',
         text1: Strings?.auth?.reset?.emailSentTitle ?? 'Código enviado',
@@ -84,7 +91,7 @@ export default function ResetPasswordScreen() {
         visibilityTime: 2000,
       });
       setStep(2);
-      setResendCooldown(60); // cooldown de 60s
+      setResendCooldown(60);
     } catch {
       Toast.show({
         type: 'error',
@@ -118,11 +125,12 @@ export default function ResetPasswordScreen() {
   };
 
   const handleGoToStep3 = () => {
-    if (!resetToken || resetToken.length === 0) {
+    const clean = (resetToken || '').trim();
+    if (clean.length !== TOKEN_LENGTH) {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.tokenMissingTitle ?? 'Informe o código',
-        text2: Strings?.auth?.reset?.tokenMissingDesc ?? 'Digite o código recebido no e-mail.',
+        text2: `Digite o código de ${TOKEN_LENGTH} dígitos enviado no e-mail.`,
         position: 'top',
       });
       return;
@@ -131,15 +139,18 @@ export default function ResetPasswordScreen() {
   };
 
   const handleRecover = async () => {
-    if (!resetToken) {
+    const clean = (resetToken || '').trim();
+
+    if (clean.length !== TOKEN_LENGTH) {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.tokenMissingTitle ?? 'Informe o código',
-        text2: Strings?.auth?.reset?.tokenMissingDesc ?? 'Digite o código recebido no e-mail.',
+        text2: `Digite o código de ${TOKEN_LENGTH} dígitos enviado no e-mail.`,
         position: 'top',
       });
       return;
     }
+
     if (!newPassword || !confirmPassword) {
       Toast.show({
         type: 'error',
@@ -149,16 +160,17 @@ export default function ResetPasswordScreen() {
       });
       return;
     }
-    // JOÃO — validação de tamanho mínimo da nova senha
-    if (newPassword.length < 8) {
+
+    if (newPassword.length < MIN_PASSWORD) {
       Toast.show({
         type: 'error',
         text1: 'Senha muito curta',
-        text2: 'A senha deve ter pelo menos 8 caracteres.',
+        text2: `A senha deve ter pelo menos ${MIN_PASSWORD} caracteres.`,
         position: 'top',
       });
       return;
     }
+
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
@@ -170,16 +182,21 @@ export default function ResetPasswordScreen() {
     }
 
     try {
-      const body = { resetToken, newPassword };
-      const resp = await recoverPassword(body as any);
+      const body = {
+        resetToken: clean,
+        newPassword,
+      };
 
-      const success = (resp as any)?.success ?? true;
-      if (!success) throw new Error((resp as any)?.message || 'recover-failed');
+      const resp: any = await recoverPassword(body as any);
+      const ok = resp?.success ?? true;
+      if (!ok) {
+        throw new Error(resp?.message || 'Não foi possível redefinir a senha.');
+      }
 
       Toast.show({
         type: 'success',
         text1: Strings?.auth?.reset?.successTitle ?? 'Senha atualizada',
-        text2: Strings?.auth?.reset?.successDesc ?? 'Faça login com sua nova senha.',
+        text2: resp?.message || (Strings?.auth?.reset?.successDesc ?? 'Faça login com sua nova senha.'),
         position: 'top',
         visibilityTime: 1800,
       });
@@ -190,22 +207,24 @@ export default function ResetPasswordScreen() {
       setEmail('');
       router.replace('/login' as any);
     } catch (e: any) {
+      const msg =
+        e?.message && typeof e.message === 'string'
+          ? e.message
+          : Strings?.auth?.reset?.failedDesc ?? 'Verifique o código e tente novamente.';
+
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.failedTitle ?? 'Não foi possível redefinir',
-        text2:
-          (e?.message && typeof e.message === 'string')
-            ? e.message
-            : (Strings?.auth?.reset?.failedDesc ?? 'Verifique o código e tente novamente.'),
+        text2: msg,
         position: 'top',
       });
+
       setNewPassword('');
       setConfirmPassword('');
     }
   };
 
-  // ---------- Renders de cada etapa ----------
-  const Title = useMemo(() => (Strings?.auth?.reset?.title ?? 'REDEFINIR SENHA'), []);
+  const Title = useMemo(() => Strings?.auth?.reset?.title ?? 'REDEFINIR SENHA', []);
 
   function StepIndicator({ n }: { n: Step }) {
     return (
@@ -232,7 +251,6 @@ export default function ResetPasswordScreen() {
         <Header title={Title} showBackButton handleBack={handleBack} />
       </View>
 
-      {/* padding superior para alinhar como no teu padrão */}
       <View className="w-full h-6" />
 
       <ScrollView
@@ -240,7 +258,6 @@ export default function ResetPasswordScreen() {
         contentContainerClassName="grow px-6 pb-4 pt-2"
         showsVerticalScrollIndicator={false}
       >
-        {/* STEP 1 — EMAIL */}
         {step === 1 && (
           <View className="w-full">
             <StepIndicator n={1} />
@@ -256,7 +273,6 @@ export default function ResetPasswordScreen() {
               {Strings.common.fields.email}
             </Text>
 
-            {/* Input de e-mail (gluestack-style) */}
             <Input className="mb-2">
               <InputIcon as={Mail} />
               <InputField
@@ -290,7 +306,6 @@ export default function ResetPasswordScreen() {
           </View>
         )}
 
-        {/* STEP 2 — TOKEN */}
         {step === 2 && (
           <View className="w-full">
             <StepIndicator n={2} />
@@ -306,19 +321,20 @@ export default function ResetPasswordScreen() {
               {Strings?.auth?.reset?.codeLabel ?? 'Código'}
             </Text>
 
-            {/* Input de token */}
             <Input className="mb-1">
               <InputField
                 value={resetToken}
-                onChangeText={(v: string) => setResetToken(v.trim())}
+                onChangeText={(v: string) =>
+                  setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
+                }
                 placeholder={Strings?.auth?.reset?.codePlaceholder ?? 'Digite o código recebido'}
-                keyboardType="default" // mude para "numeric" se o token for numérico
+                keyboardType="numeric"
                 autoCapitalize="none"
               />
             </Input>
 
             <Text className="text-typography-500 mt-1 mb-4">
-              {Strings?.auth?.reset?.codeHint ?? 'Apenas números são permitidos (se aplicável).'}
+              {Strings?.auth?.reset?.codeHint ?? `Apenas números são permitidos. (${TOKEN_LENGTH} dígitos)`}
             </Text>
 
             <TouchableOpacity
@@ -333,7 +349,9 @@ export default function ResetPasswordScreen() {
                   color={resendCooldown > 0 ? colors.disabled : colors.primaryBlue}
                 />
                 <Text
-                  className={`font-ifood-regular ${resendCooldown > 0 ? 'text-typography-400' : 'text-primary-blue-light'}`}
+                  className={`font-ifood-regular ${
+                    resendCooldown > 0 ? 'text-typography-400' : 'text-primary-blue-light'
+                  }`}
                 >
                   {resendCooldown > 0
                     ? (Strings?.auth?.reset?.resendIn ?? 'Reenviar em') + ` ${resendCooldown}s`
@@ -346,7 +364,7 @@ export default function ResetPasswordScreen() {
               <Button
                 size="md"
                 onPress={handleGoToStep3}
-                disabled={!resetToken}
+                disabled={resetToken.trim().length !== TOKEN_LENGTH}
                 className="data-[active=true]:bg-primary-orange-press-light"
               >
                 <ButtonIcon as={Lock} className="text-white" />
@@ -364,7 +382,6 @@ export default function ResetPasswordScreen() {
           </View>
         )}
 
-        {/* STEP 3 — NOVA SENHA */}
         {step === 3 && (
           <View className="w-full">
             <StepIndicator n={3} />
@@ -375,7 +392,6 @@ export default function ResetPasswordScreen() {
               {Strings?.auth?.reset?.redefineDesc ?? 'Defina sua nova senha.'}
             </Text>
 
-            {/* Token (pode ficar oculto se veio via deep link) */}
             {!tokenFromUrl && (
               <>
                 <Text className="font-ifood-medium mb-2">
@@ -384,8 +400,11 @@ export default function ResetPasswordScreen() {
                 <Input className="mb-4">
                   <InputField
                     value={resetToken}
-                    onChangeText={(v: string) => setResetToken(v.trim())}
+                    onChangeText={(v: string) =>
+                      setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
+                    }
                     placeholder={Strings?.auth?.reset?.codePlaceholder ?? 'Digite o código recebido'}
+                    keyboardType="numeric"
                     autoCapitalize="none"
                   />
                 </Input>
@@ -428,7 +447,12 @@ export default function ResetPasswordScreen() {
               <Button
                 size="md"
                 onPress={handleRecover}
-                disabled={!resetToken || !newPassword || !confirmPassword || recovering}
+                disabled={
+                  resetToken.trim().length !== TOKEN_LENGTH ||
+                  !newPassword ||
+                  !confirmPassword ||
+                  recovering
+                }
                 className="data-[active=true]:bg-primary-orange-press-light"
               >
                 <ButtonIcon as={Lock} className="text-white" />
