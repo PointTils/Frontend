@@ -44,7 +44,6 @@ export default function FeedbackModal({
   appointmentId,
   interpreterName,
 }: FeedbackModalProps) {
-  const { user } = useAuth();
   const colors = useColors();
 
   const [details, setDetails] = useState('');
