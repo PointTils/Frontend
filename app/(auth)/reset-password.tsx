@@ -149,6 +149,16 @@ export default function ResetPasswordScreen() {
       });
       return;
     }
+    // JOÃO — validação de tamanho mínimo da nova senha
+    if (newPassword.length < 8) {
+      Toast.show({
+        type: 'error',
+        text1: 'Senha muito curta',
+        text2: 'A senha deve ter pelo menos 8 caracteres.',
+        position: 'top',
+      });
+      return;
+    }
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
