@@ -3,17 +3,19 @@ export interface Rating {
   stars: number;
   description: string;
   date: string;
-  user: {
+  appointment: {
     id: string;
-    name: string;
-    picture: string;
+    modality: string;
+    status: string;
+    interpreter_id: string;
+    user_id: string;
   };
 }
 
 export interface RatingRequest {
   stars: number;
   description?: string | null;
-  user_id: string;
+  appointmentId: string;
 }
 
 export interface RatingsResponse {
