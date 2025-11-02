@@ -40,7 +40,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
-import { registerForPushNotificationsAsync } from '@/src/services/notifications';
+import { registerForPushNotificationsAsync } from '@/src/services/notificationService';
 import DeviceInfo from 'react-native-device-info';
 
 export default function LoginScreen() {
@@ -109,6 +109,33 @@ export default function LoginScreen() {
     },
   });
 
+  // Register device for push notifications after login
+  useEffect(() => {
+    if (currentUser && !isLoggingIn) {
+      const registerDevice = async () => {
+        try {
+          console.log('Registrando dispositivo para notificações push...');
+          const expoToken = await registerForPushNotificationsAsync();
+          console.log('Expo Push Token:', expoToken);
+          if (expoToken) {
+            const deviceId = await DeviceInfo.getUniqueId();
+            await registerToken({
+              token: expoToken,
+              platform: Platform.OS,
+              userId: currentUser.id,
+              device_id: deviceId,
+            });
+          }
+        } catch (err) {
+          console.log(await DeviceInfo.getUniqueId());
+          console.warn('Falha ao registrar push token:', err);
+        }
+      };
+
+      registerDevice();
+    }
+  }, [currentUser, isLoggingIn]);
+
   async function handleLogin() {
     if (!validateForm()) {
       return;
@@ -120,22 +147,6 @@ export default function LoginScreen() {
     };
 
     await login(data);
-
-    if (currentUser) {
-      const expoToken = await registerForPushNotificationsAsync();
-      if (expoToken) {
-        const deviceId = await DeviceInfo.getUniqueId();
-
-        const payload: RegisterTokenPayload = {
-          token: expoToken,
-          platform: 'android',
-          user_id: currentUser.id,
-          device_id: deviceId,
-        };
-
-        await registerToken(payload);
-      }
-    }
   }
 
   return (

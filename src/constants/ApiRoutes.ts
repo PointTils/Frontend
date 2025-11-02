@@ -13,6 +13,9 @@ export const ApiRoutes = {
     logout: '/auth/logout',
     refreshToken: '/auth/refresh',
   },
+  userApps: {
+    base: '/user-apps',
+  },
   person: {
     base: '/person',
     register: '/person/register',

@@ -10,7 +10,9 @@
     "build:prod": "eas build --platform android --profile production",
     "lint": "expo lint",
     "format:check": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/html-elements": "^0.13.7",
@@ -30,6 +32,8 @@
     "@legendapp/motion": "^2.4.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
+    "@react-native-firebase/app": "^23.5.0",
+    "@react-native-firebase/messaging": "^23.5.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
