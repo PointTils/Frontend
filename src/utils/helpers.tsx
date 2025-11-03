@@ -107,6 +107,9 @@ export const buildRegisterPayload = (
         cpf: fields.cpf.value.replace(/\D/g, ''),
         professional_data: {
           cnpj: fields.cnpj.value ? fields.cnpj.value.replace(/\D/g, '') : null,
+          video_url: fields.videoUrl.value
+            ? fields.videoUrl.value.trim()
+            : null,
         },
       };
     default:
@@ -154,6 +157,9 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
+          video_url: fields.videoUrl.value
+            ? fields.videoUrl.value.trim()
+            : null,
         },
       };
     default:

@@ -72,6 +72,7 @@ export const Strings = {
       start: 'Início',
       end: 'Fim',
       uploadFile: 'Adicionar arquivo',
+      videoUrl: 'Vídeo de apresentação',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
