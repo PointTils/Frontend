@@ -47,7 +47,6 @@ export default function ResetPasswordScreen() {
     ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || '')),
   );
 
-
   // POST para redefinir
   const { post: recoverPassword, loading: recovering } = useApiPost(
     // idem: se tiver ApiRoutes.auth.recoverPassword, usa ele
@@ -58,7 +57,11 @@ export default function ResetPasswordScreen() {
 
   // se veio via link com token, pula pra etapa 3
   useEffect(() => {
-    if (tokenFromUrl && typeof tokenFromUrl === 'string' && tokenFromUrl.length > 0) {
+    if (
+      tokenFromUrl &&
+      typeof tokenFromUrl === 'string' &&
+      tokenFromUrl.length > 0
+    ) {
       setResetToken(tokenFromUrl as string);
       setStep(3);
     }
@@ -67,7 +70,10 @@ export default function ResetPasswordScreen() {
   // cooldown do reenvio
   useEffect(() => {
     if (resendCooldown <= 0) return;
-    const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    const t = setInterval(
+      () => setResendCooldown((s) => Math.max(0, s - 1)),
+      1000,
+    );
     return () => clearInterval(t);
   }, [resendCooldown]);
 
@@ -81,7 +87,9 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.invalidEmailTitle ?? 'E-mail inválido',
-        text2: Strings?.auth?.reset?.invalidEmailDesc ?? 'Informe um e-mail válido para continuar.',
+        text2:
+          Strings?.auth?.reset?.invalidEmailDesc ??
+          'Informe um e-mail válido para continuar.',
         position: 'top',
       });
       return;
@@ -92,7 +100,9 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'success',
         text1: Strings?.auth?.reset?.emailSentTitle ?? 'Código enviado',
-        text2: Strings?.auth?.reset?.emailSentDesc ?? 'Confira sua caixa de entrada.',
+        text2:
+          Strings?.auth?.reset?.emailSentDesc ??
+          'Confira sua caixa de entrada.',
         position: 'top',
         visibilityTime: 2000,
       });
@@ -101,8 +111,11 @@ export default function ResetPasswordScreen() {
     } catch {
       Toast.show({
         type: 'error',
-        text1: Strings?.auth?.reset?.emailFailedTitle ?? 'Não foi possível enviar',
-        text2: Strings?.auth?.reset?.emailFailedDesc ?? 'Tente novamente em instantes.',
+        text1:
+          Strings?.auth?.reset?.emailFailedTitle ?? 'Não foi possível enviar',
+        text2:
+          Strings?.auth?.reset?.emailFailedDesc ??
+          'Tente novamente em instantes.',
         position: 'top',
       });
     }
@@ -115,7 +128,8 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'success',
         text1: Strings?.auth?.reset?.resendTitle ?? 'Código reenviado',
-        text2: Strings?.auth?.reset?.resendDesc ?? 'Verifique seu e-mail novamente.',
+        text2:
+          Strings?.auth?.reset?.resendDesc ?? 'Verifique seu e-mail novamente.',
         position: 'top',
         visibilityTime: 1500,
       });
@@ -124,7 +138,9 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.resendFailedTitle ?? 'Falha ao reenviar',
-        text2: Strings?.auth?.reset?.resendFailedDesc ?? 'Aguarde um pouco e tente novamente.',
+        text2:
+          Strings?.auth?.reset?.resendFailedDesc ??
+          'Aguarde um pouco e tente novamente.',
         position: 'top',
       });
     }
@@ -163,7 +179,9 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.pwdMissingTitle ?? 'Campos obrigatórios',
-        text2: Strings?.auth?.reset?.pwdMissingDesc ?? 'Preencha e confirme sua nova senha.',
+        text2:
+          Strings?.auth?.reset?.pwdMissingDesc ??
+          'Preencha e confirme sua nova senha.',
         position: 'top',
       });
       return;
@@ -185,7 +203,9 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: 'error',
         text1: Strings?.auth?.reset?.pwdMismatchTitle ?? 'Senhas não conferem',
-        text2: Strings?.auth?.reset?.pwdMismatchDesc ?? 'As duas senhas devem ser iguais.',
+        text2:
+          Strings?.auth?.reset?.pwdMismatchDesc ??
+          'As duas senhas devem ser iguais.',
         position: 'top',
       });
       return;
@@ -209,7 +229,8 @@ export default function ResetPasswordScreen() {
         text1: Strings?.auth?.reset?.successTitle ?? 'Senha atualizada',
         text2:
           resp?.message ||
-          (Strings?.auth?.reset?.successDesc ?? 'Faça login com sua nova senha.'),
+          (Strings?.auth?.reset?.successDesc ??
+            'Faça login com sua nova senha.'),
         position: 'top',
         visibilityTime: 1800,
       });
@@ -224,11 +245,13 @@ export default function ResetPasswordScreen() {
       const msg =
         e?.message && typeof e.message === 'string'
           ? e.message
-          : Strings?.auth?.reset?.failedDesc ?? 'Verifique o código e tente novamente.';
+          : (Strings?.auth?.reset?.failedDesc ??
+            'Verifique o código e tente novamente.');
 
       Toast.show({
         type: 'error',
-        text1: Strings?.auth?.reset?.failedTitle ?? 'Não foi possível redefinir',
+        text1:
+          Strings?.auth?.reset?.failedTitle ?? 'Não foi possível redefinir',
         text2: msg,
         position: 'top',
       });
@@ -239,13 +262,16 @@ export default function ResetPasswordScreen() {
   };
 
   // ========== RENDER ==========
-  const Title = useMemo(() => Strings?.auth?.reset?.title ?? 'REDEFINIR SENHA', []);
+  const Title = useMemo(
+    () => Strings?.auth?.reset?.title ?? 'REDEFINIR SENHA',
+    [],
+  );
 
   function StepIndicator({ n }: { n: Step }) {
     return (
       <Text className="text-typography-500 font-ifood-regular mb-2">
-        {(Strings?.auth?.reset?.step ?? 'Etapa')} {n}{' '}
-        {(Strings?.auth?.reset?.of ?? 'de')} 3
+        {Strings?.auth?.reset?.step ?? 'Etapa'} {n}{' '}
+        {Strings?.auth?.reset?.of ?? 'de'} 3
       </Text>
     );
   }
@@ -346,7 +372,10 @@ export default function ResetPasswordScreen() {
                 onChangeText={(v: string) =>
                   setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
                 }
-                placeholder={Strings?.auth?.reset?.codePlaceholder ?? 'Digite o código recebido'}
+                placeholder={
+                  Strings?.auth?.reset?.codePlaceholder ??
+                  'Digite o código recebido'
+                }
                 keyboardType="numeric"
                 autoCapitalize="none"
               />
@@ -366,7 +395,9 @@ export default function ResetPasswordScreen() {
               <RNView className="flex-row items-center gap-2">
                 <RotateCcw
                   size={18}
-                  color={resendCooldown > 0 ? colors.disabled : colors.primaryBlue}
+                  color={
+                    resendCooldown > 0 ? colors.disabled : colors.primaryBlue
+                  }
                 />
                 <Text
                   className={`font-ifood-regular ${
@@ -378,7 +409,7 @@ export default function ResetPasswordScreen() {
                   {resendCooldown > 0
                     ? (Strings?.auth?.reset?.resendIn ?? 'Reenviar em') +
                       ` ${resendCooldown}s`
-                    : Strings?.auth?.reset?.resend ?? 'Reenviar código'}
+                    : (Strings?.auth?.reset?.resend ?? 'Reenviar código')}
                 </Text>
               </RNView>
             </TouchableOpacity>
@@ -426,9 +457,14 @@ export default function ResetPasswordScreen() {
                   <InputField
                     value={resetToken}
                     onChangeText={(v: string) =>
-                      setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
+                      setResetToken(
+                        v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH),
+                      )
                     }
-                    placeholder={Strings?.auth?.reset?.codePlaceholder ?? 'Digite o código recebido'}
+                    placeholder={
+                      Strings?.auth?.reset?.codePlaceholder ??
+                      'Digite o código recebido'
+                    }
                     keyboardType="numeric"
                     autoCapitalize="none"
                   />
@@ -443,7 +479,10 @@ export default function ResetPasswordScreen() {
               <InputField
                 value={newPassword}
                 onChangeText={(v: string) => setNewPassword(v)}
-                placeholder={Strings?.auth?.reset?.newPwdPlaceholder ?? 'Digite a nova senha'}
+                placeholder={
+                  Strings?.auth?.reset?.newPwdPlaceholder ??
+                  'Digite a nova senha'
+                }
                 secureTextEntry={!showPwd1}
                 autoCapitalize="none"
               />
@@ -466,7 +505,10 @@ export default function ResetPasswordScreen() {
               <InputField
                 value={confirmPassword}
                 onChangeText={(v: string) => setConfirmPassword(v)}
-                placeholder={Strings?.auth?.reset?.confirmPwdPlaceholder ?? 'Repita a nova senha'}
+                placeholder={
+                  Strings?.auth?.reset?.confirmPwdPlaceholder ??
+                  'Repita a nova senha'
+                }
                 secureTextEntry={!showPwd2}
                 autoCapitalize="none"
               />

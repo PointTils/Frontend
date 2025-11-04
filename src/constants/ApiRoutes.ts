@@ -91,4 +91,4 @@ export const ApiRoutes = {
     passwordReset: (email: string) =>
       `/email/password-reset/${encodeURIComponent(email)}`,
   },
-  } as const;
+} as const;

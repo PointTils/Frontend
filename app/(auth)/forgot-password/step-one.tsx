@@ -48,9 +48,10 @@ export default function ForgotPasswordStepOne() {
         visibilityTime: 2000,
       });
 
-      const toStepTwo = (`/(auth)/forgot-password/step-two?email=${encodeURIComponent(
-        email,
-      )}`) as Href;
+      const toStepTwo =
+        `/(auth)/forgot-password/step-two?email=${encodeURIComponent(
+          email,
+        )}` as Href;
       router.push(toStepTwo);
     } catch {
       Toast.show({

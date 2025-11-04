@@ -61,7 +61,10 @@ export default function ForgotPasswordStepThree() {
       Toast.show({
         type: 'error',
         text1: Strings.auth.reset.shortPwdTitle,
-        text2: Strings.auth.reset.shortPwdDesc.replace('{min}', String(MIN_PASSWORD)),
+        text2: Strings.auth.reset.shortPwdDesc.replace(
+          '{min}',
+          String(MIN_PASSWORD),
+        ),
         position: 'top',
       });
       return;
