@@ -13,7 +13,7 @@ export interface Rating {
 export interface RatingRequest {
   stars: number;
   description?: string | null;
-  user_id: string;
+  appointment_id: string;
 }
 
 export interface RatingsResponse {

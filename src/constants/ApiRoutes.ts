@@ -101,6 +101,5 @@ export const ApiRoutes = {
     base: '/ratings',
     byInterpreter: (interpreterId: string) =>
       `/ratings?interpreterId=${interpreterId}`,
-    create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
 } as const;
