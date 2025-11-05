@@ -19,7 +19,7 @@ import type {
   RatingsResponse,
 } from '@/src/types/api';
 import type { DateTimeSelection } from '@/src/types/ui';
-import { getSafeAvatarUri, showGenericErrorToast } from '@/src/utils/helpers';
+import { getSafeAvatarUri, showGenericErrorToast, getYouTubeId } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -42,6 +42,8 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
+
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 type TabKey = keyof typeof Strings.search.tabs;
 
@@ -118,6 +120,11 @@ export default function InterpreterDetails() {
   };
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
+
+  const rawUrl = interpreter.professional_data?.video_url;
+  const videoId = rawUrl ? getYouTubeId(rawUrl) : null;
+  const hasValidVideo = !!videoId;
+  const hasInvalidVideo = rawUrl && videoId === '';
 
   return (
     <>
@@ -225,6 +232,45 @@ export default function InterpreterDetails() {
               value={interpreter.professional_data?.description || undefined}
               valueColor="text-typography-600"
             />
+
+            {hasValidVideo && (
+              <View className="mt-4">
+                <InfoRow
+                  icon={<FileTextIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <View
+                  className="mt-2"
+                  overflown-hidden
+                  rounded-2x1
+                  border-typography-200
+                  dark:border-typography-700
+                >
+                  <View className="aspect-video">
+                    <YoutubePlayer
+                      height={undefined}
+                      width={undefined}
+                      videoId={videoId!}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {hasInvalidVideo && (
+               <View className="mt-4">
+              <InfoRow
+                icon={<FileTextIcon size={16} color={colors.text} />}
+                label={Strings.common.fields.videoUrl}
+                onlyLabel={true}
+              />
+              <Text className="mt-2 text-typography-400 text-sm">
+                {Strings.common.fields.videoUnavailable}
+              </Text>
+            </View>
+          )}
+
 
             <InfoRow
               icon={<InfoIcon size={16} color={colors.text} />}
