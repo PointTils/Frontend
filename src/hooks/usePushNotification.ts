@@ -47,11 +47,8 @@ async function registerForPushNotificationsAsync() {
     return null;
   }
 
-  const projectId =
-    Constants?.expoConfig?.extra?.eas?.projectId ??
-    Constants?.easConfig?.projectId;
-  const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-  console.log('Token Expo Push:', token);
+  const token = (await Notifications.getDevicePushTokenAsync()).data;
+  // console.log('Token Expo Push:', token);
 
   return token;
 }
