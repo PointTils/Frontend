@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
 import { Strings } from '@/src/constants/Strings';
+import * as Notifications from 'expo-notifications';
+import { useEffect, useState } from 'react';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -48,7 +47,6 @@ async function registerForPushNotificationsAsync() {
   }
 
   const token = (await Notifications.getDevicePushTokenAsync()).data;
-  // console.log('Token Expo Push:', token);
 
   return token;
 }

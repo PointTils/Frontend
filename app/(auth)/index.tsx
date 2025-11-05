@@ -19,8 +19,9 @@ import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
+import { usePushNotifications } from '@/src/hooks/usePushNotification';
 import type { LoginCredentials } from '@/src/types/api';
-import {
+import type {
   RegisterTokenPayload,
   RegisterTokenResponse,
 } from '@/src/types/api/notification';
@@ -39,9 +40,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import { Toast } from 'toastify-react-native';
-import { usePushNotifications } from '@/src/hooks/usePushNotification';
 import DeviceInfo from 'react-native-device-info';
+import { Toast } from 'toastify-react-native';
 
 export default function LoginScreen() {
   const { expoPushToken } = usePushNotifications();
@@ -70,10 +70,6 @@ export default function LoginScreen() {
       setInterpreterModalVisibility(true);
     }
   }, [registeredAsInterpreter]);
-
-  const registerNotificationTokenAPI = useApiPost<any, RegisterTokenPayload>(
-    ApiRoutes.userApps.base,
-  );
 
   useEffect(() => {
     if (loginError) {
@@ -113,10 +109,8 @@ export default function LoginScreen() {
   // Register device for push notifications after login
   useEffect(() => {
     if (currentUser && !isLoggingIn && expoPushToken) {
-      console.log(expoPushToken)
       const registerDevice = async () => {
         try {
-
           const deviceId = await DeviceInfo.getUniqueId();
 
           await registerToken({
@@ -126,14 +120,13 @@ export default function LoginScreen() {
             device_id: deviceId,
           });
         } catch (err) {
-          console.log(await DeviceInfo.getUniqueId());
           console.warn('Falha ao registrar push token:', err);
         }
       };
 
       registerDevice();
     }
-  }, [currentUser, isLoggingIn, expoPushToken]);
+  }, [currentUser, isLoggingIn, expoPushToken, registerToken]);
 
   async function handleLogin() {
     if (!validateForm()) {
