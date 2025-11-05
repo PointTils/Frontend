@@ -35,6 +35,7 @@ import {
   buildInvalidFieldError,
   buildRegisterPayload,
   buildRequiredFieldError,
+  buildDocumentFormData,
 } from '@/src/utils/helpers';
 import {
   formatDate,
@@ -97,6 +98,10 @@ export default function RegisterScreen() {
       setValue(key, ''),
     );
     setDate(new Date());
+
+    if (newType !== UserType.INTERPRETER) {
+      setDocument([]);
+    }
   };
 
   // Forms validation - verify each field based on user type
@@ -265,6 +270,20 @@ export default function RegisterScreen() {
         closeIconSize: 1, // To "hide" the close icon
       });
       return;
+    }
+
+    if (type === UserType.INTERPRETER && document?.length) {
+      try {
+        const interpreterId = result.data.id;
+        const formData = buildDocumentFormData(document);
+        const uploadApi = useApiPost(
+          ApiRoutes.interpreterDocument.upload(interpreterId)
+        );
+
+        await uploadApi.post(formData);
+      } catch (err) {
+        console.error('Erro no upload de documentos:', err);
+      }
     }
 
     // Successful registration (e.g., navigate to login)

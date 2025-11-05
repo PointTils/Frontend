@@ -58,4 +58,8 @@ export const ApiRoutes = {
       `/ratings?interpreterId=${interpreterId}`,
     create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
+  interpreterDocument: {
+    base: `/interpreter-documents`,
+    upload: (interpreterId: string) => `/interpreter-documents/${interpreterId}`,
+  },
 } as const;
