@@ -2,10 +2,13 @@ import HapticTab from '@/src/components/HapticTab';
 import { Text } from '@/src/components/ui/text';
 import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
+import { useAppointmentNotification } from '@/src/hooks/useAppointmentNotification';
 import { useColors } from '@/src/hooks/useColors';
 import { router, Tabs, useSegments } from 'expo-router';
 import { HistoryIcon, House, User } from 'lucide-react-native';
 import React from 'react';
+import { View } from 'react-native';
 
 export default function TabLayout() {
   const colors = useColors();
@@ -13,6 +16,8 @@ export default function TabLayout() {
   const hideTabBar = [...segments].some((segment) =>
     HIDE_TABBAR_SEGMENTS.includes(segment),
   );
+  const { user } = useAuth();
+  const { showAppointmentNotification } = useAppointmentNotification(user?.id);
 
   return (
     <Tabs
@@ -52,7 +57,15 @@ export default function TabLayout() {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <HistoryIcon width={24} height={24} stroke={color} />
+            <View className="relative">
+              <HistoryIcon width={24} height={24} stroke={color} />
+              {showAppointmentNotification && (
+                <View
+                  className="absolute -right-1.5 -top-0.5 w-3 h-3 rounded-full"
+                  style={{ backgroundColor: colors.error }}
+                />
+              )}
+            </View>
           ),
         }}
       />
