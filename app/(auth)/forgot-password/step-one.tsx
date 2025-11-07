@@ -26,7 +26,6 @@ export default function ForgotPasswordStepOne() {
 
   const handleBack = () => router.back();
 
-
   const handleSendCode = async () => {
     if (!email || !email.includes('@')) {
       Toast.show({
@@ -49,9 +48,9 @@ export default function ForgotPasswordStepOne() {
         visibilityTime: 2000,
       });
 
-      const toStepTwo = (`/forgot-password/step-two?email=${encodeURIComponent(email)}`) as Href;
+      const toStepTwo =
+        `/forgot-password/step-two?email=${encodeURIComponent(email)}` as Href;
       router.push(toStepTwo);
-
     } catch {
       Toast.show({
         type: 'error',
