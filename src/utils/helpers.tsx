@@ -207,12 +207,13 @@ export const buildAvatarFormData = (image: ImagePickerAsset) => {
   return form;
 };
 
-export const buildDocumentFormData = (files: { uri: string; fileName?: string }[]) => {
+export const buildDocumentFormData = (
+  files: { uri: string; fileName?: string }[],
+) => {
   const form = new FormData();
 
   files.forEach((file, index) => {
-    const name =
-      file.fileName || `document_${index}_${Date.now()}.pdf`;
+    const name = file.fileName || `document_${index}_${Date.now()}.pdf`;
 
     form.append('files', {
       uri: file.uri,
@@ -223,7 +224,6 @@ export const buildDocumentFormData = (files: { uri: string; fileName?: string }[
 
   return form;
 };
-
 
 const modalityToSend = (modality: Modality[]) => {
   // If both are checked, send 'ALL', else send the single value

@@ -105,6 +105,7 @@ export const ApiRoutes = {
   },
   interpreterDocument: {
     base: `/interpreter-documents`,
-    upload: (interpreterId: string) => `/interpreter-documents/${interpreterId}`,
+    upload: (interpreterId: string, replace: boolean) =>
+      `/interpreter-documents/${interpreterId}?replace_existing=${replace}`,
   },
 } as const;

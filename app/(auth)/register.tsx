@@ -30,7 +30,12 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import { type UserRequest, type UserResponse, UserType } from '@/src/types/api';
+import {
+  type DocumentResponse,
+  type UserRequest,
+  type UserResponse,
+  UserType,
+} from '@/src/types/api';
 import {
   buildInvalidFieldError,
   buildRegisterPayload,
@@ -67,12 +72,6 @@ import {
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
-type FileType = {
-  uri: string;
-  name: string;
-  type?: string;
-};
-
 export default function RegisterScreen() {
   const colors = useColors();
 
@@ -80,6 +79,7 @@ export default function RegisterScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showPassword, setShowPassword] = useState(false);
+  const [document, setDocument] = useState<any[]>([]);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -91,7 +91,7 @@ export default function RegisterScreen() {
   const interpreterApi = useApiPost<UserResponse, UserRequest>(
     ApiRoutes.interpreters.register,
   );
-  const [document, setDocument] = useState<any[]>([]);
+  const uploadApi = useApiPost<DocumentResponse, FormData>('');
 
   const handleChangeType = (newType: UserType) => {
     setType(newType);
@@ -197,7 +197,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
-          !value.trim()
+        !value.trim()
           ? buildRequiredFieldError('gender')
           : null,
     },
@@ -278,13 +278,11 @@ export default function RegisterScreen() {
 
     if (type === UserType.INTERPRETER && document?.length) {
       try {
-        const interpreterId = result.data.id;
         const formData = buildDocumentFormData(document);
-        const uploadApi = useApiPost(
-          ApiRoutes.interpreterDocument.upload(interpreterId)
+        await uploadApi.postAt(
+          ApiRoutes.interpreterDocument.upload(result.data.id, false),
+          formData,
         );
-
-        await uploadApi.post(formData);
       } catch (err) {
         console.error('Erro no upload de documentos:', err);
       }
