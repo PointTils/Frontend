@@ -24,7 +24,8 @@ export default function ForgotPasswordStepOne() {
 
   const Title = useMemo(() => Strings.auth.reset.title, []);
 
-  const handleBack = () => router.replace('/login' as any);
+  const handleBack = () => router.back();
+
 
   const handleSendCode = async () => {
     if (!email || !email.includes('@')) {
@@ -48,11 +49,9 @@ export default function ForgotPasswordStepOne() {
         visibilityTime: 2000,
       });
 
-      const toStepTwo =
-        `/(auth)/forgot-password/step-two?email=${encodeURIComponent(
-          email,
-        )}` as Href;
+      const toStepTwo = (`/forgot-password/step-two?email=${encodeURIComponent(email)}`) as Href;
       router.push(toStepTwo);
+
     } catch {
       Toast.show({
         type: 'error',

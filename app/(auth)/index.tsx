@@ -22,7 +22,7 @@ import {
   buildRequiredFieldError,
 } from '@/src/utils/helpers';
 import { validateEmail } from '@/src/utils/masks';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { AlertCircleIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
 import {
@@ -206,7 +206,7 @@ export default function LoginScreen() {
           onPress={() => {
             console.warn('Navegar para recuperação de senha');
             clearErrors();
-            router.push('/reset-password');
+            router.push('/forgot-password/step-one' as Href);
           }}
         >
           <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark">
