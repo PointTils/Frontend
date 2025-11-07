@@ -1,5 +1,5 @@
-import { Strings } from '@/src/constants/Strings';
 import * as Notifications from 'expo-notifications';
+import { NotificationStatus } from '@/src/types/api/notification'
 import { useEffect, useState } from 'react';
 
 Notifications.setNotificationHandler({
@@ -13,13 +13,13 @@ Notifications.setNotificationHandler({
 });
 
 export function usePushNotifications() {
-  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const [fcmPushToken, setFcmPushToken] = useState<string | null>(null);
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token),
+      setFcmPushToken(token),
     );
 
     const subscription =
@@ -30,19 +30,19 @@ export function usePushNotifications() {
     };
   }, []);
 
-  return { expoPushToken, notification };
+  return { fcmPushToken: fcmPushToken, notification };
 }
 
 async function registerForPushNotificationsAsync() {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
-  if (existingStatus !== Strings.system.permission.granted) {
+  if (existingStatus !== NotificationStatus.GRANTED) {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
-  if (finalStatus !== Strings.system.permission.granted) {
+  if (finalStatus !== NotificationStatus.GRANTED) {
     return null;
   }
 

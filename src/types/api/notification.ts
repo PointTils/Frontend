@@ -14,3 +14,9 @@ export interface RegisterTokenResponse {
   device_id: string;
   user_id: string;
 }
+
+export enum NotificationStatus {
+  GRANTED,
+  DENIED,
+  UNDETERMINED
+}

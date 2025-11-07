@@ -4,14 +4,6 @@
  */
 
 export const Strings = {
-
-  system: {
-    permission: {
-      granted: 'granted',
-      denied: 'denied',
-      undetermined: 'undetermined',  
-    },  
-  }, 
   common: {
     buttons: {
       cancel: 'Cancelar',

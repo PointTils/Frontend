@@ -44,7 +44,7 @@ import DeviceInfo from 'react-native-device-info';
 import { Toast } from 'toastify-react-native';
 
 export default function LoginScreen() {
-  const { expoPushToken } = usePushNotifications();
+  const { fcmPushToken: fcmPushToken } = usePushNotifications();
   const {
     login,
     isLoggingIn,
@@ -108,13 +108,13 @@ export default function LoginScreen() {
 
   // Register device for push notifications after login
   useEffect(() => {
-    if (currentUser && !isLoggingIn && expoPushToken) {
+    if (currentUser && !isLoggingIn && fcmPushToken) {
       const registerDevice = async () => {
         try {
           const deviceId = await DeviceInfo.getUniqueId();
 
           await registerToken({
-            token: expoPushToken,
+            token: fcmPushToken,
             platform: Platform.OS,
             userId: currentUser.id,
             device_id: deviceId,
@@ -126,7 +126,7 @@ export default function LoginScreen() {
 
       registerDevice();
     }
-  }, [currentUser, isLoggingIn, expoPushToken, registerToken]);
+  }, [currentUser, isLoggingIn, fcmPushToken, registerToken]);
 
   async function handleLogin() {
     if (!validateForm()) {
