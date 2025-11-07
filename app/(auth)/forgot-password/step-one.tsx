@@ -8,7 +8,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
-import { router } from 'expo-router'; 
+import { router } from 'expo-router';
 import { Mail } from 'lucide-react-native';
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
@@ -31,7 +31,9 @@ export default function ForgotPasswordStepOne() {
   });
 
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
-    ApiRoutes.auth.passwordResetEmail(encodeURIComponent(fields.email.value || '')),
+    ApiRoutes.auth.passwordResetEmail(
+      encodeURIComponent(fields.email.value || ''),
+    ),
   );
 
   const title = Strings.auth.reset.title;
@@ -64,9 +66,8 @@ export default function ForgotPasswordStepOne() {
       //  router.push(toStepTwo);
 
       router.push(
-      `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}`
-    );
-
+        `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}`,
+      );
     } catch {
       Toast.show({
         type: 'error',
