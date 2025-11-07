@@ -33,7 +33,11 @@ export const genders: OptionItem[] = [
   { label: Strings.gender.others, value: Gender.OTHERS },
 ] as const;
 
-export const hourOptions: OptionItem[] = Array.from({ length: 24 }, (_, i) => {
-  const hour = i.toString().padStart(2, '0');
-  return { label: `${hour}:00`, value: `${hour}:00` };
+export const hourOptions: OptionItem[] = Array.from({ length: 48 }, (_, i) => {
+  const hour = Math.floor(i / 2)
+    .toString()
+    .padStart(2, '0');
+  const minute = i % 2 === 0 ? '00' : '30';
+  const time = `${hour}:${minute}`;
+  return { label: time, value: time };
 });

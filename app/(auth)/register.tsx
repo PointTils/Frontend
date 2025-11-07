@@ -55,6 +55,8 @@ import {
   XIcon,
   PlusIcon,
   CircleIcon,
+  EyeOffIcon,
+  EyeIcon,
 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
@@ -73,9 +75,11 @@ type FileType = {
 
 export default function RegisterScreen() {
   const colors = useColors();
+
   const [type, setType] = useState(UserType.PERSON);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [showPassword, setShowPassword] = useState(false);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -297,6 +301,13 @@ export default function RegisterScreen() {
       visibilityTime: 2000,
       autoHide: true,
       closeIconSize: 1, // To "hide" the close icon
+    });
+    // Successful registration (e.g., navigate to login)
+    router.replace({
+      pathname: '/(auth)',
+      params: {
+        registeredAsInterpreter: String(type === UserType.INTERPRETER),
+      },
     });
   }
 
@@ -675,10 +686,20 @@ export default function RegisterScreen() {
                     autoCapitalize="none"
                     value={fields.password.value}
                     onChangeText={(v) => setValue('password', v)}
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     maxLength={25}
                   />
                 </Input>
+                <TouchableOpacity
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-9"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon color={colors.disabled} />
+                  ) : (
+                    <EyeIcon color={colors.disabled} />
+                  )}
+                </TouchableOpacity>
                 <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}

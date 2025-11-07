@@ -107,3 +107,13 @@ export interface InterpretersResponse {
   message: string;
   data: InterpreterResponseData[];
 }
+
+export interface UserPictureResponse {
+  id: string;
+  email: string;
+  type: string;
+  status: string;
+  phone: string;
+  picture: string | null;
+  specialties: Specialty[];
+}

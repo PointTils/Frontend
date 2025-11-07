@@ -14,11 +14,12 @@ import { useColors } from '@/src/hooks/useColors';
 import { Modality } from '@/src/types/api';
 import type {
   ScheduleResponse,
-  ReviewResponse,
   InterpreterResponseData,
   UserResponse,
+  RatingsResponse,
 } from '@/src/types/api';
-import { getSafeAvatarUri } from '@/src/utils/helpers';
+import type { DateTimeSelection } from '@/src/types/ui';
+import { getSafeAvatarUri, showGenericErrorToast } from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -43,16 +44,16 @@ import {
 } from 'react-native';
 
 type TabKey = keyof typeof Strings.search.tabs;
-type TimeSelection = { date: string; time: string } | null;
 
 export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
 
-  const [section, setSection] = useState<TabKey>('details');
-  const [selectTime, setSelectedTime] = useState<TimeSelection>(null);
   const colors = useColors();
   const router = useRouter();
+
+  const [section, setSection] = useState<TabKey>('details');
+
   const now = new Date();
   const then = new Date(now);
   then.setDate(now.getDate() + 30);
@@ -70,7 +71,7 @@ export default function InterpreterDetails() {
     loading: loadingSchedule,
     error: errorSchedule,
   } = useApiGet<ScheduleResponse>(
-    ApiRoutes.schedules.interpreterSchedule(
+    ApiRoutes.schedules.availabilityPerDay(
       interpreterId,
       now.toISOString().split('T')[0],
       then.toISOString().split('T')[0],
@@ -82,7 +83,9 @@ export default function InterpreterDetails() {
     data: reviews,
     loading: loadingReviews,
     error: errorReviews,
-  } = useApiGet<ReviewResponse>(ApiRoutes.ratings.byInterpreter(interpreterId));
+  } = useApiGet<RatingsResponse>(
+    ApiRoutes.ratings.byInterpreter(interpreterId),
+  );
 
   const isLoading = loadingInterpreter || loadingReviews || loadingSchedule;
   const isError = errorInterpreter || errorSchedule || errorReviews;
@@ -99,12 +102,20 @@ export default function InterpreterDetails() {
   }
 
   if (isError) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-red-500">{Strings.common.noResults}</Text>
-      </View>
-    );
+    router.back();
+    showGenericErrorToast();
+    return null;
   }
+
+  const handleSelectedTime = (dateTime: DateTimeSelection) => {
+    router.push({
+      pathname: '/interpreters/[id]/to-schedule',
+      params: {
+        id: interpreterId,
+        startTime: new Date(`${dateTime.date}T${dateTime.time}`).toISOString(),
+      },
+    });
+  };
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
 
@@ -260,9 +271,10 @@ export default function InterpreterDetails() {
                 ) : (
                   <View className="mb-4">
                     <InterpreterCalendar
-                      schedules={schedules?.data ?? []}
-                      selectedTime={selectTime}
-                      onTimeSelect={setSelectedTime}
+                      schedules={
+                        Array.isArray(schedules?.data) ? schedules.data : []
+                      }
+                      onTimeSelect={handleSelectedTime}
                     />
                   </View>
                 )}
@@ -273,16 +285,18 @@ export default function InterpreterDetails() {
 
         {section === 'reviews' &&
           (reviews && reviews.data.length > 0 ? (
-            reviews.data.map((review) => (
-              <InterpreterReviewCard
-                key={review.id}
-                rating={review.stars}
-                reviewDate={review.date}
-                userName={review.user.name}
-                reviewText={review.description}
-                userPhoto={review.user.picture}
-              />
-            ))
+            <View className="-mt-4 pb-6">
+              {reviews.data.map((review) => (
+                <InterpreterReviewCard
+                  key={review.id}
+                  rating={review.stars}
+                  reviewDate={review.date}
+                  userName={review.user.name}
+                  reviewText={review.description}
+                  userPhoto={review.user.picture}
+                />
+              ))}
+            </View>
           ) : (
             <View className="flex-1 justify-center gap-y-4 items-center">
               <PackageSearchIcon size={38} color={colors.detailsGray} />

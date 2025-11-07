@@ -2,7 +2,7 @@ import { Text } from '@/src/components/ui/text/index';
 import { View } from '@/src/components/ui/view/index';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
-import type { RatingResponse, RatingRequest } from '@/src/types/api/review';
+import type { RatingResponse, RatingRequest } from '@/src/types/api';
 import { StarIcon, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Modal, TouchableOpacity, TextInput } from 'react-native';

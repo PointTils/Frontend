@@ -168,11 +168,9 @@ export const buildAppointmentPayload = (
 ): AppointmentRequest => {
   const isOnline = fields.modality.value.includes(Modality.ONLINE);
 
-  // Calculate end time as one hour after start time
-  const [hours, minutes] = fields.time.value.split(':');
-  const startTime = `${fields.time.value}:00`;
-  const endHour = parseInt(hours) + 1;
-  const endTime = `${String(endHour).padStart(2, '0')}:${minutes}:00`;
+  // format times to HH:MM:SS
+  const startTime = `${fields.startTime.value}:00`;
+  const endTime = `${fields.endTime.value}:00`;
 
   return {
     interpreter_id: interpreterId,
