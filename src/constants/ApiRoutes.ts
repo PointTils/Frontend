@@ -87,8 +87,4 @@ export const ApiRoutes = {
       `/ratings?interpreterId=${interpreterId}`,
     create: (appointmentId: string) => `/ratings/${appointmentId}`,
   },
-  email: {
-    passwordReset: (email: string) =>
-      `/email/password-reset/${encodeURIComponent(email)}`,
-  },
 } as const;

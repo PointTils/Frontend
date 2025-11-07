@@ -7,27 +7,38 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import { router } from 'expo-router';
-import type { Href } from 'expo-router';
+import { useFormValidation } from '@/src/hooks/useFormValidation';
+import { router } from 'expo-router'; 
 import { Mail } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function ForgotPasswordStepOne() {
   const colors = useColors();
-  const [email, setEmail] = useState<string>('');
+
+  // Apenas substitui o useState, sem helpers extras
+  const { fields, setValue, validateForm } = useFormValidation({
+    email: {
+      value: '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim()) return 'E-mail obrigatório';
+        if (!value.includes('@')) return 'E-mail inválido';
+        return null;
+      },
+    },
+  });
 
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
-    ApiRoutes.auth.passwordResetEmail(encodeURIComponent(email || '')),
+    ApiRoutes.auth.passwordResetEmail(encodeURIComponent(fields.email.value || '')),
   );
 
-  const Title = useMemo(() => Strings.auth.reset.title, []);
-
+  const title = Strings.auth.reset.title;
   const handleBack = () => router.back();
 
   const handleSendCode = async () => {
-    if (!email || !email.includes('@')) {
+    if (!validateForm()) {
       Toast.show({
         type: 'error',
         text1: Strings.auth.reset.invalidEmailTitle,
@@ -48,9 +59,14 @@ export default function ForgotPasswordStepOne() {
         visibilityTime: 2000,
       });
 
-      const toStepTwo =
-        `/forgot-password/step-two?email=${encodeURIComponent(email)}` as Href;
-      router.push(toStepTwo);
+      //const toStepTwo =
+      //  `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}` as Href;
+      //  router.push(toStepTwo);
+
+      router.push(
+      `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}`
+    );
+
     } catch {
       Toast.show({
         type: 'error',
@@ -75,7 +91,7 @@ export default function ForgotPasswordStepOne() {
   return (
     <>
       <View className="mt-12 pb-2">
-        <Header title={Title} showBackButton handleBack={handleBack} />
+        <Header title={title} showBackButton handleBack={handleBack} />
       </View>
 
       <View className="w-full h-6" />
@@ -103,19 +119,23 @@ export default function ForgotPasswordStepOne() {
         <Input className="mb-2">
           <InputIcon as={Mail} />
           <InputField
-            value={email}
-            onChangeText={(v: string) => setEmail(v)}
+            value={fields.email.value}
+            onChangeText={(v: string) => setValue('email', v)}
             placeholder="example@empresa.com"
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </Input>
 
+        {!!fields.email.error && (
+          <Text className="text-red-600 mt-1">{fields.email.error}</Text>
+        )}
+
         <View className="mt-10 gap-3">
           <Button
             size="md"
             onPress={handleSendCode}
-            disabled={!email || sendingEmail}
+            disabled={!fields.email.value || sendingEmail}
             className="data-[active=true]:bg-primary-orange-press-light"
           >
             <ButtonIcon as={Mail} className="text-white" />
