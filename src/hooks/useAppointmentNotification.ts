@@ -5,7 +5,8 @@ import { AppointmentStatus } from '@/src/types/api';
 import { useEffect, useMemo, useState } from 'react';
 
 export function useAppointmentNotification(user: any) {
-  const [showAppointmentNotification, setShowAppointmentNotification] = useState(false);
+  const [showAppointmentNotification, setShowAppointmentNotification] =
+    useState(false);
   const [shouldFetch, setShouldFetch] = useState(false);
 
   const pendingRoute = useMemo(() => {
@@ -38,7 +39,7 @@ export function useAppointmentNotification(user: any) {
     const list: Appointment[] = Array.isArray(apptCompleted?.data)
       ? apptCompleted.data
       : [];
-      
+
     if (list.length > 0) {
       setShowAppointmentNotification(true);
     }
