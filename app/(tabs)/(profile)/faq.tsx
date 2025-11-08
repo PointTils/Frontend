@@ -9,7 +9,12 @@ import type { ParameterResponse } from '@/src/types/api';
 import { router } from 'expo-router';
 import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 interface FAQItem {
@@ -27,12 +32,10 @@ export default function FAQScreen() {
   );
 
   // Fetch contact email from API
-  const {
-    data: contactEmailData,
-    loading: contactEmailLoading,
-  } = useApiGet<ParameterResponse>(
-    ApiRoutes.parameters.byKey('TEST_CONTACT_EMAIL'),
-  );
+  const { data: contactEmailData, loading: contactEmailLoading } =
+    useApiGet<ParameterResponse>(
+      ApiRoutes.parameters.byKey('TEST_CONTACT_EMAIL'),
+    );
 
   // Parse FAQ items from JSON string
   const faqData: FAQItem[] = useMemo(() => {
@@ -50,10 +53,7 @@ export default function FAQScreen() {
 
   // Extract contact email
   const contactEmail = useMemo(() => {
-    if (
-      contactEmailData?.success &&
-      contactEmailData.data?.value
-    ) {
+    if (contactEmailData?.success && contactEmailData.data?.value) {
       return contactEmailData.data.value;
     }
     return null;
@@ -68,7 +68,7 @@ export default function FAQScreen() {
     try {
       // Check if the URL can be opened
       const canOpen = await Linking.canOpenURL(mailtoUrl);
-      
+
       if (canOpen) {
         await Linking.openURL(mailtoUrl);
       } else {
@@ -83,7 +83,7 @@ export default function FAQScreen() {
           closeIconSize: 1,
         });
       }
-    } catch (err) {
+    } catch {
       // Show error toast if opening fails
       Toast.show({
         type: 'error',
@@ -137,8 +137,7 @@ export default function FAQScreen() {
         {error && (
           <View className="flex-1 justify-center items-center py-20">
             <Text className="font-ifood-regular text-primary-800 text-center">
-              Erro ao carregar perguntas frequentes. Tente novamente mais
-              tarde.
+              Erro ao carregar perguntas frequentes. Tente novamente mais tarde.
             </Text>
           </View>
         )}

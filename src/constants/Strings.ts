@@ -148,7 +148,8 @@ export const Strings = {
     contactDescription:
       'Entre em contato conosco através do nosso suporte técnico.',
     contactButton: 'Entrar em Contato',
-    contactEmailError: 'Não foi possível abrir o app de email. Verifique se há um app de email configurado no seu dispositivo.',
+    contactEmailError:
+      'Não foi possível abrir o app de email. Verifique se há um app de email configurado no seu dispositivo.',
 
     toast: {
       errorTitle: 'Erro ao obter dados do perfil.',
