@@ -8,7 +8,7 @@ export function useAppointmentNotification(user: any) {
   const [showAppointmentNotification, setShowAppointmentNotification] = useState(false);
   const [shouldFetch, setShouldFetch] = useState(false);
 
-  const completedRoute = useMemo(() => {
+  const pendingRoute = useMemo(() => {
     if (!user?.id) return '';
 
     return ApiRoutes.appointments.filters(
@@ -22,7 +22,7 @@ export function useAppointmentNotification(user: any) {
     data: apptCompleted,
     loading: loading,
     error: error,
-  } = useApiGet<AppointmentsResponse>(shouldFetch ? completedRoute : '');
+  } = useApiGet<AppointmentsResponse>(shouldFetch ? pendingRoute : '');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,5 +46,6 @@ export function useAppointmentNotification(user: any) {
 
   return {
     showAppointmentNotification,
+    setShowAppointmentNotification,
   };
 }

@@ -17,7 +17,8 @@ export default function TabLayout() {
     HIDE_TABBAR_SEGMENTS.includes(segment),
   );
   const { user } = useAuth();
-  const { showAppointmentNotification } = useAppointmentNotification(user?.id);
+  const { showAppointmentNotification, setShowAppointmentNotification } =
+    useAppointmentNotification(user);
 
   return (
     <Tabs
@@ -46,8 +47,9 @@ export default function TabLayout() {
         name="appointments"
         listeners={{
           tabPress: (e) => {
-            e.preventDefault(); // avoid default behavior (keeping last nested route)
-            router.navigate('/appointments'); // go to index of the tab
+            e.preventDefault();
+            setShowAppointmentNotification(false);
+            router.navigate('/appointments');
           },
         }}
         options={{
