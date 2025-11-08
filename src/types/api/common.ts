@@ -29,6 +29,16 @@ export interface StateAndCityResponse {
   ];
 }
 
+export interface ParameterResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    key: string;
+    value: string; // JSON string
+  };
+}
+
 // Enums
 export enum UserType {
   PERSON = 'PERSON',

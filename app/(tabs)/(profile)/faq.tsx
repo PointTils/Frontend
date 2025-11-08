@@ -1,64 +1,101 @@
 import { Button } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
+import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import type { ParameterResponse } from '@/src/types/api';
 import { router } from 'expo-router';
 import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { ScrollView, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { ActivityIndicator, Linking, ScrollView, TouchableOpacity } from 'react-native';
+import { Toast } from 'toastify-react-native';
 
 interface FAQItem {
   question: string;
   answer: string;
 }
 
-const faqData: FAQItem[] = [
-  {
-    question: 'Como posso agendar um intérprete?',
-    answer:
-      'Para agendar um intérprete, vá até a aba "Intérpretes" e use a busca para encontrar profissionais disponíveis. Selecione o intérprete desejado e clique em "Agendar" para escolher data e horário.',
-  },
-  {
-    question: 'Quais são os tipos de modalidade disponíveis?',
-    answer:
-      'Oferecemos três modalidades: Presencial (atendimento físico), Online (atendimento remoto) e Híbrido (combinação de presencial e online).',
-  },
-  {
-    question: 'Como funciona o sistema de avaliações?',
-    answer:
-      'Após cada atendimento, você pode avaliar o intérprete com notas de 1 a 5 estrelas e deixar comentários sobre sua experiência. Essas avaliações ajudam outros usuários na escolha.',
-  },
-  {
-    question: 'Posso cancelar um agendamento?',
-    answer:
-      'Sim, você pode cancelar agendamentos através da aba "Agendamentos". Consulte nossa política de cancelamento para informações sobre reembolsos.',
-  },
-  {
-    question: 'Como atualizo meus dados pessoais?',
-    answer:
-      'Você pode atualizar seus dados pessoais acessando "Editar Perfil" na sua tela de perfil. Lá você pode modificar informações como nome, telefone, email e preferências.',
-  },
-  {
-    question: 'O que fazer se tiver problemas técnicos?',
-    answer:
-      'Se você encontrar problemas técnicos, entre em contato conosco através do email de suporte ou use o formulário de contato disponível no aplicativo.',
-  },
-  {
-    question: 'Como funciona o pagamento?',
-    answer:
-      'Os pagamentos são processados de forma segura através de nossa plataforma. Aceitamos cartões de crédito e débito, além de PIX.',
-  },
-  {
-    question: 'Posso agendar para outras pessoas?',
-    answer:
-      'Sim, você pode agendar intérpretes para outras pessoas. Durante o processo de agendamento, você pode especificar se o atendimento é para você ou para outra pessoa.',
-  },
-];
-
 export default function FAQScreen() {
   const colors = useColors();
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+
+  // Fetch FAQ data from API
+  const { data, loading, error } = useApiGet<ParameterResponse>(
+    ApiRoutes.parameters.byKey('FAQ'),
+  );
+
+  // Fetch contact email from API
+  const {
+    data: contactEmailData,
+    loading: contactEmailLoading,
+  } = useApiGet<ParameterResponse>(
+    ApiRoutes.parameters.byKey('TEST_CONTACT_EMAIL'),
+  );
+
+  // Parse FAQ items from JSON string
+  const faqData: FAQItem[] = useMemo(() => {
+    if (!data?.success || !data.data?.value) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(data.data.value) as FAQItem[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [data]);
+
+  // Extract contact email
+  const contactEmail = useMemo(() => {
+    if (
+      contactEmailData?.success &&
+      contactEmailData.data?.value
+    ) {
+      return contactEmailData.data.value;
+    }
+    return null;
+  }, [contactEmailData]);
+
+  // Handle contact button press
+  const handleContactPress = async () => {
+    if (!contactEmail) return;
+
+    const mailtoUrl = `mailto:${contactEmail}`;
+
+    try {
+      // Check if the URL can be opened
+      const canOpen = await Linking.canOpenURL(mailtoUrl);
+      
+      if (canOpen) {
+        await Linking.openURL(mailtoUrl);
+      } else {
+        // Show error toast if cannot open
+        Toast.show({
+          type: 'error',
+          text1: 'Erro',
+          text2: Strings.profile.contactEmailError,
+          position: 'top',
+          visibilityTime: 3000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+      }
+    } catch (err) {
+      // Show error toast if opening fails
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: Strings.profile.contactEmailError,
+        position: 'top',
+        visibilityTime: 3000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
+  };
 
   const toggleExpanded = (index: number) => {
     const newExpanded = new Set(expandedItems);
@@ -88,31 +125,61 @@ export default function FAQScreen() {
         className="flex-1 px-4 py-6"
         showsVerticalScrollIndicator={false}
       >
-        {faqData.map((item, index) => (
-          <View key={index} className="mb-2">
-            <TouchableOpacity
-              onPress={() => toggleExpanded(index)}
-              className="py-4 px-2 flex-row items-center justify-between border-b border-gray-200"
-            >
-              <Text className="flex-1 text-base font-ifood-regular text-primary-800 pr-2">
-                {item.question}
-              </Text>
-              {expandedItems.has(index) ? (
-                <ChevronUp size={20} color="#9CA3AF" />
-              ) : (
-                <ChevronDown size={20} color="#9CA3AF" />
-              )}
-            </TouchableOpacity>
-
-            {expandedItems.has(index) && (
-              <View className="px-2 pt-2 pb-4">
-                <Text className="text-sm font-ifood-regular text-primary-700 leading-5">
-                  {item.answer}
-                </Text>
-              </View>
-            )}
+        {loading && (
+          <View className="flex-1 justify-center items-center py-20">
+            <ActivityIndicator color={colors.primaryBlue} size="small" />
+            <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+              {Strings.common.loading}
+            </Text>
           </View>
-        ))}
+        )}
+
+        {error && (
+          <View className="flex-1 justify-center items-center py-20">
+            <Text className="font-ifood-regular text-primary-800 text-center">
+              Erro ao carregar perguntas frequentes. Tente novamente mais
+              tarde.
+            </Text>
+          </View>
+        )}
+
+        {!loading && !error && faqData.length === 0 && (
+          <View className="flex-1 justify-center items-center py-20">
+            <Text className="font-ifood-regular text-primary-800 text-center">
+              Nenhuma pergunta encontrada.
+            </Text>
+          </View>
+        )}
+
+        {!loading && !error && faqData.length > 0 && (
+          <>
+            {faqData.map((item, index) => (
+              <View key={index}>
+                <TouchableOpacity
+                  onPress={() => toggleExpanded(index)}
+                  className="py-4 px-2 flex-row items-center justify-between border-b border-gray-200"
+                >
+                  <Text className="flex-1 text-base font-ifood-regular text-primary-800 pr-2">
+                    {item.question}
+                  </Text>
+                  {expandedItems.has(index) ? (
+                    <ChevronUp size={20} color="#9CA3AF" />
+                  ) : (
+                    <ChevronDown size={20} color="#9CA3AF" />
+                  )}
+                </TouchableOpacity>
+
+                {expandedItems.has(index) && (
+                  <View className="px-2 pt-2 pb-4">
+                    <Text className="text-sm font-ifood-regular text-primary-700 leading-5">
+                      {item.answer}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
         {/* Contact Section */}
         <View className="mt-8 p-4 bg-primary-blue-light rounded-lg">
@@ -126,9 +193,8 @@ export default function FAQScreen() {
             size="md"
             variant="solid"
             className="bg-primary-blue"
-            onPress={() => {
-              // TODO: Implement contact support functionality
-            }}
+            onPress={handleContactPress}
+            disabled={!contactEmail || contactEmailLoading}
           >
             <Text className="font-ifood-medium text-white">
               {Strings.profile.contactButton}
