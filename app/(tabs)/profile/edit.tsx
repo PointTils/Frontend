@@ -544,7 +544,7 @@ export default function EditProfileScreen() {
       !specialtyResponse?.success ||
       (selectedImage && !pictureResponse?.picture)
     ) {
-      router.replace('/(tabs)/(profile)');
+      router.replace('/(tabs)/profile');
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
         type: 'error',
@@ -615,7 +615,7 @@ export default function EditProfileScreen() {
       const failedCreate = createResults.some((r) => !r?.success);
 
       if (failedPatch || failedCreate) {
-        router.replace('/(tabs)/(profile)');
+        router.replace('/(tabs)/profile');
         await new Promise((resolve) => setTimeout(resolve, 300));
         Toast.show({
           type: 'error',
@@ -660,7 +660,7 @@ export default function EditProfileScreen() {
     await markProfileAsCompleted();
 
     // Successful update logic (e.g., navigate to profile)
-    router.replace('/(tabs)/(profile)');
+    router.replace('/(tabs)/profile');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
       type: 'success',
