@@ -740,16 +740,10 @@ export default function RegisterScreen() {
                     </FormControlLabel>
 
                     <UploadInput
-                      multiple={false}
-                      maxFiles={1}
+                      multiple={true}
+                      maxFiles={3}
                       onChange={(files) => setDocument(files)}
                     />
-
-                    {document?.length > 0 && (
-                      <Text className="text-text-light dark:text-text-dark mt-2">
-                        Arquivo selecionado: {document[0].name}
-                      </Text>
-                    )}
                   </FormControl>
                 </View>
               )}
