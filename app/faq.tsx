@@ -1,13 +1,15 @@
+import Header from '@/src/components/Header';
 import { Button } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { ParametersKeys } from '@/src/types/api';
 import { Strings } from '@/src/constants/Strings';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import type { ParameterResponse } from '@/src/types/api';
 import { router } from 'expo-router';
-import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, PackageSearchIcon } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -28,13 +30,13 @@ export default function FAQScreen() {
 
   // Fetch FAQ data from API
   const { data, loading, error } = useApiGet<ParameterResponse>(
-    ApiRoutes.parameters.byKey('FAQ'),
+    ApiRoutes.parameters.byKey(ParametersKeys.faq),
   );
 
   // Fetch contact email from API
   const { data: contactEmailData, loading: contactEmailLoading } =
     useApiGet<ParameterResponse>(
-      ApiRoutes.parameters.byKey('TEST_CONTACT_EMAIL'),
+      ApiRoutes.parameters.byKey(ParametersKeys.test_contact_email),
     );
 
   // Parse FAQ items from JSON string
@@ -75,8 +77,8 @@ export default function FAQScreen() {
         // Show error toast if cannot open
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: Strings.profile.contactEmailError,
+          text1: Strings.faq.toast.contactEmailErrorTitle,
+          text2: Strings.faq.toast.contactEmailErrorDescription,
           position: 'top',
           visibilityTime: 3000,
           autoHide: true,
@@ -87,8 +89,8 @@ export default function FAQScreen() {
       // Show error toast if opening fails
       Toast.show({
         type: 'error',
-        text1: 'Erro',
-        text2: Strings.profile.contactEmailError,
+        text1: Strings.faq.toast.contactEmailErrorTitle,
+        text2: Strings.faq.toast.contactEmailErrorDescription,
         position: 'top',
         visibilityTime: 3000,
         autoHide: true,
@@ -108,23 +110,17 @@ export default function FAQScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-4 pt-12 bg-white border-b border-gray-200">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <ChevronLeft size={24} color={colors.primaryOrange} />
-        </TouchableOpacity>
-        <Text className="text-base font-ifood-bold text-primary-800">
-          {Strings.profile.faqTitle}
-        </Text>
-        <View className="w-10" />
+    <View className="flex-1 justify-center">
+      <View className="mt-12 pb-2">
+        <Header
+          title={Strings.faq.header}
+          showBackButton={true}
+          handleBack={() => router.back()}
+        />
       </View>
 
       {/* FAQ Content */}
-      <ScrollView
-        className="flex-1 px-4 py-6"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
         {loading && (
           <View className="flex-1 justify-center items-center py-20">
             <ActivityIndicator color={colors.primaryBlue} size="small" />
@@ -137,15 +133,16 @@ export default function FAQScreen() {
         {error && (
           <View className="flex-1 justify-center items-center py-20">
             <Text className="font-ifood-regular text-primary-800 text-center">
-              Erro ao carregar perguntas frequentes. Tente novamente mais tarde.
+              {Strings.faq.error}
             </Text>
           </View>
         )}
 
         {!loading && !error && faqData.length === 0 && (
-          <View className="flex-1 justify-center items-center py-20">
-            <Text className="font-ifood-regular text-primary-800 text-center">
-              Nenhuma pergunta encontrada.
+          <View className="flex-1 justify-center gap-y-4 items-center">
+            <PackageSearchIcon size={38} color={colors.detailsGray} />
+            <Text className="font-ifood-regular text-typography-400 text-md">
+              {Strings.common.noResults}
             </Text>
           </View>
         )}
@@ -158,19 +155,19 @@ export default function FAQScreen() {
                   onPress={() => toggleExpanded(index)}
                   className="py-4 px-2 flex-row items-center justify-between border-b border-gray-200"
                 >
-                  <Text className="flex-1 text-base font-ifood-regular text-primary-800 pr-2">
+                  <Text className="flex-1 text-md font-ifood-regular text-text-light pr-2">
                     {item.question}
                   </Text>
                   {expandedItems.has(index) ? (
-                    <ChevronUp size={20} color="#9CA3AF" />
+                    <ChevronUp size={20} color={colors.faqChevron} />
                   ) : (
-                    <ChevronDown size={20} color="#9CA3AF" />
+                    <ChevronDown size={20} color={colors.faqChevron} />
                   )}
                 </TouchableOpacity>
 
                 {expandedItems.has(index) && (
                   <View className="px-2 pt-2 pb-4">
-                    <Text className="text-sm font-ifood-regular text-primary-700 leading-5">
+                    <Text className="text-sm font-ifood-regular text-primary-300 leading-5">
                       {item.answer}
                     </Text>
                   </View>
@@ -182,21 +179,21 @@ export default function FAQScreen() {
 
         {/* Contact Section */}
         <View className="mt-8 p-4 bg-primary-blue-light rounded-lg">
-          <Text className="text-base font-ifood-medium text-primary-800 mb-2">
-            {Strings.profile.contactTitle}
+          <Text className="text-base font-ifood-medium text-text-dark mb-2">
+            {Strings.faq.contactTitle}
           </Text>
-          <Text className="text-sm font-ifood-regular text-primary-700 mb-4">
-            {Strings.profile.contactDescription}
+          <Text className="text-sm font-ifood-regular text-text-dark mb-6">
+            {Strings.faq.contactDescription}
           </Text>
           <Button
             size="md"
             variant="solid"
-            className="bg-primary-blue"
+            className="bg-primary-orange-light"
             onPress={handleContactPress}
             disabled={!contactEmail || contactEmailLoading}
           >
             <Text className="font-ifood-medium text-white">
-              {Strings.profile.contactButton}
+              {Strings.faq.contactButton}
             </Text>
           </Button>
         </View>

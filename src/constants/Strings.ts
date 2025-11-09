@@ -143,17 +143,24 @@ export const Strings = {
     editProfile: 'Editar Perfil',
     help: 'Ajuda',
     logout: 'Sair',
-    faqTitle: 'PERGUNTAS FREQUENTES',
-    contactTitle: 'Não encontrou sua resposta?',
-    contactDescription:
-      'Entre em contato conosco através do nosso suporte técnico.',
-    contactButton: 'Entrar em Contato',
-    contactEmailError:
-      'Não foi possível abrir o app de email. Verifique se há um app de email configurado no seu dispositivo.',
 
     toast: {
       errorTitle: 'Erro ao obter dados do perfil.',
       errorDescription: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
+  faq: {
+    header: 'PERGUNTAS FREQUENTES',
+    contactTitle: 'Não encontrou sua resposta?',
+    contactDescription: 'Entre em contato conosco via e-mail.',
+    contactButton: 'Enviar e-mail',
+    error: 'Erro ao carregar perguntas frequentes. Tente novamente mais tarde.',
+
+    toast: {
+      contactEmailErrorTitle: 'Erro ao abrir email',
+      contactEmailErrorDescription:
+        'Não foi possível abrir a aplicação de email. Tente novamente mais tarde.',
     },
   },
 

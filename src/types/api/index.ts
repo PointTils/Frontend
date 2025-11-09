@@ -9,4 +9,5 @@ export * from './specialty';
 export * from './appointment';
 export * from './rating';
 export * from './schedule';
+export * from './parameter';
 export * from './common';
