@@ -207,6 +207,24 @@ export const buildAvatarFormData = (image: ImagePickerAsset) => {
   return form;
 };
 
+export const buildDocumentFormData = (
+  files: { uri: string; fileName?: string }[],
+) => {
+  const form = new FormData();
+
+  files.forEach((file, index) => {
+    const name = file.fileName || `document_${index}_${Date.now()}.pdf`;
+
+    form.append('files', {
+      uri: file.uri,
+      name,
+      type: 'application/pdf',
+    } as any);
+  });
+
+  return form;
+};
+
 const modalityToSend = (modality: Modality[]) => {
   // If both are checked, send 'ALL', else send the single value
   let modalityToSend: Modality;
@@ -236,7 +254,7 @@ export const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
     allowsEditing: true,
-    aspect: [4, 3],
+    aspect: [1, 1],
     quality: 1,
   });
 

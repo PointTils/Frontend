@@ -72,6 +72,7 @@ export const Strings = {
       start: 'Início',
       end: 'Fim',
       uploadFile: 'Adicionar arquivo',
+      certificate: 'Certificados',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
@@ -147,6 +148,20 @@ export const Strings = {
     toast: {
       errorTitle: 'Erro ao obter dados do perfil.',
       errorDescription: 'Verifique sua conexão e tente novamente.',
+    },
+  },
+
+  faq: {
+    header: 'PERGUNTAS FREQUENTES',
+    contactTitle: 'Não encontrou sua resposta?',
+    contactDescription: 'Entre em contato conosco via e-mail.',
+    contactButton: 'Enviar e-mail',
+    error: 'Erro ao carregar perguntas frequentes. Tente novamente mais tarde.',
+
+    toast: {
+      contactEmailErrorTitle: 'Erro ao abrir email',
+      contactEmailErrorDescription:
+        'Não foi possível abrir a aplicação de email. Tente novamente mais tarde.',
     },
   },
 
