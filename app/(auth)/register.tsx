@@ -65,6 +65,7 @@ import {
 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -80,6 +81,7 @@ export default function RegisterScreen() {
   const [date, setDate] = useState(new Date());
   const [showPassword, setShowPassword] = useState(false);
   const [document, setDocument] = useState<any[]>([]);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -197,7 +199,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
-        !value.trim()
+          !value.trim()
           ? buildRequiredFieldError('gender')
           : null,
     },
@@ -239,31 +241,80 @@ export default function RegisterScreen() {
 
   // Handle form submission - API call and response handling
   async function handleRegister() {
-    if (!validateForm({ type })) return;
+    if (isRegistering) return;
 
-    const payload = buildRegisterPayload(type, fields);
-    if (!payload) return;
+    const isValid = validateForm({ type });
+    if (!isValid) return;
 
-    let api;
-    switch (type) {
-      case UserType.PERSON:
-        api = personApi;
-        break;
-      case UserType.ENTERPRISE:
-        api = enterpriseApi;
-        break;
-      case UserType.INTERPRETER:
-        api = interpreterApi;
-        break;
-      default:
+    setIsRegistering(true);
+
+    try {
+      const payload = buildRegisterPayload(type, fields);
+      if (!payload) return;
+
+      let api;
+      switch (type) {
+        case UserType.PERSON:
+          api = personApi;
+          break;
+        case UserType.ENTERPRISE:
+          api = enterpriseApi;
+          break;
+        case UserType.INTERPRETER:
+          api = interpreterApi;
+          break;
+        default:
+          return;
+      }
+      if (!api) return;
+
+      const result = await api.post(payload);
+
+      if (!result?.success || !result?.data) {
+        console.error('Registration error:', api.error || 'Unknown error');
+        Toast.show({
+          type: 'error',
+          text1: Strings.register.toast.errorTitle,
+          text2: Strings.register.toast.errorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
         return;
-    }
-    if (!api) return;
+      }
 
-    const result = await api.post(payload);
+      if (type === UserType.INTERPRETER && document?.length) {
+        try {
+          const formData = buildDocumentFormData(document);
+          await uploadApi.postAt(
+            ApiRoutes.interpreterDocument.upload(result.data.id, false),
+            formData
+          );
+        } catch (err) {
+          console.error('Erro no upload de documentos:', err);
+        }
+      }
+      router.replace({
+        pathname: '/(auth)',
+        params: {
+          registeredAsInterpreter: String(type === UserType.INTERPRETER),
+        },
+      });
 
-    if (!result?.success || !result?.data) {
-      console.error('Registration error:', api.error || 'Unknown error');
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      Toast.show({
+        type: 'success',
+        text1: Strings.register.toast.successTitle,
+        text2: Strings.register.toast.successDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } catch (err) {
+      console.error('Erro no registro:', err);
       Toast.show({
         type: 'error',
         text1: Strings.register.toast.errorTitle,
@@ -271,42 +322,11 @@ export default function RegisterScreen() {
         position: 'top',
         visibilityTime: 2000,
         autoHide: true,
-        closeIconSize: 1, // To "hide" the close icon
+        closeIconSize: 1,
       });
-      return;
+    } finally {
+      setIsRegistering(false);
     }
-
-    if (type === UserType.INTERPRETER && document?.length) {
-      try {
-        const formData = buildDocumentFormData(document);
-        await uploadApi.postAt(
-          ApiRoutes.interpreterDocument.upload(result.data.id, false),
-          formData,
-        );
-      } catch (err) {
-        console.error('Erro no upload de documentos:', err);
-      }
-    }
-
-    // Successful registration (e.g., navigate to login)
-    router.back();
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    Toast.show({
-      type: 'success',
-      text1: Strings.register.toast.successTitle,
-      text2: Strings.register.toast.successDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1, // To "hide" the close icon
-    });
-    // Successful registration (e.g., navigate to login)
-    router.replace({
-      pathname: '/(auth)',
-      params: {
-        registeredAsInterpreter: String(type === UserType.INTERPRETER),
-      },
-    });
   }
 
   return (
@@ -740,26 +760,34 @@ export default function RegisterScreen() {
               <Button
                 onPress={handleRegister}
                 size="md"
+                isDisabled={isRegistering}
                 className="data-[active=true]:bg-primary-orange-press-light"
               >
-                <ButtonIcon as={PlusIcon} className="text-white" />
-                <Text className="font-ifood-regular text-text-dark">
-                  {Strings.auth.signUpAction}
-                </Text>
+                {isRegistering ? (
+                  <ActivityIndicator color={colors.white} />
+                ) : (
+                  <>
+                    <ButtonIcon as={PlusIcon} className="text-white" />
+                    <Text className="font-ifood-regular text-text-dark">
+                      {Strings.auth.signUpAction}
+                    </Text>
+                  </>
+                )}
               </Button>
-
-              <HapticTab
-                onPress={() => {
-                  clearErrors();
-                  router.back();
-                }}
-                className="flex-row justify-center gap-2 py-2"
-              >
-                <XIcon color={colors.primaryOrange} />
-                <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                  {Strings.common.buttons.cancel}
-                </Text>
-              </HapticTab>
+              {!isRegistering && (
+                <HapticTab
+                  onPress={() => {
+                    clearErrors();
+                    router.back();
+                  }}
+                  className="flex-row justify-center gap-2 py-2"
+                >
+                  <XIcon color={colors.primaryOrange} />
+                  <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                    {Strings.common.buttons.cancel}
+                  </Text>
+                </HapticTab>
+              )}
             </View>
           </View>
         </ScrollView>
