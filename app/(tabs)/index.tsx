@@ -96,7 +96,7 @@ export default function HomeScreen() {
                   : Strings.home.banner.person
               }
               backgroundColor={colors.primaryBlue}
-              onPress={() => router.push('/(tabs)/(profile)')}
+              onPress={() => router.push('/(tabs)/profile')}
             />
 
             {/* Divider */}

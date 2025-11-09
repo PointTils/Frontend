@@ -150,6 +150,20 @@ export const Strings = {
     },
   },
 
+  faq: {
+    header: 'PERGUNTAS FREQUENTES',
+    contactTitle: 'Não encontrou sua resposta?',
+    contactDescription: 'Entre em contato conosco via e-mail.',
+    contactButton: 'Enviar e-mail',
+    error: 'Erro ao carregar perguntas frequentes. Tente novamente mais tarde.',
+
+    toast: {
+      contactEmailErrorTitle: 'Erro ao abrir email',
+      contactEmailErrorDescription:
+        'Não foi possível abrir a aplicação de email. Tente novamente mais tarde.',
+    },
+  },
+
   onboarding: {
     INTERPRETER: {
       logoAlt: 'Logotipo do Point Tils',
