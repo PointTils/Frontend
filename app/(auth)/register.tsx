@@ -199,7 +199,7 @@ export default function RegisterScreen() {
       error: '',
       validate: (value: string, ctx?: { type: string }) =>
         (ctx?.type === UserType.PERSON || ctx?.type === UserType.INTERPRETER) &&
-          !value.trim()
+        !value.trim()
           ? buildRequiredFieldError('gender')
           : null,
     },
@@ -289,7 +289,7 @@ export default function RegisterScreen() {
           const formData = buildDocumentFormData(document);
           await uploadApi.postAt(
             ApiRoutes.interpreterDocument.upload(result.data.id, false),
-            formData
+            formData,
           );
         } catch (err) {
           console.error('Erro no upload de documentos:', err);
