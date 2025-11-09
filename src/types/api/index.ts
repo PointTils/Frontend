@@ -10,4 +10,5 @@ export * from './appointment';
 export * from './rating';
 export * from './schedule';
 export * from './parameter';
+export * from './document';
 export * from './common';

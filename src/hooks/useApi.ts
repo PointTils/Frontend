@@ -127,7 +127,29 @@ export const useApiPost = <T, U>(endpoint: string, body?: U) => {
     }
   };
 
-  return { ...state, post };
+  const postAt = async (targetEndpoint: string, payload?: U) => {
+    setState((prev) => ({ ...prev, loading: true }));
+    try {
+      const effectivePayload = (payload ?? body) as unknown;
+      const config = isFormData(effectivePayload)
+        ? { headers: { 'Content-Type': 'multipart/form-data' } }
+        : undefined;
+
+      const res: AxiosResponse<T> = await api.post<T>(
+        targetEndpoint,
+        effectivePayload as U,
+        config,
+      );
+      setState({ data: res.data, loading: false, error: null });
+      return res.data;
+    } catch (err: any) {
+      logAxiosError('POST', targetEndpoint, err);
+      setState({ data: null, loading: false, error: err.message });
+      return null;
+    }
+  };
+
+  return { ...state, post, postAt };
 };
 
 /**
