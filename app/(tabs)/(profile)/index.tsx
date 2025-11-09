@@ -289,13 +289,13 @@ export default function ProfileScreen() {
 
               {/* Presentation video link */}
               {profile.professional_data?.video_url && (
-                <View className="px-2 mt-3">
+                <View className="px-2 py-1 mb-2">
                   <Text className="font-ifood-medium text-text-light dark:text-text-dark mb-1">
                     {Strings.common.fields.videoUrl}
                   </Text>
                   <Text
                     style={{ color: colors.primaryBlue }}
-                    className="underline font-ifood-regular break-words"
+                    className="underline font-ifood-regular break-words"                    numberOfLines={1}
                     onPress={() =>
                       Linking.openURL(profile.professional_data!.video_url!)
                     }

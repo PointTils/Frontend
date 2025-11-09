@@ -33,6 +33,7 @@ import {
   InfoIcon,
   MapPinIcon,
   PackageSearchIcon,
+  VideoIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -41,8 +42,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
-
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 type TabKey = keyof typeof Strings.search.tabs;
@@ -125,6 +126,11 @@ export default function InterpreterDetails() {
   const videoId = rawUrl ? getYouTubeId(rawUrl) : null;
   const hasValidVideo = !!videoId;
   const hasInvalidVideo = rawUrl && videoId === '';
+  const screenWidth = Dimensions.get('window').width;
+  const contentPadding = 48;
+  const playerWidth = screenWidth - contentPadding;
+  const playerHeight = Math.round((playerWidth * 9) / 16);
+
 
   return (
     <>
@@ -236,22 +242,18 @@ export default function InterpreterDetails() {
             {hasValidVideo && (
               <View className="mt-4">
                 <InfoRow
-                  icon={<FileTextIcon size={16} color={colors.text} />}
+                  icon={<VideoIcon size={16} color={colors.text} />}
                   label={Strings.common.fields.videoUrl}
                   onlyLabel={true}
                 />
-                <View
-                  className="mt-2"
-                  overflown-hidden
-                  rounded-2x1
-                  border-typography-200
-                  dark:border-typography-700
-                >
+               <View className="-mt-5 mb-3 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
+                
                   <View className="aspect-video">
                     <YoutubePlayer
-                      height={undefined}
-                      width={undefined}
+                      height={playerHeight}
+                      width={playerWidth}
                       videoId={videoId!}
+                      webViewProps={{ allowsFullScreenVideo: true }}
                     />
                   </View>
                 </View>
@@ -261,7 +263,7 @@ export default function InterpreterDetails() {
             {hasInvalidVideo && (
                <View className="mt-4">
               <InfoRow
-                icon={<FileTextIcon size={16} color={colors.text} />}
+                icon={<VideoIcon size={16} color={colors.text} />}
                 label={Strings.common.fields.videoUrl}
                 onlyLabel={true}
               />
