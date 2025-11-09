@@ -28,7 +28,7 @@ const compact = (obj: unknown, max = 300) => {
 
 // Centralized error logging
 const logAxiosError = (
-  verb: 'GET' | 'POST' | 'PATCH',
+  verb: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   endpoint: string,
   err: unknown,
 ) => {
@@ -210,4 +210,66 @@ export const useApiPatch = <T, U>(endpoint: string, body?: U) => {
   };
 
   return { ...state, patch, patchAt };
+};
+
+/**
+ * Usage example:
+ *
+ *   const { data, loading, error, del } = useApiDelete<void>('/users/1');
+ *   const result = await del();
+ */
+export const useApiDelete = <T, U = unknown>(endpoint: string, body?: U) => {
+  const [state, setState] = useState<ApiState<T>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const del = async (payload?: U) => {
+    setState((prev) => ({ ...prev, loading: true }));
+    try {
+      const effectivePayload = (payload ?? body) as unknown;
+      const config: Record<string, unknown> = {};
+
+      if (effectivePayload !== undefined) {
+        config.data = effectivePayload as U;
+        if (isFormData(effectivePayload)) {
+          config.headers = { 'Content-Type': 'multipart/form-data' };
+        }
+      }
+
+      const res: AxiosResponse<T> = await api.delete<T>(endpoint, config);
+      setState({ data: res.data, loading: false, error: null });
+      return res.data;
+    } catch (err: any) {
+      logAxiosError('DELETE', endpoint, err);
+      setState({ data: null, loading: false, error: err.message });
+      return null;
+    }
+  };
+
+  const deleteAt = async (targetEndpoint: string, payload?: U) => {
+    setState((prev) => ({ ...prev, loading: true }));
+    try {
+      const effectivePayload = (payload ?? body) as unknown;
+      const config: Record<string, unknown> = {};
+
+      if (effectivePayload !== undefined) {
+        config.data = effectivePayload as U;
+        if (isFormData(effectivePayload)) {
+          config.headers = { 'Content-Type': 'multipart/form-data' };
+        }
+      }
+
+      const res: AxiosResponse<T> = await api.delete<T>(targetEndpoint, config);
+      setState({ data: res.data, loading: false, error: null });
+      return res.data;
+    } catch (err: any) {
+      logAxiosError('DELETE', targetEndpoint, err);
+      setState({ data: null, loading: false, error: err.message });
+      return null;
+    }
+  };
+
+  return { ...state, del, deleteAt };
 };
