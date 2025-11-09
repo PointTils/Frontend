@@ -284,7 +284,7 @@ export default function RegisterScreen() {
         return;
       }
 
-      if (type === UserType.INTERPRETER && document?.length) {
+      if (type === UserType.INTERPRETER && document?.length > 0) {
         try {
           const formData = buildDocumentFormData(document);
           await uploadApi.postAt(
@@ -750,12 +750,12 @@ export default function RegisterScreen() {
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-14 pb-4 gap-4">
+            <View className="mt-8 pb-4 gap-4">
               <Button
                 onPress={handleRegister}
                 size="md"
                 isDisabled={isRegistering}
-                className="data-[active=true]:bg-primary-orange-press-light"
+                className={`data-[active=true]:bg-primary-orange-press-light ${isRegistering ? 'mb-6' : ''} bg-primary-orange-light`}
               >
                 {isRegistering ? (
                   <ActivityIndicator color={colors.white} />
