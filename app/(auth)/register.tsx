@@ -235,14 +235,14 @@ export default function RegisterScreen() {
       value: '',
       error: '',
       validate: (value: string, ctx?: { type: string }) => {
-        if (ctx?.type === UserType.INTERPRETER &&
-            value.trim() &&
-            !validateUrl(value)
-          ) 
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          value.trim() &&
+          !validateUrl(value)
+        )
           return buildInvalidFieldError('videoUrl');
         return null;
-      }
-
+      },
     },
   });
 

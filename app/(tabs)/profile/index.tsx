@@ -295,7 +295,8 @@ export default function ProfileScreen() {
                   </Text>
                   <Text
                     style={{ color: colors.primaryBlue }}
-                    className="underline font-ifood-regular break-words"                    numberOfLines={1}
+                    className="underline font-ifood-regular break-words"
+                    numberOfLines={1}
                     onPress={() =>
                       Linking.openURL(profile.professional_data!.video_url!)
                     }
@@ -342,7 +343,7 @@ export default function ProfileScreen() {
             size="md"
             onPress={() =>
               router.push({
-                pathname: '/(tabs)/profile/edit',
+                pathname: '/(tabs)/(profile)/edit',
                 params: {
                   profile: JSON.stringify(profile),
                   schedule: SCHEDULE_ENABLED
@@ -365,7 +366,7 @@ export default function ProfileScreen() {
 
           <Button
             size="md"
-            onPress={() => router.push('/faq')}
+            //onPress={() => router.push('/faq')}
             variant={'linked'}
             className="w-[330px] bg-transparent data-[active=true]:bg-primary-gray-press-light items-center justify-start p-2"
           >

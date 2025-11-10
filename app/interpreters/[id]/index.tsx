@@ -19,7 +19,11 @@ import type {
   RatingsResponse,
 } from '@/src/types/api';
 import type { DateTimeSelection } from '@/src/types/ui';
-import { getSafeAvatarUri, showGenericErrorToast, getYouTubeId } from '@/src/utils/helpers';
+import {
+  getSafeAvatarUri,
+  showGenericErrorToast,
+  getYouTubeId,
+} from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -130,7 +134,6 @@ export default function InterpreterDetails() {
   const contentPadding = 48;
   const playerWidth = screenWidth - contentPadding;
   const playerHeight = Math.round((playerWidth * 9) / 16);
-
 
   return (
     <>
@@ -246,8 +249,7 @@ export default function InterpreterDetails() {
                   label={Strings.common.fields.videoUrl}
                   onlyLabel={true}
                 />
-               <View className="-mt-5 mb-3 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
-                
+                <View className="-mt-5 mb-3 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
                   <View className="aspect-video">
                     <YoutubePlayer
                       height={playerHeight}
@@ -261,18 +263,17 @@ export default function InterpreterDetails() {
             )}
 
             {hasInvalidVideo && (
-               <View className="mt-4">
-              <InfoRow
-                icon={<VideoIcon size={16} color={colors.text} />}
-                label={Strings.common.fields.videoUrl}
-                onlyLabel={true}
-              />
-              <Text className="mt-2 text-typography-400 text-sm">
-                {Strings.common.fields.videoUnavailable}
-              </Text>
-            </View>
-          )}
-
+              <View className="mt-4">
+                <InfoRow
+                  icon={<VideoIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <Text className="mt-2 text-typography-400 text-sm">
+                  {Strings.common.fields.videoUnavailable}
+                </Text>
+              </View>
+            )}
 
             <InfoRow
               icon={<InfoIcon size={16} color={colors.text} />}

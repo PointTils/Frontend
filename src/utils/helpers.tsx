@@ -412,7 +412,7 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
  * - Embed URLs: youtube.com/embed/ID
  * - Short videos: youtube.com/shorts/ID
  * - Raw IDs: just the 11 character ID
- * 
+ *
  * @param input YouTube URL or ID
  * @returns Video ID if valid, empty string if invalid URL format, null if no input
  */
