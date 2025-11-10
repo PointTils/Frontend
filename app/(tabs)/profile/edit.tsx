@@ -41,10 +41,16 @@ import {
 } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
-import { useApiGet, useApiPatch, useApiPost } from '@/src/hooks/useApi';
+import {
+  useApiDelete,
+  useApiGet,
+  useApiPatch,
+  useApiPost,
+} from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
+import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
   type ScheduleResponse,
   type ScheduleRequest,
@@ -99,6 +105,7 @@ import {
   Pencil,
   PlusIcon,
   MinusIcon,
+  Trash,
 } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -124,6 +131,7 @@ export default function EditProfileScreen() {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
     null,
   );
@@ -135,9 +143,11 @@ export default function EditProfileScreen() {
     useRef<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
 
   // Parse the profile data from params if available
-  let profile = params.profile
+  const profile = params.profile
     ? (JSON.parse(params.profile as string) as UserResponseData)
     : null;
+
+  const { markProfileAsCompleted } = useProfileCompletion(profile?.id);
 
   // Early return if no profile data
   useEffect(() => {
@@ -155,6 +165,13 @@ export default function EditProfileScreen() {
       router.back();
     }
   }, [profile]);
+
+  // Mark profile as completed for non-interpreter users when they access edit screen
+  useEffect(() => {
+    if (profile && profile.type !== UserType.INTERPRETER) {
+      markProfileAsCompleted();
+    }
+  }, [profile, profile?.type, markProfileAsCompleted]);
 
   const scheduleData = useMemo(
     () =>
@@ -199,6 +216,9 @@ export default function EditProfileScreen() {
     UserSpecialtyRequest
   >(ApiRoutes.userSpecialties.byUser(profile?.id || ''));
   const userPictureApi = useApiPost<UserPictureResponse, FormData>(
+    ApiRoutes.userPicture.upload(profile?.id || ''),
+  );
+  const userPictureDeleteApi = useApiDelete<void>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
   const scheduleApiPatch = useApiPatch<ScheduleResponse, ScheduleRequest>('');
@@ -477,6 +497,7 @@ export default function EditProfileScreen() {
     const image = await pickImage();
     if (image) {
       setSelectedImage(image);
+      setIsImageDeleted(false);
     }
   };
 
@@ -542,23 +563,34 @@ export default function EditProfileScreen() {
     const profilePromise = api.patch(payload);
     const specialtyPromise = userSpecialtyApi.post(specialtiesPayload);
 
-    let picturePromise: Promise<UserPictureResponse | null>;
+    let pictureOkPromise: Promise<boolean>;
     if (selectedImage) {
-      picturePromise = userPictureApi.post(buildAvatarFormData(selectedImage));
+      pictureOkPromise = userPictureApi
+        .post(buildAvatarFormData(selectedImage))
+        .then((r) => !!r?.picture)
+        .catch(() => false);
+    } else if (profile?.picture && !selectedImage) {
+      pictureOkPromise = userPictureDeleteApi
+        .del()
+        .then(() => true)
+        .catch(() => false);
     } else {
-      picturePromise = Promise.resolve({ success: true } as any);
+      pictureOkPromise = Promise.resolve(true);
     }
 
     // Submit updates
-    const [profileResponse, specialtyResponse, pictureResponse] =
-      await Promise.all([profilePromise, specialtyPromise, picturePromise]);
+    const [profileResponse, specialtyResponse, pictureOk] = await Promise.all([
+      profilePromise,
+      specialtyPromise,
+      pictureOkPromise,
+    ]);
 
     if (
       !profileResponse?.success ||
       !specialtyResponse?.success ||
-      (selectedImage && !pictureResponse?.picture)
+      !pictureOk
     ) {
-      router.replace('/(tabs)/(profile)');
+      router.replace('/(tabs)/profile');
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
         type: 'error',
@@ -629,7 +661,7 @@ export default function EditProfileScreen() {
       const failedCreate = createResults.some((r) => !r?.success);
 
       if (failedPatch || failedCreate) {
-        router.replace('/(tabs)/(profile)');
+        router.replace('/(tabs)/profile');
         await new Promise((resolve) => setTimeout(resolve, 300));
         Toast.show({
           type: 'error',
@@ -671,8 +703,10 @@ export default function EditProfileScreen() {
       return;
     }
 
+    await markProfileAsCompleted();
+
     // Successful update logic (e.g., navigate to profile)
-    router.replace('/(tabs)/(profile)');
+    router.replace('/(tabs)/profile');
     await new Promise((resolve) => setTimeout(resolve, 300));
     Toast.show({
       type: 'success',
@@ -714,17 +748,32 @@ export default function EditProfileScreen() {
                 <Avatar size="lg" borderRadius="full" className="h-32 w-32">
                   <AvatarImage
                     source={{
-                      uri:
-                        selectedImage?.uri ||
-                        getSafeAvatarUri({
-                          remoteUrl: profile?.picture,
-                        }),
+                      uri: isImageDeleted
+                        ? getSafeAvatarUri({
+                            remoteUrl: '',
+                          })
+                        : selectedImage?.uri ||
+                          getSafeAvatarUri({
+                            remoteUrl: profile?.picture,
+                          }),
                     }}
                   />
                 </Avatar>
                 {IMAGE_UPLOAD_ENABLED && (
-                  <View className="absolute bottom-2 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
-                    <Pencil size={20} color={colors.primaryBlue} />
+                  <View>
+                    <View className="absolute bottom-0 right-2 bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
+                      <Pencil size={20} color={colors.primaryBlue} />
+                    </View>
+                    <View className="absolute bottom-24 left bg-white dark:bg-background-dark rounded-full p-2 shadow-xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedImage(null);
+                          setIsImageDeleted(true);
+                        }}
+                      >
+                        <Trash size={20} color={colors.error} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
               </View>

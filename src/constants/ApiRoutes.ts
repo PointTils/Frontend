@@ -101,6 +101,14 @@ export const ApiRoutes = {
     base: '/ratings',
     byInterpreter: (interpreterId: string) =>
       `/ratings?interpreterId=${interpreterId}`,
-    create: (appointmentId: string) => `/ratings/${appointmentId}`,
+  },
+  parameters: {
+    base: '/parameters',
+    byKey: (key: string) => `/parameters/${key}`,
+  },
+  interpreterDocument: {
+    base: `/interpreter-documents`,
+    upload: (interpreterId: string, replace: boolean) =>
+      `/interpreter-documents/${interpreterId}?replace_existing=${replace}`,
   },
 } as const;
