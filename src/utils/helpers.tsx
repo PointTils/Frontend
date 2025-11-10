@@ -440,10 +440,10 @@ export const getYouTubeId = (input?: string | null): string | null => {
     const idx = parts.findIndex((p) => p === 'embed' || p === 'shorts');
     if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
   } catch {
-    // URL inválida -> marcar como inválida
+    // Invalid URL
     return '';
   }
 
-  // formato não reconhecido -> inválida
+  // Unrecognized format -> invalid
   return '';
 };
