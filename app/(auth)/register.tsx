@@ -52,6 +52,7 @@ import {
   validateCpf,
   validateEmail,
   validatePhone,
+  validateUrl,
 } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
@@ -227,6 +228,19 @@ export default function RegisterScreen() {
       validate: (value: string) => {
         if (!value.trim()) return buildRequiredFieldError('password');
         if (value.length < 8) return Strings.common.fields.errors.minPassword;
+        return null;
+      },
+    },
+    videoUrl: {
+      value: '',
+      error: '',
+      validate: (value: string, ctx?: { type: string }) => {
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          value.trim() &&
+          !validateUrl(value)
+        )
+          return buildInvalidFieldError('videoUrl');
         return null;
       },
     },
@@ -597,9 +611,10 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            {/* Interpreter CNPJ */}
+            {/* Interpreter */}
             {type === UserType.INTERPRETER && (
               <View className="gap-3 mt-3">
+                {/* Interpreter CNPJ */}
                 <FormControl isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -626,6 +641,35 @@ export default function RegisterScreen() {
                     />
                     <FormControlErrorText>
                       {fields.cnpj.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+
+                {/* Presentation video*/}
+                <FormControl isInvalid={!!fields.videoUrl.error}>
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.common.fields.videoUrl} (
+                      {Strings.common.fields.optional})
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Input>
+                    <InputField
+                      placeholder="https://youtube.com/meu-video"
+                      className="font-ifood-regular"
+                      value={fields.videoUrl.value}
+                      onChangeText={(v) => setValue('videoUrl', v)}
+                      maxLength={250}
+                      autoCapitalize="none"
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.videoUrl.error}
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
