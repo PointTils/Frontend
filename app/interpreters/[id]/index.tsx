@@ -249,7 +249,7 @@ export default function InterpreterDetails() {
                   label={Strings.common.fields.videoUrl}
                   onlyLabel={true}
                 />
-                <View className="-mt-5 mb-3 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
+                <View className="-mt-6 mb-8 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
                   <View className="aspect-video">
                     <YoutubePlayer
                       height={playerHeight}
@@ -263,7 +263,7 @@ export default function InterpreterDetails() {
             )}
 
             {hasInvalidVideo && (
-              <View className="mt-4">
+              <View className="mt-4 mb-6">
                 <InfoRow
                   icon={<VideoIcon size={16} color={colors.text} />}
                   label={Strings.common.fields.videoUrl}
