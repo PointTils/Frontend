@@ -267,6 +267,14 @@ export const validateEmail = (email: string) => {
   return regex.test(email);
 };
 
+export const validateUrl = (url: string) => {
+  if (!url) return false;
+  const value = url.trim();
+  const regex =
+    /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/i;
+  return regex.test(value);
+};
+
 export const validateCnpj = (cnpj: string) => {
   return cnpj.replace(/\D/g, '').length === 14;
 };

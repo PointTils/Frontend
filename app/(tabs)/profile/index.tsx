@@ -38,7 +38,7 @@ import {
   LogOut,
 } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, ActivityIndicator } from 'react-native';
+import { ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function ProfileScreen() {
@@ -286,6 +286,25 @@ export default function ProfileScreen() {
                 label={Strings.common.fields.values}
                 value={Strings.common.values.combined}
               />
+
+              {/* Presentation video link */}
+              {profile.professional_data?.video_url && (
+                <View className="px-2 py-1 mb-2">
+                  <Text className="font-ifood-medium text-text-light dark:text-text-dark mb-1">
+                    {Strings.common.fields.videoUrl}
+                  </Text>
+                  <Text
+                    style={{ color: colors.primaryBlue }}
+                    className="underline font-ifood-regular break-words"
+                    numberOfLines={1}
+                    onPress={() =>
+                      Linking.openURL(profile.professional_data!.video_url!)
+                    }
+                  >
+                    {profile.professional_data!.video_url}
+                  </Text>
+                </View>
+              )}
 
               {/* Schedule */}
               {SCHEDULE_ENABLED && (

@@ -19,7 +19,11 @@ import type {
   RatingsResponse,
 } from '@/src/types/api';
 import type { DateTimeSelection } from '@/src/types/ui';
-import { getSafeAvatarUri, showGenericErrorToast } from '@/src/utils/helpers';
+import {
+  getSafeAvatarUri,
+  showGenericErrorToast,
+  getYouTubeId,
+} from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -33,6 +37,7 @@ import {
   InfoIcon,
   MapPinIcon,
   PackageSearchIcon,
+  VideoIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -41,7 +46,9 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 type TabKey = keyof typeof Strings.search.tabs;
 
@@ -118,6 +125,15 @@ export default function InterpreterDetails() {
   };
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
+
+  const rawUrl = interpreter.professional_data?.video_url;
+  const videoId = rawUrl ? getYouTubeId(rawUrl) : null;
+  const hasValidVideo = !!videoId;
+  const hasInvalidVideo = rawUrl && videoId === '';
+  const screenWidth = Dimensions.get('window').width;
+  const contentPadding = 48;
+  const playerWidth = screenWidth - contentPadding;
+  const playerHeight = Math.round((playerWidth * 9) / 16);
 
   return (
     <>
@@ -225,6 +241,39 @@ export default function InterpreterDetails() {
               value={interpreter.professional_data?.description || undefined}
               valueColor="text-typography-600"
             />
+
+            {hasValidVideo && (
+              <View className="mt-4">
+                <InfoRow
+                  icon={<VideoIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <View className="-mt-6 mb-8 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
+                  <View className="aspect-video">
+                    <YoutubePlayer
+                      height={playerHeight}
+                      width={playerWidth}
+                      videoId={videoId!}
+                      webViewProps={{ allowsFullScreenVideo: true }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {hasInvalidVideo && (
+              <View className="mt-4 mb-6">
+                <InfoRow
+                  icon={<VideoIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <Text className="mt-2 text-typography-400 text-sm">
+                  {Strings.common.fields.videoUnavailable}
+                </Text>
+              </View>
+            )}
 
             <InfoRow
               icon={<InfoIcon size={16} color={colors.text} />}
