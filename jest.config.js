@@ -13,5 +13,13 @@ module.exports = {
     '!<rootDir>/src/components/ui/**',
     '!<rootDir>/src/assets/**',
     '!<rootDir>/src/contexts/**',
+    '!<rootDir>/app/**/_layout.tsx',
+    '!**/*.d.ts',
+  ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/android/',
+    '/.github/',
+    '/tests/',
   ],
 };
