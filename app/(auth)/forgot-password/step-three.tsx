@@ -36,7 +36,6 @@ export default function ForgotPasswordStepThree() {
   const handleRecover = async () => {
     const clean = (resetToken || '').trim();
 
-    // token obrigatório e com tamanho correto
     if (clean.length !== TOKEN_LENGTH) {
       Toast.show({
         type: 'error',
@@ -47,7 +46,6 @@ export default function ForgotPasswordStepThree() {
       return;
     }
 
-    // senhas obrigatórias
     if (!newPassword || !confirmPassword) {
       Toast.show({
         type: 'error',
@@ -58,7 +56,6 @@ export default function ForgotPasswordStepThree() {
       return;
     }
 
-    // tamanho mínimo
     if (newPassword.length < MIN_PASSWORD) {
       Toast.show({
         type: 'error',
@@ -72,7 +69,6 @@ export default function ForgotPasswordStepThree() {
       return;
     }
 
-    // senhas iguais
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
@@ -84,7 +80,7 @@ export default function ForgotPasswordStepThree() {
     }
 
     try {
-      const body = { resetToken: clean, newPassword };
+      const body = { reset_token: clean, new_password: newPassword };
       const resp: any = await recoverPassword(body as any);
       const ok = resp?.success ?? true;
       if (!ok) throw new Error(resp?.message || Strings.auth.reset.failedDesc);
@@ -153,7 +149,6 @@ export default function ForgotPasswordStepThree() {
           {Strings.auth.reset.redefineDesc}
         </Text>
 
-        {/* Se não vier token pelo link, exibe o campo do código */}
         {!tokenFromUrl && (
           <>
             <Text className="font-ifood-medium mb-2">

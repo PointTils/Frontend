@@ -17,14 +17,15 @@ import { Toast } from 'toastify-react-native';
 export default function ForgotPasswordStepOne() {
   const colors = useColors();
 
-  // Apenas substitui o useState, sem helpers extras
   const { fields, setValue, validateForm } = useFormValidation({
     email: {
       value: '',
       error: '',
       validate: (value: string) => {
-        if (!value.trim()) return 'E-mail obrigatório';
-        if (!value.includes('@')) return 'E-mail inválido';
+        const v = value.trim();
+        if (!v) return 'E-mail obrigatório';
+        const re = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (!re.test(v)) return 'E-mail inválido';
         return null;
       },
     },
@@ -32,7 +33,7 @@ export default function ForgotPasswordStepOne() {
 
   const { post: sendResetEmail, loading: sendingEmail } = useApiPost(
     ApiRoutes.auth.passwordResetEmail(
-      encodeURIComponent(fields.email.value || ''),
+      encodeURIComponent((fields.email.value || '').trim()),
     ),
   );
 
@@ -50,9 +51,11 @@ export default function ForgotPasswordStepOne() {
       return;
     }
 
-    try {
-      await sendResetEmail(undefined as any);
+    const email = (fields.email.value || '').trim();
+    if (!email) return;
 
+    try {
+      await sendResetEmail();
       Toast.show({
         type: 'success',
         text1: Strings.auth.reset.emailSentTitle,
@@ -61,18 +64,19 @@ export default function ForgotPasswordStepOne() {
         visibilityTime: 2000,
       });
 
-      //const toStepTwo =
-      //  `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}` as Href;
-      //  router.push(toStepTwo);
-
       router.push(
-        `/forgot-password/step-two?email=${encodeURIComponent(fields.email.value)}`,
+        `/forgot-password/step-two?email=${encodeURIComponent(email)}`,
       );
-    } catch {
+    } catch (e: any) {
+      const msg =
+        e?.message && typeof e.message === 'string'
+          ? e.message
+          : Strings.auth.reset.emailFailedDesc;
+
       Toast.show({
         type: 'error',
         text1: Strings.auth.reset.emailFailedTitle,
-        text2: Strings.auth.reset.emailFailedDesc,
+        text2: msg,
         position: 'top',
       });
     }
@@ -136,7 +140,9 @@ export default function ForgotPasswordStepOne() {
           <Button
             size="md"
             onPress={handleSendCode}
-            disabled={!fields.email.value || sendingEmail}
+            disabled={
+              !!fields.email.error || !fields.email.value.trim() || sendingEmail
+            }
             className="data-[active=true]:bg-primary-orange-press-light"
           >
             <ButtonIcon as={Mail} className="text-white" />

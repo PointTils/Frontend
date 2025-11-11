@@ -1,4 +1,3 @@
-// app/(auth)/forgot-password/step-three.tsx
 import Header from '@/src/components/Header';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { Input, InputField } from '@/src/components/ui/input';
@@ -9,34 +8,31 @@ import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Eye, EyeOff, Lock } from 'lucide-react-native';
+import { Lock } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 const TOKEN_LENGTH = 6;
-const MIN_PASSWORD = 8;
 
-export default function ForgotPasswordStepThree() {
+export default function ForgotPasswordStepTwo() {
   const colors = useColors();
-  const { token: tokenFromUrl } = useLocalSearchParams<{ token?: string }>();
+  const { email: emailFromUrl } = useLocalSearchParams<{ email?: string }>();
 
-  const [resetToken, setResetToken] = useState<string>(tokenFromUrl ?? '');
-  const [newPassword, setNewPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [showPwd1, setShowPwd1] = useState(false);
-  const [showPwd2, setShowPwd2] = useState(false);
+  const [resetToken, setResetToken] = useState<string>('');
+  const [resending, setResending] = useState(false);
 
-  const { post: recoverPassword, loading: recovering } = useApiPost(
-    ApiRoutes.auth.recoverPassword,
+  const { post: resendEmail } = useApiPost(
+    ApiRoutes.auth.passwordResetEmail(
+      encodeURIComponent((emailFromUrl || '').trim()),
+    ),
   );
 
   const Title = useMemo(() => Strings.auth.reset.title, []);
   const handleBack = () => router.replace('/login' as any);
 
-  const handleRecover = async () => {
+  const handleVerify = () => {
     const clean = (resetToken || '').trim();
-
     if (clean.length !== TOKEN_LENGTH) {
       Toast.show({
         type: 'error',
@@ -47,75 +43,49 @@ export default function ForgotPasswordStepThree() {
       return;
     }
 
-    if (!newPassword || !confirmPassword) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.pwdMissingTitle,
-        text2: Strings.auth.reset.pwdMissingDesc,
-        position: 'top',
-      });
-      return;
-    }
+    router.push(`/forgot-password/step-three?token=${encodeURIComponent(clean)}`);
+  };
 
-    if (newPassword.length < MIN_PASSWORD) {
+  const handleResend = async () => {
+    const email = (emailFromUrl || '').trim();
+    if (!email) {
       Toast.show({
         type: 'error',
-        text1: Strings.auth.reset.shortPwdTitle,
-        text2: Strings.auth.reset.shortPwdDesc.replace(
-          '{min}',
-          String(MIN_PASSWORD),
-        ),
-        position: 'top',
-      });
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.pwdMismatchTitle,
-        text2: Strings.auth.reset.pwdMismatchDesc,
+        text1: Strings.auth.reset.invalidEmailTitle,
+        text2: Strings.auth.reset.invalidEmailDesc,
         position: 'top',
       });
       return;
     }
 
     try {
-      const body = { resetToken: clean, newPassword };
-      const resp: any = await recoverPassword(body as any);
-      const ok = resp?.success ?? true;
-      if (!ok) throw new Error(resp?.message || Strings.auth.reset.failedDesc);
-
+      setResending(true);
+      await resendEmail();
       Toast.show({
         type: 'success',
-        text1: Strings.auth.reset.successTitle,
-        text2: resp?.message || Strings.auth.reset.successDesc,
+        text1: Strings.auth.reset.emailSentTitle,
+        text2: Strings.auth.reset.emailSentDesc,
         position: 'top',
-        visibilityTime: 1800,
+        visibilityTime: 1600,
       });
-
-      setNewPassword('');
-      setConfirmPassword('');
-      router.replace('/login' as any);
     } catch (e: any) {
       const msg =
         e?.message && typeof e.message === 'string'
           ? e.message
-          : Strings.auth.reset.failedDesc;
+          : Strings.auth.reset.emailFailedDesc;
 
       Toast.show({
         type: 'error',
-        text1: Strings.auth.reset.failedTitle,
+        text1: Strings.auth.reset.emailFailedTitle,
         text2: msg,
         position: 'top',
       });
-
-      setNewPassword('');
-      setConfirmPassword('');
+    } finally {
+      setResending(false);
     }
   };
 
-  if (recovering) {
+  if (resending) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={colors.primaryOrange} />
@@ -140,96 +110,47 @@ export default function ForgotPasswordStepThree() {
         showsVerticalScrollIndicator={false}
       >
         <Text className="text-typography-500 font-ifood-regular mb-2">
-          {Strings.auth.reset.step} 3 {Strings.auth.reset.of} 3
+          {Strings.auth.reset.step} 2 {Strings.auth.reset.of} 3
         </Text>
 
         <Text className="font-ifood-medium text-xl text-text-light dark:text-text-dark mb-1">
-          {Strings.auth.reset.redefineTitle}
+          {Strings.auth.reset.authTitle}
         </Text>
         <Text className="font-ifood-regular text-typography-600 mb-6">
-          {Strings.auth.reset.redefineDesc}
+          {Strings.auth.reset.authDesc}
         </Text>
-
-        {!tokenFromUrl && (
-          <>
-            <Text className="font-ifood-medium mb-2">
-              {Strings.auth.reset.codeLabel}
-            </Text>
-            <Input className="mb-4">
-              <InputField
-                value={resetToken}
-                onChangeText={(v: string) =>
-                  setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
-                }
-                placeholder={Strings.auth.reset.codePlaceholder}
-                keyboardType="numeric"
-                autoCapitalize="none"
-              />
-            </Input>
-          </>
-        )}
 
         <Text className="font-ifood-medium mb-2">
-          {Strings.auth.reset.newPwdLabel}
+          {Strings.auth.reset.codeLabel}
         </Text>
-        <Input className="mb-2">
+        <Input className="mb-1">
           <InputField
-            value={newPassword}
-            onChangeText={(v: string) => setNewPassword(v)}
-            placeholder={Strings.auth.reset.newPwdPlaceholder}
-            secureTextEntry={!showPwd1}
+            value={resetToken}
+            onChangeText={(v: string) =>
+              setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
+            }
+            placeholder={Strings.auth.reset.codePlaceholder}
+            keyboardType="numeric"
             autoCapitalize="none"
           />
-          <Pressable
-            onPress={() => setShowPwd1((s) => !s)}
-            className="absolute right-3 top-3"
-          >
-            {showPwd1 ? (
-              <EyeOff size={18} color={colors.text} />
-            ) : (
-              <Eye size={18} color={colors.text} />
-            )}
-          </Pressable>
         </Input>
 
-        <Text className="font-ifood-medium mt-4 mb-2">
-          {Strings.auth.reset.confirmPwdLabel}
-        </Text>
-        <Input>
-          <InputField
-            value={confirmPassword}
-            onChangeText={(v: string) => setConfirmPassword(v)}
-            placeholder={Strings.auth.reset.confirmPwdPlaceholder}
-            secureTextEntry={!showPwd2}
-            autoCapitalize="none"
-          />
-          <Pressable
-            onPress={() => setShowPwd2((s) => !s)}
-            className="absolute right-3 top-3"
-          >
-            {showPwd2 ? (
-              <EyeOff size={18} color={colors.text} />
-            ) : (
-              <Eye size={18} color={colors.text} />
-            )}
-          </Pressable>
-        </Input>
+        <Pressable onPress={handleResend} className="mb-8">
+          <Text className="text-primary-orange-light dark:text-primary-orange-dark underline">
+            {Strings.auth.reset.resendDesc}
+          </Text>
+        </Pressable>
 
-        <View className="mt-10 gap-3">
+        <View className="mt-6 gap-3">
           <Button
             size="md"
-            onPress={handleRecover}
-            disabled={
-              (!tokenFromUrl && resetToken.trim().length !== TOKEN_LENGTH) ||
-              !newPassword ||
-              !confirmPassword ||
-              recovering
-            }
+            onPress={handleVerify}
+            disabled={resetToken.trim().length !== TOKEN_LENGTH}
             className="data-[active=true]:bg-primary-orange-press-light"
           >
             <ButtonIcon as={Lock} className="text-white" />
             <Text className="font-ifood-regular text-text-dark">
-              {Strings.auth.reset.saveCta}
+              {Strings.auth.reset.verifyCta}
             </Text>
           </Button>
 
