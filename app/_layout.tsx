@@ -12,8 +12,17 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
 import ToastManager from 'toastify-react-native';
+import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
+import { notificationTemplates } from '@/src/utils/notificationTemplates'; // ajuste o path conforme sua pasta
+import '@/src/utils/messageHandler';
+import { usePushNotifications } from '@/src/hooks/usePushNotification';
 
 import 'react-native-reanimated';
+import { Platform } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import { useApiGet } from '@/src/hooks/useApi';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
 SplashScreen.preventAutoHideAsync();
@@ -101,7 +110,6 @@ function RootNavigator() {
 function AppContent() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
-
   const { isLoading: authLoading } = useAuth();
 
   const [fontsLoaded] = useFonts({
@@ -112,6 +120,8 @@ function AppContent() {
     'iFoodRC-Bold': require('@/src/assets/fonts/iFoodRCTextos-Bold.ttf'),
     'iFoodRC-ExtraBold': require('@/src/assets/fonts/iFoodRCTextos-ExtraBold.ttf'),
   });
+
+  const { fcmPushToken, notification } = usePushNotifications();
 
   useEffect(() => {
     async function prepare() {
@@ -132,6 +142,41 @@ function AppContent() {
       prepare();
     }
   }, [fontsLoaded]);
+
+
+
+  useEffect(() => {
+    console.log('Criando canal de notificações');
+    async function createNotificationChannel() {
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'Default Channel',
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      }
+    }
+
+    const unsubscribeForeground = messaging().onMessage(async (remoteMessage) => {
+      const { type, ...data } = remoteMessage.data || {};
+      console.log('Mensagem recebida em FOREGROUND:', remoteMessage);
+      const typeStr = String(type);
+      const template = notificationTemplates[typeStr];
+      if (template) {
+        console.log('Template encontrado para o tipo:', typeStr);
+        const { title, body } = template(data);
+        await Notifications.scheduleNotificationAsync({
+          content: { title, body, priority: Notifications.AndroidNotificationPriority.MAX, data: data },
+          trigger: null,
+
+        });
+      }
+    });
+
+
+    createNotificationChannel();
+
+    return () => unsubscribeForeground();
+  }, []);
 
   const hideNativeSplash = useCallback(async () => {
     if (appIsReady && fontsLoaded) {
