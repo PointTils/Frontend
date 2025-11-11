@@ -43,7 +43,9 @@ export default function ForgotPasswordStepTwo() {
       return;
     }
 
-    router.push(`/forgot-password/step-three?token=${encodeURIComponent(clean)}`);
+    router.push(
+      `/forgot-password/step-three?token=${encodeURIComponent(clean)}`,
+    );
   };
 
   const handleResend = async () => {
