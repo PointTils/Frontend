@@ -11,7 +11,8 @@
     "lint": "expo lint",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "test": "jest"
+    "test": "jest",
+    "test:report": "jest --coverage"
   },
   "dependencies": {
     "@expo/html-elements": "^0.13.7",
