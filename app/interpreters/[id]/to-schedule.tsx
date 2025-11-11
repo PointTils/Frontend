@@ -30,11 +30,12 @@ import {
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
 import {
+  type SchedulePerDate,
   type AppointmentRequest,
   type AppointmentResponse,
   type StateAndCityResponse,
-  Modality,
   type ScheduleResponse,
+  Modality,
 } from '@/src/types/api';
 import type { OptionItem } from '@/src/types/ui';
 import {
@@ -94,7 +95,7 @@ export default function ToScheduleScreen() {
   const minDate = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 1);
+    d.setDate(d.getDate());
     return d;
   }, []);
 
@@ -211,29 +212,35 @@ export default function ToScheduleScreen() {
 
   // Build time options from fetched schedule
   const startTimeOptions = useMemo(() => {
-    const items = daySchedule?.data ?? [];
+    const items = Array.isArray(daySchedule?.data)
+      ? (daySchedule?.data as SchedulePerDate[])
+      : [];
     const forDay = items.find((s) => s.date?.slice(0, 10) === selectedDateStr);
     const slots = forDay?.time_slots ?? [];
-    const hhmm = Array.from(
-      new Set(
+
+    const allStarts = Array.from(
+      new Set<string>(
         slots
           .map((t) => t.start_time?.slice(0, 5))
           .filter((v): v is string => !!v),
       ),
     ).sort();
-    return hhmm.map((t) => ({ label: t, value: t }));
+
+    return allStarts.map((t) => ({ label: t, value: t }));
   }, [daySchedule, selectedDateStr]);
 
   const endTimeOptions = useMemo(() => {
     if (!fields.startTime.value) return []; // No start time selected yet
 
-    const items = daySchedule?.data ?? [];
+    const items = Array.isArray(daySchedule?.data)
+      ? (daySchedule?.data as SchedulePerDate[])
+      : [];
     const forDay = items.find((s) => s.date?.slice(0, 10) === selectedDateStr);
     const slots = forDay?.time_slots ?? [];
 
     // All end times for the day
     const allEnds = Array.from(
-      new Set(
+      new Set<string>(
         slots
           .map((t) => t.end_time?.slice(0, 5))
           .filter((v): v is string => !!v),

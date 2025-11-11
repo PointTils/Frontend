@@ -10,7 +10,6 @@ import { Toast } from 'toastify-react-native';
 
 import { Button } from './ui/button';
 import { ApiRoutes } from '../constants/ApiRoutes';
-import { useAuth } from '../contexts/AuthProvider';
 import { useApiPost } from '../hooks/useApi';
 
 interface FeedbackModalProps {
@@ -44,14 +43,13 @@ export default function FeedbackModal({
   appointmentId,
   interpreterName,
 }: FeedbackModalProps) {
-  const { user } = useAuth();
   const colors = useColors();
 
   const [details, setDetails] = useState('');
   const [rating, setRating] = useState(0);
 
   const { post, loading } = useApiPost<RatingResponse, RatingRequest>(
-    ApiRoutes.ratings.create(appointmentId),
+    ApiRoutes.ratings.base,
   );
 
   // Reset state when modal is opened
@@ -79,7 +77,7 @@ export default function FeedbackModal({
     const body = {
       stars: rating,
       description: details.trim() || null,
-      user_id: user?.id || '',
+      appointment_id: appointmentId || '',
     };
 
     const response = await post(body);

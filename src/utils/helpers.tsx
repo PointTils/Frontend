@@ -107,6 +107,9 @@ export const buildRegisterPayload = (
         cpf: fields.cpf.value.replace(/\D/g, ''),
         professional_data: {
           cnpj: fields.cnpj.value ? fields.cnpj.value.replace(/\D/g, '') : null,
+          video_url: fields.videoUrl.value
+            ? fields.videoUrl.value.trim()
+            : null,
         },
       };
     default:
@@ -154,6 +157,9 @@ export const buildEditPayload = (type: string, fields: any): UserRequest => {
           description: fields.description.value,
           image_rights:
             fields.imageRight.value === Strings.common.options.authorize,
+          video_url: fields.videoUrl.value
+            ? fields.videoUrl.value.trim()
+            : null,
         },
       };
     default:
@@ -207,6 +213,24 @@ export const buildAvatarFormData = (image: ImagePickerAsset) => {
   return form;
 };
 
+export const buildDocumentFormData = (
+  files: { uri: string; fileName?: string }[],
+) => {
+  const form = new FormData();
+
+  files.forEach((file, index) => {
+    const name = file.fileName || `document_${index}_${Date.now()}.pdf`;
+
+    form.append('files', {
+      uri: file.uri,
+      name,
+      type: 'application/pdf',
+    } as any);
+  });
+
+  return form;
+};
+
 const modalityToSend = (modality: Modality[]) => {
   // If both are checked, send 'ALL', else send the single value
   let modalityToSend: Modality;
@@ -236,7 +260,7 @@ export const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
     allowsEditing: true,
-    aspect: [4, 3],
+    aspect: [1, 1],
     quality: 1,
   });
 
@@ -378,4 +402,48 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
   (RenderApptItem as unknown as { displayName?: string }).displayName =
     'RenderApptItem';
   return RenderApptItem;
+};
+
+/**
+ * Extract YouTube video ID from various URL formats
+ * Supports:
+ * - Regular URLs: youtube.com/watch?v=ID
+ * - Short URLs: youtu.be/ID
+ * - Embed URLs: youtube.com/embed/ID
+ * - Short videos: youtube.com/shorts/ID
+ * - Raw IDs: just the 11 character ID
+ *
+ * @param input YouTube URL or ID
+ * @returns Video ID if valid, empty string if invalid URL format, null if no input
+ */
+export const getYouTubeId = (input?: string | null): string | null => {
+  if (!input) return null;
+
+  // já é um ID (11 chars)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+
+  try {
+    const u = new URL(input);
+
+    // ?v=ID
+    const v = u.searchParams.get('v');
+    if (v) return v;
+
+    // youtu.be/ID
+    if (u.hostname.includes('youtu.be')) {
+      const p = u.pathname.replace('/', '');
+      return p || null;
+    }
+
+    // /embed/ID ou /shorts/ID
+    const parts = u.pathname.split('/').filter(Boolean);
+    const idx = parts.findIndex((p) => p === 'embed' || p === 'shorts');
+    if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
+  } catch {
+    // Invalid URL
+    return '';
+  }
+
+  // Unrecognized format -> invalid
+  return '';
 };
