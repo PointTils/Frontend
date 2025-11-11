@@ -7,4 +7,11 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.{ts,tsx}',
+    '<rootDir>/app/**/*.{ts,tsx}',
+    '!<rootDir>/src/components/ui/**',
+    '!<rootDir>/src/assets/**',
+    '!<rootDir>/src/contexts/**',
+  ],
 };

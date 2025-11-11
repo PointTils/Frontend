@@ -75,6 +75,7 @@ npm run start
 - **src/contexts**: Providers e contextos globais.
 - **src/hooks**: Hooks compartilhados para lógica reutilizável.
 - **src/types**: Definições de tipos TypeScript.
+- **tests/**: Testes unitários dos utilitários e componentes visuais.
 - **+**: Arquivos de configuração do projeto, como `tailwind.config.js`, `eslint.config.js`, e `tsconfig.json`.
 
 ## UI e Theming
