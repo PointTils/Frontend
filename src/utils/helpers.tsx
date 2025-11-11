@@ -14,7 +14,7 @@ import {
   formatDateToISO,
   formatTime,
 } from './masks';
-import { Card } from '../components/ui/card';
+import InterpreterCard from '../components/InterpreterCard';
 import { Strings } from '../constants/Strings';
 import {
   type Appointment,
@@ -378,7 +378,7 @@ export const renderApptItem = (opts: RenderApptItemOptions = {}) => {
     return (
       <Fragment>
         <View className="w-full h-px bg-gray-200" />
-        <Card
+        <InterpreterCard
           photoUrl={appt.contact_data?.picture || ''}
           fullName={appt.contact_data?.name || ''}
           subtitle={
