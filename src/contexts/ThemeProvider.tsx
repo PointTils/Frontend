@@ -6,6 +6,7 @@ import {
   DefaultTheme as NavLight,
   ThemeProvider as NavigationThemeProvider,
 } from '@react-navigation/native';
+import { render, RenderOptions } from '@testing-library/react-native';
 import React, {
   createContext,
   useContext,
@@ -14,6 +15,8 @@ import React, {
   useState,
 } from 'react';
 import { Appearance } from 'react-native';
+
+type UI = Parameters<typeof render>[0];
 
 type Mode = 'light' | 'dark' | 'system';
 type Resolved = 'light' | 'dark';
@@ -104,4 +107,12 @@ export function useTheme() {
   const ctx = useContext(ThemeCtx);
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
+}
+
+// Custom render function for testing with ThemeProvider
+export function renderWithProviders(ui: UI, options?: RenderOptions) {
+  return render(ui, {
+    wrapper: ({ children }) => <ThemeProvider>{children}</ThemeProvider>,
+    ...options,
+  });
 }
