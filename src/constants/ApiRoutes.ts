@@ -15,6 +15,9 @@ export const ApiRoutes = {
   },
   userApps: {
     base: '/user-apps',
+    update: (id: string) => `/user-apps/${id}`,
+    getByUserAndDevice: (userId: string, deviceId: string) =>
+      `/user-apps?userId=${encodeURIComponent(userId)}&deviceId=${encodeURIComponent(deviceId)}`,
   },
   person: {
     base: '/person',
