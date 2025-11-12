@@ -376,7 +376,7 @@ export default function RegisterScreen() {
               onChange={handleChangeType}
               className="flex-row items-center justify-between"
             >
-              <Radio value={UserType.PERSON}>
+              <Radio testID="person-type-button" value={UserType.PERSON}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -394,7 +394,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.ENTERPRISE}>
+              <Radio
+                testID="enterprise-type-button"
+                value={UserType.ENTERPRISE}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -412,7 +415,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.INTERPRETER}>
+              <Radio
+                testID="interpreter-type-button"
+                value={UserType.INTERPRETER}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -445,6 +451,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="reason-input"
                       placeholder="Empresa X"
                       className="font-ifood-regular"
                       value={fields.reason.value}
@@ -452,7 +459,7 @@ export default function RegisterScreen() {
                       maxLength={100}
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="reason-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -471,6 +478,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -481,7 +489,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="cnpj-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -505,6 +513,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="name-input"
                       placeholder="Nome X"
                       className="font-ifood-regular"
                       value={fields.name.value}
@@ -512,7 +521,7 @@ export default function RegisterScreen() {
                       maxLength={100}
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="name-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -531,6 +540,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cpf-input"
                       placeholder="000.000.000-00"
                       className="font-ifood-regular"
                       value={fields.cpf.value}
@@ -539,7 +549,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="cpf-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -559,6 +569,7 @@ export default function RegisterScreen() {
                   <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <Input pointerEvents="none">
                       <InputField
+                        testID="birthday-input"
                         placeholder="DD/MM/AAAA"
                         className="font-ifood-regular"
                         value={fields.birthday.value}
@@ -566,7 +577,7 @@ export default function RegisterScreen() {
                       />
                     </Input>
                   </TouchableOpacity>
-                  <FormControlError>
+                  <FormControlError testID="birthday-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -598,7 +609,7 @@ export default function RegisterScreen() {
                     onSelectionChange={(value) => setValue('gender', value)}
                     hasError={!!fields.gender.error}
                   />
-                  <FormControlError>
+                  <FormControlError testID='gender-error'>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -624,6 +635,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -634,7 +646,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="cnpj-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -655,6 +667,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="videoUrl-input"
                       placeholder="https://youtube.com/meu-video"
                       className="font-ifood-regular"
                       value={fields.videoUrl.value}
@@ -663,7 +676,7 @@ export default function RegisterScreen() {
                       autoCapitalize="none"
                     />
                   </Input>
-                  <FormControlError>
+                  <FormControlError testID="videoUrl-error">
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -686,6 +699,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="phone-input"
                     placeholder="(00) 00000-0000"
                     className="font-ifood-regular"
                     value={fields.phone.value}
@@ -696,7 +710,7 @@ export default function RegisterScreen() {
                     maxLength={15}
                   />
                 </Input>
-                <FormControlError>
+                <FormControlError testID="phone-error">
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -715,6 +729,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="email-input"
                     placeholder="example@gmail.com"
                     className="font-ifood-regular"
                     value={fields.email.value}
@@ -724,7 +739,7 @@ export default function RegisterScreen() {
                     maxLength={250}
                   />
                 </Input>
-                <FormControlError>
+                <FormControlError testID="email-error">
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -743,6 +758,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="password-input"
                     placeholder="********"
                     className="font-ifood-regular"
                     autoCapitalize="none"
@@ -753,6 +769,7 @@ export default function RegisterScreen() {
                   />
                 </Input>
                 <TouchableOpacity
+                  testID="toggle-password-visibility"
                   onPress={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-9"
                 >
@@ -762,7 +779,7 @@ export default function RegisterScreen() {
                     <EyeIcon color={colors.disabled} />
                   )}
                 </TouchableOpacity>
-                <FormControlError>
+                <FormControlError testID="password-error">
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -796,6 +813,7 @@ export default function RegisterScreen() {
             {/* Bottom buttons */}
             <View className="mt-8 pb-4 gap-4">
               <Button
+                testID="register-button"
                 onPress={handleRegister}
                 size="md"
                 isDisabled={isRegistering}
@@ -814,6 +832,7 @@ export default function RegisterScreen() {
               </Button>
               {!isRegistering && (
                 <HapticTab
+                  testID="cancel-button"
                   onPress={() => {
                     clearErrors();
                     router.back();
