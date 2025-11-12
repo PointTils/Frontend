@@ -1,6 +1,6 @@
 import Header from '@/src/components/Header';
+import InterpreterCard from '@/src/components/InterpreterCard';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
-import { Card } from '@/src/components/ui/card';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
@@ -81,7 +81,7 @@ export default function SearchScreen() {
             {result.data.map((item) => (
               <Fragment key={item.id}>
                 <View className="w-full h-px bg-gray-200" />
-                <Card
+                <InterpreterCard
                   variant="search"
                   photoUrl={item.picture}
                   fullName={item?.name || ''}

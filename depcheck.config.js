@@ -46,5 +46,9 @@ module.exports = {
 
     // Gluestack UI components (used through wrapper components)
     '@gluestack-ui/avatar',
+
+    // Jest
+    '@testing-library/react-hooks',
+    '@types/jest',
   ],
 };
