@@ -35,11 +35,7 @@ export default function Header({
     <View className="w-full flex-row justify-center items-center px-4">
       <View className="w-8 items-start justify-center">
         {showBackButton && (
-          <TouchableOpacity
-            testID="back-button"
-            onPress={handleBack}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
             <ChevronLeft size={24} color={colorScheme.primaryOrange} />
           </TouchableOpacity>
         )}
