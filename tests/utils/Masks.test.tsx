@@ -30,6 +30,9 @@ import {
   mapWeekDay,
 } from '@/src/utils/masks';
 
+// Override global setups
+jest.mock('@/src/utils/masks', () => jest.requireActual('@/src/utils/masks'));
+
 describe('utils/masks', () => {
   it('formats phone and CPF inputs', () => {
     expect(handlePhoneChange('11988776655')).toBe('(11) 98877-6655');

@@ -459,7 +459,7 @@ export default function RegisterScreen() {
                       maxLength={100}
                     />
                   </Input>
-                  <FormControlError testID="reason-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -489,7 +489,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError testID="cnpj-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -521,7 +521,7 @@ export default function RegisterScreen() {
                       maxLength={100}
                     />
                   </Input>
-                  <FormControlError testID="name-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -549,7 +549,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError testID="cpf-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -577,7 +577,7 @@ export default function RegisterScreen() {
                       />
                     </Input>
                   </TouchableOpacity>
-                  <FormControlError testID="birthday-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -609,7 +609,7 @@ export default function RegisterScreen() {
                     onSelectionChange={(value) => setValue('gender', value)}
                     hasError={!!fields.gender.error}
                   />
-                  <FormControlError testID='gender-error'>
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -646,7 +646,7 @@ export default function RegisterScreen() {
                       keyboardType="numeric"
                     />
                   </Input>
-                  <FormControlError testID="cnpj-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -676,7 +676,7 @@ export default function RegisterScreen() {
                       autoCapitalize="none"
                     />
                   </Input>
-                  <FormControlError testID="videoUrl-error">
+                  <FormControlError>
                     <FormControlErrorIcon
                       as={AlertCircleIcon}
                       className="text-red-600"
@@ -710,7 +710,7 @@ export default function RegisterScreen() {
                     maxLength={15}
                   />
                 </Input>
-                <FormControlError testID="phone-error">
+                <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -739,7 +739,7 @@ export default function RegisterScreen() {
                     maxLength={250}
                   />
                 </Input>
-                <FormControlError testID="email-error">
+                <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -779,7 +779,7 @@ export default function RegisterScreen() {
                     <EyeIcon color={colors.disabled} />
                   )}
                 </TouchableOpacity>
-                <FormControlError testID="password-error">
+                <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
                     className="text-red-600"
@@ -820,7 +820,10 @@ export default function RegisterScreen() {
                 className={`data-[active=true]:bg-primary-orange-press-light ${isRegistering ? 'mb-6' : ''} bg-primary-orange-light`}
               >
                 {isRegistering ? (
-                  <ActivityIndicator color={colors.white} />
+                  <ActivityIndicator
+                    testID="register-loading-indicator"
+                    color={colors.white}
+                  />
                 ) : (
                   <>
                     <ButtonIcon as={PlusIcon} className="text-white" />

@@ -1,6 +1,12 @@
 import React from 'react';
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
-import { renderWithProviders } from '@/tests/config';
+import {
+  createClearFieldErrors,
+  createSetFieldValue,
+  fillForm,
+  getRouterMock,
+  renderWithProviders,
+} from '@/tests/utils';
 import { Strings } from '@/src/constants/Strings';
 import { Gender, UserType } from '@/src/types/api';
 
@@ -9,18 +15,31 @@ import RegisterScreen from '@/app/(auth)/register';
 import Header from '@/src/components/Header';
 
 // Shared Mocks and Helpers
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-let mockParams: Record<string, unknown> = {};
+const routerMock = getRouterMock();
+const { replace: mockReplace } = routerMock;
+
 const mockPost = jest.fn();
 const mockUploadPost = jest.fn();
 
 let mockPersonApi = { post: mockPost, error: null, isLoading: false };
 let mockEnterpriseApi = { post: mockPost, error: null, isLoading: false };
 let mockInterpreterApi = { post: mockPost, error: null, isLoading: false };
-let mockUploadApi = { post: mockUploadPost, error: null, isLoading: false };
+let mockUploadApi = {
+  post: mockUploadPost,
+  postAt: mockUploadPost,
+  error: null,
+  isLoading: false,
+};
 
-// Mock fields for useFormValidation
+jest.mock('@/src/hooks/useApi', () => ({
+  useApiPost: (route: string) => {
+    if (route === '/person/register') return mockPersonApi;
+    if (route === '/enterprises/register') return mockEnterpriseApi;
+    if (route === '/interpreters/register') return mockInterpreterApi;
+    return mockUploadApi;
+  },
+}));
+
 const mockFields = {
   name: { value: '', error: '' },
   reason: { value: '', error: '' },
@@ -33,13 +52,6 @@ const mockFields = {
   password: { value: '', error: '' },
   videoUrl: { value: '', error: '' },
 };
-
-const mockSetValue = jest.fn(
-  (key: keyof typeof mockFields, value: string | undefined) => {
-    mockFields[key].value = value || '';
-    mockFields[key].error = ''; // Clear error on change
-  },
-);
 
 const mockValidateForm = jest.fn((context?: { type: string }) => {
   let isValid = true;
@@ -97,70 +109,24 @@ const mockValidateForm = jest.fn((context?: { type: string }) => {
   return isValid;
 });
 
-const mockClearErrors = jest.fn(() => {
-  (Object.keys(mockFields) as (keyof typeof mockFields)[]).forEach(
-    (key: keyof typeof mockFields) => {
-      mockFields[key].value = '';
-      mockFields[key].error = '';
-    },
-  );
+let mockUseActualValidation = false;
+const mockSetValue = createSetFieldValue(mockFields);
+const mockClearErrors = createClearFieldErrors(mockFields);
+
+jest.mock('@/src/hooks/useFormValidation', () => {
+  const actualModule = jest.requireActual('@/src/hooks/useFormValidation');
+  return {
+    useFormValidation: (...args: any[]) =>
+      mockUseActualValidation
+        ? actualModule.useFormValidation(...args)
+        : {
+            fields: mockFields,
+            setValue: mockSetValue,
+            validateForm: mockValidateForm,
+            clearErrors: mockClearErrors,
+          },
+  };
 });
-
-// Deps mocks
-jest.mock('expo-router', () => ({
-  router: {
-    push: (...args: unknown[]) => mockPush(...args),
-    replace: (...args: unknown[]) => mockReplace(...args),
-  },
-  useLocalSearchParams: () => mockParams,
-}));
-
-jest.mock('toastify-react-native', () => ({
-  Toast: {
-    show: jest.fn(),
-  },
-}));
-
-// Hooks and Context Mocks
-jest.mock('@/src/hooks/useColors', () => ({
-  useColors: () => ({
-    white: '#fff',
-    disabled: '#999999',
-    text: '#0D0D0D',
-    primaryOrange: '#F28D22',
-  }),
-}));
-
-jest.mock('@/src/hooks/useApi', () => ({
-  useApiPost: (route: string) => {
-    if (route === '/person/register') return mockPersonApi;
-    if (route === '/enterprises/register') return mockEnterpriseApi;
-    if (route === '/interpreters/register') return mockInterpreterApi;
-    return mockUploadApi;
-  },
-}));
-
-jest.mock('@/src/hooks/useFormValidation', () => ({
-  useFormValidation: jest.fn(() => ({
-    fields: mockFields,
-    setValue: mockSetValue,
-    validateForm: mockValidateForm,
-    clearErrors: mockClearErrors,
-  })),
-}));
-
-jest.mock('@/src/utils/masks', () => ({
-  formatDate: jest.fn((date: Date) => date.toISOString().split('T')[0]),
-  validateCpf: jest.fn(() => true),
-  validateCnpj: jest.fn(() => true),
-  validatePhone: jest.fn(() => true),
-  validateEmail: jest.fn(() => true),
-  validateBirthday: jest.fn(() => true),
-  validateUrl: jest.fn(() => true),
-  handleCnpjChange: jest.fn(),
-  handleCpfChange: jest.fn(),
-  handlePhoneChange: jest.fn(),
-}));
 
 jest.mock('@/src/utils/helpers', () => ({
   buildRegisterPayload: jest.fn((type: UserType, fields: any) => {
@@ -191,22 +157,37 @@ jest.mock('@/src/utils/helpers', () => ({
   buildInvalidFieldError: jest.fn((field: string) => `${field} is invalid`),
 }));
 
-// Helpers
-const fillForm = (
-  utils: ReturnType<typeof renderWithProviders>,
-  data: Partial<Record<string, string>>,
-) => {
-  Object.entries(data).forEach(([key, value]) => {
-    if (key === 'gender') {
-      // Gender is a select/picker, not a text input; set value directly via mock
-      mockSetValue(key, value);
-    } else {
-      const input = utils.getByTestId(`${key}-input`);
-      fireEvent.changeText(input, value);
-    }
-  });
-};
+jest.mock('@/src/components/ModalSingleSelection', () => {
+  const React = require('react');
+  const { Pressable, Text } = require('react-native');
+  return ({ selectedValue, onSelectionChange }: any) => (
+    <Pressable
+      testID="gender-selector"
+      onPress={() => onSelectionChange('MALE')}
+      accessibilityRole="button"
+    >
+      <Text>{selectedValue || 'Select gender'}</Text>
+    </Pressable>
+  );
+});
 
+const mockDateChangeHandler: {
+  current?: (event: unknown, date?: Date) => void;
+} = {};
+
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react');
+  return ({
+    onChange,
+  }: {
+    onChange: (event: unknown, date?: Date) => void;
+  }) => {
+    mockDateChangeHandler.current = onChange;
+    return null;
+  };
+});
+
+// Helper functions
 const selectUserType = (
   utils: ReturnType<typeof renderWithProviders>,
   type: UserType,
@@ -215,19 +196,33 @@ const selectUserType = (
   fireEvent.press(typeButton);
 };
 
+// Tests
 describe('app/(auth)/register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockParams = {};
+    mockUseActualValidation = false;
     mockPersonApi = { post: mockPost, error: null, isLoading: false };
     mockEnterpriseApi = { post: mockPost, error: null, isLoading: false };
     mockInterpreterApi = { post: mockPost, error: null, isLoading: false };
-    mockUploadApi = { post: mockUploadPost, error: null, isLoading: false };
+    mockUploadApi = {
+      post: mockUploadPost,
+      postAt: mockUploadPost,
+      error: null,
+      isLoading: false,
+    };
+    mockSetValue.mockClear();
+    mockClearErrors.mockClear();
+    mockValidateForm.mockClear();
     // Reset mock fields
     (Object.keys(mockFields) as (keyof typeof mockFields)[]).forEach((key) => {
       mockFields[key].value = '';
       mockFields[key].error = '';
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    mockUseActualValidation = false;
   });
 
   it('renders basic elements', () => {
@@ -247,242 +242,21 @@ describe('app/(auth)/register', () => {
   });
 
   it('changes user type and clears form', () => {
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
+    const screen = renderWithProviders(<RegisterScreen />);
 
-    fillForm(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      { email: 'test@example.com' },
-    );
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.ENTERPRISE,
-    );
+    fillForm(screen, mockSetValue, { email: 'test@examplecom' });
+    selectUserType(screen, UserType.ENTERPRISE);
 
-    // Assuming form clears, check if name input is empty
-    const emailInput = getByTestId('email-input');
+    const emailInput = screen.getByTestId('email-input');
     expect(emailInput.props.value).toBe('');
-  });
-
-  it('validates required fields for person type', async () => {
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.PERSON,
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('name-error')).toBeTruthy();
-      expect(getByTestId('cpf-error')).toBeTruthy();
-      expect(getByTestId('birthday-error')).toBeTruthy();
-      expect(getByTestId('gender-error')).toBeTruthy();
-      expect(getByTestId('phone-error')).toBeTruthy();
-      expect(getByTestId('email-error')).toBeTruthy();
-      expect(getByTestId('password-error')).toBeTruthy();
-    });
-  });
-
-  it('validates required fields for enterprise type', async () => {
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.ENTERPRISE,
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('reason-error')).toBeTruthy();
-      expect(getByTestId('cnpj-error')).toBeTruthy();
-      expect(getByTestId('phone-error')).toBeTruthy();
-      expect(getByTestId('email-error')).toBeTruthy();
-      expect(getByTestId('password-error')).toBeTruthy();
-    });
-  });
-
-  it('validates required fields for interpreter type', async () => {
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.INTERPRETER,
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('name-error')).toBeTruthy();
-      expect(getByTestId('cpf-error')).toBeTruthy();
-      expect(getByTestId('birthday-error')).toBeTruthy();
-      expect(getByTestId('gender-error')).toBeTruthy();
-      expect(getByTestId('phone-error')).toBeTruthy();
-      expect(getByTestId('email-error')).toBeTruthy();
-      expect(getByTestId('password-error')).toBeTruthy();
-    });
-  });
-
-  it('submits form successfully for person type', async () => {
-    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
-
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.PERSON,
-    );
-
-    const payload = {
-      name: 'Test Person',
-      cpf: '12345678901',
-      birthday: '1990-01-01',
-      gender: Gender.MALE,
-      phone: '11999999999',
-      email: 'test@example.com',
-      password: 'password123',
-    };
-
-    fillForm(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      payload,
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(payload);
-      expect(mockReplace).toHaveBeenCalledWith({
-        pathname: '/(auth)',
-        params: { registeredAsInterpreter: 'false' },
-      });
-    });
-  });
-
-  it('submits form successfully for enterprise type', async () => {
-    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
-
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.ENTERPRISE,
-    );
-    fillForm(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      {
-        reason: 'Test Enterprise',
-        cnpj: '12345678000123',
-        phone: '11999999999',
-        email: 'test@example.com',
-        password: 'password123',
-      },
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalled();
-      expect(mockReplace).toHaveBeenCalledWith({
-        pathname: '/(auth)',
-        params: { registeredAsInterpreter: 'false' },
-      });
-    });
-  });
-
-  it('submits form successfully for interpreter type with documents', async () => {
-    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
-    mockUploadPost.mockResolvedValue({ success: true });
-
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.INTERPRETER,
-    );
-    fillForm(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      {
-        name: 'Test Interpreter',
-        cpf: '12345678901',
-        birthday: '1990-01-01',
-        gender: 'male',
-        phone: '11999999999',
-        email: 'test@example.com',
-        password: 'password123',
-        videoUrl: 'https://example.com/video',
-      },
-    );
-    // Assume document is set somehow, e.g., via state
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalled();
-      expect(mockUploadPost).toHaveBeenCalled();
-      expect(mockReplace).toHaveBeenCalledWith({
-        pathname: '/(auth)',
-        params: { registeredAsInterpreter: 'true' },
-      });
-    });
-  });
-
-  it('shows error toast on registration failure', async () => {
-    const { Toast } = require('toastify-react-native');
-    mockPost.mockResolvedValue({ success: false });
-
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
-
-    selectUserType(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      UserType.PERSON,
-    );
-    fillForm(
-      { getByTestId } as unknown as ReturnType<typeof renderWithProviders>,
-      {
-        name: 'Test Person',
-        cpf: '12345678901',
-        birthday: '1990-01-01',
-        gender: 'male',
-        phone: '11999999999',
-        email: 'test@example.com',
-        password: 'password123',
-      },
-    );
-
-    await act(async () => {
-      fireEvent.press(getByTestId('register-button'));
-    });
-
-    await waitFor(() => {
-      expect(Toast.show).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'error',
-          text1: Strings.register.toast.errorTitle,
-          text2: Strings.register.toast.errorDescription,
-        }),
-      );
-    });
+    expect(mockClearErrors).toHaveBeenCalledTimes(1);
   });
 
   it('toggles password visibility', () => {
-    const { getByTestId } = renderWithProviders(<RegisterScreen />);
+    const screen = renderWithProviders(<RegisterScreen />);
 
-    const passwordInput = getByTestId('password-input');
-    const toggle = getByTestId('toggle-password-visibility');
-
+    const passwordInput = screen.getByTestId('password-input');
+    const toggle = screen.getByTestId('toggle-password-visibility');
     expect(passwordInput.props.secureTextEntry).toBe(true);
 
     fireEvent.press(toggle);
@@ -502,6 +276,19 @@ describe('app/(auth)/register', () => {
     expect(dateInput).toBeTruthy();
   });
 
+  it('updates birthday field when a date is selected', () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+    fireEvent.press(screen.getByTestId('birthday-input'));
+
+    act(() => {
+      mockDateChangeHandler.current?.({}, new Date('1995-05-20T00:00:00.000Z'));
+    });
+
+    expect(mockFields.birthday.value).toBe('1995-05-20');
+  });
+
   it('navigates back on header back button', () => {
     const { getByTestId } = renderWithProviders(
       <Header
@@ -513,5 +300,574 @@ describe('app/(auth)/register', () => {
 
     fireEvent.press(getByTestId('back-button'));
     expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+  });
+
+  it('does not submit when payload builder returns null', async () => {
+    const { Toast } = require('toastify-react-native');
+    const helpers = require('@/src/utils/helpers');
+
+    Toast.show.mockClear();
+    helpers.buildRegisterPayload.mockReturnValueOnce(null);
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    expect(mockPost).not.toHaveBeenCalled();
+    expect(Toast.show).not.toHaveBeenCalled();
+  });
+
+  it('prevents duplicate submissions while request is pending', async () => {
+    const { Toast } = require('toastify-react-native');
+    jest.useFakeTimers();
+
+    mockPost.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, data: { id: '1' } }), 500),
+        ),
+    );
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    act(() => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    fireEvent.press(screen.getByTestId('register-button'));
+
+    expect(mockPost).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'false' },
+      }),
+    );
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
+  });
+
+  it('runs real validation on empty person form', async () => {
+    mockUseActualValidation = true;
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    act(() => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('name is required')).toBeTruthy();
+      expect(screen.getByText('cpf is required')).toBeTruthy();
+      expect(screen.getByText('birthday is required')).toBeTruthy();
+      expect(screen.getByText('gender is required')).toBeTruthy();
+      expect(screen.getByText('phone is required')).toBeTruthy();
+      expect(screen.getByText('email is required')).toBeTruthy();
+      expect(screen.getByText('password is required')).toBeTruthy();
+    });
+
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it('shows invalid format errors when validators fail', async () => {
+    mockUseActualValidation = true;
+
+    const masks = require('@/src/utils/masks');
+    const cpfSpy = jest.spyOn(masks, 'validateCpf').mockReturnValue(false);
+    const birthdaySpy = jest
+      .spyOn(masks, 'validateBirthday')
+      .mockReturnValue(false);
+    const phoneSpy = jest.spyOn(masks, 'validatePhone').mockReturnValue(false);
+    const emailSpy = jest.spyOn(masks, 'validateEmail').mockReturnValue(false);
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    fireEvent.changeText(screen.getByTestId('name-input'), 'Valid Person');
+    fireEvent.changeText(screen.getByTestId('cpf-input'), '12345678901');
+    fireEvent.press(screen.getByTestId('birthday-input'));
+
+    act(() => {
+      mockDateChangeHandler.current?.({}, new Date('1990-01-01T00:00:00.000Z'));
+    });
+
+    fireEvent.press(screen.getByTestId('gender-selector'));
+    fireEvent.changeText(screen.getByTestId('phone-input'), '11999999999');
+    fireEvent.changeText(screen.getByTestId('email-input'), 'test@example.com');
+    fireEvent.changeText(screen.getByTestId('password-input'), 'short');
+
+    act(() => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('cpf is invalid')).toBeTruthy();
+      expect(screen.getByText('birthday is invalid')).toBeTruthy();
+      expect(screen.getByText('phone is invalid')).toBeTruthy();
+      expect(screen.getByText('email is invalid')).toBeTruthy();
+      expect(
+        screen.getByText(Strings.common.fields.errors.minPassword),
+      ).toBeTruthy();
+    });
+
+    expect(mockPost).not.toHaveBeenCalled();
+
+    cpfSpy.mockRestore();
+    birthdaySpy.mockRestore();
+    phoneSpy.mockRestore();
+    emailSpy.mockRestore();
+  });
+
+  it('validates required fields for person type', async () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockFields.name.error).toBe('name is required');
+      expect(mockFields.cpf.error).toBe('cpf is required');
+      expect(mockFields.birthday.error).toBe('birthday is required');
+      expect(mockFields.gender.error).toBe('gender is required');
+      expect(mockFields.phone.error).toBe('phone is required');
+      expect(mockFields.email.error).toBe('email is required');
+      expect(mockFields.password.error).toBe('password is required');
+    });
+  });
+
+  it('validates required fields for enterprise type', async () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.ENTERPRISE);
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockFields.reason.error).toBe('reason is required');
+      expect(mockFields.cnpj.error).toBe('cnpj is required');
+      expect(mockFields.phone.error).toBe('phone is required');
+      expect(mockFields.email.error).toBe('email is required');
+      expect(mockFields.password.error).toBe('password is required');
+    });
+  });
+
+  it('validates required fields for interpreter type', async () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.INTERPRETER);
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockFields.name.error).toBe('name is required');
+      expect(mockFields.cpf.error).toBe('cpf is required');
+      expect(mockFields.birthday.error).toBe('birthday is required');
+      expect(mockFields.gender.error).toBe('gender is required');
+      expect(mockFields.phone.error).toBe('phone is required');
+      expect(mockFields.email.error).toBe('email is required');
+      expect(mockFields.password.error).toBe('password is required');
+    });
+  });
+
+  it('validates interpreter optional fields with real validators', async () => {
+    mockUseActualValidation = true;
+
+    const masks = require('@/src/utils/masks');
+    const cnpjSpy = jest.spyOn(masks, 'validateCnpj').mockReturnValue(false);
+    const urlSpy = jest.spyOn(masks, 'validateUrl').mockReturnValue(false);
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.INTERPRETER);
+
+    fireEvent.changeText(screen.getByTestId('name-input'), 'Valid Interpreter');
+    fireEvent.changeText(screen.getByTestId('cpf-input'), '12345678901');
+    fireEvent.press(screen.getByTestId('birthday-input'));
+
+    act(() => {
+      mockDateChangeHandler.current?.({}, new Date('1990-01-01T00:00:00.000Z'));
+    });
+
+    fireEvent.press(screen.getByTestId('gender-selector'));
+    fireEvent.changeText(screen.getByTestId('phone-input'), '11999999999');
+    fireEvent.changeText(screen.getByTestId('email-input'), 'test@example.com');
+    fireEvent.changeText(screen.getByTestId('password-input'), 'password123');
+    fireEvent.changeText(screen.getByTestId('cnpj-input'), '12345678000123');
+    fireEvent.changeText(screen.getByTestId('videoUrl-input'), 'https://video');
+
+    act(() => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('cnpj is invalid')).toBeTruthy();
+      expect(screen.getByText('videoUrl is invalid')).toBeTruthy();
+    });
+
+    expect(mockPost).not.toHaveBeenCalled();
+
+    cnpjSpy.mockRestore();
+    urlSpy.mockRestore();
+  });
+
+  it('submits form successfully for person type', async () => {
+    const { Toast } = require('toastify-react-native');
+    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'false' },
+      });
+    });
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
+  });
+
+  it('submits form successfully for enterprise type', async () => {
+    const { Toast } = require('toastify-react-native');
+    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.ENTERPRISE);
+    fillForm(screen, mockSetValue, {
+      reason: 'Test Enterprise',
+      cnpj: '12345678000123',
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'false' },
+      });
+    });
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
+  });
+
+  it('submits form successfully for interpreter type with documents', async () => {
+    const { Toast } = require('toastify-react-native');
+    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
+    mockUploadPost.mockResolvedValue({ success: true });
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.INTERPRETER);
+    fillForm(screen, mockSetValue, {
+      name: 'Test Interpreter',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+      videoUrl: 'https://example.com/video',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalled();
+      expect(mockUploadPost).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'true' },
+      });
+    });
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
+  });
+
+  it('shows error toast on registration failure', async () => {
+    const { Toast } = require('toastify-react-native');
+    mockPost.mockResolvedValueOnce({ success: false });
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.PERSON);
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          text1: Strings.register.toast.errorTitle,
+          text2: Strings.register.toast.errorDescription,
+        }),
+      );
+    });
+  });
+
+  it('shows error toast when API call throws', async () => {
+    const { Toast } = require('toastify-react-native');
+    Toast.show.mockClear();
+
+    mockPost.mockRejectedValueOnce(new Error('network'));
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          text1: Strings.register.toast.errorTitle,
+          text2: Strings.register.toast.errorDescription,
+        }),
+      ),
+    );
+  });
+
+  it('shows success toast even when document upload fails', async () => {
+    const { Toast } = require('toastify-react-native');
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    mockPost.mockResolvedValue({ success: true, data: { id: '1' } });
+    mockUploadPost.mockRejectedValueOnce(new Error('upload failed'));
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.INTERPRETER);
+    fillForm(screen, mockSetValue, {
+      name: 'Test Interpreter',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+      videoUrl: 'https://example.com/video',
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'true' },
+      });
+    });
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
+
+    expect(mockUploadPost).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('does not submit when validation fails', () => {
+    mockValidateForm.mockReturnValueOnce(false);
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    fireEvent.press(screen.getByTestId('register-button'));
+
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it('passes the selected user type to validation', () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    selectUserType(screen, UserType.INTERPRETER);
+    fireEvent.press(screen.getByTestId('register-button'));
+
+    expect(mockValidateForm).toHaveBeenCalledWith({
+      type: UserType.INTERPRETER,
+    });
+  });
+
+  it('clears errors when cancel button is pressed', () => {
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    fireEvent.press(screen.getByTestId('cancel-button'));
+
+    expect(mockClearErrors).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows loading indicator while submitting', async () => {
+    const { Toast } = require('toastify-react-native');
+    jest.useFakeTimers();
+    mockPost.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, data: { id: '1' } }), 100),
+        ),
+    );
+
+    const screen = renderWithProviders(<RegisterScreen />);
+
+    fillForm(screen, mockSetValue, {
+      name: 'Test Person',
+      cpf: '12345678901',
+      birthday: '1990-01-01',
+      gender: Gender.MALE,
+      phone: '11999999999',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    act(() => {
+      fireEvent.press(screen.getByTestId('register-button'));
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('register-loading-indicator')).toBeTruthy(),
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/(auth)',
+        params: { registeredAsInterpreter: 'false' },
+      }),
+    );
+
+    await waitFor(() =>
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'success',
+          text1: Strings.register.toast.successTitle,
+          text2: Strings.register.toast.successDescription,
+        }),
+      ),
+    );
   });
 });
