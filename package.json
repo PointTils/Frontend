@@ -103,7 +103,9 @@
       "expo-splash-screen",
       "eslint-plugin-import",
       "tailwind-variants",
-      "expo-build-properties"
+      "expo-build-properties",
+      "@testing-library/react-hooks",
+      "@types/jest"
     ]
   },
   "overrides": {
