@@ -18,6 +18,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import DeviceInfo from 'react-native-device-info';
 
 interface AuthContextData {
   user: User | null;
@@ -146,6 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return Promise.reject(error);
       },
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load stored user data and tokens on app start
@@ -242,6 +244,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function logout(): Promise<void> {
     try {
       setIsLoggingOut(true);
+
+      if (user) {
+        try {
+          const deviceId = await DeviceInfo.getUniqueId();
+          const url = `${ApiRoutes.userApps.base}?userId=${user.id}&deviceId=${deviceId}`;
+          await api.delete(url);
+          //console.log('Token FCM desvinculado com sucesso no logout');
+        } catch (error) {
+          console.warn('Falha ao remover token FCM no logout:', error);
+        }
+      }
 
       try {
         const storedRefreshToken = await AsyncStorage.getItem(

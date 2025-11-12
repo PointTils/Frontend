@@ -16,20 +16,14 @@ export const notificationTemplates: Record<
     body: 'Uma solicitação foi aceita.',
   }),
 
-  // Preciso ver o que fazer nesse cenário
-  REQUEST_DECLINED: () => ({
-    title: 'Solicitação recusada!',
-    body: 'Uma solicitação foi recusada.',
-  }),
-
   APPOINTMENT_REQUESTED: () => ({
     title: 'Solicitação recebida!',
     body: 'Você recebeu uma nova solicitação.',
   }),
 
   APPOINTMENT_CANCELED: () => ({
-    title: 'Solicitação cancelada!',
-    body: 'Uma solicitação foi cancelada.',
+    title: 'Solicitação encerrada!',
+    body: 'Uma solicitação foi cancelada ou recusada.',
   }),
 
   APPOINTMENT_REMINDER: () => ({

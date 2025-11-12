@@ -1,12 +1,13 @@
+import api from '@/src/api';
+import { ApiRoutes } from '@/src/constants/ApiRoutes';
+import { useApiPost, useApiPatch } from '@/src/hooks/useApi';
+import type { RegisterTokenPayload } from '@/src/types/api/notification';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
-import DeviceInfo from 'react-native-device-info';
 import { Platform } from 'react-native';
-import { useApiPost, useApiPatch } from '@/src/hooks/useApi';
-import { ApiRoutes } from '@/src/constants/ApiRoutes';
-import type { RegisterTokenPayload } from '@/src/types/api/notification';
+import DeviceInfo from 'react-native-device-info';
+
 import { useAuth } from '../contexts/AuthProvider';
-import api from '@/src/api';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -24,8 +25,8 @@ export function usePushNotifications() {
     useState<Notifications.Notification | null>(null);
 
   const { user } = useAuth();
-  const { post, postAt } = useApiPost(ApiRoutes.userApps.base);
-  const { patch, patchAt } = useApiPatch(ApiRoutes.userApps.base);
+  const { postAt } = useApiPost(ApiRoutes.userApps.base);
+  const { patchAt } = useApiPatch(ApiRoutes.userApps.base);
 
   useEffect(() => {
     if (!user) return;
@@ -50,7 +51,7 @@ export function usePushNotifications() {
             platform: Platform.OS,
             device_id: deviceId,
           });
-          console.log('Token atualizado com sucesso:', token);
+          // console.log('Token atualizado com sucesso:', token);
         } else if (existing.data.length === 0) {
           const payload: RegisterTokenPayload = {
             userId,
@@ -59,7 +60,7 @@ export function usePushNotifications() {
             platform: Platform.OS,
           };
           await postAt(ApiRoutes.userApps.base, payload);
-          console.log('Token cadastrado com sucesso:', token);
+          // console.log('Token cadastrado com sucesso:', token);
         }
       } catch (error) {
         console.error('Erro ao registrar token do dispositivo:', error);
@@ -71,6 +72,7 @@ export function usePushNotifications() {
     const subscription =
       Notifications.addNotificationReceivedListener(setNotification);
     return () => subscription.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return { fcmPushToken, notification };
