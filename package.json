@@ -11,6 +11,8 @@
     "lint": "expo lint",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
+    "test": "jest",
+    "test:report": "jest --coverage",
     "build:android": "expo run:android"
   },
   "dependencies": {
@@ -66,11 +68,16 @@
     "react-native-web": "^0.21.0",
     "react-native-webview": "13.15.0",
     "react-native-worklets": "0.5.1",
+    "react-native-youtube-iframe": "^2.4.1",
     "tailwindcss": "^3.4.17",
     "toastify-react-native": "^7.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "29.5.14",
     "@types/react": "~19.1.10",
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
@@ -79,6 +86,8 @@
     "eslint-config-expo": "~10.0.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-native": "^5.0.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.13",
     "prettier": "^3.6.2",
     "tailwind-variants": "^0.1.20",
     "typescript": "~5.9.2"
@@ -100,7 +109,9 @@
       "expo-splash-screen",
       "eslint-plugin-import",
       "tailwind-variants",
-      "expo-build-properties"
+      "expo-build-properties",
+      "@testing-library/react-hooks",
+      "@types/jest"
     ]
   },
   "overrides": {

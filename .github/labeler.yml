@@ -11,6 +11,10 @@ dependencies:
   - changed-files:
       - any-glob-to-any-file: ['package.json', 'package-lock.json']
 
+test:
+  - changed-files:
+      - any-glob-to-any-file: ['*.test.tsx', '*.spec.tsx', 'tests/**']
+
 # Labels based on branch names
 feature:
   - head-branch: ['^feat/', 'feat']

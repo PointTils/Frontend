@@ -136,7 +136,7 @@ jobs:
           npx depcheck --json --config depcheck.config.js > depcheck-output.json || echo "Depcheck exited with error (expected if unused dependencies found)"
 
           # Lista de dependências a ignorar
-          IGNORE_LIST='["expo-splash-screen","expo-dev-client","eslint-plugin-import","tailwind-variants","typescript", "expo-build-properties"]'
+          IGNORE_LIST='["expo-splash-screen","expo-dev-client","eslint-plugin-import","tailwind-variants","typescript", "expo-build-properties", "@testing-library/react-hooks", "@types/jest"]'
 
           # Filtra dependencies e devDependencies removendo as que estão na lista de ignore
           unused=$(jq --argjson ignore "$IGNORE_LIST" '
