@@ -113,6 +113,7 @@ export default function LoginScreen() {
         text={Strings.auth.toast.interpreterRegisterDescription}
         buttonTitle={Strings.common.buttons.understood}
       />
+
       {/* Main content */}
       <KeyboardAvoidingView
         className="items-center justify-center"
@@ -181,9 +182,9 @@ export default function LoginScreen() {
                 placeholder="********"
                 onChangeText={(text) => setValue('password', text)}
                 value={fields.password.value}
-                autoCapitalize="none"
                 secureTextEntry={!showPassword}
                 maxLength={25}
+                autoCapitalize="none"
               />
             </Input>
             <TouchableOpacity
@@ -245,7 +246,7 @@ export default function LoginScreen() {
         <HapticTab
           testID="forgot-password-link"
           onPress={() => {
-            console.warn('Navegar para recuperação de senha');
+            router.push('/forgot-password/step-one');
             clearErrors();
           }}
         >
