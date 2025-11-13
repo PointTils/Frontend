@@ -1,7 +1,7 @@
-import React from 'react';
+import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import type { RenderOptions } from '@testing-library/react-native';
 import { render } from '@testing-library/react-native';
-import { ThemeProvider } from '@/src/contexts/ThemeProvider';
+import React from 'react';
 
 type UI = Parameters<typeof render>[0];
 

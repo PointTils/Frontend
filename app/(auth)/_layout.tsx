@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="register" />
-      {/* You can add more screens here as needed*/}
+      <Stack.Screen name="forgot-password" />
     </Stack>
   );
 }

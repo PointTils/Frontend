@@ -49,8 +49,9 @@ export const Strings = {
       birthday: 'Data de nascimento',
       gender: 'Gênero',
       phone: 'Telefone',
-      email: 'Email',
+      email: 'E-mail',
       password: 'Senha',
+      confirmPassword: 'Confirmar senha',
       more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
       values: 'Valores',
@@ -75,12 +76,14 @@ export const Strings = {
       videoUrl: 'Vídeo de apresentação',
       videoUnavailable: 'Vídeo não disponível',
       certificate: 'Certificados',
+      token: 'Código',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
         required: 'obrigatório',
         invalid: 'inválido',
         futureDate: 'Selecione uma data posterior a hoje',
+        passwordsDoNotMatch: 'As senhas não coincidem',
       },
     },
 
@@ -128,6 +131,51 @@ export const Strings = {
       interpreterRegisterTitle: 'Quase lá!',
       interpreterRegisterDescription:
         'Recebemos seu cadastro como intérprete. Nossa equipe fará a validação dos dados e, após aprovação, você poderá acessar sua conta.\n\nAvisaremos por e-mail quando estiver tudo pronto.',
+    },
+  },
+
+  forgotPassword: {
+    header: 'REDEFINIR SENHA',
+    step: 'Etapa',
+    of: 'de',
+
+    // Step 1
+    forgotTitle: 'Esqueceu sua senha?',
+    forgotDesc:
+      'Não se preocupe! Informe abaixo seu e-mail cadastrado para enviarmos o código de autenticação.',
+    sendCodeCta: 'Enviar código',
+
+    // Step 2
+    authTitle: 'Autenticação',
+    authDesc:
+      'Quase lá! Verifique sua caixa de entrada e informe o código enviado.',
+    verifyCta: 'Verificar',
+    resend: 'Reenviar código',
+    resendIn: 'Reenviar em',
+    tokenMissingDesc: 'Digite o código recebido no e-mail.',
+
+    // Step 3
+    resetTitle: 'Redefinir',
+    resetDesc: 'Defina sua nova senha.',
+    recoverPasswordCta: 'Redefinir senha',
+
+    toast: {
+      emailSentTitle: 'Código enviado',
+      emailSentDesc: 'Confira sua caixa de entrada.',
+      emailFailedTitle: 'Não foi possível enviar',
+      emailFailedDesc: 'Tente novamente em instantes.',
+
+      invalidTokenTitle: 'Código inválido',
+      invalidTokenDesc: 'Verifique o código e tente novamente.',
+      resendTitle: 'Código reenviado',
+      resendDesc: 'Verifique seu e-mail novamente.',
+      resendFailedTitle: 'Falha ao reenviar',
+      resendFailedDesc: 'Aguarde um pouco e tente novamente.',
+
+      successTitle: 'Senha atualizada',
+      successDesc: 'Faça login com sua nova senha.',
+      failedTitle: 'Não foi possível redefinir',
+      failedDesc: 'Verifique o código e tente novamente.',
     },
   },
 
