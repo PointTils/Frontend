@@ -1,5 +1,6 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import HapticTab from '@/src/components/HapticTab';
+import ModalWarning from '@/src/components/ModalWarning';
 import { Button } from '@/src/components/ui/button';
 import {
   FormControl,
@@ -20,21 +21,37 @@ import type { LoginCredentials } from '@/src/types/api';
 import {
   buildInvalidFieldError,
   buildRequiredFieldError,
+  toBoolean,
 } from '@/src/utils/helpers';
 import { validateEmail } from '@/src/utils/masks';
-import { router, type Href } from 'expo-router';
-import { AlertCircleIcon } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
 export default function LoginScreen() {
   const { login, isLoggingIn, loginError, setLoginError } = useAuth();
   const colors = useColors();
+  const { registeredAsInterpreter } = useLocalSearchParams<{
+    registeredAsInterpreter?: string;
+  }>();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isInterpreterModalVisible, setInterpreterModalVisibility] =
+    useState(false);
+
+  useEffect(() => {
+    // Show interpreter modal if the user just registered as an interpreter
+    if (toBoolean(registeredAsInterpreter)) {
+      setInterpreterModalVisibility(true);
+    }
+  }, [registeredAsInterpreter]);
 
   useEffect(() => {
     if (loginError) {
@@ -89,6 +106,15 @@ export default function LoginScreen() {
       className="flex-1 items-center justify-center"
       accessibilityLabel={Strings.auth.login}
     >
+      <ModalWarning
+        visible={isInterpreterModalVisible}
+        onClose={() => setInterpreterModalVisibility(false)}
+        title={Strings.auth.toast.interpreterRegisterTitle}
+        text={Strings.auth.toast.interpreterRegisterDescription}
+        buttonTitle={Strings.common.buttons.understood}
+      />
+
+      {/* Main content */}
       <KeyboardAvoidingView
         className="items-center justify-center"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -150,15 +176,25 @@ export default function LoginScreen() {
             </FormControlLabel>
             <Input size="md" className="w-[300px]">
               <InputField
-                type="password"
                 className="font-ifood-regular"
                 placeholder="********"
                 onChangeText={(text) => setValue('password', text)}
                 value={fields.password.value}
+                secureTextEntry={!showPassword}
+                maxLength={25}
                 autoCapitalize="none"
-                autoComplete="password"
               />
             </Input>
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-9"
+            >
+              {showPassword ? (
+                <EyeOffIcon color={colors.disabled} />
+              ) : (
+                <EyeIcon color={colors.disabled} />
+              )}
+            </TouchableOpacity>
             <FormControlError>
               <FormControlErrorIcon
                 as={AlertCircleIcon}
@@ -204,9 +240,8 @@ export default function LoginScreen() {
 
         <HapticTab
           onPress={() => {
-            console.warn('Navegar para recuperação de senha');
+            router.push('');
             clearErrors();
-            router.push('/forgot-password/step-one' as Href);
           }}
         >
           <Text className="font-ifood-regular text-primary-blue-light dark:text-primary-blue-dark">
