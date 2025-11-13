@@ -143,6 +143,7 @@ export default function LoginScreen() {
             <Input size="md" className="w-[300px]">
               <InputField
                 type="text"
+                testID="email-input"
                 className="font-ifood-regular"
                 placeholder="email@example.com"
                 onChangeText={(text) => setValue('email', text)}
@@ -177,6 +178,7 @@ export default function LoginScreen() {
             <Input size="md" className="w-[300px]">
               <InputField
                 className="font-ifood-regular"
+                testID="password-input"
                 placeholder="********"
                 onChangeText={(text) => setValue('password', text)}
                 value={fields.password.value}
@@ -186,6 +188,7 @@ export default function LoginScreen() {
               />
             </Input>
             <TouchableOpacity
+              testID="toggle-password-visibility"
               onPress={() => setShowPassword((prev) => !prev)}
               className="absolute right-3 top-9"
             >
@@ -210,6 +213,7 @@ export default function LoginScreen() {
         {/* bottom buttons */}
         <Button
           size="md"
+          testID="sign-in-button"
           onPress={handleLogin}
           className="mb-10 mt-2 w-[300px] bg-primary-blue-light dark:bg-primary-blue-dark data-[active=true]:bg-primary-blue-press-light"
         >
@@ -227,6 +231,7 @@ export default function LoginScreen() {
             {Strings.auth.signUpPrefix}{' '}
           </Text>
           <HapticTab
+            testID="sign-up-link"
             onPress={() => {
               router.push('/register');
               clearErrors();
@@ -239,6 +244,7 @@ export default function LoginScreen() {
         </View>
 
         <HapticTab
+          testID="forgot-password-link"
           onPress={() => {
             router.push('');
             clearErrors();

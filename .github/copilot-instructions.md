@@ -15,6 +15,7 @@ This project, **Point Tils**, is a mobile application built with React Native an
 - `/src/types`: TypeScript type definitions.
   - `/api`: Type definitions for API responses and requests.
 - `/src/utils`: Utility functions and helpers.
+- `/tests`: Unit tests for utilities and UI components.
 - `app.json`: Expo configuration file.
 - `eas.json`: Configuration for Expo Application Services (EAS).
 
@@ -57,8 +58,8 @@ This project, **Point Tils**, is a mobile application built with React Native an
 
 - **PR Checks**: Includes linting, type-checking, prebuild for Android/iOS, dependency checks, security audits, and `expo-doctor`.
   - Workflow: [.github/workflows/pr_checks.yml](../.github/workflows/pr_checks.yml)
-- **Nightly Build**: Runs daily at 3 AM UTC to check for vulnerabilities, update dependencies, and monitor project health.
-  - Workflow: [.github/workflows/nightly_build.yml](../.github/workflows/nightly_build.yml)
+- **APK Build**: Runs daily at 3 AM UTC to check for vulnerabilities, update dependencies, and monitor project health.
+  - Workflow: [.github/workflows/apk_build.yml](../.github/workflows/apk_build.yml)
 
 ## Additional Notes
 
