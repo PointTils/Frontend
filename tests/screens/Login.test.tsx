@@ -1,49 +1,40 @@
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react-native';
-import { renderWithProviders } from '@/tests/config';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import {
+  getAuthStateMock,
+  getRouterMock,
+  getUseLocalSearchParamsMock,
+  renderWithProviders,
+  setLocalSearchParams,
+} from '@/tests/utils';
 import { Strings } from '@/src/constants/Strings';
 
 // Import screen
 import LoginScreen from '@/app/(auth)';
 
-// Shared Mocks and Helpers
-const mockPush = jest.fn();
-let mockParams: Record<string, unknown> = {};
-const mockLogin = jest.fn();
-const mockSetLoginError = jest.fn();
-
-let mockAuthState = {
-  login: mockLogin,
-  isLoggingIn: false,
-  loginError: null as string | null,
-  setLoginError: mockSetLoginError,
-};
-
 // Deps mocks
-jest.mock('expo-router', () => ({
-  router: { push: (...args: unknown[]) => mockPush(...args) },
-  useLocalSearchParams: () => mockParams,
-}));
+const routerMock = getRouterMock();
+const { push: mockPush } = routerMock;
+const authMock = getAuthStateMock();
+const useLocalSearchParamsMock = getUseLocalSearchParamsMock();
 
-jest.mock('toastify-react-native', () => ({
-  Toast: {
-    show: jest.fn(),
-  },
-}));
-
-// Hooks and Context Mocks
-jest.mock('@/src/contexts/AuthProvider', () => ({
-  useAuth: () => mockAuthState,
-}));
-
-jest.mock('@/src/hooks/useColors', () => ({
-  useColors: () => ({
-    white: '#fff',
-    disabled: '#999',
-  }),
-}));
+// Shared Mocks and Helpers
+const mockLogin = jest.fn();
 
 jest.mock('@/src/assets/svgs/DarkBlueLogo', () => () => null);
+
+jest.mock('@/src/hooks/useFormValidation', () => {
+  return jest.requireActual('@/src/hooks/useFormValidation');
+});
+
+jest.mock('@/src/utils/helpers', () => {
+  const actual = jest.requireActual('@/src/utils/helpers');
+  return {
+    ...actual,
+    buildRequiredFieldError: jest.fn((field: string) => `${field} is required`),
+    buildInvalidFieldError: jest.fn((field: string) => `${field} is invalid`),
+  };
+});
 
 // Helpers
 const typeAndLogin = (
@@ -63,13 +54,14 @@ const typeAndLogin = (
 describe('app/(auth)/index', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockParams = {};
-    mockAuthState = {
-      login: mockLogin,
-      isLoggingIn: false,
-      loginError: null,
-      setLoginError: mockSetLoginError,
-    };
+    authMock.login = mockLogin;
+    authMock.loginError = null;
+    authMock.isLoggingIn = false;
+    authMock.setLoginError = jest.fn();
+    authMock.user = null;
+    authMock.isAuthenticated = false;
+    setLocalSearchParams({});
+    useLocalSearchParamsMock.mockClear();
   });
 
   it('renders basic elements', () => {
@@ -107,6 +99,28 @@ describe('app/(auth)/index', () => {
     });
   });
 
+  it('shows validation errors for invalid fields', async () => {
+    const masks = require('@/src/utils/masks');
+    const emailSpy = jest.spyOn(masks, 'validateEmail').mockReturnValue(false);
+
+    const { getByTestId, getByText } = renderWithProviders(<LoginScreen />);
+
+    fireEvent.changeText(getByTestId('email-input'), 'invalid-email');
+    fireEvent.changeText(getByTestId('password-input'), ' ');
+
+    act(() => {
+      fireEvent.press(getByTestId('sign-in-button'));
+    });
+
+    await waitFor(() => {
+      expect(getByText('email is invalid')).toBeTruthy();
+      expect(getByText('password is required')).toBeTruthy();
+    });
+    expect(mockLogin).not.toHaveBeenCalled();
+
+    emailSpy.mockRestore();
+  });
+
   it('toggles password visibility', () => {
     const { getByTestId } = renderWithProviders(<LoginScreen />);
 
@@ -123,7 +137,8 @@ describe('app/(auth)/index', () => {
   });
 
   it('shows modal when registeredAsInterpreter=true', () => {
-    mockParams = { registeredAsInterpreter: 'true' };
+    setLocalSearchParams({ registeredAsInterpreter: 'true' });
+
     const { getByText } = renderWithProviders(<LoginScreen />);
 
     expect(getByText(Strings.auth.toast.interpreterRegisterTitle)).toBeTruthy();
@@ -140,27 +155,37 @@ describe('app/(auth)/index', () => {
 
   it('shows error toast when loginError is set', async () => {
     const { Toast } = require('toastify-react-native');
-    mockAuthState.loginError = 'any-error';
+    authMock.loginError = 'Invalid credentials';
 
     renderWithProviders(<LoginScreen />);
 
     await waitFor(() => {
-      expect(Toast.show).toHaveBeenCalledTimes(1);
+      expect(Toast.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          text1: Strings.auth.toast.errorTitle,
+          text2: Strings.auth.toast.errorDescription,
+        }),
+      );
+    });
+  });
+
+  it('clears login error when toast hides', async () => {
+    const { Toast } = require('toastify-react-native');
+    const setLoginErrorSpy = jest.fn();
+
+    authMock.loginError = 'Invalid credentials';
+    authMock.setLoginError = setLoginErrorSpy;
+
+    renderWithProviders(<LoginScreen />);
+
+    await waitFor(() => {
+      expect(Toast.show).toHaveBeenCalled();
     });
 
     const toastArgs = (Toast.show as jest.Mock).mock.calls[0][0];
-
-    expect(toastArgs).toEqual(
-      expect.objectContaining({
-        type: 'error',
-        text1: Strings.auth.toast.errorTitle,
-        text2: Strings.auth.toast.errorDescription,
-      }),
-    );
-
-    // Simulate auto hide to trigger setLoginError(null)
     toastArgs.onHide?.();
 
-    expect(mockSetLoginError).toHaveBeenCalledWith(null);
+    expect(setLoginErrorSpy).toHaveBeenCalledWith(null);
   });
 });

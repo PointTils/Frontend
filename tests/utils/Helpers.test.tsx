@@ -26,6 +26,12 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Toast } from 'toastify-react-native';
 
+// Override global setups
+jest.mock('@/src/utils/helpers', () =>
+  jest.requireActual('@/src/utils/helpers'),
+);
+jest.mock('@/src/utils/masks', () => jest.requireActual('@/src/utils/masks'));
+
 const originalFormData = (global as any).FormData;
 
 class TestFormData {

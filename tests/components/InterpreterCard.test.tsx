@@ -1,6 +1,6 @@
 import InterpreterCard from '@/src/components/InterpreterCard';
 import { Strings } from '@/src/constants/Strings';
-import { renderWithProviders } from '@/tests/config';
+import { renderWithProviders } from '@/tests/utils';
 import { fireEvent } from '@testing-library/react-native';
 import React from 'react';
 
