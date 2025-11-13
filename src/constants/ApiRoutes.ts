@@ -12,7 +12,9 @@ export const ApiRoutes = {
     login: '/auth/login',
     logout: '/auth/logout',
     refreshToken: '/auth/refresh',
-    passwordResetEmail: (email: string) => `/email/password-reset/${email}`,
+    passwordReset: (email: string) => `/email/password-reset/${email}`,
+    validateMailToken: (token: string) =>
+      `/auth/validate-mail-token?token=${token}`,
     recoverPassword: '/auth/recover-password',
   },
   person: {

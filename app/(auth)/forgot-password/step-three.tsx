@@ -1,5 +1,14 @@
+import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from '@/src/components/ui/form-control';
 import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -7,238 +16,271 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
+import { useFormValidation } from '@/src/hooks/useFormValidation';
+import type {
+  RecoverPasswordRequest,
+  RecoverPasswordResponse,
+} from '@/src/types/api/auth';
+import { buildRequiredFieldError } from '@/src/utils/helpers';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Eye, EyeOff, Lock } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
+import {
+  AlertCircleIcon,
+  CheckIcon,
+  EyeIcon,
+  EyeOffIcon,
+  XIcon,
+} from 'lucide-react-native';
+import React from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+} from 'react-native';
 import { Toast } from 'toastify-react-native';
 
-const TOKEN_LENGTH = 6;
-const MIN_PASSWORD = 8;
-
 export default function ForgotPasswordStepThree() {
+  const [isLoading, setIsLoading] = React.useState(false);
   const colors = useColors();
-  const { token: tokenFromUrl } = useLocalSearchParams<{ token?: string }>();
+  const { token } = useLocalSearchParams<{ token: string }>();
 
-  const [resetToken, setResetToken] = useState<string>(tokenFromUrl ?? '');
-  const [newPassword, setNewPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [showPwd1, setShowPwd1] = useState(false);
-  const [showPwd2, setShowPwd2] = useState(false);
+  const passwordValueRef = React.useRef('');
 
-  const { post: recoverPassword, loading: recovering } = useApiPost(
-    ApiRoutes.auth.recoverPassword,
-  );
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-  const Title = useMemo(() => Strings.auth.reset.title, []);
-  const handleBack = () => router.replace('/login' as any);
+  const { fields, setValue, validateForm } = useFormValidation({
+    password: {
+      value: '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim()) return buildRequiredFieldError('password');
+        return null;
+      },
+    },
+    confirmPassword: {
+      value: '',
+      error: '',
+      validate: (value: string) => {
+        if (!value.trim()) return buildRequiredFieldError('confirmPassword');
+        if (value !== passwordValueRef.current)
+          return Strings.common.fields.errors.passwordsDoNotMatch;
+        return null;
+      },
+    },
+  });
 
-  const handleRecover = async () => {
-    const clean = (resetToken || '').trim();
+  passwordValueRef.current = fields.password.value;
 
-    if (clean.length !== TOKEN_LENGTH) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.tokenMissingTitle,
-        text2: `${Strings.auth.reset.tokenMissingDesc} (${TOKEN_LENGTH} dígitos)`,
-        position: 'top',
-      });
-      return;
-    }
+  const { post: recoverPassword } = useApiPost<
+    RecoverPasswordResponse,
+    RecoverPasswordRequest
+  >(ApiRoutes.auth.recoverPassword);
 
-    if (!newPassword || !confirmPassword) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.pwdMissingTitle,
-        text2: Strings.auth.reset.pwdMissingDesc,
-        position: 'top',
-      });
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
 
-    if (newPassword.length < MIN_PASSWORD) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.shortPwdTitle,
-        text2: Strings.auth.reset.shortPwdDesc.replace(
-          '{min}',
-          String(MIN_PASSWORD),
-        ),
-        position: 'top',
-      });
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Toast.show({
-        type: 'error',
-        text1: Strings.auth.reset.pwdMismatchTitle,
-        text2: Strings.auth.reset.pwdMismatchDesc,
-        position: 'top',
-      });
-      return;
-    }
-
+    setIsLoading(true);
     try {
-      const body = { reset_token: clean, new_password: newPassword };
-      const resp: any = await recoverPassword(body as any);
-      const ok = resp?.success ?? true;
-      if (!ok) throw new Error(resp?.message || Strings.auth.reset.failedDesc);
+      const result = (await recoverPassword({
+        reset_token: token,
+        new_password: fields.confirmPassword.value,
+      })) as RecoverPasswordResponse;
+
+      if (!result?.success) {
+        Toast.show({
+          type: 'error',
+          text1: Strings.forgotPassword.toast.failedTitle,
+          text2: Strings.forgotPassword.toast.failedDesc,
+          position: 'top',
+          visibilityTime: 3000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
+        return;
+      }
+
+      router.push('/(auth)');
 
       Toast.show({
         type: 'success',
-        text1: Strings.auth.reset.successTitle,
-        text2: resp?.message || Strings.auth.reset.successDesc,
+        text1: Strings.forgotPassword.toast.successTitle,
+        text2: Strings.forgotPassword.toast.successDesc,
         position: 'top',
-        visibilityTime: 1800,
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
       });
-
-      setNewPassword('');
-      setConfirmPassword('');
-      router.replace('/login' as any);
-    } catch (e: any) {
-      const msg =
-        e?.message && typeof e.message === 'string'
-          ? e.message
-          : Strings.auth.reset.failedDesc;
-
+    } catch (err) {
+      console.error('Erro ao definir nova senha:', err);
       Toast.show({
         type: 'error',
-        text1: Strings.auth.reset.failedTitle,
-        text2: msg,
+        text1: Strings.common.toast.errorUnknownTitle,
+        text2: Strings.common.toast.errorUnknownDescription,
         position: 'top',
+        visibilityTime: 3000,
+        autoHide: true,
+        closeIconSize: 1,
       });
-
-      setNewPassword('');
-      setConfirmPassword('');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (recovering) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color={colors.primaryOrange} />
-        <Text className="text-typography-600 font-ifood-regular mt-4">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
-
   return (
-    <>
+    <View className="flex-1 justify-center">
       <View className="mt-12 pb-2">
-        <Header title={Title} showBackButton handleBack={handleBack} />
+        <Header
+          title={Strings.forgotPassword.header}
+          showBackButton={true}
+          handleBack={() => router.back()}
+        />
       </View>
 
-      <View className="w-full h-6" />
-
-      <ScrollView
-        className="w-full"
-        contentContainerClassName="grow px-6 pb-4 pt-2"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Text className="text-typography-500 font-ifood-regular mb-2">
-          {Strings.auth.reset.step} 3 {Strings.auth.reset.of} 3
-        </Text>
-
-        <Text className="font-ifood-medium text-xl text-text-light dark:text-text-dark mb-1">
-          {Strings.auth.reset.redefineTitle}
-        </Text>
-        <Text className="font-ifood-regular text-typography-600 mb-6">
-          {Strings.auth.reset.redefineDesc}
-        </Text>
-
-        {!tokenFromUrl && (
-          <>
-            <Text className="font-ifood-medium mb-2">
-              {Strings.auth.reset.codeLabel}
+        <View className="flex-1 px-8">
+          <View className="mt-10 mb-6">
+            <Text className="text-text-light dark:text-text-dark font-ifood-medium mb-1">
+              {Strings.forgotPassword.step} 3 {Strings.forgotPassword.of} 3
             </Text>
-            <Input className="mb-4">
+
+            <Text className="font-ifood-medium text-xl text-text-light dark:text-text-dark mb-3">
+              {Strings.forgotPassword.resetTitle}
+            </Text>
+            <Text className="font-ifood-regular text-typography-700 mb-6">
+              {Strings.forgotPassword.resetDesc}
+            </Text>
+          </View>
+
+          <FormControl
+            className="mb-4"
+            size="md"
+            accessibilityLabel={Strings.common.fields.password}
+            isRequired={true}
+            isInvalid={!!fields.password.error}
+          >
+            <FormControlLabel>
+              <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.common.fields.password}
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Input size="md">
               <InputField
-                value={resetToken}
-                onChangeText={(v: string) =>
-                  setResetToken(v.replace(/[^0-9]/g, '').slice(0, TOKEN_LENGTH))
-                }
-                placeholder={Strings.auth.reset.codePlaceholder}
-                keyboardType="numeric"
+                testID="password-input"
+                className="font-ifood-regular"
+                placeholder="********"
+                onChangeText={(text) => setValue('password', text)}
+                value={fields.password.value}
+                keyboardType="default"
                 autoCapitalize="none"
+                secureTextEntry={!showPassword}
+                editable={!isLoading}
               />
             </Input>
-          </>
-        )}
+            <TouchableOpacity
+              testID="toggle-password-visibility"
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-9"
+            >
+              {showPassword ? (
+                <EyeOffIcon color={colors.disabled} />
+              ) : (
+                <EyeIcon color={colors.disabled} />
+              )}
+            </TouchableOpacity>
+            <FormControlError>
+              <FormControlErrorIcon
+                as={AlertCircleIcon}
+                className="text-red-600"
+              />
+              <FormControlErrorText className="text-red-600">
+                {fields.password.error}
+              </FormControlErrorText>
+            </FormControlError>
+          </FormControl>
 
-        <Text className="font-ifood-medium mb-2">
-          {Strings.auth.reset.newPwdLabel}
-        </Text>
-        <Input className="mb-2">
-          <InputField
-            value={newPassword}
-            onChangeText={(v: string) => setNewPassword(v)}
-            placeholder={Strings.auth.reset.newPwdPlaceholder}
-            secureTextEntry={!showPwd1}
-            autoCapitalize="none"
-          />
-          <Pressable
-            onPress={() => setShowPwd1((s) => !s)}
-            className="absolute right-3 top-3"
-          >
-            {showPwd1 ? (
-              <EyeOff size={18} color={colors.text} />
-            ) : (
-              <Eye size={18} color={colors.text} />
-            )}
-          </Pressable>
-        </Input>
-
-        <Text className="font-ifood-medium mt-4 mb-2">
-          {Strings.auth.reset.confirmPwdLabel}
-        </Text>
-        <Input>
-          <InputField
-            value={confirmPassword}
-            onChangeText={(v: string) => setConfirmPassword(v)}
-            placeholder={Strings.auth.reset.confirmPwdPlaceholder}
-            secureTextEntry={!showPwd2}
-            autoCapitalize="none"
-          />
-          <Pressable
-            onPress={() => setShowPwd2((s) => !s)}
-            className="absolute right-3 top-3"
-          >
-            {showPwd2 ? (
-              <EyeOff size={18} color={colors.text} />
-            ) : (
-              <Eye size={18} color={colors.text} />
-            )}
-          </Pressable>
-        </Input>
-
-        <View className="mt-10 gap-3">
-          <Button
+          <FormControl
             size="md"
-            onPress={handleRecover}
-            disabled={
-              (!tokenFromUrl && resetToken.trim().length !== TOKEN_LENGTH) ||
-              !newPassword ||
-              !confirmPassword ||
-              recovering
-            }
-            className="data-[active=true]:bg-primary-orange-press-light"
+            accessibilityLabel={Strings.common.fields.confirmPassword}
+            isRequired={true}
+            isInvalid={!!fields.confirmPassword.error}
           >
-            <ButtonIcon as={Lock} className="text-white" />
-            <Text className="font-ifood-regular text-text-dark">
-              {Strings.auth.reset.saveCta}
-            </Text>
-          </Button>
+            <FormControlLabel>
+              <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                {Strings.common.fields.confirmPassword}
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Input size="md">
+              <InputField
+                testID="confirmPassword-input"
+                className="font-ifood-regular"
+                placeholder="********"
+                onChangeText={(text) => setValue('confirmPassword', text)}
+                value={fields.confirmPassword.value}
+                keyboardType="default"
+                autoCapitalize="none"
+                secureTextEntry={!showConfirmPassword}
+                editable={!isLoading}
+              />
+            </Input>
+            <TouchableOpacity
+              testID="toggle-confirmPassword-visibility"
+              onPress={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-3 top-9"
+            >
+              {showConfirmPassword ? (
+                <EyeOffIcon color={colors.disabled} />
+              ) : (
+                <EyeIcon color={colors.disabled} />
+              )}
+            </TouchableOpacity>
+            <FormControlError>
+              <FormControlErrorIcon
+                as={AlertCircleIcon}
+                className="text-red-600"
+              />
+              <FormControlErrorText className="text-red-600">
+                {fields.confirmPassword.error}
+              </FormControlErrorText>
+            </FormControlError>
+          </FormControl>
 
-          <Pressable onPress={handleBack} className="items-center">
-            <Text className="text-primary-orange-light dark:text-primary-orange-dark">
-              {Strings.common.buttons.cancel}
-            </Text>
-          </Pressable>
+          {/* Bottom buttons */}
+          <View className="mt-auto pb-6 gap-4">
+            <Button
+              size="md"
+              onPress={handleSubmit}
+              className="data-[active=true]:bg-primary-orange-press-light"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <>
+                  <ButtonIcon as={CheckIcon} className="text-white" />
+                  <Text className="font-ifood-regular text-text-dark">
+                    {Strings.forgotPassword.recoverPasswordCta}
+                  </Text>
+                </>
+              )}
+            </Button>
+
+            <HapticTab
+              onPress={() => router.replace('/(auth)')}
+              className="flex-row justify-center gap-2 py-2"
+              disabled={isLoading}
+            >
+              <XIcon color={colors.primaryOrange} />
+              <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                {Strings.common.buttons.cancel}
+              </Text>
+            </HapticTab>
+          </View>
         </View>
-      </ScrollView>
-    </>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

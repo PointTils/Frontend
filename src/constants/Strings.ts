@@ -51,6 +51,7 @@ export const Strings = {
       phone: 'Telefone',
       email: 'E-mail',
       password: 'Senha',
+      confirmPassword: 'Confirmar senha',
       more: 'Mais informações',
       imageRights: 'Direito de uso de imagem',
       values: 'Valores',
@@ -75,12 +76,14 @@ export const Strings = {
       videoUrl: 'Vídeo de apresentação',
       videoUnavailable: 'Vídeo não disponível',
       certificate: 'Certificados',
+      token: 'Código',
 
       errors: {
         minPassword: 'Senha deve ter no mínimo 8 caracteres',
         required: 'obrigatório',
         invalid: 'inválido',
         futureDate: 'Selecione uma data posterior a hoje',
+        passwordsDoNotMatch: 'As senhas não coincidem',
       },
     },
 
@@ -129,57 +132,46 @@ export const Strings = {
       interpreterRegisterDescription:
         'Recebemos seu cadastro como intérprete. Nossa equipe fará a validação dos dados e, após aprovação, você poderá acessar sua conta.\n\nAvisaremos por e-mail quando estiver tudo pronto.',
     },
+  },
 
-    // Fluxo de Redefinição de Senha
-    reset: {
-      title: 'REDEFINIR SENHA',
-      step: 'Etapa',
-      of: 'de',
+  forgotPassword: {
+    header: 'REDEFINIR SENHA',
+    step: 'Etapa',
+    of: 'de',
 
-      // Passo 1
-      forgotTitle: 'Esqueceu sua senha?',
-      forgotDesc:
-        'Não se preocupe! Informe abaixo seu e-mail cadastrado para enviarmos o código de autenticação.',
-      sendCodeCta: 'Enviar código',
-      invalidEmailTitle: 'E-mail inválido',
-      invalidEmailDesc: 'Informe um e-mail válido para continuar.',
+    // Step 1
+    forgotTitle: 'Esqueceu sua senha?',
+    forgotDesc:
+      'Não se preocupe! Informe abaixo seu e-mail cadastrado para enviarmos o código de autenticação.',
+    sendCodeCta: 'Enviar código',
+
+    // Step 2
+    authTitle: 'Autenticação',
+    authDesc:
+      'Quase lá! Verifique sua caixa de entrada e informe o código enviado.',
+    verifyCta: 'Verificar',
+    resend: 'Reenviar código',
+    resendIn: 'Reenviar em',
+    tokenMissingDesc: 'Digite o código recebido no e-mail.',
+
+    // Step 3
+    resetTitle: 'Redefinir',
+    resetDesc: 'Defina sua nova senha.',
+    recoverPasswordCta: 'Redefinir senha',
+
+    toast: {
       emailSentTitle: 'Código enviado',
       emailSentDesc: 'Confira sua caixa de entrada.',
       emailFailedTitle: 'Não foi possível enviar',
       emailFailedDesc: 'Tente novamente em instantes.',
 
-      // Passo 2
-      authTitle: 'Autenticação',
-      authDesc:
-        'Quase lá! Verifique sua caixa de entrada e informe o código enviado.',
-      codeLabel: 'Código',
-      codePlaceholder: 'Digite o código recebido',
-      codeHint: 'Apenas números são permitidos.',
-      codeDigitsHint: 'Apenas números são permitidos. ({digits} dígitos)',
-      verifyCta: 'Verificar',
-      resend: 'Reenviar código',
-      resendIn: 'Reenviar em',
+      invalidTokenTitle: 'Código inválido',
+      invalidTokenDesc: 'Verifique o código e tente novamente.',
       resendTitle: 'Código reenviado',
       resendDesc: 'Verifique seu e-mail novamente.',
       resendFailedTitle: 'Falha ao reenviar',
       resendFailedDesc: 'Aguarde um pouco e tente novamente.',
-      tokenMissingTitle: 'Informe o código',
-      tokenMissingDesc: 'Digite o código recebido no e-mail.',
 
-      // Passo 3
-      redefineTitle: 'Redefinir',
-      redefineDesc: 'Defina sua nova senha.',
-      newPwdLabel: 'Nova senha',
-      newPwdPlaceholder: 'Digite a nova senha',
-      confirmPwdLabel: 'Confirmar senha',
-      confirmPwdPlaceholder: 'Repita a nova senha',
-      saveCta: 'Salvar',
-      shortPwdTitle: 'Senha muito curta',
-      shortPwdDesc: 'A senha deve ter pelo menos {min} caracteres.',
-      pwdMissingTitle: 'Campos obrigatórios',
-      pwdMissingDesc: 'Preencha e confirme sua nova senha.',
-      pwdMismatchTitle: 'Senhas não conferem',
-      pwdMismatchDesc: 'As duas senhas devem ser iguais.',
       successTitle: 'Senha atualizada',
       successDesc: 'Faça login com sua nova senha.',
       failedTitle: 'Não foi possível redefinir',
@@ -381,6 +373,7 @@ export const Strings = {
     },
   },
 
+  // Enums and fixed options
   gender: {
     male: 'Masculino',
     female: 'Feminino',

@@ -246,7 +246,7 @@ export default function LoginScreen() {
         <HapticTab
           testID="forgot-password-link"
           onPress={() => {
-            router.push('');
+            router.push('/forgot-password/step-one');
             clearErrors();
           }}
         >
