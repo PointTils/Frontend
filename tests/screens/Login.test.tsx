@@ -114,7 +114,7 @@ describe('app/(auth)/index', () => {
 
     await waitFor(() => {
       expect(getByText('email is invalid')).toBeTruthy();
-      // expect(getByText('password is required')).toBeTruthy();
+      expect(getByText('password is required')).toBeTruthy();
     });
     expect(mockLogin).not.toHaveBeenCalled();
 

@@ -76,10 +76,6 @@ jest.mock('expo-image-picker', () => ({
   PermissionStatus: { GRANTED: 'granted' },
 }));
 
-jest.mock('toastify-react-native', () => ({
-  Toast: { show: jest.fn() },
-}));
-
 // Global mocks
 jest.mock('@/src/contexts/AuthProvider', () => ({
   useAuth: () => mockAuthState,

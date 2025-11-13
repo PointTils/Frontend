@@ -176,7 +176,6 @@ const mockDateChangeHandler: {
 } = {};
 
 jest.mock('@react-native-community/datetimepicker', () => {
-  const React = require('react');
   return ({
     onChange,
   }: {
@@ -244,7 +243,7 @@ describe('app/(auth)/register', () => {
   it('changes user type and clears form', () => {
     const screen = renderWithProviders(<RegisterScreen />);
 
-    fillForm(screen, mockSetValue, { email: 'test@examplecom' });
+    fillForm(screen, mockSetValue, { email: 'test@example.com' });
     selectUserType(screen, UserType.ENTERPRISE);
 
     const emailInput = screen.getByTestId('email-input');
@@ -299,6 +298,7 @@ describe('app/(auth)/register', () => {
     );
 
     fireEvent.press(getByTestId('back-button'));
+
     expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
   });
 
