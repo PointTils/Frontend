@@ -6,10 +6,13 @@ import { useColors } from '@/src/hooks/useColors';
 import { router, Tabs, useSegments } from 'expo-router';
 import { HistoryIcon, House, User } from 'lucide-react-native';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const segments = useSegments();
+  const colors = useColors();
+
   const hideTabBar = [...segments].some((segment) =>
     HIDE_TABBAR_SEGMENTS.includes(segment),
   );
@@ -21,7 +24,10 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         // Used to hide tab bar on specific screens
-        tabBarStyle: { display: hideTabBar ? 'none' : 'flex', height: 60 },
+        tabBarStyle: {
+          display: hideTabBar ? 'none' : 'flex',
+          paddingBottom: insets.bottom + 6,
+        },
       }}
     >
       <Tabs.Screen
@@ -57,7 +63,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="(profile)"
+        name="profile"
         options={{
           tabBarLabel: ({ color }) => (
             <Text className="font-ifood-regular text-xs" style={{ color }}>

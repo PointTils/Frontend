@@ -8,4 +8,5 @@ export const StorageKeys = {
   refresh_token: 'refresh_token',
   user_data: 'user_data',
   hasSeenOnboarding: (id: string) => `hasSeenOnboarding_${id}`,
+  hasCompletedProfile: (id: string) => `hasCompletedProfile_${id}`,
 } as const;

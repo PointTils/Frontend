@@ -37,6 +37,7 @@ export interface InterpreterBody {
     modality?: Modality;
     description?: string;
     image_rights?: boolean;
+    video_url?: string | null;
   };
 }
 
@@ -85,6 +86,7 @@ export interface InterpreterResponseData {
     modality: Modality;
     description: string;
     image_rights: boolean;
+    video_url?: string | null;
   };
 }
 

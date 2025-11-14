@@ -32,7 +32,7 @@ export default function AppointmentsScreen() {
     () =>
       renderApptItem({
         userType: user?.type,
-        returnTo: ApiRoutes.appointments.base,
+        returnTo: '/(tabs)/appointments',
       }),
     [user?.type],
   );

@@ -20,6 +20,7 @@ import {
 } from '@/src/components/ui/radio';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
+import UploadInput from '@/src/components/UploadInput';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { genders } from '@/src/constants/ItemsSelection';
 import { Strings } from '@/src/constants/Strings';
@@ -29,11 +30,17 @@ import {
   type FormFields,
   useFormValidation,
 } from '@/src/hooks/useFormValidation';
-import { type UserRequest, type UserResponse, UserType } from '@/src/types/api';
+import {
+  type DocumentResponse,
+  type UserRequest,
+  type UserResponse,
+  UserType,
+} from '@/src/types/api';
 import {
   buildInvalidFieldError,
   buildRegisterPayload,
   buildRequiredFieldError,
+  buildDocumentFormData,
 } from '@/src/utils/helpers';
 import {
   formatDate,
@@ -45,6 +52,7 @@ import {
   validateCpf,
   validateEmail,
   validatePhone,
+  validateUrl,
 } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
@@ -53,21 +61,30 @@ import {
   XIcon,
   PlusIcon,
   CircleIcon,
+  EyeOffIcon,
+  EyeIcon,
 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
+
+  const [isRegistering, setIsRegistering] = useState(false);
   const [type, setType] = useState(UserType.PERSON);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [showPassword, setShowPassword] = useState(false);
+  const [document, setDocument] = useState<any[]>([]);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -79,6 +96,7 @@ export default function RegisterScreen() {
   const interpreterApi = useApiPost<UserResponse, UserRequest>(
     ApiRoutes.interpreters.register,
   );
+  const uploadApi = useApiPost<DocumentResponse, FormData>('');
 
   const handleChangeType = (newType: UserType) => {
     setType(newType);
@@ -89,6 +107,10 @@ export default function RegisterScreen() {
       setValue(key, ''),
     );
     setDate(new Date());
+
+    if (newType !== UserType.INTERPRETER) {
+      setDocument([]);
+    }
   };
 
   // Forms validation - verify each field based on user type
@@ -211,6 +233,19 @@ export default function RegisterScreen() {
         return null;
       },
     },
+    videoUrl: {
+      value: '',
+      error: '',
+      validate: (value: string, ctx?: { type: string }) => {
+        if (
+          ctx?.type === UserType.INTERPRETER &&
+          value.trim() &&
+          !validateUrl(value)
+        )
+          return buildInvalidFieldError('videoUrl');
+        return null;
+      },
+    },
   });
 
   const maxDate = useMemo(() => {
@@ -222,31 +257,80 @@ export default function RegisterScreen() {
 
   // Handle form submission - API call and response handling
   async function handleRegister() {
-    if (!validateForm({ type })) return;
+    if (isRegistering) return;
 
-    const payload = buildRegisterPayload(type, fields);
-    if (!payload) return;
+    const isValid = validateForm({ type });
+    if (!isValid) return;
 
-    let api;
-    switch (type) {
-      case UserType.PERSON:
-        api = personApi;
-        break;
-      case UserType.ENTERPRISE:
-        api = enterpriseApi;
-        break;
-      case UserType.INTERPRETER:
-        api = interpreterApi;
-        break;
-      default:
+    setIsRegistering(true);
+
+    try {
+      const payload = buildRegisterPayload(type, fields);
+      if (!payload) return;
+
+      let api;
+      switch (type) {
+        case UserType.PERSON:
+          api = personApi;
+          break;
+        case UserType.ENTERPRISE:
+          api = enterpriseApi;
+          break;
+        case UserType.INTERPRETER:
+          api = interpreterApi;
+          break;
+        default:
+          return;
+      }
+      if (!api) return;
+
+      const result = await api.post(payload);
+
+      if (!result?.success || !result?.data) {
+        console.error('Registration error:', api.error || 'Unknown error');
+        Toast.show({
+          type: 'error',
+          text1: Strings.register.toast.errorTitle,
+          text2: Strings.register.toast.errorDescription,
+          position: 'top',
+          visibilityTime: 2000,
+          autoHide: true,
+          closeIconSize: 1,
+        });
         return;
-    }
-    if (!api) return;
+      }
 
-    const result = await api.post(payload);
+      if (type === UserType.INTERPRETER && document?.length > 0) {
+        try {
+          const formData = buildDocumentFormData(document);
+          await uploadApi.postAt(
+            ApiRoutes.interpreterDocument.upload(result.data.id, false),
+            formData,
+          );
+        } catch (err) {
+          console.error('Erro no upload de documentos:', err);
+        }
+      }
+      router.replace({
+        pathname: '/(auth)',
+        params: {
+          registeredAsInterpreter: String(type === UserType.INTERPRETER),
+        },
+      });
 
-    if (!result?.success || !result?.data) {
-      console.error('Registration error:', api.error || 'Unknown error');
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      Toast.show({
+        type: 'success',
+        text1: Strings.register.toast.successTitle,
+        text2: Strings.register.toast.successDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } catch (err) {
+      console.error('Erro no registro:', err);
       Toast.show({
         type: 'error',
         text1: Strings.register.toast.errorTitle,
@@ -254,24 +338,14 @@ export default function RegisterScreen() {
         position: 'top',
         visibilityTime: 2000,
         autoHide: true,
-        closeIconSize: 1, // To "hide" the close icon
+        closeIconSize: 1,
       });
-      return;
+    } finally {
+      setIsRegistering(false);
     }
-
-    // Successful registration (e.g., navigate to login)
-    router.back();
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    Toast.show({
-      type: 'success',
-      text1: Strings.register.toast.successTitle,
-      text2: Strings.register.toast.successDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1, // To "hide" the close icon
-    });
   }
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
     <View className="flex-1">
@@ -306,7 +380,7 @@ export default function RegisterScreen() {
               onChange={handleChangeType}
               className="flex-row items-center justify-between"
             >
-              <Radio value={UserType.PERSON}>
+              <Radio testID="person-type-button" value={UserType.PERSON}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -324,7 +398,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.ENTERPRISE}>
+              <Radio
+                testID="enterprise-type-button"
+                value={UserType.ENTERPRISE}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -342,7 +419,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.INTERPRETER}>
+              <Radio
+                testID="interpreter-type-button"
+                value={UserType.INTERPRETER}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -375,6 +455,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="reason-input"
                       placeholder="Empresa X"
                       className="font-ifood-regular"
                       value={fields.reason.value}
@@ -401,6 +482,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -435,6 +517,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="name-input"
                       placeholder="Nome X"
                       className="font-ifood-regular"
                       value={fields.name.value}
@@ -461,6 +544,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cpf-input"
                       placeholder="000.000.000-00"
                       className="font-ifood-regular"
                       value={fields.cpf.value}
@@ -489,6 +573,7 @@ export default function RegisterScreen() {
                   <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <Input pointerEvents="none">
                       <InputField
+                        testID="birthday-input"
                         placeholder="DD/MM/AAAA"
                         className="font-ifood-regular"
                         value={fields.birthday.value}
@@ -541,9 +626,10 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            {/* Interpreter CNPJ */}
+            {/* Interpreter */}
             {type === UserType.INTERPRETER && (
               <View className="gap-3 mt-3">
+                {/* Interpreter CNPJ */}
                 <FormControl isInvalid={!!fields.cnpj.error}>
                   <FormControlLabel>
                     <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -553,6 +639,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -573,6 +660,36 @@ export default function RegisterScreen() {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
+
+                {/* Presentation video*/}
+                <FormControl isInvalid={!!fields.videoUrl.error}>
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.common.fields.videoUrl} (
+                      {Strings.common.fields.optional})
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Input>
+                    <InputField
+                      testID="videoUrl-input"
+                      placeholder="https://youtube.com/meu-video"
+                      className="font-ifood-regular"
+                      value={fields.videoUrl.value}
+                      onChangeText={(v) => setValue('videoUrl', v)}
+                      maxLength={250}
+                      autoCapitalize="none"
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.videoUrl.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
               </View>
             )}
 
@@ -586,6 +703,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="phone-input"
                     placeholder="(00) 00000-0000"
                     className="font-ifood-regular"
                     value={fields.phone.value}
@@ -615,6 +733,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="email-input"
                     placeholder="example@gmail.com"
                     className="font-ifood-regular"
                     value={fields.email.value}
@@ -643,15 +762,27 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="password-input"
                     placeholder="********"
                     className="font-ifood-regular"
                     autoCapitalize="none"
                     value={fields.password.value}
                     onChangeText={(v) => setValue('password', v)}
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     maxLength={25}
                   />
                 </Input>
+                <TouchableOpacity
+                  testID="toggle-password-visibility"
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-9"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon color={colors.disabled} />
+                  ) : (
+                    <EyeIcon color={colors.disabled} />
+                  )}
+                </TouchableOpacity>
                 <FormControlError>
                   <FormControlErrorIcon
                     as={AlertCircleIcon}
@@ -662,33 +793,65 @@ export default function RegisterScreen() {
                   </FormControlErrorText>
                 </FormControlError>
               </FormControl>
+
+              {/* Interpreter Load File */}
+              {type === UserType.INTERPRETER && (
+                <View className="gap-3 mt-3">
+                  <FormControl>
+                    <FormControlLabel>
+                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                        {Strings.common.fields.certificate}
+                      </FormControlLabelText>
+                    </FormControlLabel>
+
+                    <UploadInput
+                      multiple={true}
+                      maxFiles={3}
+                      onChange={(files) => setDocument(files)}
+                    />
+                  </FormControl>
+                </View>
+              )}
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-14 pb-4 gap-4">
+            <View className="mt-8 gap-4" style={{ paddingBottom: bottomInset }}>
               <Button
+                testID="register-button"
                 onPress={handleRegister}
                 size="md"
-                className="data-[active=true]:bg-primary-orange-press-light"
+                isDisabled={isRegistering}
+                className={`data-[active=true]:bg-primary-orange-press-light ${isRegistering ? 'mb-6' : ''} bg-primary-orange-light`}
               >
-                <ButtonIcon as={PlusIcon} className="text-white" />
-                <Text className="font-ifood-regular text-text-dark">
-                  {Strings.auth.signUpAction}
-                </Text>
+                {isRegistering ? (
+                  <ActivityIndicator
+                    testID="register-loading-indicator"
+                    color={colors.white}
+                  />
+                ) : (
+                  <>
+                    <ButtonIcon as={PlusIcon} className="text-white" />
+                    <Text className="font-ifood-regular text-text-dark">
+                      {Strings.auth.signUpAction}
+                    </Text>
+                  </>
+                )}
               </Button>
-
-              <HapticTab
-                onPress={() => {
-                  clearErrors();
-                  router.back();
-                }}
-                className="flex-row justify-center gap-2 py-2"
-              >
-                <XIcon color={colors.primaryOrange} />
-                <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                  {Strings.common.buttons.cancel}
-                </Text>
-              </HapticTab>
+              {!isRegistering && (
+                <HapticTab
+                  testID="cancel-button"
+                  onPress={() => {
+                    clearErrors();
+                    router.back();
+                  }}
+                  className="flex-row justify-center gap-2 py-2"
+                >
+                  <XIcon color={colors.primaryOrange} />
+                  <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                    {Strings.common.buttons.cancel}
+                  </Text>
+                </HapticTab>
+              )}
             </View>
           </View>
         </ScrollView>

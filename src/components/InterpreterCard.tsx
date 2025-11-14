@@ -1,11 +1,45 @@
+import { StarRating } from '@/src/components/Rating';
+import { Text } from '@/src/components/ui/text';
+import { Strings } from '@/src/constants/Strings';
+import { useColors } from '@/src/hooks/useColors';
+import { CalendarDays, MapPin, Info } from 'lucide-react-native';
 import React from 'react';
 import { View, Pressable } from 'react-native';
-import { Text } from '@/src/components/ui/text';
-import { CalendarDays, MapPin, Info, Wallet } from 'lucide-react-native';
-import { useColors } from '@/src/hooks/useColors';
-import { Strings } from '@/src/constants/Strings';
-import { Avatar, AvatarImage } from '../avatar';
-import { StarRating } from '@/src/components/Rating';
+
+import { Avatar, AvatarImage } from './ui/avatar';
+
+type CardVariant = 'appointment' | 'search';
+
+export interface CardProps {
+  photoUrl: string;
+  fullName: string;
+
+  /** Subtitle (e.g., specialty or CPF/CNPJ) */
+  subtitle?: string;
+  /** Kept for backward compatibility: used if 'subtitle' is not provided */
+  specialty?: string;
+
+  /** Rating 0..5 (visible when showRating=true) */
+  rating?: number;
+  showRating?: boolean;
+
+  /** Card 3: "pending" badge */
+  pending?: boolean;
+  pendingLabel?: string;
+
+  /** "Appointment" fields (cards 1–3) */
+  date?: string;
+  location?: string;
+
+  /** "Search" fields (card 4) */
+  variant?: CardVariant; // 'appointment' | 'search'
+  modality?: string; // e.g., "Presencial/Online" or "Online"
+  isOnlineOnly?: boolean; // true => hides Location
+
+  /** Additional Tailwind classes */
+  className?: string;
+  onPress?: () => void;
+}
 
 /**
  * A reusable card used across two variants:
@@ -23,7 +57,7 @@ import { StarRating } from '@/src/components/Rating';
  * import React from 'react';
  * import { SafeAreaView } from 'react-native-safe-area-context';
  * import { View } from '@/src/components/ui/view';
- * import { Card } from '@/src/components/ui/card';
+ * import InterpreterCard from '@/src/components/InterpreterCard';
  *
  * export default function CardTestScreen() {
  *   return (
@@ -77,41 +111,7 @@ import { StarRating } from '@/src/components/Rating';
  * }
  * ```
  */
-
-type CardVariant = 'appointment' | 'search';
-
-export interface CardProps {
-  photoUrl: string;
-  fullName: string;
-
-  /** Subtitle (e.g., specialty or CPF/CNPJ) */
-  subtitle?: string;
-  /** Kept for backward compatibility: used if 'subtitle' is not provided */
-  specialty?: string;
-
-  /** Rating 0..5 (visible when showRating=true) */
-  rating?: number;
-  showRating?: boolean;
-
-  /** Card 3: "pending" badge */
-  pending?: boolean;
-  pendingLabel?: string;
-
-  /** "Appointment" fields (cards 1–3) */
-  date?: string;
-  location?: string;
-
-  /** "Search" fields (card 4) */
-  variant?: CardVariant; // 'appointment' | 'search'
-  modality?: string; // e.g., "Presencial/Online" or "Online"
-  isOnlineOnly?: boolean; // true => hides Location
-
-  /** Additional Tailwind classes */
-  className?: string;
-  onPress?: () => void;
-}
-
-export function Card({
+export default function InterpreterCard({
   photoUrl,
   fullName,
   subtitle,

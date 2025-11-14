@@ -19,7 +19,11 @@ import type {
   RatingsResponse,
 } from '@/src/types/api';
 import type { DateTimeSelection } from '@/src/types/ui';
-import { getSafeAvatarUri, showGenericErrorToast } from '@/src/utils/helpers';
+import {
+  getSafeAvatarUri,
+  showGenericErrorToast,
+  getYouTubeId,
+} from '@/src/utils/helpers';
 import { mapImageRights, mapModality } from '@/src/utils/masks';
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
@@ -33,6 +37,7 @@ import {
   InfoIcon,
   MapPinIcon,
   PackageSearchIcon,
+  VideoIcon,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -41,7 +46,10 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 type TabKey = keyof typeof Strings.search.tabs;
 
@@ -49,6 +57,7 @@ export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
 
+  const insets = useSafeAreaInsets();
   const colors = useColors();
   const router = useRouter();
 
@@ -118,6 +127,16 @@ export default function InterpreterDetails() {
   };
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 24);
+  const rawUrl = interpreter.professional_data?.video_url;
+  const videoId = rawUrl ? getYouTubeId(rawUrl) : null;
+  const hasValidVideo = !!videoId;
+  const hasInvalidVideo = rawUrl && videoId === '';
+  const screenWidth = Dimensions.get('window').width;
+  const contentPadding = 48;
+  const playerWidth = screenWidth - contentPadding;
+  const playerHeight = Math.round((playerWidth * 9) / 16);
 
   return (
     <>
@@ -226,6 +245,39 @@ export default function InterpreterDetails() {
               valueColor="text-typography-600"
             />
 
+            {hasValidVideo && (
+              <View className="mt-4">
+                <InfoRow
+                  icon={<VideoIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <View className="-mt-6 mb-8 overflow-hidden rounded-2xl border border-typography-200 dark:border-typography-700">
+                  <View className="aspect-video">
+                    <YoutubePlayer
+                      height={playerHeight}
+                      width={playerWidth}
+                      videoId={videoId!}
+                      webViewProps={{ allowsFullScreenVideo: true }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {hasInvalidVideo && (
+              <View className="mt-4 mb-6">
+                <InfoRow
+                  icon={<VideoIcon size={16} color={colors.text} />}
+                  label={Strings.common.fields.videoUrl}
+                  onlyLabel={true}
+                />
+                <Text className="mt-2 text-typography-400 text-sm">
+                  {Strings.common.fields.videoUnavailable}
+                </Text>
+              </View>
+            )}
+
             <InfoRow
               icon={<InfoIcon size={16} color={colors.text} />}
               label={Strings.common.fields.modality}
@@ -271,7 +323,9 @@ export default function InterpreterDetails() {
                 ) : (
                   <View className="mb-4">
                     <InterpreterCalendar
-                      schedules={schedules?.data ?? []}
+                      schedules={
+                        Array.isArray(schedules?.data) ? schedules.data : []
+                      }
                       onTimeSelect={handleSelectedTime}
                     />
                   </View>
@@ -283,16 +337,18 @@ export default function InterpreterDetails() {
 
         {section === 'reviews' &&
           (reviews && reviews.data.length > 0 ? (
-            reviews.data.map((review) => (
-              <InterpreterReviewCard
-                key={review.id}
-                rating={review.stars}
-                reviewDate={review.date}
-                userName={review.user.name}
-                reviewText={review.description}
-                userPhoto={review.user.picture}
-              />
-            ))
+            <View className="-mt-4 pb-6">
+              {reviews.data.map((review) => (
+                <InterpreterReviewCard
+                  key={review.id}
+                  rating={review.stars}
+                  reviewDate={review.date}
+                  userName={review.user.name}
+                  reviewText={review.description}
+                  userPhoto={review.user.picture}
+                />
+              ))}
+            </View>
           ) : (
             <View className="flex-1 justify-center gap-y-4 items-center">
               <PackageSearchIcon size={38} color={colors.detailsGray} />
@@ -303,7 +359,10 @@ export default function InterpreterDetails() {
           ))}
       </ScrollView>
 
-      <View className="w-full mb-8 pt-6 px-8 border-t border-typography-200 dark:border-typography-700">
+      <View
+        className="w-full pt-6 px-8 border-t border-typography-200 dark:border-typography-700"
+        style={{ paddingBottom: bottomInset }}
+      >
         <Button
           size="md"
           onPress={() => {

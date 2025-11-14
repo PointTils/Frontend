@@ -39,3 +39,31 @@ export interface RefreshResponse {
     tokens: Tokens;
   };
 }
+
+export interface PasswordResetEmailResponse {
+  success: boolean;
+  message: string;
+  data: {
+    to: string;
+    userName: string;
+  };
+}
+
+export interface ValidateMailTokenResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
+export interface RecoverPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    resetToken: string;
+  };
+}
+
+export interface RecoverPasswordRequest {
+  reset_token: string;
+  new_password: string;
+}
