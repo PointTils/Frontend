@@ -1,5 +1,5 @@
 import { Paperclip, Upload, X } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
@@ -7,12 +7,15 @@ import { Text } from '../components/ui/text';
 import { View } from '../components/ui/view';
 import { Strings } from '../constants/Strings';
 import { useColors } from '../hooks/useColors';
+import type { ExistingDocument } from '../types/api';
 import { pickFile } from '../utils/helpers';
 
 type UploadInputProps = {
   multiple?: boolean;
   maxFiles?: number;
-  onChange: (files: string[]) => void;
+  existing?: ExistingDocument[];
+  onChange: (files: any[]) => void;
+  onExistingChange?: (files: ExistingDocument[]) => void;
 };
 
 /**
@@ -22,7 +25,9 @@ type UploadInputProps = {
  *
  * @param multiple - Enables selection of multiple files (default: false)
  * @param maxFiles - Maximum number of files allowed when multiple is true (default: 3)
+ * @param existing - List of existing files (get from backend)
  * @param onChange - Callback function called with the current list of selected files
+ * @param onExistingChange - Callback function called with the current list of existing files
  *
  * @returns A file upload input with add and remove file controls.
  *
@@ -37,18 +42,22 @@ export default function UploadInput({
   multiple = false,
   maxFiles = 3,
   onChange,
+  existing = [],
+  onExistingChange,
 }: UploadInputProps) {
+  const [existingFiles, setExistingFiles] =
+    useState<ExistingDocument[]>(existing);
   const [files, setFiles] = useState<any[]>([]);
   const colors = useColors();
+
+  useEffect(() => {
+    setExistingFiles(existing);
+  }, [existing]);
 
   const handlePickFile = async () => {
     try {
       // Block when max reached (only relevant for multiple)
-      if (
-        multiple &&
-        typeof maxFiles === 'number' &&
-        files.length >= maxFiles
-      ) {
+      if (multiple && existingFiles.length + files.length >= maxFiles) {
         Toast.show({
           type: 'info',
           text1: Strings.upload.toast.limitTitle,
@@ -66,9 +75,16 @@ export default function UploadInput({
 
       const result = await pickFile();
       if (result) {
-        const exists = files.some((file) => file.name === result.name);
+        const hasDuplicateInNew = files.some(
+          (file) =>
+            file.name.toLocaleLowerCase() === result.name.toLocaleLowerCase(),
+        );
+        const hasDuplicateInExisting = existingFiles.some(
+          (file) =>
+            file.name.toLocaleLowerCase() === result.name.toLocaleLowerCase(),
+        );
 
-        if (exists) {
+        if (hasDuplicateInNew || hasDuplicateInExisting) {
           Toast.show({
             type: 'info',
             text1: Strings.upload.toast.duplicatedTitle,
@@ -95,7 +111,7 @@ export default function UploadInput({
         autoHide: true,
         closeIconSize: 1,
       });
-      console.error('Erro ao selecionar arquivo', error);
+      console.error('Erro ao selecionar novo documento', error);
     }
   };
 
@@ -103,6 +119,12 @@ export default function UploadInput({
     const newFiles = files.filter((_, i) => i !== index);
     setFiles(newFiles);
     onChange(newFiles);
+  };
+
+  const removeExistingFile = (index: number) => {
+    const updated = existingFiles.filter((_, i) => i !== index);
+    setExistingFiles(updated);
+    onExistingChange?.(updated);
   };
 
   return (
@@ -113,6 +135,25 @@ export default function UploadInput({
           {Strings.common.fields.uploadFile}
         </Text>
       </Pressable>
+
+      {existingFiles.map((file, index) => (
+        <View
+          key={`${file.id}-${index}`}
+          className="flex-row items-center border border-gray-300 bg-white rounded px-2 py-4 mb-4"
+        >
+          <Paperclip size={16} color={colors.detailsGray} />
+          <Text
+            className="flex-1 ml-2 font-ifood-regular text-text-light dark:text-text-dark"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {file.name}
+          </Text>
+          <Pressable onPress={() => removeExistingFile(index)} className="pl-2">
+            <X size={18} color={colors.text} />
+          </Pressable>
+        </View>
+      ))}
 
       {files.map((file, index) => (
         <View

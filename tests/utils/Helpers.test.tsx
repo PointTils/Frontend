@@ -19,6 +19,7 @@ import {
   pickFile,
   showGenericErrorToast,
   renderApptItem,
+  extractDocumentName,
 } from '@/src/utils/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
@@ -421,7 +422,7 @@ describe('utils/helpers', () => {
       });
 
       const documentsForm = buildDocumentFormData([
-        { uri: 'file:///contract.pdf', fileName: 'contract.pdf' },
+        { uri: 'file:///contract.pdf', name: 'contract.pdf' },
         { uri: 'file:///certificate.pdf' },
       ]);
 
@@ -462,6 +463,19 @@ describe('utils/helpers', () => {
           type: 'image/jpg',
         });
       });
+    });
+  });
+
+  describe('extractDocumentName', () => {
+    it('removes generated prefix and decodes document name', () => {
+      const file = {
+        document:
+          'https://url.s3.amazonaws.com/profiles/docs/9fff4463-8181-4735-9f1f-36995af06890/1763056424586-Termo de Abertura do Projeto-6LM6NP-Point Tils.pdf',
+      } as any;
+
+      expect(extractDocumentName(file)).toBe(
+        'Termo de Abertura do Projeto-6LM6NP-Point Tils.pdf',
+      );
     });
   });
 

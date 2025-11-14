@@ -111,7 +111,7 @@ export const ApiRoutes = {
     byKey: (key: string) => `/parameters/${key}`,
   },
   interpreterDocument: {
-    base: `/interpreter-documents`,
+    base: (interpreterId: string) => `/interpreter-documents/${interpreterId}`,
     upload: (interpreterId: string, replace: boolean) =>
       `/interpreter-documents/${interpreterId}?replace_existing=${replace}`,
   },
