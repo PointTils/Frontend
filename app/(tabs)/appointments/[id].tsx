@@ -217,7 +217,7 @@ export default function AppointmentDetailsScreen() {
       } else {
         showGenericErrorToast();
       }
-    } catch (err) {
+    } catch {
       // Show error toast
       showGenericErrorToast();
     } finally {
