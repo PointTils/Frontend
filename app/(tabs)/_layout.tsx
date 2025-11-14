@@ -2,10 +2,13 @@ import HapticTab from '@/src/components/HapticTab';
 import { Text } from '@/src/components/ui/text';
 import { HIDE_TABBAR_SEGMENTS } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
+import { useAppointmentNotification } from '@/src/hooks/useAppointmentNotification';
 import { useColors } from '@/src/hooks/useColors';
 import { router, Tabs, useSegments } from 'expo-router';
 import { HistoryIcon, House, User } from 'lucide-react-native';
 import React from 'react';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
@@ -16,6 +19,9 @@ export default function TabLayout() {
   const hideTabBar = [...segments].some((segment) =>
     HIDE_TABBAR_SEGMENTS.includes(segment),
   );
+  const { user } = useAuth();
+  const { showAppointmentNotification, setShowAppointmentNotification } =
+    useAppointmentNotification(user);
 
   return (
     <Tabs
@@ -47,8 +53,9 @@ export default function TabLayout() {
         name="appointments"
         listeners={{
           tabPress: (e) => {
-            e.preventDefault(); // avoid default behavior (keeping last nested route)
-            router.navigate('/appointments'); // go to index of the tab
+            e.preventDefault();
+            setShowAppointmentNotification(false);
+            router.navigate('/appointments');
           },
         }}
         options={{
@@ -58,7 +65,15 @@ export default function TabLayout() {
             </Text>
           ),
           tabBarIcon: ({ color }) => (
-            <HistoryIcon width={24} height={24} stroke={color} />
+            <View className="relative">
+              <HistoryIcon width={24} height={24} stroke={color} />
+              {showAppointmentNotification && (
+                <View
+                  className="absolute -right-1.5 -top-0.5 w-3 h-3 rounded-full"
+                  style={{ backgroundColor: colors.error }}
+                />
+              )}
+            </View>
           ),
         }}
       />
