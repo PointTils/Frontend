@@ -244,6 +244,8 @@ export default function EditProfileScreen() {
 
   const documentApi = useApiGet<DocumentResponse>(
     ApiRoutes.interpreterDocument.base(profile?.id || ''),
+    undefined,
+    { enabled: profile?.type === UserType.INTERPRETER },
   );
   const documentUploadApi = useApiPost<DocumentResponse, FormData>(
     ApiRoutes.interpreterDocument.upload(profile?.id || '', false),
@@ -617,7 +619,7 @@ export default function EditProfileScreen() {
         .post(buildAvatarFormData(selectedImage))
         .then((r) => !!r?.picture)
         .catch(() => false);
-    } else if (profile?.picture && !selectedImage) {
+    } else if (profile?.picture && isImageDeleted) {
       pictureOkPromise = userPictureDeleteApi
         .del()
         .then(() => true)
