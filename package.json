@@ -109,6 +109,8 @@
     ]
   },
   "overrides": {
-    "expo-dev-menu": "7.0.10"
+    "expo-dev-menu": "7.0.10",
+    "js-yaml": "4.1.1",
+    "tmp": "0.2.4"
   }
 }

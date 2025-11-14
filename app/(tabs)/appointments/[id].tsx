@@ -214,6 +214,8 @@ export default function AppointmentDetailsScreen() {
           autoHide: true,
           closeIconSize: 1,
         });
+      } else {
+        showGenericErrorToast();
       }
     } catch {
       // Show error toast
@@ -245,6 +247,8 @@ export default function AppointmentDetailsScreen() {
           autoHide: true,
           closeIconSize: 1,
         });
+      } else {
+        showGenericErrorToast();
       }
     } catch {
       // Show error toast
@@ -276,6 +280,8 @@ export default function AppointmentDetailsScreen() {
           autoHide: true,
           closeIconSize: 1,
         });
+      } else {
+        showGenericErrorToast();
       }
     } catch {
       // Show error toast

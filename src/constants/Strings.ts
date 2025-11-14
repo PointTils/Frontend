@@ -276,6 +276,9 @@ export const Strings = {
       emailChangedTitle: 'Conta atualizada com sucesso!',
       emailChangedDescription:
         'Necessário realizar login novamente. Por favor, entre com suas novas credenciais.',
+      missingFieldsTitle: 'Campos obrigatórios',
+      missingFieldsDescription:
+        'Por favor, preencha todos os campos obrigatórios antes de salvar.',
     },
   },
 

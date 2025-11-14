@@ -186,13 +186,20 @@ export default function EditProfileScreen() {
     }
   }, [profile, profile?.type, markProfileAsCompleted]);
 
-  const scheduleData = useMemo(
-    () =>
-      SCHEDULE_ENABLED && params.schedule
-        ? (JSON.parse(params.schedule as string) as WeekSchedule)
-        : emptyWeekSchedule(),
-    [params.schedule],
-  );
+  const scheduleData = useMemo(() => {
+    if (!SCHEDULE_ENABLED) return emptyWeekSchedule();
+    const raw = params.schedule;
+
+    if (!raw || raw === 'false') return emptyWeekSchedule();
+
+    try {
+      const parsed = JSON.parse(String(raw)) as WeekSchedule | null;
+      return parsed ?? emptyWeekSchedule();
+    } catch (error) {
+      console.warn('Invalid schedule payload', error);
+      return emptyWeekSchedule();
+    }
+  }, [params.schedule]);
 
   useEffect(() => {
     setSchedule(scheduleData);
@@ -244,6 +251,8 @@ export default function EditProfileScreen() {
 
   const documentApi = useApiGet<DocumentResponse>(
     ApiRoutes.interpreterDocument.base(profile?.id || ''),
+    undefined,
+    { enabled: profile?.type === UserType.INTERPRETER },
   );
   const documentUploadApi = useApiPost<DocumentResponse, FormData>(
     ApiRoutes.interpreterDocument.upload(profile?.id || '', false),
@@ -563,8 +572,18 @@ export default function EditProfileScreen() {
         state: selectedState,
         modality: fields.modality.value,
       })
-    )
+    ) {
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.missingFieldsTitle,
+        text2: Strings.edit.toast.missingFieldsDescription,
+        position: 'top',
+        visibilityTime: 2500,
+        autoHide: true,
+        closeIconSize: 1,
+      });
       return;
+    }
 
     setIsSubmitting(true);
 
@@ -617,7 +636,7 @@ export default function EditProfileScreen() {
         .post(buildAvatarFormData(selectedImage))
         .then((r) => !!r?.picture)
         .catch(() => false);
-    } else if (profile?.picture && !selectedImage) {
+    } else if (profile?.picture && isImageDeleted) {
       pictureOkPromise = userPictureDeleteApi
         .del()
         .then(() => true)
