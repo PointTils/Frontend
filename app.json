@@ -14,6 +14,7 @@
     },
     "android": {
       "package": "com.pointtils.pointtils",
+      "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/apk-logo.png",

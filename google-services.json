@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "474816633211",
+    "project_id": "point-tils",
+    "storage_bucket": "point-tils.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474816633211:android:adef693d4f53ac8f2f85de",
+        "android_client_info": {
+          "package_name": "com.pointtils.pointtils"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMdn8co_jR7d_IydS1fo2Sk06xAtwo1HU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

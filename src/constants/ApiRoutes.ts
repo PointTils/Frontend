@@ -17,6 +17,12 @@ export const ApiRoutes = {
       `/auth/validate-mail-token?token=${token}`,
     recoverPassword: '/auth/recover-password',
   },
+  userApps: {
+    base: '/user-apps',
+    update: (id: string) => `/user-apps/${id}`,
+    getByUserAndDevice: (userId: string, deviceId: string) =>
+      `/user-apps?userId=${encodeURIComponent(userId)}&deviceId=${encodeURIComponent(deviceId)}`,
+  },
   person: {
     base: '/person',
     register: '/person/register',
