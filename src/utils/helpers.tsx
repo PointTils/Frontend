@@ -17,6 +17,7 @@ import {
 import InterpreterCard from '../components/InterpreterCard';
 import { Strings } from '../constants/Strings';
 import {
+  type Document,
   type Appointment,
   type AppointmentRequest,
   type UserRequest,
@@ -214,12 +215,12 @@ export const buildAvatarFormData = (image: ImagePickerAsset) => {
 };
 
 export const buildDocumentFormData = (
-  files: { uri: string; fileName?: string }[],
+  files: { uri: string; name?: string }[],
 ) => {
   const form = new FormData();
 
   files.forEach((file, index) => {
-    const name = file.fileName || `document_${index}_${Date.now()}.pdf`;
+    const name = file.name || `document_${index}_${Date.now()}.pdf`;
 
     form.append('files', {
       uri: file.uri,
@@ -295,6 +296,12 @@ export const pickFile = async () => {
     console.error(error);
     return null;
   }
+};
+
+export const extractDocumentName = (file: Document) => {
+  const lastPart = file.document.split('/').pop() || '';
+  const parts = decodeURIComponent(lastPart);
+  return parts.replace(/^\d+-/, '').trim();
 };
 
 // Rendering helpers
