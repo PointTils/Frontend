@@ -72,17 +72,19 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
+  const [isRegistering, setIsRegistering] = useState(false);
   const [type, setType] = useState(UserType.PERSON);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showPassword, setShowPassword] = useState(false);
   const [document, setDocument] = useState<any[]>([]);
-  const [isRegistering, setIsRegistering] = useState(false);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -342,6 +344,8 @@ export default function RegisterScreen() {
       setIsRegistering(false);
     }
   }
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
     <View className="flex-1">
@@ -811,7 +815,7 @@ export default function RegisterScreen() {
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-8 pb-4 gap-4">
+            <View className="mt-8 gap-4" style={{ paddingBottom: bottomInset }}>
               <Button
                 testID="register-button"
                 onPress={handleRegister}

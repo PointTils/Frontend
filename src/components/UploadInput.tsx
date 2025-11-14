@@ -1,5 +1,5 @@
 import { Paperclip, Upload, X } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
@@ -42,15 +42,21 @@ export default function UploadInput({
   multiple = false,
   maxFiles = 3,
   onChange,
-  existing = [],
+  existing,
   onExistingChange,
 }: UploadInputProps) {
-  const [existingFiles, setExistingFiles] =
-    useState<ExistingDocument[]>(existing);
-  const [files, setFiles] = useState<any[]>([]);
   const colors = useColors();
 
+  const [existingFiles, setExistingFiles] = useState<ExistingDocument[]>(
+    existing ?? [],
+  );
+  const [files, setFiles] = useState<any[]>([]);
+  const previousExistingRef = useRef<ExistingDocument[] | undefined>(existing);
+
   useEffect(() => {
+    if (existing === undefined) return;
+    if (previousExistingRef.current === existing) return;
+    previousExistingRef.current = existing;
     setExistingFiles(existing);
   }, [existing]);
 

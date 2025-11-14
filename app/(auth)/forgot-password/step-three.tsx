@@ -37,12 +37,15 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function ForgotPasswordStepThree() {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const colors = useColors();
   const { token } = useLocalSearchParams<{ token: string }>();
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const passwordValueRef = React.useRef('');
 
@@ -126,6 +129,8 @@ export default function ForgotPasswordStepThree() {
       setIsLoading(false);
     }
   };
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
     <View className="flex-1 justify-center">
@@ -249,7 +254,10 @@ export default function ForgotPasswordStepThree() {
           </FormControl>
 
           {/* Bottom buttons */}
-          <View className="mt-auto pb-6 gap-4">
+          <View
+            className="mt-auto gap-4"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               size="md"
               onPress={handleSubmit}

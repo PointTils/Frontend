@@ -11,6 +11,10 @@ Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento po
 - Navegação: React Navigation + Expo Router
 - UI: NativeWind + Gluestack UI overlay/toast + Lucid icons
 
+> [!NOTE]
+> Mais informações a respeito de UI, Theming e padrões de código... podem ser encontradas em nossa Wiki:
+> [Wiki](https://github.com/PointTils/Frontend/wiki)
+
 ### Requisitos
 
 - Node.js LTS ≥ 22.17.0
@@ -78,32 +82,13 @@ npm run start
 - **tests/**: Testes unitários dos utilitários e componentes visuais.
 - **+**: Arquivos de configuração do projeto, como `tailwind.config.js`, `eslint.config.js`, e `tsconfig.json`.
 
-## UI e Theming
-
-- Tema global via [contexts/ThemeProvider.tsx](src/contexts/ThemeProvider.tsx) que integra:
-  - React Navigation ThemeProvider
-  - GluestackUIProvider (NativeWind vars)
-- Cores centralizadas em [constants/Colors.ts](src/constants/Colors.ts)
-- Tailwind estendido com variáveis (CSS vars) em
-  - [components/ui/gluestack-ui-provider/config.ts](src/components/ui/gluestack-ui-provider/config.ts)
-  - [tailwind.config.js](tailwind.config.js)
-
-## Navegação
-
-O roteamento é baseado em arquivos (expo-router), mais informações sobre o funcionamento em https://docs.expo.dev/router/basics/core-concepts/#4-root-_layouttsx-replaces-appjsxtsx
-
-## Padrões de código
-
-- TypeScript strict ([tsconfig.json](tsconfig.json))
-- ESLint + Prettier ([eslint.config.js](eslint.config.js), [.prettierrc](.prettierrc))
-- Strings com aspas simples
-- Componentes funcionais e hooks idiomáticos
-- Evitar estilos inline (usar Tailwind/NativeWind)
-
 ## CI/CD
 
+- PR Notifications: Dispara notificação a cada abertura de PR para dev, envia para um channel no Discord
+  - Workflow: [.github/workflows/pr_notification.yml](.github/workflows/pr_notification.yml)
 - PR Checks: lint, type-check, prebuild Android/iOS, depcheck, audit, expo-doctor
   - Workflow: [.github/workflows/pr_checks.yml](.github/workflows/pr_checks.yml)
-- Nightly Build Android com EAS:
-  - Workflow: [.github/workflows/nightly_build.yml](.github/workflows/nightly_build.yml)
-  - Publica release no GitHub e anexa APK quando disponível
+- APK Build Android com EAS: Publica release no GitHub e anexa APK quando disponível
+  - Workflow: [.github/workflows/apk_build.yml](.github/workflows/apk_build.yml)
+- Mirror GitLab: Sincroniza repos do GitLab e GitHub
+  - Workflow: [.github/workflows/mirror_gitlab_front.yml](.github/workflows/mirror_gitlab_front.yml)
