@@ -251,6 +251,8 @@ export default function EditProfileScreen() {
   const documentDeleteApi = useApiDelete<void>('');
 
   useEffect(() => {
+    if (documentApi.loading) return;
+
     const fetchedDocuments = documentApi?.data?.data ?? [];
     if (!fetchedDocuments.length) {
       initialExistingDocumentsRef.current = [];
@@ -265,7 +267,7 @@ export default function EditProfileScreen() {
     }));
     initialExistingDocumentsRef.current = mappedExistingDocuments;
     setExistingDocuments(mappedExistingDocuments);
-  }, [documentApi.data]);
+  }, [documentApi.data, documentApi.loading]);
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
