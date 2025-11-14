@@ -26,7 +26,7 @@ export default function TabLayout() {
         // Used to hide tab bar on specific screens
         tabBarStyle: {
           display: hideTabBar ? 'none' : 'flex',
-          paddingBottom: insets.bottom,
+          paddingBottom: insets.bottom + 6,
         },
       }}
     >

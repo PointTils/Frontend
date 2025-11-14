@@ -54,11 +54,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 type TabKey = keyof typeof Strings.appointments.tabs;
 
 export default function AppointmentDetailsScreen() {
+  const insets = useSafeAreaInsets();
   const colors = useColors();
   const { user } = useAuth();
 
@@ -87,6 +89,8 @@ export default function AppointmentDetailsScreen() {
   const ratingNumber = toFloat(rating, { min: 0, max: 5 }) ?? 0;
   const isPendingBool = toBoolean(isPending) ?? false;
   const isActiveBool = toBoolean(isActive) ?? false;
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 24);
 
   // Fetch appointment data
   const {
@@ -295,7 +299,7 @@ export default function AppointmentDetailsScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color={colors.primaryOrange} />
+        <ActivityIndicator size="large" color={colors.primaryBlue} />
         <Text className="text-typography-600 font-ifood-regular mt-4">
           {Strings.common.loading}
         </Text>
@@ -528,7 +532,10 @@ export default function AppointmentDetailsScreen() {
       </ScrollView>
       {isPendingBool ? (
         user?.type === UserType.INTERPRETER ? (
-          <View className="w-full px-6 pt-6 pb-2 gap-4 border-t border-typography-200 dark:border-typography-700">
+          <View
+            className="w-full px-6 pt-6 gap-4 border-t border-typography-200 dark:border-typography-700"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               size="md"
               onPress={handleAcceptPending}
@@ -553,7 +560,10 @@ export default function AppointmentDetailsScreen() {
             </HapticTab>
           </View>
         ) : (
-          <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
+          <View
+            className="w-full pt-6 px-6 gap-4 border-t border-typography-200 dark:border-typography-700"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               size="md"
               onPress={handleCancelPending}
@@ -567,7 +577,10 @@ export default function AppointmentDetailsScreen() {
           </View>
         )
       ) : isActiveBool ? (
-        <View className="w-full p-6 gap-4 border-t border-typography-200 dark:border-typography-700">
+        <View
+          className="w-full pt-6 px-6 gap-4 border-t border-typography-200 dark:border-typography-700"
+          style={{ paddingBottom: bottomInset }}
+        >
           <Button
             size="md"
             onPress={handleCancelPending}

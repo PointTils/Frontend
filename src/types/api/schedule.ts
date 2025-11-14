@@ -49,5 +49,5 @@ export interface SchedulePaginated {
 export interface ScheduleResponse {
   success: boolean;
   message: string;
-  data: Schedule | SchedulePaginated | SchedulePerDate;
+  data: Schedule | SchedulePaginated | SchedulePerDate | null;
 }

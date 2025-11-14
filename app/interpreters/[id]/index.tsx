@@ -48,6 +48,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 type TabKey = keyof typeof Strings.search.tabs;
@@ -56,6 +57,7 @@ export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
 
+  const insets = useSafeAreaInsets();
   const colors = useColors();
   const router = useRouter();
 
@@ -126,6 +128,7 @@ export default function InterpreterDetails() {
 
   const interpreter = interpreterData?.data as InterpreterResponseData;
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 24);
   const rawUrl = interpreter.professional_data?.video_url;
   const videoId = rawUrl ? getYouTubeId(rawUrl) : null;
   const hasValidVideo = !!videoId;
@@ -356,7 +359,10 @@ export default function InterpreterDetails() {
           ))}
       </ScrollView>
 
-      <View className="w-full mb-8 pt-6 px-8 border-t border-typography-200 dark:border-typography-700">
+      <View
+        className="w-full pt-6 px-8 border-t border-typography-200 dark:border-typography-700"
+        style={{ paddingBottom: bottomInset }}
+      >
         <Button
           size="md"
           onPress={() => {

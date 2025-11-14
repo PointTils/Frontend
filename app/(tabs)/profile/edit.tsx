@@ -112,6 +112,7 @@ import {
   PlusIcon,
   MinusIcon,
   Trash,
+  CircleXIcon,
 } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -123,6 +124,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 type EditProfileValidationContext = {
@@ -135,6 +137,7 @@ export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const { logout, updateUser } = useAuth();
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [documents, setDocuments] = useState<DocumentPickerAsset[]>([]);
@@ -150,6 +153,7 @@ export default function EditProfileScreen() {
   );
   const [schedule, setSchedule] =
     useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
+  const [clearingDay, setClearingDay] = useState<Days | null>(null);
 
   // Keep initial values to detect which days were changed
   const initialScheduleRef =
@@ -248,6 +252,7 @@ export default function EditProfileScreen() {
   const scheduleApiPost = useApiPost<ScheduleResponse, ScheduleRequest>(
     ApiRoutes.schedules.register,
   );
+  const scheduleApiDelete = useApiDelete<ScheduleResponse, void>('');
 
   const documentApi = useApiGet<DocumentResponse>(
     ApiRoutes.interpreterDocument.base(profile?.id || ''),
@@ -537,6 +542,9 @@ export default function EditProfileScreen() {
     }));
   }
 
+  const neighborhoodValues =
+    fields.neighborhoods.value.length > 0 ? fields.neighborhoods.value : [''];
+
   const handleDateChange = (_event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -557,6 +565,43 @@ export default function EditProfileScreen() {
     if (!time) return -1;
     const [h, m] = time.split(':').map(Number);
     return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
+  };
+
+  const handleClearSchedule = async (day: Days) => {
+    const current = schedule[day];
+    if (!current.from && !current.to) return;
+
+    const scheduleId = scheduleIds[day];
+
+    setClearingDay(day);
+    try {
+      if (scheduleId) {
+        await scheduleApiDelete.deleteAt(
+          ApiRoutes.schedules.updatePerDay(scheduleId),
+        );
+      }
+
+      setSchedule((prev) => ({
+        ...prev,
+        [day]: { from: '', to: '' },
+      }));
+      initialScheduleRef.current = {
+        ...initialScheduleRef.current,
+        [day]: { from: '', to: '' },
+      };
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.scheduleErrorTitle,
+        text2: Strings.edit.toast.scheduleErrorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } finally {
+      setClearingDay(null);
+    }
   };
 
   function handleBack() {
@@ -836,6 +881,8 @@ export default function EditProfileScreen() {
       </View>
     );
   }
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
     <View className="flex-1 justify-center items-center">
@@ -1387,7 +1434,7 @@ export default function EditProfileScreen() {
                           </FormControlLabelText>
                         </FormControlLabel>
                         <View className="flex-col gap-2">
-                          {fields.neighborhoods.value.map(
+                          {neighborhoodValues.map(
                             (neighborhood: string, idx: number) => (
                               <View
                                 key={idx}
@@ -1554,10 +1601,12 @@ export default function EditProfileScreen() {
                       <View className="flex-col gap-2">
                         {Object.entries(Days).map(([key, label]) => (
                           <FormControl key={key} className="mb-2">
-                            <View className="flex-row items-center gap-1">
-                              <Text className="w-32 font-ifood-regular text-text-light dark:text-text-dark">
+                            <View className="items-left justify-between">
+                              <Text className="font-ifood-regular text-text-light dark:text-text-dark">
                                 {mapWeekDay(label)}
                               </Text>
+                            </View>
+                            <View className="mt-2 flex-row items-center gap-2 pl-8">
                               <ModalSingleSelection
                                 items={hourOptions}
                                 selectedValue={
@@ -1574,9 +1623,9 @@ export default function EditProfileScreen() {
                                 }
                                 placeholderText={Strings.hours.from}
                                 scrollableHeight={220}
-                                minWidth={72}
+                                minWidth={100}
                               />
-                              <Text className="mx-1 text-text-light dark:text-text-dark">
+                              <Text className="text-text-light dark:text-text-dark">
                                 -
                               </Text>
                               <ModalSingleSelection
@@ -1606,8 +1655,18 @@ export default function EditProfileScreen() {
                                 }
                                 placeholderText={Strings.hours.to}
                                 scrollableHeight={220}
-                                minWidth={72}
+                                minWidth={100}
                               />
+                              <HapticTab
+                                onPress={() => handleClearSchedule(key as Days)}
+                                className="ml-2 items-center justify-center data-[active=true]:bg-primary-50/15"
+                              >
+                                {clearingDay === (key as Days) ? (
+                                  <ActivityIndicator color={colors.error} />
+                                ) : (
+                                  <CircleXIcon color={colors.error} />
+                                )}
+                              </HapticTab>
                             </View>
                             <FormControlError>
                               <FormControlErrorIcon
@@ -1627,7 +1686,7 @@ export default function EditProfileScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-14 pb-6 gap-4">
+          <View className="mt-14 gap-4" style={{ paddingBottom: bottomInset }}>
             <Button
               size="md"
               onPress={handleUpdate}
