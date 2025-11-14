@@ -35,11 +35,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function ForgotPasswordStepTwo() {
-  const colors = useColors();
   const { email: emailFromUrl } = useLocalSearchParams<{ email: string }>();
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
 
   const [isVerifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
@@ -156,6 +158,8 @@ export default function ForgotPasswordStepTwo() {
     }
   };
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <View className="flex-1 justify-center">
       <View className="mt-12 pb-2">
@@ -236,7 +240,10 @@ export default function ForgotPasswordStepTwo() {
           </HapticTab>
 
           {/* Bottom buttons */}
-          <View className="mt-auto pb-6 gap-4">
+          <View
+            className="mt-auto gap-4"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               onPress={handleVerify}
               className="data-[active=true]:bg-primary-orange-press-light"

@@ -28,6 +28,7 @@ import {
   RadioIcon,
 } from '@/src/components/ui/radio';
 import { Text } from '@/src/components/ui/text';
+import UploadInput from '@/src/components/UploadInput';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import {
   IMAGE_UPLOAD_ENABLED,
@@ -52,6 +53,8 @@ import { useFormValidation } from '@/src/hooks/useFormValidation';
 import type { FormFields } from '@/src/hooks/useFormValidation';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
 import {
+  type DocumentResponse,
+  type ExistingDocument,
   type ScheduleResponse,
   type ScheduleRequest,
   type WeekSchedule,
@@ -69,9 +72,11 @@ import {
 import type { OptionItem } from '@/src/types/ui';
 import {
   buildAvatarFormData,
+  buildDocumentFormData,
   buildEditPayload,
   buildInvalidFieldError,
   buildRequiredFieldError,
+  extractDocumentName,
   getModality,
   getSafeAvatarUri,
   pickImage,
@@ -92,6 +97,7 @@ import {
   validateUrl,
 } from '@/src/utils/masks';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import type { DocumentPickerAsset } from 'expo-document-picker';
 import type { ImagePickerAsset } from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -106,9 +112,11 @@ import {
   PlusIcon,
   MinusIcon,
   Trash,
+  CircleXIcon,
 } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -116,6 +124,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 type EditProfileValidationContext = {
@@ -128,7 +137,14 @@ export default function EditProfileScreen() {
   const params = useLocalSearchParams();
   const { logout, updateUser } = useAuth();
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [documents, setDocuments] = useState<DocumentPickerAsset[]>([]);
+  const [existingDocuments, setExistingDocuments] = useState<
+    ExistingDocument[]
+  >([]);
+  const initialExistingDocumentsRef = useRef<ExistingDocument[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isImageDeleted, setIsImageDeleted] = useState(false);
@@ -137,6 +153,7 @@ export default function EditProfileScreen() {
   );
   const [schedule, setSchedule] =
     useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
+  const [clearingDay, setClearingDay] = useState<Days | null>(null);
 
   // Keep initial values to detect which days were changed
   const initialScheduleRef =
@@ -173,13 +190,20 @@ export default function EditProfileScreen() {
     }
   }, [profile, profile?.type, markProfileAsCompleted]);
 
-  const scheduleData = useMemo(
-    () =>
-      SCHEDULE_ENABLED && params.schedule
-        ? (JSON.parse(params.schedule as string) as WeekSchedule)
-        : emptyWeekSchedule(),
-    [params.schedule],
-  );
+  const scheduleData = useMemo(() => {
+    if (!SCHEDULE_ENABLED) return emptyWeekSchedule();
+    const raw = params.schedule;
+
+    if (!raw || raw === 'false') return emptyWeekSchedule();
+
+    try {
+      const parsed = JSON.parse(String(raw)) as WeekSchedule | null;
+      return parsed ?? emptyWeekSchedule();
+    } catch (error) {
+      console.warn('Invalid schedule payload', error);
+      return emptyWeekSchedule();
+    }
+  }, [params.schedule]);
 
   useEffect(() => {
     setSchedule(scheduleData);
@@ -211,20 +235,53 @@ export default function EditProfileScreen() {
   const interpreterApi = useApiPatch<UserResponse, UserRequest>(
     ApiRoutes.interpreters.profile(profile?.id || ''),
   );
+
   const userSpecialtyApi = useApiPost<
     UserSpecialtyResponse,
     UserSpecialtyRequest
   >(ApiRoutes.userSpecialties.byUser(profile?.id || ''));
+
   const userPictureApi = useApiPost<UserPictureResponse, FormData>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
   const userPictureDeleteApi = useApiDelete<void>(
     ApiRoutes.userPicture.upload(profile?.id || ''),
   );
+
   const scheduleApiPatch = useApiPatch<ScheduleResponse, ScheduleRequest>('');
   const scheduleApiPost = useApiPost<ScheduleResponse, ScheduleRequest>(
     ApiRoutes.schedules.register,
   );
+  const scheduleApiDelete = useApiDelete<ScheduleResponse, void>('');
+
+  const documentApi = useApiGet<DocumentResponse>(
+    ApiRoutes.interpreterDocument.base(profile?.id || ''),
+    undefined,
+    { enabled: profile?.type === UserType.INTERPRETER },
+  );
+  const documentUploadApi = useApiPost<DocumentResponse, FormData>(
+    ApiRoutes.interpreterDocument.upload(profile?.id || '', false),
+  );
+  const documentDeleteApi = useApiDelete<void>('');
+
+  useEffect(() => {
+    if (documentApi.loading) return;
+
+    const fetchedDocuments = documentApi?.data?.data ?? [];
+    if (!fetchedDocuments.length) {
+      initialExistingDocumentsRef.current = [];
+      setExistingDocuments([]);
+      return;
+    }
+
+    const mappedExistingDocuments = fetchedDocuments.map((doc) => ({
+      id: doc.id,
+      name: extractDocumentName(doc),
+      url: doc.document,
+    }));
+    initialExistingDocumentsRef.current = mappedExistingDocuments;
+    setExistingDocuments(mappedExistingDocuments);
+  }, [documentApi.data, documentApi.loading]);
 
   // Forms validation - verify each field based on user type
   const { fields, setValue, validateForm, clearErrors } = useFormValidation<
@@ -485,6 +542,9 @@ export default function EditProfileScreen() {
     }));
   }
 
+  const neighborhoodValues =
+    fields.neighborhoods.value.length > 0 ? fields.neighborhoods.value : [''];
+
   const handleDateChange = (_event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -507,6 +567,43 @@ export default function EditProfileScreen() {
     return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
   };
 
+  const handleClearSchedule = async (day: Days) => {
+    const current = schedule[day];
+    if (!current.from && !current.to) return;
+
+    const scheduleId = scheduleIds[day];
+
+    setClearingDay(day);
+    try {
+      if (scheduleId) {
+        await scheduleApiDelete.deleteAt(
+          ApiRoutes.schedules.updatePerDay(scheduleId),
+        );
+      }
+
+      setSchedule((prev) => ({
+        ...prev,
+        [day]: { from: '', to: '' },
+      }));
+      initialScheduleRef.current = {
+        ...initialScheduleRef.current,
+        [day]: { from: '', to: '' },
+      };
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.scheduleErrorTitle,
+        text2: Strings.edit.toast.scheduleErrorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    } finally {
+      setClearingDay(null);
+    }
+  };
+
   function handleBack() {
     clearErrors();
     router.back();
@@ -520,8 +617,20 @@ export default function EditProfileScreen() {
         state: selectedState,
         modality: fields.modality.value,
       })
-    )
+    ) {
+      Toast.show({
+        type: 'error',
+        text1: Strings.edit.toast.missingFieldsTitle,
+        text2: Strings.edit.toast.missingFieldsDescription,
+        position: 'top',
+        visibilityTime: 2500,
+        autoHide: true,
+        closeIconSize: 1,
+      });
       return;
+    }
+
+    setIsSubmitting(true);
 
     // Detect if email was changed
     const emailChanged =
@@ -558,7 +667,10 @@ export default function EditProfileScreen() {
       replace_existing: true, // Always replace existing specialties - similar to PUT behavior
     };
 
-    if (!api && !userSpecialtyApi && !userPictureApi) return;
+    if (!api && !userSpecialtyApi && !userPictureApi) {
+      setIsSubmitting(false);
+      return;
+    }
 
     const profilePromise = api.patch(payload);
     const specialtyPromise = userSpecialtyApi.post(specialtiesPayload);
@@ -569,7 +681,7 @@ export default function EditProfileScreen() {
         .post(buildAvatarFormData(selectedImage))
         .then((r) => !!r?.picture)
         .catch(() => false);
-    } else if (profile?.picture && !selectedImage) {
+    } else if (profile?.picture && isImageDeleted) {
       pictureOkPromise = userPictureDeleteApi
         .del()
         .then(() => true)
@@ -578,17 +690,54 @@ export default function EditProfileScreen() {
       pictureOkPromise = Promise.resolve(true);
     }
 
-    // Submit updates
-    const [profileResponse, specialtyResponse, pictureOk] = await Promise.all([
+    const removedExistingDocuments = initialExistingDocumentsRef.current.filter(
+      (file) => !existingDocuments.some((current) => current.id === file.id),
+    );
+
+    // Upload new documents
+    let documentsPromise: Promise<boolean> = Promise.resolve(true);
+    if (documents.length > 0) {
+      const formData = buildDocumentFormData(documents);
+      documentsPromise = documentUploadApi
+        .post(formData)
+        .then((r) => !!r?.success)
+        .catch(() => false);
+    }
+    // Delete removed existing documents
+    let documentsDeletePromise: Promise<boolean[]> = Promise.resolve([]);
+    if (removedExistingDocuments.length > 0) {
+      documentsDeletePromise = Promise.all(
+        removedExistingDocuments.map((file) =>
+          documentDeleteApi
+            .deleteAt(ApiRoutes.interpreterDocument.base(file.id))
+            .then(() => true)
+            .catch(() => false),
+        ),
+      );
+    }
+
+    // Submit updates - all in parallel
+    const [
+      profileResponse,
+      specialtyResponse,
+      pictureOk,
+      documentsResponse,
+      documentsDeleteResponse,
+    ] = await Promise.all([
       profilePromise,
       specialtyPromise,
       pictureOkPromise,
+      documentsPromise,
+      documentsDeletePromise,
     ]);
 
+    // If any request failed, cancel the operation and show error toast
     if (
       !profileResponse?.success ||
       !specialtyResponse?.success ||
-      !pictureOk
+      !pictureOk ||
+      !documentsResponse ||
+      documentsDeleteResponse.some((res) => !res)
     ) {
       router.replace('/(tabs)/profile');
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -601,6 +750,7 @@ export default function EditProfileScreen() {
         autoHide: true,
         closeIconSize: 1,
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -689,6 +839,7 @@ export default function EditProfileScreen() {
 
     // If email changed, force re-login to renew tokens
     if (emailChanged) {
+      setIsSubmitting(false);
       logout();
       await new Promise((resolve) => setTimeout(resolve, 300));
       Toast.show({
@@ -717,7 +868,21 @@ export default function EditProfileScreen() {
       autoHide: true,
       closeIconSize: 1,
     });
+    setIsSubmitting(false);
   }
+
+  if (documentApi?.loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator color={colors.primaryBlue} size="small" />
+        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+          {Strings.common.loading}
+        </Text>
+      </View>
+    );
+  }
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
     <View className="flex-1 justify-center items-center">
@@ -1269,7 +1434,7 @@ export default function EditProfileScreen() {
                           </FormControlLabelText>
                         </FormControlLabel>
                         <View className="flex-col gap-2">
-                          {fields.neighborhoods.value.map(
+                          {neighborhoodValues.map(
                             (neighborhood: string, idx: number) => (
                               <View
                                 key={idx}
@@ -1406,19 +1571,42 @@ export default function EditProfileScreen() {
                     </RadioGroup>
                   </View>
 
+                  {/* Interpreter Load File */}
+                  <View className="gap-3 mt-3">
+                    <FormControl>
+                      <FormControlLabel>
+                        <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                          {Strings.common.fields.certificate}
+                        </FormControlLabelText>
+                      </FormControlLabel>
+
+                      <UploadInput
+                        existing={existingDocuments}
+                        multiple={true}
+                        maxFiles={3}
+                        onChange={(files) => setDocuments(files)}
+                        onExistingChange={(files) =>
+                          setExistingDocuments(files)
+                        }
+                      />
+                    </FormControl>
+                  </View>
+
                   {/* Schedule */}
                   {SCHEDULE_ENABLED && (
-                    <View className="w-full mt-6">
+                    <View className="w-full mt-4">
                       <Text className="font-ifood-medium text-text-light dark:text-text-dark mb-2">
                         {Strings.hours.title}
                       </Text>
                       <View className="flex-col gap-2">
                         {Object.entries(Days).map(([key, label]) => (
                           <FormControl key={key} className="mb-2">
-                            <View className="flex-row items-center gap-1">
-                              <Text className="w-32 font-ifood-regular text-text-light dark:text-text-dark">
+                            <View className="items-left justify-between">
+                              <Text className="font-ifood-regular text-text-light dark:text-text-dark">
                                 {mapWeekDay(label)}
                               </Text>
+                            </View>
+                            <View className="mt-2 flex-row items-center gap-2 pl-8">
                               <ModalSingleSelection
                                 items={hourOptions}
                                 selectedValue={
@@ -1435,9 +1623,9 @@ export default function EditProfileScreen() {
                                 }
                                 placeholderText={Strings.hours.from}
                                 scrollableHeight={220}
-                                minWidth={72}
+                                minWidth={100}
                               />
-                              <Text className="mx-1 text-text-light dark:text-text-dark">
+                              <Text className="text-text-light dark:text-text-dark">
                                 -
                               </Text>
                               <ModalSingleSelection
@@ -1467,8 +1655,18 @@ export default function EditProfileScreen() {
                                 }
                                 placeholderText={Strings.hours.to}
                                 scrollableHeight={220}
-                                minWidth={72}
+                                minWidth={100}
                               />
+                              <HapticTab
+                                onPress={() => handleClearSchedule(key as Days)}
+                                className="ml-2 items-center justify-center data-[active=true]:bg-primary-50/15"
+                              >
+                                {clearingDay === (key as Days) ? (
+                                  <ActivityIndicator color={colors.error} />
+                                ) : (
+                                  <CircleXIcon color={colors.error} />
+                                )}
+                              </HapticTab>
                             </View>
                             <FormControlError>
                               <FormControlErrorIcon
@@ -1488,27 +1686,38 @@ export default function EditProfileScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-14 pb-6 gap-4">
+          <View className="mt-14 gap-4" style={{ paddingBottom: bottomInset }}>
             <Button
               size="md"
               onPress={handleUpdate}
               className="data-[active=true]:bg-primary-orange-press-light"
+              disabled={isSubmitting}
             >
-              <ButtonIcon as={CheckIcon} className="text-white" />
-              <Text className="font-ifood-regular text-text-dark">
-                {Strings.common.buttons.save}
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator
+                  testID="register-loading-indicator"
+                  color={colors.white}
+                />
+              ) : (
+                <>
+                  <ButtonIcon as={CheckIcon} className="text-white" />
+                  <Text className="font-ifood-regular text-text-dark">
+                    {Strings.common.buttons.save}
+                  </Text>
+                </>
+              )}
             </Button>
-
-            <HapticTab
-              onPress={handleBack}
-              className="flex-row justify-center gap-2 py-2"
-            >
-              <XIcon color={colors.primaryOrange} />
-              <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                {Strings.common.buttons.cancel}
-              </Text>
-            </HapticTab>
+            {!isSubmitting && (
+              <HapticTab
+                onPress={handleBack}
+                className="flex-row justify-center gap-2 py-2"
+              >
+                <XIcon color={colors.primaryOrange} />
+                <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                  {Strings.common.buttons.cancel}
+                </Text>
+              </HapticTab>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

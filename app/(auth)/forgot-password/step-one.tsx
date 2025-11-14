@@ -31,11 +31,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function ForgotPasswordStepOne() {
-  const [isSendingEmail, setIsSendingEmail] = React.useState(false);
   const colors = useColors();
+  const insets = useSafeAreaInsets();
+
+  const [isSendingEmail, setIsSendingEmail] = React.useState(false);
 
   const { fields, setValue, validateForm } = useFormValidation({
     email: {
@@ -108,6 +111,8 @@ export default function ForgotPasswordStepOne() {
     }
   };
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <View className="flex-1 justify-center">
       <View className="mt-12 pb-2">
@@ -173,7 +178,10 @@ export default function ForgotPasswordStepOne() {
           </FormControl>
 
           {/* Bottom buttons */}
-          <View className="mt-auto pb-6 gap-4">
+          <View
+            className="mt-auto gap-4"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               size="md"
               onPress={handleSendCode}

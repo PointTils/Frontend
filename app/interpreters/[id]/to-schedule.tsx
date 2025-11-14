@@ -60,6 +60,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 type ScheduleValidationContext = {
@@ -74,6 +75,7 @@ export default function ToScheduleScreen() {
   }>(); // Interpreter ID from route params
   const { user } = useAuth();
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(
@@ -358,6 +360,8 @@ export default function ToScheduleScreen() {
     });
   }
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <View className="flex-1">
       <View className="mt-12 pb-2">
@@ -375,7 +379,7 @@ export default function ToScheduleScreen() {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="grow pb-4"
+          contentContainerClassName="grow"
         >
           <View className="mt-4 py-4 px-4">
             <Text className="font-ifood-medium mb-3 text-[18px] text-left text-primary-800">
@@ -783,7 +787,10 @@ export default function ToScheduleScreen() {
           </View>
 
           {/* Bottom buttons */}
-          <View className="mt-auto pb-2 gap-4 px-4">
+          <View
+            className="mt-auto gap-4 px-4"
+            style={{ paddingBottom: bottomInset }}
+          >
             <Button
               size="md"
               onPress={handleSubmit}
