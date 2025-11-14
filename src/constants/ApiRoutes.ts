@@ -12,6 +12,10 @@ export const ApiRoutes = {
     login: '/auth/login',
     logout: '/auth/logout',
     refreshToken: '/auth/refresh',
+    passwordReset: (email: string) => `/email/password-reset/${email}`,
+    validateMailToken: (token: string) =>
+      `/auth/validate-mail-token?token=${token}`,
+    recoverPassword: '/auth/recover-password',
   },
   person: {
     base: '/person',
@@ -107,7 +111,7 @@ export const ApiRoutes = {
     byKey: (key: string) => `/parameters/${key}`,
   },
   interpreterDocument: {
-    base: `/interpreter-documents`,
+    base: (interpreterId: string) => `/interpreter-documents/${interpreterId}`,
     upload: (interpreterId: string, replace: boolean) =>
       `/interpreter-documents/${interpreterId}?replace_existing=${replace}`,
   },

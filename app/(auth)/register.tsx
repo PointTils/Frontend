@@ -72,17 +72,19 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 export default function RegisterScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
+  const [isRegistering, setIsRegistering] = useState(false);
   const [type, setType] = useState(UserType.PERSON);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showPassword, setShowPassword] = useState(false);
   const [document, setDocument] = useState<any[]>([]);
-  const [isRegistering, setIsRegistering] = useState(false);
 
   // API hooks for different user types
   const personApi = useApiPost<UserResponse, UserRequest>(
@@ -343,6 +345,8 @@ export default function RegisterScreen() {
     }
   }
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <View className="flex-1">
       <View className="mt-12 pb-2">
@@ -376,7 +380,7 @@ export default function RegisterScreen() {
               onChange={handleChangeType}
               className="flex-row items-center justify-between"
             >
-              <Radio value={UserType.PERSON}>
+              <Radio testID="person-type-button" value={UserType.PERSON}>
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -394,7 +398,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.ENTERPRISE}>
+              <Radio
+                testID="enterprise-type-button"
+                value={UserType.ENTERPRISE}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -412,7 +419,10 @@ export default function RegisterScreen() {
                   </Text>
                 </RadioLabel>
               </Radio>
-              <Radio value={UserType.INTERPRETER}>
+              <Radio
+                testID="interpreter-type-button"
+                value={UserType.INTERPRETER}
+              >
                 <RadioIndicator>
                   <RadioIcon as={CircleIcon} />
                 </RadioIndicator>
@@ -445,6 +455,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="reason-input"
                       placeholder="Empresa X"
                       className="font-ifood-regular"
                       value={fields.reason.value}
@@ -471,6 +482,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -505,6 +517,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="name-input"
                       placeholder="Nome X"
                       className="font-ifood-regular"
                       value={fields.name.value}
@@ -531,6 +544,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cpf-input"
                       placeholder="000.000.000-00"
                       className="font-ifood-regular"
                       value={fields.cpf.value}
@@ -559,6 +573,7 @@ export default function RegisterScreen() {
                   <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <Input pointerEvents="none">
                       <InputField
+                        testID="birthday-input"
                         placeholder="DD/MM/AAAA"
                         className="font-ifood-regular"
                         value={fields.birthday.value}
@@ -624,6 +639,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="cnpj-input"
                       placeholder="00.000.000/0001-00"
                       className="font-ifood-regular"
                       value={fields.cnpj.value}
@@ -655,6 +671,7 @@ export default function RegisterScreen() {
                   </FormControlLabel>
                   <Input>
                     <InputField
+                      testID="videoUrl-input"
                       placeholder="https://youtube.com/meu-video"
                       className="font-ifood-regular"
                       value={fields.videoUrl.value}
@@ -686,6 +703,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="phone-input"
                     placeholder="(00) 00000-0000"
                     className="font-ifood-regular"
                     value={fields.phone.value}
@@ -715,6 +733,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="email-input"
                     placeholder="example@gmail.com"
                     className="font-ifood-regular"
                     value={fields.email.value}
@@ -743,6 +762,7 @@ export default function RegisterScreen() {
                 </FormControlLabel>
                 <Input>
                   <InputField
+                    testID="password-input"
                     placeholder="********"
                     className="font-ifood-regular"
                     autoCapitalize="none"
@@ -753,6 +773,7 @@ export default function RegisterScreen() {
                   />
                 </Input>
                 <TouchableOpacity
+                  testID="toggle-password-visibility"
                   onPress={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-9"
                 >
@@ -794,15 +815,19 @@ export default function RegisterScreen() {
             </View>
 
             {/* Bottom buttons */}
-            <View className="mt-8 pb-4 gap-4">
+            <View className="mt-8 gap-4" style={{ paddingBottom: bottomInset }}>
               <Button
+                testID="register-button"
                 onPress={handleRegister}
                 size="md"
                 isDisabled={isRegistering}
                 className={`data-[active=true]:bg-primary-orange-press-light ${isRegistering ? 'mb-6' : ''} bg-primary-orange-light`}
               >
                 {isRegistering ? (
-                  <ActivityIndicator color={colors.white} />
+                  <ActivityIndicator
+                    testID="register-loading-indicator"
+                    color={colors.white}
+                  />
                 ) : (
                   <>
                     <ButtonIcon as={PlusIcon} className="text-white" />
@@ -814,6 +839,7 @@ export default function RegisterScreen() {
               </Button>
               {!isRegistering && (
                 <HapticTab
+                  testID="cancel-button"
                   onPress={() => {
                     clearErrors();
                     router.back();

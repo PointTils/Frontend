@@ -1,11 +1,17 @@
 export interface DocumentResponse {
   success: boolean;
-  message: string;
-  data: [
-    {
-      id: string;
-      document: string;
-      interpreter_id: string;
-    },
-  ];
+  message?: string;
+  data?: Document[];
 }
+
+export interface Document {
+  id: string;
+  document: string;
+  interpreter_id: string;
+}
+
+export type ExistingDocument = {
+  id: string;
+  name: string;
+  url: string;
+};

@@ -65,26 +65,8 @@ export default function FAQScreen() {
   const handleContactPress = async () => {
     if (!contactEmail) return;
 
-    const mailtoUrl = `mailto:${contactEmail}`;
-
     try {
-      // Check if the URL can be opened
-      const canOpen = await Linking.canOpenURL(mailtoUrl);
-
-      if (canOpen) {
-        await Linking.openURL(mailtoUrl);
-      } else {
-        // Show error toast if cannot open
-        Toast.show({
-          type: 'error',
-          text1: Strings.faq.toast.contactEmailErrorTitle,
-          text2: Strings.faq.toast.contactEmailErrorDescription,
-          position: 'top',
-          visibilityTime: 3000,
-          autoHide: true,
-          closeIconSize: 1,
-        });
-      }
+      await Linking.openURL(`mailto:${contactEmail}`);
     } catch {
       // Show error toast if opening fails
       Toast.show({
