@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 import { CheckIcon } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 import HapticTab from './HapticTab';
@@ -88,6 +89,7 @@ export default function FilterSheet({
     { label: string; value: string }[]
   >([]);
 
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
 
   const { data: statesData, error: statesError } =
@@ -194,6 +196,8 @@ export default function FilterSheet({
     onApply(cleanedFilters);
   };
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <Modal transparent animationType="slide">
       <TouchableOpacity
@@ -201,7 +205,10 @@ export default function FilterSheet({
         activeOpacity={1}
         onPress={onClose}
       />
-      <View className="p-4 bg-white py-8">
+      <View
+        className="p-4 bg-white pt-8"
+        style={{ paddingBottom: bottomInset }}
+      >
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">

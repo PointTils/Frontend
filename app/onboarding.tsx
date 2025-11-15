@@ -10,10 +10,12 @@ import { UserType } from '@/src/types/api';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { height } = Dimensions.get('window');
 
 export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
   const colors = useColors();
   const { user, completeOnboarding } = useAuth();
 
@@ -45,6 +47,8 @@ export default function OnboardingScreen() {
     await completeOnboarding();
     router.replace('/(tabs)');
   }
+
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 24);
 
   return (
     <View
@@ -80,7 +84,7 @@ export default function OnboardingScreen() {
         </Text>
       </View>
 
-      <View className="absolute bottom-10 w-full px-6">
+      <View className="absolute w-full px-6" style={{ bottom: bottomInset }}>
         <Button
           className="w-full"
           onPress={handleContinue}
