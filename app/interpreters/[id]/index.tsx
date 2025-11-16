@@ -290,14 +290,19 @@ export default function InterpreterDetails() {
               <InfoRow
                 icon={<MapPinIcon size={16} color={colors.text} />}
                 label={Strings.common.fields.location}
-                value={interpreter.locations?.[0].city
-                  .concat('/', interpreter.locations?.[0].uf)
-                  .concat(
-                    ' - ',
-                    interpreter.locations
-                      ?.map((loc) => loc.neighborhood)
-                      .join(', '),
-                  )}
+                value={
+                  Array.isArray(interpreter.locations) &&
+                  interpreter.locations.length > 0
+                    ? interpreter.locations[0].city
+                        .concat('/', interpreter.locations[0].uf)
+                        .concat(
+                          ' - ',
+                          interpreter.locations
+                            .map((loc) => loc.neighborhood)
+                            .join(', '),
+                        )
+                    : ''
+                }
                 valueColor="text-typography-600"
               />
             )}
