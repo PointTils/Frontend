@@ -9,9 +9,10 @@ import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { SCHEDULE_ENABLED } from '@/src/constants/Config';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
-import { Modality } from '@/src/types/api';
+import { Modality, UserType } from '@/src/types/api';
 import type {
   ScheduleResponse,
   InterpreterResponseData,
@@ -56,8 +57,8 @@ type TabKey = keyof typeof Strings.search.tabs;
 export default function InterpreterDetails() {
   const params = useLocalSearchParams<{ id: string }>();
   const interpreterId = params.id;
-
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const colors = useColors();
   const router = useRouter();
 
@@ -289,9 +290,14 @@ export default function InterpreterDetails() {
               <InfoRow
                 icon={<MapPinIcon size={16} color={colors.text} />}
                 label={Strings.common.fields.location}
-                value={interpreter.locations
-                  ?.map((loc) => loc.neighborhood)
-                  .join(', ')}
+                value={interpreter.locations?.[0].city
+                  .concat('/', interpreter.locations?.[0].uf)
+                  .concat(
+                    ' - ',
+                    interpreter.locations
+                      ?.map((loc) => loc.neighborhood)
+                      .join(', '),
+                  )}
                 valueColor="text-typography-600"
               />
             )}
@@ -363,21 +369,27 @@ export default function InterpreterDetails() {
         className="w-full pt-6 px-8 border-t border-typography-200 dark:border-typography-700"
         style={{ paddingBottom: bottomInset }}
       >
-        <Button
-          size="md"
-          onPress={() => {
-            router.push({
-              pathname: '/interpreters/[id]/to-schedule',
-              params: { id: interpreterId },
-            });
-          }}
-          className="data-[active=true]:bg-primary-orange-press-light"
-        >
-          <ButtonIcon as={PlusIcon} className="text-white" />
-          <Text className="font-ifood-regular text-text-dark">
-            {Strings.search.createAppointment}
+        {user?.type === UserType.INTERPRETER ? (
+          <Text className="font-ifood-regular text-typography-600 text-center mb-2">
+            {Strings.toSchedule.professionalOnlyProfile}
           </Text>
-        </Button>
+        ) : (
+          <Button
+            size="md"
+            onPress={() => {
+              router.push({
+                pathname: '/interpreters/[id]/to-schedule',
+                params: { id: interpreterId },
+              });
+            }}
+            className="data-[active=true]:bg-primary-orange-press-light"
+          >
+            <ButtonIcon as={PlusIcon} className="text-white" />
+            <Text className="font-ifood-regular text-text-dark">
+              {Strings.search.createAppointment}
+            </Text>
+          </Button>
+        )}
       </View>
     </>
   );

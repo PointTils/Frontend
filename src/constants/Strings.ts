@@ -249,6 +249,8 @@ export const Strings = {
       'Informar uma descrição detalhada aumenta as chances do intérprete aceitar a sua solicitação.',
 
     noCalendarAvailable: 'Nenhum horário disponível.',
+    professionalOnlyProfile:
+      'Seu perfil profissional é destinado apenas à atuação como Intérprete. Para agendar, cadastre-se como Solicitante ou Empresa.',
 
     toast: {
       errorTitle: 'Erro ao criar agendamento',
