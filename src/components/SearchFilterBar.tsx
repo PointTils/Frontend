@@ -37,6 +37,9 @@ interface SearchFilterBarProps {
  * (date availability, online modality, and advanced filters via modal).
  *
  * @param onData - Callback function called with API response data (UserListResponse)
+ * @param navigateOnSearch - If true, navigates to search results page on search submission
+ * @param initialQuery - Optional initial query string to populate the search input
+ * @param initialFilters - Optional initial filters to apply on the search
  *
  * @returns A search bar with input field, filter controls, and modal integration.
  *
@@ -56,17 +59,20 @@ export default function SearchFilterBar({
   const { user, isAuthenticated } = useAuth();
   const colors = useColors();
 
-  const [preSelectedSpecialty, setPreSelectedSpecialty] = useState<string[]>(
-    [],
-  );
-  const [query, setQuery] = useState(() => initialQuery ?? '');
-  const [filters, setFilters] = useState<AppliedFilters>(
-    () => initialFilters ?? {},
-  );
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [initialFocus, setInitialFocus] = useState<
     'date' | 'modality' | undefined
   >(undefined);
+  const [query, setQuery] = useState(() => initialQuery ?? '');
+  const [filters, setFilters] = useState<AppliedFilters>(
+    () => initialFilters ?? {},
+  );
+  const [preSelectedSpecialty, setPreSelectedSpecialty] = useState<string[]>(
+    [],
+  );
+  const [includeDefaultSpecialties, setIncludeDefaultSpecialties] = useState(
+    () => !initialFilters?.specialty?.length,
+  );
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(
     () => !!initialQuery?.trim(),
   );
@@ -134,8 +140,16 @@ export default function SearchFilterBar({
 
   const handleApplyFilters = (appliedFilters: AppliedFilters) => {
     setFilters(appliedFilters);
+    setIncludeDefaultSpecialties(false);
     setSheetVisible(false);
     maybeNavigate(appliedFilters, query);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setIncludeDefaultSpecialties(false);
+    setSheetVisible(false);
+    maybeNavigate({}, query);
   };
 
   const handlerOnlineButton = (data?: Modality) =>
@@ -165,7 +179,7 @@ export default function SearchFilterBar({
     }
     if (filters.specialty?.length)
       query.append('specialty', filters.specialty.join(','));
-    else if (preSelectedSpecialty.length)
+    else if (includeDefaultSpecialties && preSelectedSpecialty.length)
       query.append('specialty', preSelectedSpecialty.join(','));
     if (filters.availableDates) {
       const date = new Date(filters.availableDates);
@@ -349,6 +363,7 @@ export default function SearchFilterBar({
           onClose={() => {
             setSheetVisible(false);
           }}
+          onClear={handleClearFilters}
         />
       )}
     </View>
