@@ -153,7 +153,6 @@ export default function EditProfileScreen() {
   );
   const [schedule, setSchedule] =
     useState<Record<Days, { from: string; to: string }>>(emptyWeekSchedule());
-  const [clearingDay, setClearingDay] = useState<Days | null>(null);
 
   // Keep initial values to detect which days were changed
   const initialScheduleRef =
@@ -545,6 +544,12 @@ export default function EditProfileScreen() {
   const neighborhoodValues =
     fields.neighborhoods.value.length > 0 ? fields.neighborhoods.value : [''];
 
+  const toMinutes = (time?: string): number => {
+    if (!time) return -1;
+    const [h, m] = time.split(':').map(Number);
+    return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
+  };
+
   const handleDateChange = (_event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -561,47 +566,14 @@ export default function EditProfileScreen() {
     }
   };
 
-  const toMinutes = (time?: string): number => {
-    if (!time) return -1;
-    const [h, m] = time.split(':').map(Number);
-    return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : -1;
-  };
-
-  const handleClearSchedule = async (day: Days) => {
+  const handleClearSchedule = (day: Days) => {
     const current = schedule[day];
     if (!current.from && !current.to) return;
 
-    const scheduleId = scheduleIds[day];
-
-    setClearingDay(day);
-    try {
-      if (scheduleId) {
-        await scheduleApiDelete.deleteAt(
-          ApiRoutes.schedules.updatePerDay(scheduleId),
-        );
-      }
-
-      setSchedule((prev) => ({
-        ...prev,
-        [day]: { from: '', to: '' },
-      }));
-      initialScheduleRef.current = {
-        ...initialScheduleRef.current,
-        [day]: { from: '', to: '' },
-      };
-    } catch {
-      Toast.show({
-        type: 'error',
-        text1: Strings.edit.toast.scheduleErrorTitle,
-        text2: Strings.edit.toast.scheduleErrorDescription,
-        position: 'top',
-        visibilityTime: 2000,
-        autoHide: true,
-        closeIconSize: 1,
-      });
-    } finally {
-      setClearingDay(null);
-    }
+    setSchedule((prev) => ({
+      ...prev,
+      [day]: { from: '', to: '' },
+    }));
   };
 
   function handleBack() {
@@ -609,6 +581,7 @@ export default function EditProfileScreen() {
     router.back();
   }
 
+  // Handle form submission - all in one function to manage loading state easily
   async function handleUpdate() {
     if (!profile) return;
     if (
@@ -760,6 +733,7 @@ export default function EditProfileScreen() {
 
       const updates: { id: string; payload: ScheduleRequest }[] = [];
       const creates: ScheduleRequest[] = [];
+      const deletes: string[] = [];
 
       for (const key of keys) {
         const curr = schedule[key];
@@ -768,9 +742,17 @@ export default function EditProfileScreen() {
           (curr?.from ?? '') !== (init?.from ?? '') ||
           (curr?.to ?? '') !== (init?.to ?? '');
 
-        if (!changed || !curr?.from || !curr?.to) continue;
+        if (!changed) continue;
 
         const id = scheduleIds[key];
+        const hasCurrRange = !!curr?.from && !!curr?.to;
+
+        if (!hasCurrRange) {
+          if (id) {
+            deletes.push(id);
+          }
+          continue;
+        }
 
         const payload: ScheduleRequest = {
           day: key as Days,
@@ -784,6 +766,16 @@ export default function EditProfileScreen() {
         } else {
           creates.push(payload);
         }
+      }
+
+      // DELETE
+      let deleteResults: (ScheduleResponse | null)[] = [];
+      if (deletes.length > 0) {
+        deleteResults = await Promise.all(
+          deletes.map((id) =>
+            scheduleApiDelete.deleteAt(ApiRoutes.schedules.updatePerDay(id)),
+          ),
+        );
       }
 
       // PATCH
@@ -809,8 +801,9 @@ export default function EditProfileScreen() {
 
       const failedPatch = patchResults.some((r) => !r?.success);
       const failedCreate = createResults.some((r) => !r?.success);
+      const failedDelete = deleteResults.some((r) => !r?.success);
 
-      if (failedPatch || failedCreate) {
+      if (failedPatch || failedCreate || failedDelete) {
         router.replace('/(tabs)/profile');
         await new Promise((resolve) => setTimeout(resolve, 300));
         Toast.show({
@@ -822,6 +815,7 @@ export default function EditProfileScreen() {
           autoHide: true,
           closeIconSize: 1,
         });
+        setIsSubmitting(false);
         return;
       }
     }
@@ -894,7 +888,7 @@ export default function EditProfileScreen() {
         />
       </View>
       <KeyboardAvoidingView
-        className="flex-1 w-full px-10"
+        className="flex-1 w-full px-8"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
@@ -1661,11 +1655,7 @@ export default function EditProfileScreen() {
                                 onPress={() => handleClearSchedule(key as Days)}
                                 className="ml-2 items-center justify-center data-[active=true]:bg-primary-50/15"
                               >
-                                {clearingDay === (key as Days) ? (
-                                  <ActivityIndicator color={colors.error} />
-                                ) : (
-                                  <CircleXIcon color={colors.error} />
-                                )}
+                                <CircleXIcon color={colors.redDelete} />
                               </HapticTab>
                             </View>
                             <FormControlError>
