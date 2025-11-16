@@ -12,27 +12,27 @@ export const notificationTemplates: Record<
   (data: NotificationTemplateData) => NotificationTemplate
 > = {
   APPOINTMENT_ACCEPTED: () => ({
-    title: 'Solicitação aceita!',
-    body: 'Uma solicitação foi aceita.',
+    title: 'Sua solicitação foi aceita!',
+    body: 'Boas notícias! O intérprete aceitou sua solicitação.',
   }),
 
   APPOINTMENT_REQUESTED: () => ({
-    title: 'Solicitação recebida!',
-    body: 'Você recebeu uma nova solicitação.',
+    title: 'Você recebeu uma nova solicitação!',
+    body: 'Alguém acabou de pedir sua ajuda como intérprete 😊',
   }),
 
   APPOINTMENT_CANCELED: () => ({
-    title: 'Solicitação encerrada!',
+    title: 'Status da solicitação atualizado',
     body: 'Uma solicitação foi cancelada ou recusada.',
   }),
 
   APPOINTMENT_REMINDER: () => ({
-    title: 'Lembrete de solicitação!',
-    body: 'Você tem uma solicitação agendada em breve.',
+    title: 'Lembrete para você!',
+    body: 'Seu agendamento está chegando. Não esqueça! 😉',
   }),
 
   DEFAULT: () => ({
-    title: 'Notificação',
-    body: 'Você recebeu uma nova atualização.',
+    title: 'Nova notificação',
+    body: 'Você recebeu uma atualização importante. Clique para mais detalhes.',
   }),
 };
