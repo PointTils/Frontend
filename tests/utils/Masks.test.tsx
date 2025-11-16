@@ -123,15 +123,20 @@ describe('utils/masks', () => {
   });
 
   describe('handlePhoneChange', () => {
-    it('limits input to 11 digits', () => {
-      expect(handlePhoneChange('1198877665512345')).toBe('(11) 98877-6655');
+    it('formats mobile numbers with five-digit split', () => {
+      expect(handlePhoneChange('11987654321')).toBe('(11) 98765-4321');
+    });
+
+    it('formats landline numbers with four-digit split', () => {
+      expect(handlePhoneChange('1132654321')).toBe('(11) 3265-4321');
     });
 
     it.each([
-      ['119', '(11) 9'],
-      ['11988', '(11) 988'],
-    ])('handles partial input: %s -> %s', (input, output) => {
-      expect(handlePhoneChange(input)).toBe(output);
+      ['', ''],
+      ['1', '1'],
+      ['12', '12'],
+    ])('returns raw digits for input "%s"', (input, expected) => {
+      expect(handlePhoneChange(input)).toBe(expected);
     });
   });
 
@@ -255,6 +260,10 @@ describe('utils/masks', () => {
   describe('formatPhone', () => {
     it.each([[''], [null], [undefined] as any])('handles empty input', (v) => {
       expect(formatPhone(v)).toBe('');
+    });
+
+    it('caps formatted output to 11 digits', () => {
+      expect(formatPhone('11987654321999')).toBe('(11) 98765-4321');
     });
 
     it('handles partial phone number', () => {
