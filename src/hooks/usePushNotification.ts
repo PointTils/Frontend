@@ -11,10 +11,9 @@ import { useAuth } from '../contexts/AuthProvider';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
-    shouldShowBanner: true,
     shouldShowList: true,
   }),
 });
@@ -33,8 +32,9 @@ export function usePushNotifications() {
 
     async function setup() {
       const token = await registerForPushNotificationsAsync();
-      if (!token) return;
-
+      if (!token) {
+        return;
+      }
       setFcmPushToken(token);
 
       const deviceId = await DeviceInfo.getUniqueId();
@@ -51,7 +51,6 @@ export function usePushNotifications() {
             platform: Platform.OS,
             device_id: deviceId,
           });
-          // console.log('Token atualizado com sucesso:', token);
         } else if (existing.data.length === 0) {
           const payload: RegisterTokenPayload = {
             userId,
@@ -60,7 +59,6 @@ export function usePushNotifications() {
             platform: Platform.OS,
           };
           await postAt(ApiRoutes.userApps.base, payload);
-          // console.log('Token cadastrado com sucesso:', token);
         }
       } catch (error) {
         console.error('Erro ao registrar token do dispositivo:', error);

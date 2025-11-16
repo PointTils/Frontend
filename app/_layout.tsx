@@ -5,6 +5,7 @@ import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import { usePushNotifications } from '@/src/hooks/usePushNotification';
+import type { NotificationType } from '@/src/types/api/notification';
 import { notificationTemplates } from '@/src/utils/notificationTemplates'; // ajuste o path conforme sua pasta
 import messaging from '@react-native-firebase/messaging';
 import { useFonts } from 'expo-font';
@@ -15,7 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import ToastManager from 'toastify-react-native';
-import '@/src/utils/messageHandler';
+// import '@/src/utils/pushNotificationHandler';
 
 import 'react-native-reanimated';
 
@@ -139,7 +140,6 @@ function AppContent() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    // console.log('Criando canal de notificações');
     async function createNotificationChannel() {
       if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('default', {
@@ -152,12 +152,11 @@ function AppContent() {
     const unsubscribeForeground = messaging().onMessage(
       async (remoteMessage) => {
         const { type, ...data } = remoteMessage.data || {};
-        // console.log('Mensagem recebida em FOREGROUND:', remoteMessage);
         const typeStr = String(type);
-        const template = notificationTemplates[typeStr];
-        if (template) {
-          // console.log('Template encontrado para o tipo:', typeStr);
+        if (typeStr in notificationTemplates) {
+          const template = notificationTemplates[typeStr as NotificationType];
           const { title, body } = template(data);
+
           await Notifications.scheduleNotificationAsync({
             content: {
               title,

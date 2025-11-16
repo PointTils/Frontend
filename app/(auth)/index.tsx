@@ -13,18 +13,11 @@ import {
 import { Input, InputField } from '@/src/components/ui/input';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
-import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
-import { useApiPost } from '@/src/hooks/useApi';
 import { useColors } from '@/src/hooks/useColors';
 import { useFormValidation } from '@/src/hooks/useFormValidation';
-import { usePushNotifications } from '@/src/hooks/usePushNotification';
 import type { LoginCredentials } from '@/src/types/api';
-import type {
-  RegisterTokenPayload,
-  RegisterTokenResponse,
-} from '@/src/types/api/notification';
 import {
   buildInvalidFieldError,
   buildRequiredFieldError,
@@ -40,26 +33,14 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
 import { Toast } from 'toastify-react-native';
 
 export default function LoginScreen() {
-  const { fcmPushToken: fcmPushToken } = usePushNotifications();
-  const {
-    login,
-    isLoggingIn,
-    loginError,
-    setLoginError,
-    user: currentUser,
-  } = useAuth();
+  const { login, isLoggingIn, loginError, setLoginError } = useAuth();
   const colors = useColors();
   const { registeredAsInterpreter } = useLocalSearchParams<{
     registeredAsInterpreter?: string;
   }>();
-  const { post: registerToken } = useApiPost<
-    RegisterTokenResponse,
-    RegisterTokenPayload
-  >(ApiRoutes.userApps.base);
   const [showPassword, setShowPassword] = useState(false);
   const [isInterpreterModalVisible, setInterpreterModalVisibility] =
     useState(false);
@@ -105,28 +86,6 @@ export default function LoginScreen() {
       },
     },
   });
-
-  // Register device for push notifications after login
-  useEffect(() => {
-    if (currentUser && !isLoggingIn && fcmPushToken) {
-      const registerDevice = async () => {
-        try {
-          const deviceId = await DeviceInfo.getUniqueId();
-
-          await registerToken({
-            token: fcmPushToken,
-            platform: Platform.OS,
-            userId: currentUser.id,
-            device_id: deviceId,
-          });
-        } catch (err) {
-          console.warn('Falha ao registrar push token:', err);
-        }
-      };
-
-      registerDevice();
-    }
-  }, [currentUser, isLoggingIn, fcmPushToken, registerToken]);
 
   async function handleLogin() {
     if (!validateForm()) {

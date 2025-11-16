@@ -1,3 +1,6 @@
+import { Strings } from '../constants/Strings';
+import { NotificationType } from '../types/api/notification';
+
 export interface NotificationTemplateData {
   [key: string]: any;
 }
@@ -8,7 +11,7 @@ export interface NotificationTemplate {
 }
 
 export const notificationTemplates: Record<
-  string,
+  NotificationType,
   (data: NotificationTemplateData) => NotificationTemplate
 > = {
   APPOINTMENT_ACCEPTED: () => ({

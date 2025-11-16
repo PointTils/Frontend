@@ -2,12 +2,13 @@ import { notificationTemplates } from '@/src/utils/notificationTemplates';
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 
+import type { NotificationType } from '../types/api/notification';
+
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
   const { type, ...data } = remoteMessage.data || {};
-  //console.log('Mensagem recebida em BACKGROUND:', remoteMessage);
   const typeStr = String(type);
-  const template = notificationTemplates[typeStr];
-  if (template) {
+  if (typeStr in notificationTemplates) {
+    const template = notificationTemplates[typeStr as NotificationType];
     const { title, body } = template(data);
     await Notifications.scheduleNotificationAsync({
       content: {
