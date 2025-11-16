@@ -58,6 +58,7 @@ export default function ForgotPasswordStepThree() {
       error: '',
       validate: (value: string) => {
         if (!value.trim()) return buildRequiredFieldError('password');
+        if (value.length < 8) return Strings.common.fields.errors.minPassword;
         return null;
       },
     },
