@@ -40,6 +40,7 @@ import { formatDateTime } from '../utils/masks';
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
   onClose: () => void;
+  onClear?: () => void;
   filter: AppliedFilters;
   preSelectedSpecialty?: string[];
   initialFocus?: 'date' | 'modality';
@@ -50,6 +51,7 @@ interface FilterSheetProps {
  *
  * @param onApply - Callback function called with applied filters
  * @param onClose - Callback function to close the modal
+ * @param onClear - Optional callback function called when filters are cleared
  * @param filter - Initial filter values to populate the form
  * @param initialFocus - Optional parameter to set initial focus on 'date' or 'modality' section
  *
@@ -69,6 +71,7 @@ interface FilterSheetProps {
 export default function FilterSheet({
   onApply,
   onClose,
+  onClear,
   filter,
   preSelectedSpecialty,
   initialFocus,
@@ -411,6 +414,7 @@ export default function FilterSheet({
               setDate(null);
               setGender(null);
               onApply({});
+              onClear?.();
             }}
             className="flex-row justify-center py-2"
           >
