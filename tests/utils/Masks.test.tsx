@@ -377,12 +377,16 @@ describe('utils/masks', () => {
   });
 
   describe('validatePhone', () => {
-    it('validates correct phone', () => {
+    it('validates mobile phone', () => {
       expect(validatePhone('(11) 98877-6655')).toBe(true);
     });
 
+    it('accepts ramal phone', () => {
+      expect(validatePhone('(11) 9887-6655')).toBe(true);
+    });
+
     it('rejects incomplete phone', () => {
-      expect(validatePhone('(11) 9887-6655')).toBe(false);
+      expect(validatePhone('(11) 9887-665')).toBe(false);
     });
   });
 
