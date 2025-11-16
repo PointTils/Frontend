@@ -23,6 +23,7 @@ export const Colors = {
     pendingBadgeBackground: '#FCEFE6',
     success: '#348352',
     error: '#E63535',
+    redDelete: '#ef5c5cff',
     faqChevron: '#9CA3AF',
   },
   dark: {
@@ -43,6 +44,7 @@ export const Colors = {
     pendingBadgeBackground: '#FCEFE6',
     success: '#319758ff',
     error: '#ff3131ff',
+    redDelete: '#ef5c5cff',
     faqChevron: '#9CA3AF',
   },
 } as const;

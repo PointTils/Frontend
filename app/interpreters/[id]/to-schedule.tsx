@@ -354,8 +354,8 @@ export default function ToScheduleScreen() {
       text1: Strings.toSchedule.toast.successTitle,
       text2: Strings.toSchedule.toast.successDescription,
       position: 'top',
-      visibilityTime: 2000,
-      autoHide: false,
+      visibilityTime: 3000,
+      autoHide: true,
       closeIconSize: 1,
     });
   }
