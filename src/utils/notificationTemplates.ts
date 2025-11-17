@@ -1,5 +1,4 @@
-import { Strings } from '../constants/Strings';
-import { NotificationType } from '../types/api/notification';
+import type { NotificationType } from '../types/api/notification';
 
 export interface NotificationTemplateData {
   [key: string]: any;
