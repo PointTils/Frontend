@@ -1,4 +1,4 @@
-import { StarRating } from '@/src/components/Rating';
+import StarRating from '@/src/components/Rating';
 import { formatDate } from '@/src/utils/masks';
 import { View, Text } from 'react-native';
 

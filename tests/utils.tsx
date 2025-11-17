@@ -23,6 +23,8 @@ export const setLocalSearchParams = (params: Record<string, unknown>): void => {
 };
 export const getAuthStateMock = () => (globalThis as any).mockAuthState;
 
+export const getHapticTab = () => (globalThis as any).mockImpactAsync;
+
 // Mock form fields
 export const fillForm = (
   utils: ReturnType<typeof import('@/tests/utils').renderWithProviders>,

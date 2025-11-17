@@ -1,4 +1,4 @@
-import { StarRating } from '@/src/components/Rating';
+import StarRating from '@/src/components/Rating';
 import { Text } from '@/src/components/ui/text';
 import { Strings } from '@/src/constants/Strings';
 import { useColors } from '@/src/hooks/useColors';
