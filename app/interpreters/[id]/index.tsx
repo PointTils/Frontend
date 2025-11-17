@@ -2,7 +2,7 @@ import Header from '@/src/components/Header';
 import InfoRow from '@/src/components/InfoRow';
 import InterpreterCalendar from '@/src/components/InterpreterCalendar';
 import InterpreterReviewCard from '@/src/components/InterpreterReviewCard';
-import { StarRating } from '@/src/components/Rating';
+import StarRating from '@/src/components/Rating';
 import { Avatar } from '@/src/components/ui/avatar';
 import { AvatarImage } from '@/src/components/ui/avatar/avatar-image';
 import { Button, ButtonIcon } from '@/src/components/ui/button';

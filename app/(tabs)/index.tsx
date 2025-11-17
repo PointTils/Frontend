@@ -8,9 +8,9 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
+import { useCheckFeedback } from '@/src/hooks/useCheckFeedback';
 import { useColors } from '@/src/hooks/useColors';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
-import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
   type Appointment,

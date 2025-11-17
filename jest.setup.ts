@@ -4,6 +4,7 @@ import '@testing-library/jest-native/extend-expect';
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
 const localSearchParamsStore = { params: {} as Record<string, unknown> };
 const mockUseLocalSearchParams = jest.fn(() => localSearchParamsStore.params);
+const mockImpactAsync = jest.fn();
 
 const mockToast = { show: jest.fn() };
 
@@ -25,6 +26,7 @@ Object.assign(globalThis, {
   },
   mockToast,
   mockAuthState,
+  mockImpactAsync,
 });
 
 // Suppress console.error during tests
@@ -86,6 +88,11 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('expo-haptics', () => ({
+  ImpactFeedbackStyle: { Light: 'Light' },
+  impactAsync: mockImpactAsync,
+}));
+
 // Global mocks
 jest.mock('@/src/contexts/AuthProvider', () => ({
   useAuth: () => mockAuthState,
@@ -93,10 +100,11 @@ jest.mock('@/src/contexts/AuthProvider', () => ({
 
 jest.mock('@/src/hooks/useColors', () => ({
   useColors: () => ({
+    background: '#ffffff',
     white: '#fff',
     disabled: '#999999',
     text: '#0d0d0d',
-    primaryOrange: '#f28d22',
+    primaryOrange: '#F28D22',
     primaryBlue: '#007bff',
     detailsGray: '#6c757d',
     fieldGray: '#e9ecef',

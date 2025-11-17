@@ -17,7 +17,11 @@ interface StarRatingProps {
  *
  * @returns A React component that visually represents the rating with stars.
  */
-export function StarRating({ rating, size = 24, color }: StarRatingProps) {
+export default function StarRating({
+  rating,
+  size = 24,
+  color,
+}: StarRatingProps) {
   const colors = useColors();
   const totalStars = 5;
   const starColor = color ?? colors.primaryBlue;
