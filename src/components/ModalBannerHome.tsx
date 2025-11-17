@@ -26,6 +26,7 @@ export default function ModalBannerHome({
       className="flex-row items-center justify-between h-[100px] rounded-md p-4 mx-4 my-2"
       style={{ backgroundColor }}
       activeOpacity={0.8}
+      testID="banner-home-button"
     >
       <View className="flex-row items-center flex-1">
         <BannerHome />

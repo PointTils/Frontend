@@ -162,6 +162,7 @@ export default function FeedbackModal({
                   onPress={() => setRating(i + 1)}
                   activeOpacity={0.7}
                   className="mx-1"
+                  testID={`feedback-star-${i + 1}`}
                 >
                   <StarIcon
                     width={28}
@@ -194,6 +195,7 @@ export default function FeedbackModal({
             scrollEnabled
             maxLength={400}
             textAlignVertical="top"
+            testID="feedback-details"
             value={details}
             onChangeText={setDetails}
           />
@@ -204,6 +206,7 @@ export default function FeedbackModal({
               size="md"
               onPress={handleSubmit}
               disabled={loading}
+              testID="feedback-submit"
               className={`
                 ${
                   loading

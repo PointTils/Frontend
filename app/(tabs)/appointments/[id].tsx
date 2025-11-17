@@ -1,7 +1,7 @@
 import HapticTab from '@/src/components/HapticTab';
 import Header from '@/src/components/Header';
 import InfoRow from '@/src/components/InfoRow';
-import { StarRating } from '@/src/components/Rating';
+import StarRating from '@/src/components/Rating';
 import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button, ButtonIcon } from '@/src/components/ui/button';
 import { Text } from '@/src/components/ui/text';
