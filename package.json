@@ -13,7 +13,7 @@
     "format:write": "prettier --write .",
     "test": "jest",
     "test:report": "jest --coverage",
-    "test:web": "start .\\coverage\\lcov-report\\index.html"
+    "test:view": "start .\\coverage\\lcov-report\\index.html"
   },
   "dependencies": {
     "@expo/html-elements": "^0.13.7",

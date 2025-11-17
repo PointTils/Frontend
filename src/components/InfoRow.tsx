@@ -17,6 +17,7 @@ type InfoRowProps = {
  * @param icon - An optional icon to display alongside the label.
  * @param label - The label text for the information row.
  * @param value - The value text for the information row.
+ * @param valueColor - Optional color for the value text.
  * @param onlyLabel - If true, only the label will be displayed, even if the value is not provided.
  * @param border - If true, a border will be added around the value text.
  *
@@ -27,6 +28,7 @@ type InfoRowProps = {
  *   icon={<SomeIcon />}
  *   label="Email"
  *   value="email@example.com"
+ *   valueColor="text-blue-500"
  */
 export default function InfoRow({
   icon,
