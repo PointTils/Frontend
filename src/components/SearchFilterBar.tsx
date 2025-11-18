@@ -160,10 +160,10 @@ export default function SearchFilterBar({
   const handlerOnlineText = (data?: Modality) =>
     data === Modality.ONLINE || data === Modality.ALL
       ? 'text-primary-blue-light'
-      : 'text-gray-700';
+      : 'text-typography-600';
 
   const handlerDateText = (data?: string) =>
-    data ? 'text-primary-blue-light' : 'text-gray-700';
+    data ? 'text-primary-blue-light' : 'text-typography-600';
 
   const handlerFilterCount = () => {
     const count = Object.values(filters).filter(
@@ -245,7 +245,7 @@ export default function SearchFilterBar({
 
   return (
     <View className="px-4 py-2">
-      <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
+      <View className="flex-row items-center bg-background-0 rounded-full px-4 shadow-sm border border-gray-200 dark:border-background-700">
         {isSearchSubmitted ? (
           <TouchableOpacity
             onPress={handleClearSearch}
@@ -259,7 +259,7 @@ export default function SearchFilterBar({
         )}
         <TextInput
           placeholder={Strings.common.buttons.search}
-          className="ml-2 font-ifood-regular flex-1"
+          className="ml-2 font-ifood-regular flex-1 text-text-light dark:text-text-dark"
           placeholderTextColor={colors.disabled}
           value={query}
           onChangeText={setQuery}
@@ -339,15 +339,11 @@ export default function SearchFilterBar({
             name="sliders"
             size={18}
             color={
-              handlerFilterCount() > '' ? colors.primaryBlue : colors.fieldGray
+              handlerFilterCount() > '' ? colors.primaryBlue : colors.sliders
             }
           />
           <Text
-            className="ml-1 font-ifood-regular"
-            style={{
-              color:
-                handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
-            }}
+            className={`ml-1 ${handlerFilterCount() > '' ? 'text-primary-blue-light' : 'text-typography-600'} font-ifood-regular`}
           >
             {Strings.search.filter} {handlerFilterCount()}
           </Text>
