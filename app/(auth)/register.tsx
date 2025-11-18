@@ -71,6 +71,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
@@ -311,6 +312,8 @@ export default function RegisterScreen() {
           console.error('Erro no upload de documentos:', err);
         }
       }
+
+      // Navigate back to login with success param to show understanding modal
       router.replace({
         pathname: '/(auth)',
         params: {
@@ -356,8 +359,10 @@ export default function RegisterScreen() {
           handleBack={() => router.replace('/(tabs)')}
         />
       </View>
+
       <KeyboardAvoidingView
         className="px-6"
+        style={styles.keyboardAvoider}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
@@ -859,3 +864,9 @@ export default function RegisterScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  keyboardAvoider: {
+    flex: 1,
+  },
+});
