@@ -349,15 +349,12 @@ export default function ToScheduleScreen() {
       return;
     }
 
-    router.replace('/(tabs)');
-    Toast.show({
-      type: 'success',
-      text1: Strings.toSchedule.toast.successTitle,
-      text2: Strings.toSchedule.toast.successDescription,
-      position: 'top',
-      visibilityTime: 3000,
-      autoHide: true,
-      closeIconSize: 1,
+    // Navigate back to home with success param to show understanding modal
+    router.replace({
+      pathname: '/(tabs)',
+      params: {
+        apptScheduled: 'true',
+      },
     });
   }
 

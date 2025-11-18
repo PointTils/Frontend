@@ -1,6 +1,7 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import FeedbackModal from '@/src/components/FeedbackModal';
 import ModalBannerHome from '@/src/components/ModalBannerHome';
+import ModalWarning from '@/src/components/ModalWarning';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -17,10 +18,10 @@ import {
   UserType,
   AppointmentStatus,
 } from '@/src/types/api';
-import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { renderApptItem, toBoolean } from '@/src/utils/helpers';
+import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
@@ -33,6 +34,18 @@ export default function HomeScreen() {
     interpreterName,
   } = useCheckFeedback(user);
   const { showBanner } = useProfileCompletion(user?.id);
+  const { apptScheduled } = useLocalSearchParams<{
+    apptScheduled?: string;
+  }>();
+
+  const [showApptScheduleModal, setShowApptScheduleModal] = useState(false);
+
+  useEffect(() => {
+    // Show modal if the user just scheduled an appointment
+    if (toBoolean(apptScheduled)) {
+      setShowApptScheduleModal(true);
+    }
+  }, [apptScheduled]);
 
   const renderItem = useMemo(
     () =>
@@ -77,7 +90,7 @@ export default function HomeScreen() {
       <View className="pt-16">
         <View className="flex-row px-4 pb-6 items-center gap-2">
           <DarkBlueLogo width={85} height={50} />
-          <Text className="text-left text-2xl font-ifood-medium text-text max-w-[65%]">
+          <Text className="text-left text-2xl font-ifood-medium text-text-light dark:text-text-dark max-w-[65%]">
             {welcomeMessage}
           </Text>
         </View>
@@ -105,7 +118,7 @@ export default function HomeScreen() {
         )}
         <View className="flex-row items-center gap-3 px-4">
           <CalendarDays color={colors.primaryBlue} />
-          <Text className="text-text-light font-ifood-medium">
+          <Text className="text-text-light dark:text-text-dark font-ifood-medium">
             {Strings.home.nextAppointments}
           </Text>
         </View>
@@ -134,10 +147,18 @@ export default function HomeScreen() {
       </View>
 
       <FeedbackModal
-        visible={showFeedbackModal}
+        visible={showFeedbackModal && !showApptScheduleModal}
         onClose={() => setShowFeedbackModal(false)}
         appointmentId={appointmentForFeedback?.id || ''}
         interpreterName={interpreterName ?? ''}
+      />
+
+      <ModalWarning
+        visible={showApptScheduleModal}
+        onClose={() => setShowApptScheduleModal(false)}
+        title={Strings.toSchedule.toast.successTitle}
+        text={Strings.toSchedule.toast.successDescription}
+        buttonTitle={Strings.common.buttons.understood}
       />
     </View>
   );

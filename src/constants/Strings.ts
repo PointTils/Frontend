@@ -256,7 +256,8 @@ export const Strings = {
       errorTitle: 'Erro ao criar agendamento',
       errorDescription: 'Verifique os campos preenchidos. Tente novamente.',
       successTitle: 'Solicitação enviada!',
-      successDescription: 'O intérprete irá analisar sua solicitação.',
+      successDescription:
+        'O intérprete irá analisar sua solicitação e você receberá uma notificação assim que houver resposta.',
     },
   },
 
