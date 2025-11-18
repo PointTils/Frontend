@@ -357,7 +357,7 @@ export default function RegisterScreen() {
         />
       </View>
       <KeyboardAvoidingView
-        className="flex-1 px-6"
+        className="px-6"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView

@@ -123,6 +123,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
@@ -879,7 +880,7 @@ export default function EditProfileScreen() {
   const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
-    <View className="flex-1 justify-center items-center">
+    <View className="flex-1" style={{ paddingBottom: bottomInset }}>
       <View className="mt-12 pb-2">
         <Header
           title={Strings.edit.header}
@@ -888,7 +889,8 @@ export default function EditProfileScreen() {
         />
       </View>
       <KeyboardAvoidingView
-        className="flex-1 w-full px-8"
+        className="w-full px-8"
+        style={styles.keyboardAvoider}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
@@ -1714,3 +1716,9 @@ export default function EditProfileScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  keyboardAvoider: {
+    flex: 1,
+  },
+});

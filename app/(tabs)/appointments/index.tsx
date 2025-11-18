@@ -232,7 +232,7 @@ export default function AppointmentsScreen() {
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            contentContainerClassName="flex-1 mt-2 pb-4"
+            contentContainerClassName="mt-2"
             ItemSeparatorComponent={() => <View className="h-3" />}
           />
         )}

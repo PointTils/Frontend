@@ -59,6 +59,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
@@ -373,401 +374,313 @@ export default function ToScheduleScreen() {
       </View>
 
       <KeyboardAvoidingView
-        className="flex-1 px-6"
+        className="px-6"
+        style={styles.keyboardAvoider}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="grow"
-        >
-          <View className="mt-4 py-4 px-4">
-            <Text className="font-ifood-medium mb-3 text-[18px] text-left text-primary-800">
-              {Strings.toSchedule.title}
-            </Text>
-            <Text className="font-ifood-regular text-left text-primary-800">
-              {Strings.toSchedule.subtitle}
-            </Text>
-          </View>
-
-          <View className="flex-1 px-4 mt-4">
-            {/* Description */}
-            <FormControl
-              isRequired
-              isInvalid={!!fields.description.error}
-              className="mb-4"
-            >
-              <FormControlLabel>
-                <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.common.fields.more}
-                </FormControlLabelText>
-              </FormControlLabel>
-              <TextInput
-                className={`w-90 border rounded p-2 ${
-                  fields.description.error
-                    ? 'border-error-700'
-                    : 'border-primary-0 focus:border-primary-950'
-                }`}
-                multiline
-                numberOfLines={7}
-                value={fields.description.value}
-                onChangeText={(text) => setValue('description', text)}
-                inputMode="text"
-                maxLength={400}
-              />
-              <FormControlError>
-                <FormControlErrorIcon
-                  as={AlertCircleIcon}
-                  className="text-red-600"
-                />
-                <FormControlErrorText>
-                  {fields.description.error}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
-
-            {/* Date */}
-            <FormControl isRequired isInvalid={!!fields.date.error}>
-              <FormControlLabel>
-                <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.common.fields.date}
-                </FormControlLabelText>
-              </FormControlLabel>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <Input pointerEvents="none">
-                  <InputField
-                    placeholder="DD/MM/AAAA"
-                    className="font-ifood-regular"
-                    value={fields.date.value}
-                    editable={false}
-                  />
-                </Input>
-              </TouchableOpacity>
-              <FormControlError>
-                <FormControlErrorIcon
-                  as={AlertCircleIcon}
-                  className="text-red-600"
-                />
-                <FormControlErrorText>{fields.date.error}</FormControlErrorText>
-              </FormControlError>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="calendar"
-                  minimumDate={minDate}
-                  onChange={handleDateChange}
-                />
-              )}
-            </FormControl>
-
-            <View className="flex-row justify-between gap-4 my-4">
-              {/* Start and End time constrained by availability */}
-              <FormControl
-                isRequired
-                isInvalid={!!fields.startTime.error}
-                className="flex-1"
-              >
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.fields.start}
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <ModalSingleSelection
-                  items={startTimeOptions}
-                  selectedValue={fields.startTime.value}
-                  onSelectionChange={(value) => {
-                    setValue('startTime', value);
-                    setValue('endTime', '');
-                  }}
-                  placeholderText={
-                    loadingDaySchedule
-                      ? Strings.common.loading
-                      : Strings.common.fields.select
-                  }
-                  hasError={!!fields.startTime.error}
-                  hasTimeSlots={
-                    !loadingDaySchedule && startTimeOptions.length > 0
-                  }
-                />
-                <FormControlError>
-                  <FormControlErrorIcon
-                    as={AlertCircleIcon}
-                    className="text-red-600"
-                  />
-                  <FormControlErrorText>
-                    {fields.startTime.error}
-                  </FormControlErrorText>
-                </FormControlError>
-              </FormControl>
-
-              <FormControl
-                isRequired
-                isInvalid={!!fields.endTime.error}
-                className="flex-1"
-              >
-                <FormControlLabel>
-                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                    {Strings.common.fields.end}
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <ModalSingleSelection
-                  items={endTimeOptions}
-                  selectedValue={fields.endTime.value}
-                  onSelectionChange={(value) => setValue('endTime', value)}
-                  placeholderText={
-                    loadingDaySchedule
-                      ? Strings.common.loading
-                      : Strings.common.fields.select
-                  }
-                  hasError={!!fields.endTime.error}
-                  hasTimeSlots={
-                    !loadingDaySchedule && endTimeOptions.length > 0
-                  }
-                />
-                <FormControlError>
-                  <FormControlErrorIcon
-                    as={AlertCircleIcon}
-                    className="text-red-600"
-                  />
-                  <FormControlErrorText>
-                    {fields.endTime.error}
-                  </FormControlErrorText>
-                </FormControlError>
-              </FormControl>
-            </View>
-
-            {/* Modality */}
-            <View className="w-80 mt-2 mb-6">
-              <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
-                {Strings.common.fields.modality}*
+        <View style={styles.contentWrapper}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="grow"
+          >
+            <View className="mt-4 py-4 px-4">
+              <Text className="font-ifood-medium mb-3 text-[18px] text-left text-primary-800">
+                {Strings.toSchedule.title}
               </Text>
-              <RadioGroup
-                value={fields.modality.value[0] || Modality.PERSONALLY}
-                onChange={(value) => setValue('modality', [value as Modality])}
-                className="flex-row items-center justify-around"
-              >
-                <Radio value={Modality.PERSONALLY}>
-                  <RadioIndicator>
-                    <RadioIcon as={CircleIcon} />
-                  </RadioIndicator>
-                  <RadioLabel>
-                    <Text
-                      className="font-ifood-regular"
-                      style={{
-                        color: fields.modality.value.includes(
-                          Modality.PERSONALLY,
-                        )
-                          ? colors.text
-                          : colors.disabled,
-                      }}
-                    >
-                      {Strings.common.options.inPerson}
-                    </Text>
-                  </RadioLabel>
-                </Radio>
-                <Radio value={Modality.ONLINE}>
-                  <RadioIndicator>
-                    <RadioIcon as={CircleIcon} />
-                  </RadioIndicator>
-                  <RadioLabel>
-                    <Text
-                      className="font-ifood-regular"
-                      style={{
-                        color: fields.modality.value.includes(Modality.ONLINE)
-                          ? colors.text
-                          : colors.disabled,
-                      }}
-                    >
-                      {Strings.common.options.online}
-                    </Text>
-                  </RadioLabel>
-                </Radio>
-              </RadioGroup>
+              <Text className="font-ifood-regular text-left text-primary-800">
+                {Strings.toSchedule.subtitle}
+              </Text>
             </View>
 
-            {/* Location */}
-            {fields.modality.value.includes(Modality.PERSONALLY) && (
-              <View className="mb-12">
-                <Text className="mb-2 font-ifood-medium text-text-light dark:text-text-dark">
-                  {Strings.common.fields.location}*
+            <View className="px-4 mt-4">
+              {/* Description */}
+              <FormControl
+                isRequired
+                isInvalid={!!fields.description.error}
+                className="mb-4"
+              >
+                <FormControlLabel>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.more}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <TextInput
+                  className={`w-90 border rounded p-2 ${
+                    fields.description.error
+                      ? 'border-error-700'
+                      : 'border-primary-0 focus:border-primary-950'
+                  }`}
+                  multiline
+                  numberOfLines={7}
+                  value={fields.description.value}
+                  onChangeText={(text) => setValue('description', text)}
+                  inputMode="text"
+                  maxLength={400}
+                />
+                <FormControlError>
+                  <FormControlErrorIcon
+                    as={AlertCircleIcon}
+                    className="text-red-600"
+                  />
+                  <FormControlErrorText>
+                    {fields.description.error}
+                  </FormControlErrorText>
+                </FormControlError>
+              </FormControl>
+
+              {/* Date */}
+              <FormControl isRequired isInvalid={!!fields.date.error}>
+                <FormControlLabel>
+                  <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.date}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                  <Input pointerEvents="none">
+                    <InputField
+                      placeholder="DD/MM/AAAA"
+                      className="font-ifood-regular"
+                      value={fields.date.value}
+                      editable={false}
+                    />
+                  </Input>
+                </TouchableOpacity>
+                <FormControlError>
+                  <FormControlErrorIcon
+                    as={AlertCircleIcon}
+                    className="text-red-600"
+                  />
+                  <FormControlErrorText>
+                    {fields.date.error}
+                  </FormControlErrorText>
+                </FormControlError>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="calendar"
+                    minimumDate={minDate}
+                    onChange={handleDateChange}
+                  />
+                )}
+              </FormControl>
+
+              <View className="flex-row justify-between gap-4 my-4">
+                {/* Start and End time constrained by availability */}
+                <FormControl
+                  isRequired
+                  isInvalid={!!fields.startTime.error}
+                  className="flex-1"
+                >
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.common.fields.start}
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <ModalSingleSelection
+                    items={startTimeOptions}
+                    selectedValue={fields.startTime.value}
+                    onSelectionChange={(value) => {
+                      setValue('startTime', value);
+                      setValue('endTime', '');
+                    }}
+                    placeholderText={
+                      loadingDaySchedule
+                        ? Strings.common.loading
+                        : Strings.common.fields.select
+                    }
+                    hasError={!!fields.startTime.error}
+                    hasTimeSlots={
+                      !loadingDaySchedule && startTimeOptions.length > 0
+                    }
+                  />
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.startTime.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+
+                <FormControl
+                  isRequired
+                  isInvalid={!!fields.endTime.error}
+                  className="flex-1"
+                >
+                  <FormControlLabel>
+                    <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                      {Strings.common.fields.end}
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <ModalSingleSelection
+                    items={endTimeOptions}
+                    selectedValue={fields.endTime.value}
+                    onSelectionChange={(value) => setValue('endTime', value)}
+                    placeholderText={
+                      loadingDaySchedule
+                        ? Strings.common.loading
+                        : Strings.common.fields.select
+                    }
+                    hasError={!!fields.endTime.error}
+                    hasTimeSlots={
+                      !loadingDaySchedule && endTimeOptions.length > 0
+                    }
+                  />
+                  <FormControlError>
+                    <FormControlErrorIcon
+                      as={AlertCircleIcon}
+                      className="text-red-600"
+                    />
+                    <FormControlErrorText>
+                      {fields.endTime.error}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+              </View>
+
+              {/* Modality */}
+              <View className="w-80 mt-2 mb-6">
+                <Text className="font-ifood-medium text-text-light mb-2 dark:text-text-dark">
+                  {Strings.common.fields.modality}*
                 </Text>
-
-                <View className="gap-2">
-                  <View className="flex-row justify-between">
-                    {/* State */}
-                    <FormControl
-                      isInvalid={!!fields.state.error}
-                      className="w-24"
-                    >
-                      <FormControlLabel>
-                        <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.state}
-                        </FormControlLabelText>
-                      </FormControlLabel>
-                      <ModalSingleSelection
-                        items={stateOptions}
-                        selectedValue={fields.state.value}
-                        onSelectionChange={(value) => {
-                          setValue('state', value);
-                          setselectedState(value);
-                          setValue('city', '');
-                        }}
-                        placeholderText={Strings.common.fields.state}
-                        hasError={!!fields.state.error}
-                      />
-                      <FormControlError>
-                        <FormControlErrorIcon
-                          as={AlertCircleIcon}
-                          className="text-red-600"
-                        />
-                        <FormControlErrorText>
-                          {fields.state.error}
-                        </FormControlErrorText>
-                      </FormControlError>
-                    </FormControl>
-
-                    {/* City */}
-                    <FormControl
-                      isInvalid={!!fields.city.error}
-                      className="w-56"
-                    >
-                      <FormControlLabel>
-                        <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.city}
-                        </FormControlLabelText>
-                      </FormControlLabel>
-                      <ModalSingleSelection
-                        items={cityOptions}
-                        selectedValue={fields.city.value}
-                        onSelectionChange={(value) => {
-                          setValue('city', value);
-                        }}
-                        placeholderText={Strings.common.fields.city}
-                        hasError={!!fields.city.error}
-                      />
-                      <FormControlError>
-                        <FormControlErrorIcon
-                          as={AlertCircleIcon}
-                          className="text-red-600"
-                        />
-                        <FormControlErrorText>
-                          {fields.city.error}
-                        </FormControlErrorText>
-                      </FormControlError>
-                    </FormControl>
-                  </View>
-
-                  {/* Neighborhood */}
-                  <FormControl isInvalid={!!fields.neighborhood.error}>
-                    <FormControlLabel>
-                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.neighborhood}
-                      </FormControlLabelText>
-                    </FormControlLabel>
-                    <Input>
-                      <InputField
-                        placeholder={Strings.common.fields.neighborhood}
+                <RadioGroup
+                  value={fields.modality.value[0] || Modality.PERSONALLY}
+                  onChange={(value) =>
+                    setValue('modality', [value as Modality])
+                  }
+                  className="flex-row items-center justify-around"
+                >
+                  <Radio value={Modality.PERSONALLY}>
+                    <RadioIndicator>
+                      <RadioIcon as={CircleIcon} />
+                    </RadioIndicator>
+                    <RadioLabel>
+                      <Text
                         className="font-ifood-regular"
-                        value={fields.neighborhood.value}
-                        autoCapitalize="none"
-                        onChangeText={(v) => setValue('neighborhood', v)}
-                        keyboardType="default"
-                        maxLength={100}
-                      />
-                    </Input>
-                    <FormControlError>
-                      <FormControlErrorIcon
-                        as={AlertCircleIcon}
-                        className="text-red-600"
-                      />
-                      <FormControlErrorText>
-                        {fields.neighborhood.error}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  </FormControl>
-
-                  {/* Street */}
-                  <FormControl isInvalid={!!fields.street.error}>
-                    <FormControlLabel>
-                      <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                        {Strings.common.fields.street}
-                      </FormControlLabelText>
-                    </FormControlLabel>
-                    <Input>
-                      <InputField
-                        placeholder={Strings.common.fields.street}
+                        style={{
+                          color: fields.modality.value.includes(
+                            Modality.PERSONALLY,
+                          )
+                            ? colors.text
+                            : colors.disabled,
+                        }}
+                      >
+                        {Strings.common.options.inPerson}
+                      </Text>
+                    </RadioLabel>
+                  </Radio>
+                  <Radio value={Modality.ONLINE}>
+                    <RadioIndicator>
+                      <RadioIcon as={CircleIcon} />
+                    </RadioIndicator>
+                    <RadioLabel>
+                      <Text
                         className="font-ifood-regular"
-                        value={fields.street.value}
-                        autoCapitalize="none"
-                        onChangeText={(v) => setValue('street', v)}
-                        keyboardType="default"
-                        maxLength={100}
-                      />
-                    </Input>
-                    <FormControlError>
-                      <FormControlErrorIcon
-                        as={AlertCircleIcon}
-                        className="text-red-600"
-                      />
-                      <FormControlErrorText>
-                        {fields.street.error}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  </FormControl>
+                        style={{
+                          color: fields.modality.value.includes(Modality.ONLINE)
+                            ? colors.text
+                            : colors.disabled,
+                        }}
+                      >
+                        {Strings.common.options.online}
+                      </Text>
+                    </RadioLabel>
+                  </Radio>
+                </RadioGroup>
+              </View>
 
-                  <View className="flex-row justify-between">
-                    {/* Number */}
-                    <FormControl
-                      isInvalid={!!fields.number.error}
-                      className="w-24"
-                    >
+              {/* Location */}
+              {fields.modality.value.includes(Modality.PERSONALLY) && (
+                <View className="mb-12">
+                  <Text className="mb-2 font-ifood-medium text-text-light dark:text-text-dark">
+                    {Strings.common.fields.location}*
+                  </Text>
+
+                  <View className="gap-2">
+                    <View className="flex-row justify-between">
+                      {/* State */}
+                      <FormControl
+                        isInvalid={!!fields.state.error}
+                        className="w-24"
+                      >
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.state}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <ModalSingleSelection
+                          items={stateOptions}
+                          selectedValue={fields.state.value}
+                          onSelectionChange={(value) => {
+                            setValue('state', value);
+                            setselectedState(value);
+                            setValue('city', '');
+                          }}
+                          placeholderText={Strings.common.fields.state}
+                          hasError={!!fields.state.error}
+                        />
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.state.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
+
+                      {/* City */}
+                      <FormControl
+                        isInvalid={!!fields.city.error}
+                        className="w-56"
+                      >
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.city}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <ModalSingleSelection
+                          items={cityOptions}
+                          selectedValue={fields.city.value}
+                          onSelectionChange={(value) => {
+                            setValue('city', value);
+                          }}
+                          placeholderText={Strings.common.fields.city}
+                          hasError={!!fields.city.error}
+                        />
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.city.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
+                    </View>
+
+                    {/* Neighborhood */}
+                    <FormControl isInvalid={!!fields.neighborhood.error}>
                       <FormControlLabel>
                         <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.number}
+                          {Strings.common.fields.neighborhood}
                         </FormControlLabelText>
                       </FormControlLabel>
                       <Input>
                         <InputField
-                          placeholder={Strings.common.fields.number}
+                          placeholder={Strings.common.fields.neighborhood}
                           className="font-ifood-regular"
-                          value={fields.number.value}
+                          value={fields.neighborhood.value}
                           autoCapitalize="none"
-                          onChangeText={(v) => setValue('number', v)}
-                          keyboardType="numeric"
-                          maxLength={50}
-                        />
-                      </Input>
-                      <FormControlError>
-                        <FormControlErrorIcon
-                          as={AlertCircleIcon}
-                          className="text-red-600"
-                        />
-                        <FormControlErrorText>
-                          {fields.number.error}
-                        </FormControlErrorText>
-                      </FormControlError>
-                    </FormControl>
-
-                    {/* Floor */}
-                    <FormControl
-                      isInvalid={!!fields.floor.error}
-                      className="w-56"
-                    >
-                      <FormControlLabel>
-                        <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
-                          {Strings.common.fields.floor}
-                        </FormControlLabelText>
-                      </FormControlLabel>
-                      <Input>
-                        <InputField
-                          placeholder={Strings.common.fields.floor}
-                          className="font-ifood-regular"
-                          value={fields.floor.value}
-                          autoCapitalize="none"
-                          onChangeText={(v) => setValue('floor', v)}
+                          onChangeText={(v) => setValue('neighborhood', v)}
                           keyboardType="default"
-                          maxLength={200}
+                          maxLength={100}
                         />
                       </Input>
                       <FormControlError>
@@ -776,44 +689,148 @@ export default function ToScheduleScreen() {
                           className="text-red-600"
                         />
                         <FormControlErrorText>
-                          {fields.floor.error}
+                          {fields.neighborhood.error}
                         </FormControlErrorText>
                       </FormControlError>
                     </FormControl>
+
+                    {/* Street */}
+                    <FormControl isInvalid={!!fields.street.error}>
+                      <FormControlLabel>
+                        <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                          {Strings.common.fields.street}
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <Input>
+                        <InputField
+                          placeholder={Strings.common.fields.street}
+                          className="font-ifood-regular"
+                          value={fields.street.value}
+                          autoCapitalize="none"
+                          onChangeText={(v) => setValue('street', v)}
+                          keyboardType="default"
+                          maxLength={100}
+                        />
+                      </Input>
+                      <FormControlError>
+                        <FormControlErrorIcon
+                          as={AlertCircleIcon}
+                          className="text-red-600"
+                        />
+                        <FormControlErrorText>
+                          {fields.street.error}
+                        </FormControlErrorText>
+                      </FormControlError>
+                    </FormControl>
+
+                    <View className="flex-row justify-between">
+                      {/* Number */}
+                      <FormControl
+                        isInvalid={!!fields.number.error}
+                        className="w-24"
+                      >
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.number}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <Input>
+                          <InputField
+                            placeholder={Strings.common.fields.number}
+                            className="font-ifood-regular"
+                            value={fields.number.value}
+                            autoCapitalize="none"
+                            onChangeText={(v) => setValue('number', v)}
+                            keyboardType="numeric"
+                            maxLength={50}
+                          />
+                        </Input>
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.number.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
+
+                      {/* Floor */}
+                      <FormControl
+                        isInvalid={!!fields.floor.error}
+                        className="w-56"
+                      >
+                        <FormControlLabel>
+                          <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
+                            {Strings.common.fields.floor}
+                          </FormControlLabelText>
+                        </FormControlLabel>
+                        <Input>
+                          <InputField
+                            placeholder={Strings.common.fields.floor}
+                            className="font-ifood-regular"
+                            value={fields.floor.value}
+                            autoCapitalize="none"
+                            onChangeText={(v) => setValue('floor', v)}
+                            keyboardType="default"
+                            maxLength={200}
+                          />
+                        </Input>
+                        <FormControlError>
+                          <FormControlErrorIcon
+                            as={AlertCircleIcon}
+                            className="text-red-600"
+                          />
+                          <FormControlErrorText>
+                            {fields.floor.error}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      </FormControl>
+                    </View>
                   </View>
                 </View>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
 
-          {/* Bottom buttons */}
-          <View
-            className="mt-auto gap-4 px-4"
-            style={{ paddingBottom: bottomInset }}
-          >
-            <Button
-              size="md"
-              onPress={handleSubmit}
-              className="data-[active=true]:bg-primary-orange-press-light"
+            {/* Bottom buttons */}
+            <View
+              className="mt-auto gap-4 px-4"
+              style={{ paddingBottom: bottomInset }}
             >
-              <ButtonIcon as={CheckIcon} className="text-white" />
-              <Text className="font-ifood-regular text-text-dark">
-                {Strings.common.buttons.confirm}
-              </Text>
-            </Button>
+              <Button
+                size="md"
+                onPress={handleSubmit}
+                className="data-[active=true]:bg-primary-orange-press-light"
+              >
+                <ButtonIcon as={CheckIcon} className="text-white" />
+                <Text className="font-ifood-regular text-text-dark">
+                  {Strings.common.buttons.confirm}
+                </Text>
+              </Button>
 
-            <HapticTab
-              onPress={handleBack}
-              className="flex-row justify-center gap-2 py-2"
-            >
-              <XIcon color={colors.primaryOrange} />
-              <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
-                {Strings.common.buttons.cancel}
-              </Text>
-            </HapticTab>
-          </View>
-        </ScrollView>
+              <HapticTab
+                onPress={handleBack}
+                className="flex-row justify-center gap-2 py-2"
+              >
+                <XIcon color={colors.primaryOrange} />
+                <Text className="font-ifood-regular text-primary-orange-light dark:text-primary-orange-dark">
+                  {Strings.common.buttons.cancel}
+                </Text>
+              </HapticTab>
+            </View>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  keyboardAvoider: {
+    flex: 1,
+  },
+  contentWrapper: {
+    flex: 1,
+  },
+});

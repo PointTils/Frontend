@@ -74,7 +74,7 @@ export const Strings = {
       end: 'Fim',
       uploadFile: 'Adicionar arquivo',
       videoUrl: 'Vídeo de apresentação',
-      videoUnavailable: 'Vídeo não disponível',
+      videoUnavailable: 'Vídeo não disponível.',
       certificate: 'Certificados',
       token: 'Código',
 
