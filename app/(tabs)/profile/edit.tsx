@@ -880,7 +880,7 @@ export default function EditProfileScreen() {
   const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
 
   return (
-    <View className="flex-1" style={{ paddingBottom: bottomInset }}>
+    <View className="flex-1">
       <View className="mt-12 pb-2">
         <Header
           title={Strings.edit.header}
