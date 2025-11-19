@@ -11,7 +11,7 @@ import { AppointmentStatus, UserType } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
 import { router } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -104,6 +104,60 @@ export default function AppointmentsScreen() {
     return Array.isArray(apptPending?.data) ? apptPending.data : empty;
   }, [apptPending?.data, empty]);
 
+  // Handle errors
+  const allLoaded =
+    !loadCompleted && !loadCanceled && !loadActive && !loadPending;
+
+  const hasError = useMemo(() => {
+    if (!allLoaded) return false;
+    return (
+      !!errorCompleted ||
+      !!errorCanceled ||
+      !!errorActive ||
+      !!errorPending ||
+      (apptCompleted &&
+        (!apptCompleted.success || !Array.isArray(apptCompleted.data))) ||
+      (apptCanceled &&
+        (!apptCanceled.success || !Array.isArray(apptCanceled.data))) ||
+      (apptActive &&
+        (!apptActive.success || !Array.isArray(apptActive.data))) ||
+      (apptPending &&
+        (!apptPending.success || !Array.isArray(apptPending.data)))
+    );
+  }, [
+    allLoaded,
+    errorCompleted,
+    errorCanceled,
+    errorActive,
+    errorPending,
+    apptCompleted,
+    apptCanceled,
+    apptActive,
+    apptPending,
+  ]);
+
+  const handledErrorRef = useRef(false);
+
+  useEffect(() => {
+    if (!allLoaded) return;
+    if (hasError && !handledErrorRef.current) {
+      handledErrorRef.current = true;
+      router.replace('/');
+      Toast.show({
+        type: 'error',
+        text1: Strings.profile.toast.errorTitle,
+        text2: Strings.profile.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
+    if (!hasError) {
+      handledErrorRef.current = false;
+    }
+  }, [allLoaded, hasError]);
+
   // Combine and sort appointments based on selected tab
   // Sorted by date descending, then by start_time descending
   const current = useMemo(() => {
@@ -154,31 +208,7 @@ export default function AppointmentsScreen() {
     );
   }
 
-  // Handle errors
-  if (
-    errorCompleted ||
-    errorCanceled ||
-    errorActive ||
-    errorPending ||
-    !apptCompleted?.success ||
-    !apptCompleted.data ||
-    !apptCanceled?.success ||
-    !apptCanceled.data ||
-    !apptActive?.success ||
-    !apptActive.data ||
-    !apptPending?.success ||
-    !apptPending.data
-  ) {
-    router.replace('/');
-    Toast.show({
-      type: 'error',
-      text1: Strings.profile.toast.errorTitle,
-      text2: Strings.profile.toast.errorDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  if (hasError) {
     return null;
   }
 
@@ -232,7 +262,7 @@ export default function AppointmentsScreen() {
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            contentContainerClassName="flex-1 mt-2 pb-4"
+            contentContainerClassName="mt-2"
             ItemSeparatorComponent={() => <View className="h-3" />}
           />
         )}

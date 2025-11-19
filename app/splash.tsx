@@ -11,7 +11,7 @@ export default function CustomSplashScreen({ onFinish }: SplashScreenProps) {
   const animationRef = useRef<LottieView>(null);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white">
+    <View className="flex-1 items-center justify-center bg-background-0">
       <LottieView
         ref={animationRef}
         source={require('@/src/assets/animations/splash-hands.json')}

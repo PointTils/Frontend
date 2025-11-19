@@ -137,7 +137,7 @@ export default function InterpreterCard({
       <View className="flex-1 mr-8">
         <View className="flex-row items-center mb-1">
           <CalendarDays size={12} color={colors.text} />
-          <Text className="text-text-light text-xs font-ifood-medium ml-1">
+          <Text className="text-text-light dark:text-text-dark text-xs font-ifood-medium ml-1">
             {Strings.common.fields.date}
           </Text>
         </View>
@@ -150,7 +150,7 @@ export default function InterpreterCard({
       <View className="flex-1">
         <View className="flex-row items-center mb-1">
           <MapPin size={12} color={colors.text} />
-          <Text className="text-text-light text-xs font-ifood-medium ml-1">
+          <Text className="text-text-light dark:text-text-dark text-xs font-ifood-medium ml-1">
             {Strings.common.fields.location}
           </Text>
         </View>
@@ -172,7 +172,7 @@ export default function InterpreterCard({
         <View className="flex-1 mr-8">
           <View className="flex-row items-center mb-1">
             <Info size={12} color={colors.text} />
-            <Text className="text-text-light text-xs font-ifood-medium ml-1">
+            <Text className="text-text-light dark:text-text-dark text-xs font-ifood-medium ml-1">
               {Strings.common.fields.modality}
             </Text>
           </View>
@@ -186,7 +186,7 @@ export default function InterpreterCard({
           <View className="flex-1">
             <View className="flex-row items-center mb-1">
               <MapPin size={12} color={colors.text} />
-              <Text className="text-text-light text-xs font-ifood-medium ml-1">
+              <Text className="text-text-light dark:text-text-dark text-xs font-ifood-medium ml-1">
                 {Strings.common.fields.location}
               </Text>
             </View>
@@ -238,7 +238,7 @@ export default function InterpreterCard({
 
         <View className="flex-1 items-start">
           <Text
-            className="text-text-light font-ifood-medium text-sm mb-0.5"
+            className="text-text-light dark:text-text-dark font-ifood-medium text-sm mb-0.5"
             numberOfLines={1}
             ellipsizeMode="tail"
           >

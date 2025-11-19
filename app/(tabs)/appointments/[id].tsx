@@ -299,8 +299,8 @@ export default function AppointmentDetailsScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color={colors.primaryBlue} />
-        <Text className="text-typography-600 font-ifood-regular mt-4">
+        <ActivityIndicator size="small" color={colors.primaryBlue} />
+        <Text className="text-primary-blue-light font-ifood-regular mt-4">
           {Strings.common.loading}
         </Text>
       </View>
@@ -511,7 +511,7 @@ export default function AppointmentDetailsScreen() {
                 onPress={handleOpenWhatsApp}
                 accessibilityLabel={Strings.appointments.cta.whatsapp}
               >
-                <Text className="text-success-300 border-success-300 px-4 py-2 border rounded">
+                <Text className="text-success-500 border-success-500 px-4 py-2 border rounded">
                   {Strings.appointments.cta.whatsapp}
                 </Text>
               </Pressable>
