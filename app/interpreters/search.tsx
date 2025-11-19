@@ -3,8 +3,14 @@ import InterpreterCard from '@/src/components/InterpreterCard';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { View } from '@/src/components/ui/view';
 import { Strings } from '@/src/constants/Strings';
+import { useAuth } from '@/src/contexts/AuthProvider';
 import { useColors } from '@/src/hooks/useColors';
-import type { InterpretersResponse, Gender, Modality } from '@/src/types/api';
+import {
+  type InterpretersResponse,
+  type Gender,
+  type Modality,
+  UserType,
+} from '@/src/types/api';
 import type { AppliedFilters } from '@/src/types/ui';
 import { formatDateToISO, mapModality } from '@/src/utils/masks';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -14,6 +20,7 @@ import { ActivityIndicator, ScrollView, Text } from 'react-native';
 
 export default function SearchScreen() {
   const colors = useColors();
+  const { user } = useAuth();
 
   const params = useLocalSearchParams<{
     name?: string;
@@ -40,8 +47,17 @@ export default function SearchScreen() {
 
   const handleData = (data: InterpretersResponse) => {
     setLoading(true);
+
+    const sanitizedData =
+      user?.type === UserType.INTERPRETER
+        ? {
+            ...data,
+            data: data.data?.filter((item) => item.id !== user.id) ?? [],
+          }
+        : data;
+
     setTimeout(() => {
-      setResult(data);
+      setResult(sanitizedData);
       setLoading(false);
     }, 1000);
   };

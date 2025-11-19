@@ -273,7 +273,7 @@ export default function InterpreterDetails() {
                   label={Strings.common.fields.videoUrl}
                   onlyLabel={true}
                 />
-                <Text className="mt-2 text-typography-400 text-sm">
+                <Text className="-mt-4 mb-2 text-center text-typography-400 font-ifood-regular">
                   {Strings.common.fields.videoUnavailable}
                 </Text>
               </View>
