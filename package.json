@@ -14,7 +14,7 @@
     "test": "jest",
     "test:report": "jest --coverage",
     "test:view": "start .\\coverage\\lcov-report\\index.html",
-    "build:android": "expo run:android"
+    "build:android": "npx expo prebuild --platform android --clean && npx expo run:android"
   },
   "dependencies": {
     "@expo/html-elements": "^0.13.7",
