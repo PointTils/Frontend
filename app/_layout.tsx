@@ -150,16 +150,14 @@ function AppContent() {
 
     const unsubscribeForeground = messaging().onMessage(
       async (remoteMessage) => {
-
         await Notifications.scheduleNotificationAsync({
-            content: {
-              title: remoteMessage.notification?.title,
-              body: remoteMessage.notification?.body,
-              priority: Notifications.AndroidNotificationPriority.MAX,
-            },
-            trigger: null,
-          });
-      
+          content: {
+            title: remoteMessage.notification?.title,
+            body: remoteMessage.notification?.body,
+            priority: Notifications.AndroidNotificationPriority.MAX,
+          },
+          trigger: null,
+        });
       },
     );
 
