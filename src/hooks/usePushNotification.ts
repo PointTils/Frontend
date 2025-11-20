@@ -61,7 +61,7 @@ export function usePushNotifications() {
           await postAt(ApiRoutes.userApps.base, payload);
         }
       } catch (error) {
-        console.error('Erro ao registrar token do dispositivo:', error);
+        console.error('Error registering device token:', error);
       }
     }
 

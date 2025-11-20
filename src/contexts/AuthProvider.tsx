@@ -250,9 +250,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const deviceId = await DeviceInfo.getUniqueId();
           const url = `${ApiRoutes.userApps.base}?userId=${user.id}&deviceId=${deviceId}`;
           await api.delete(url);
-          //console.log('Token FCM desvinculado com sucesso no logout');
         } catch (error) {
-          console.warn('Falha ao remover token FCM no logout:', error);
+          console.warn('Error trying to delete user FCM token:', error);
         }
       }
 
