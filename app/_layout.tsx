@@ -21,7 +21,9 @@ import ToastManager from 'toastify-react-native';
 import 'react-native-reanimated';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch((e) => {
+  console.warn(e);
+});
 
 /**
  * Navigation controller that handles route changes based on auth state
@@ -151,22 +153,16 @@ function AppContent() {
 
     const unsubscribeForeground = messaging().onMessage(
       async (remoteMessage) => {
-        const { type, ...data } = remoteMessage.data || {};
-        const typeStr = String(type);
-        if (typeStr in notificationTemplates) {
-          const template = notificationTemplates[typeStr as NotificationType];
-          const { title, body } = template(data);
 
-          await Notifications.scheduleNotificationAsync({
+        await Notifications.scheduleNotificationAsync({
             content: {
-              title,
-              body,
+              title: remoteMessage.notification?.title,
+              body: remoteMessage.notification?.body,
               priority: Notifications.AndroidNotificationPriority.MAX,
-              data: data,
             },
             trigger: null,
           });
-        }
+      
       },
     );
 
