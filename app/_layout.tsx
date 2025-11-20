@@ -5,8 +5,6 @@ import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
 import { usePushNotifications } from '@/src/hooks/usePushNotification';
-import type { NotificationType } from '@/src/types/api/notification';
-import { notificationTemplates } from '@/src/utils/notificationTemplates'; // ajuste o path conforme sua pasta
 import messaging from '@react-native-firebase/messaging';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
@@ -16,7 +14,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import ToastManager from 'toastify-react-native';
-// import '@/src/utils/pushNotificationHandler';
 
 import 'react-native-reanimated';
 
