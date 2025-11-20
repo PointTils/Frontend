@@ -12,6 +12,7 @@ import { useApiGet } from '@/src/hooks/useApi';
 import { useCheckFeedback } from '@/src/hooks/useCheckFeedback';
 import { useColors } from '@/src/hooks/useColors';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
+import { usePushNotifications } from '@/src/hooks/usePushNotification';
 import {
   type AppointmentsResponse,
   type Appointment,
@@ -19,9 +20,9 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem, toBoolean } from '@/src/utils/helpers';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
@@ -56,19 +57,41 @@ export default function HomeScreen() {
     [user?.type],
   );
 
+  const [reloadKey, setReloadKey] = useState(0);
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
       ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
-      ),
+      ) + `&reloadKey=${reloadKey}`,
     );
 
   const appointments = useMemo<Appointment[]>(
     () => (Array.isArray(appointmentsData?.data) ? appointmentsData.data : []),
     [appointmentsData?.data],
   );
+
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
+
+  // Refetch on push notification
+  const { notification } = usePushNotifications();
+  const prevNotificationId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      notification &&
+      notification.request.identifier !== prevNotificationId.current
+    ) {
+      prevNotificationId.current = notification.request.identifier;
+      setReloadKey((k) => k + 1);
+    }
+  }, [notification]);
 
   if (appointmentsLoading) {
     return (
