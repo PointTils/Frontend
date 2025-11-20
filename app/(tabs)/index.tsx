@@ -70,6 +70,13 @@ export default function HomeScreen() {
     [appointmentsData?.data],
   );
 
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
+
   if (appointmentsLoading) {
     return (
       <View className="flex-1 justify-center items-center">

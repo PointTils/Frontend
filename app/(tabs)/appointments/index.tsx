@@ -9,9 +9,9 @@ import { useColors } from '@/src/hooks/useColors';
 import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -36,6 +36,14 @@ export default function AppointmentsScreen() {
       }),
     [user?.type],
   );
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
 
   const {
     data: apptActive,
@@ -46,7 +54,7 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.ACCEPTED,
-    ),
+    ) + `&refresh=${reloadKey}`,
   );
 
   const {
@@ -58,7 +66,7 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
-    ),
+    ) + `&refresh=${reloadKey}`,
   );
 
   const {
@@ -70,7 +78,7 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.CANCELED,
-    ),
+    ) + `&refresh=${reloadKey}`,
   );
 
   const {
@@ -82,7 +90,7 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.PENDING,
-    ),
+    ) + `&refresh=${reloadKey}`,
   );
 
   // Ensure stable refs for dependencies
@@ -270,3 +278,5 @@ export default function AppointmentsScreen() {
     </View>
   );
 }
+
+
