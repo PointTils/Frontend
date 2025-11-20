@@ -1,4 +1,3 @@
-// ModalMultipleSelection.test.tsx
 import ModalMultipleSelection from '@/src/components/ModalMultipleSelection';
 import { Strings } from '@/src/constants/Strings';
 import { render, fireEvent, screen } from '@testing-library/react-native';

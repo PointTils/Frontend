@@ -1,4 +1,3 @@
-// tests/components/SearchFilterBar.test.tsx
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';

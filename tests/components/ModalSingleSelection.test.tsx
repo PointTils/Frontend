@@ -1,4 +1,3 @@
-// ModalSingleSelection.test.tsx
 import ModalSingleSelection from '@/src/components/ModalSingleSelection';
 import { Strings } from '@/src/constants/Strings';
 import { render, fireEvent, screen } from '@testing-library/react-native';

@@ -136,13 +136,6 @@ describe('FilterSheet', () => {
     expect(screen.getByText(Strings.common.buttons.clean)).toBeTruthy();
   });
 
-  // it('fecha o modal ao tocar na sombra', () => {
-  //   render(<FilterSheet {...defaultProps} />);
-  //   const overlay = screen.getByTestId('filter-sheet-overlay');
-  //   fireEvent.press(overlay);
-  //   expect(mockOnClose).toHaveBeenCalled();
-  // });
-
   it('aplica filtros ao clicar no botão aplicar', () => {
     render(<FilterSheet {...defaultProps} />);
     fireEvent.press(screen.getByTestId('button'));
@@ -175,20 +168,6 @@ describe('FilterSheet', () => {
     );
     expect(screen.getByText(Strings.common.fields.location)).toBeTruthy();
   });
-
-  // it('altera estado de data corretamente', () => {
-  //   render(<FilterSheet {...defaultProps} />);
-  //   const dateInput = screen.getByPlaceholderText('DD/MM/AAAA HH:mm');
-    
-  //   act(() => {
-  //     fireEvent.press(dateInput);
-  //   });
-    
-  //   // Avança os timers para garantir que o useEffect seja executado
-  //   jest.runAllTimers();
-    
-  //   expect(dateInput.props.value).not.toBe('');
-  // });
 
   it('chama router e toast em erro de API', () => {
     // Simula erro de API
