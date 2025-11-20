@@ -3,7 +3,7 @@ import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
 import { Gender, Modality } from '@/src/types/api';
-import { render, fireEvent, waitFor} from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import React from 'react';
 import { Toast } from 'toastify-react-native';
@@ -42,22 +42,24 @@ jest.mock('@/src/components/FilterSheet', () => {
     onClose: () => void;
     onClear: () => void;
   }) {
-  return <View testID="filter-sheet">
-      <Text>FilterSheet</Text>
-      <TouchableOpacity
-        testID="apply-filters"
-        onPress={() => onApply({ specialty: ['1'] })}
-      >
-        <Text>Apply</Text>
-      </TouchableOpacity>
-      <TouchableOpacity testID="clear-filters" onPress={onClear}>
-        <Text>Clear</Text>
-      </TouchableOpacity>
-      <TouchableOpacity testID="close-sheet" onPress={onClose}>
-        <Text>Close</Text>
-      </TouchableOpacity>
-    </View>
-}
+    return (
+      <View testID="filter-sheet">
+        <Text>FilterSheet</Text>
+        <TouchableOpacity
+          testID="apply-filters"
+          onPress={() => onApply({ specialty: ['1'] })}
+        >
+          <Text>Apply</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="clear-filters" onPress={onClear}>
+          <Text>Clear</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="close-sheet" onPress={onClose}>
+          <Text>Close</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   return MockFilterSheet;
 });
 
@@ -181,9 +183,7 @@ describe('SearchFilterBar', () => {
   });
 
   it('toggles date filter by opening sheet when no date is set', () => {
-    const { getByText } = render(
-      <SearchFilterBar onData={mockOnData} />,
-    );
+    const { getByText } = render(<SearchFilterBar onData={mockOnData} />);
 
     const dateButton = getByText(Strings.search.datesAvailable);
     fireEvent.press(dateButton);
@@ -300,7 +300,7 @@ describe('SearchFilterBar', () => {
       success: true,
       data: [],
     };
-    
+
     mockUseApiGet
       .mockReturnValueOnce({ data: mockSpecialtiesData, error: false })
       .mockReturnValueOnce({ data: null, error: false });
@@ -327,11 +327,9 @@ describe('SearchFilterBar', () => {
   it('includes default specialties when no initial filters', () => {
     const mockSpecialtiesData = {
       success: true,
-      data: [
-        { specialty_id: '1', specialty_name: 'Libras' },
-      ],
+      data: [{ specialty_id: '1', specialty_name: 'Libras' }],
     };
-    
+
     mockUseApiGet
       .mockReturnValueOnce({ data: mockSpecialtiesData, error: false })
       .mockReturnValueOnce({ data: null, error: false });
@@ -345,20 +343,18 @@ describe('SearchFilterBar', () => {
   it('excludes default specialties when initial filters have specialty', () => {
     const mockSpecialtiesData = {
       success: true,
-      data: [
-        { specialty_id: '1', specialty_name: 'Libras' },
-      ],
+      data: [{ specialty_id: '1', specialty_name: 'Libras' }],
     };
-    
+
     mockUseApiGet
       .mockReturnValueOnce({ data: mockSpecialtiesData, error: false })
       .mockReturnValueOnce({ data: null, error: false });
 
     render(
-      <SearchFilterBar 
-        onData={mockOnData} 
+      <SearchFilterBar
+        onData={mockOnData}
         initialFilters={{ specialty: ['custom'] }}
-      />
+      />,
     );
 
     // Não deve incluir especialidades padrão quando já há filtros de especialidade
@@ -371,19 +367,23 @@ describe('SearchFilterBar', () => {
     );
 
     const onlineButton = getByText(Strings.common.options.online);
-    
+
     // Primeiro clique - ativa online
     fireEvent.press(onlineButton);
-    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({
-      params: expect.objectContaining({
-        modality: Modality.ONLINE
-      })
-    }));
+    expect(router.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          modality: Modality.ONLINE,
+        }),
+      }),
+    );
 
     // Segundo clique - desativa online
     fireEvent.press(onlineButton);
-    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({
-      params: expect.objectContaining({})
-    }));
+    expect(router.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({}),
+      }),
+    );
   });
 });

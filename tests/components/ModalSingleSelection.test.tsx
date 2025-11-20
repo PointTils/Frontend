@@ -4,8 +4,6 @@ import { render, fireEvent, screen } from '@testing-library/react-native';
 import React from 'react';
 import { Modal } from 'react-native';
 
-
-
 // Mock do useColors
 jest.mock('@/src/hooks/useColors', () => ({
   useColors: () => ({
@@ -44,17 +42,12 @@ describe('ModalSingleSelection', () => {
 
   it('renders with placeholder when no item is selected', () => {
     render(<ModalSingleSelection {...defaultProps} />);
-    
+
     expect(screen.getByText(Strings.common.fields.select)).toBeTruthy();
   });
 
   it('renders with selected item label', () => {
-    render(
-      <ModalSingleSelection
-        {...defaultProps}
-        selectedValue="male"
-      />
-    );
+    render(<ModalSingleSelection {...defaultProps} selectedValue="male" />);
 
     expect(screen.getByText('Male')).toBeTruthy();
   });
@@ -76,7 +69,7 @@ describe('ModalSingleSelection', () => {
       <ModalSingleSelection
         {...defaultProps}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     );
 
     // Abre o modal e seleciona um item
@@ -97,7 +90,7 @@ describe('ModalSingleSelection', () => {
 
     // Fecha o modal
     fireEvent.press(screen.getByText(Strings.common.buttons.cancel));
-    
+
     // Verifica que o modal foi fechado
     expect(screen.queryByText('Male')).toBeFalsy();
   });
@@ -107,13 +100,13 @@ describe('ModalSingleSelection', () => {
 
     // Abre o modal
     fireEvent.press(screen.getByText(Strings.common.fields.select));
-    
+
     // Encontra o overlay pressionando fora do conteúdo do modal
     // Busca pelo elemento que contém o texto de cancelamento e sobe na hierarquia
     const cancelButton = screen.getByText(Strings.common.buttons.cancel);
     const modalContent = cancelButton.parent?.parent; // View do conteúdo
     const overlay = modalContent?.parent; // Pressable do overlay
-    
+
     if (overlay) {
       fireEvent.press(overlay);
     }
@@ -127,7 +120,7 @@ describe('ModalSingleSelection', () => {
 
     // Abre o modal
     fireEvent.press(screen.getByText(Strings.common.fields.select));
-    
+
     // Encontra o modal usando a instância do componente
     const modalComponent = UNSAFE_root.findAllByType(Modal)[0];
     fireEvent(modalComponent, 'onRequestClose');
@@ -136,16 +129,13 @@ describe('ModalSingleSelection', () => {
   });
 
   it('shows no calendar available message when hasTimeSlots is false', () => {
-    render(
-      <ModalSingleSelection
-        {...defaultProps}
-        hasTimeSlots={false}
-      />
-    );
+    render(<ModalSingleSelection {...defaultProps} hasTimeSlots={false} />);
 
     fireEvent.press(screen.getByText(Strings.common.fields.select));
 
-    expect(screen.getByText(Strings.toSchedule.noCalendarAvailable)).toBeTruthy();
+    expect(
+      screen.getByText(Strings.toSchedule.noCalendarAvailable),
+    ).toBeTruthy();
     // Verifica que os itens normais não são mostrados
     expect(screen.queryByText('Male')).toBeFalsy();
   });
@@ -155,7 +145,7 @@ describe('ModalSingleSelection', () => {
       <ModalSingleSelection
         {...defaultProps}
         placeholderText="Choose an option"
-      />
+      />,
     );
 
     expect(screen.getByText('Choose an option')).toBeTruthy();

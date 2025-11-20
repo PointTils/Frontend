@@ -6,7 +6,9 @@ import React from 'react';
 // ---- Mock utils ----
 jest.mock('@/src/utils/masks', () => ({
   formatDateToISO: jest.fn((date: string) => date),
-  mapModality: jest.fn((modality: string) => (modality === 'online' ? 'Online' : modality)),
+  mapModality: jest.fn((modality: string) =>
+    modality === 'online' ? 'Online' : modality,
+  ),
 }));
 
 // ---- Mock expo-router ----

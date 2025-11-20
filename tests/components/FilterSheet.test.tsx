@@ -10,8 +10,11 @@ import { Toast } from 'toastify-react-native';
 jest.mock('@/src/components/ModalMultipleSelection', () => {
   const { View, Text } = require('react-native');
   const React = require('react');
-  
-  function MockModalMultipleSelection({ selectedValues, onSelectionChange }: any) {
+
+  function MockModalMultipleSelection({
+    selectedValues,
+    onSelectionChange,
+  }: any) {
     return (
       <View>
         <Text
@@ -23,14 +26,14 @@ jest.mock('@/src/components/ModalMultipleSelection', () => {
       </View>
     );
   }
-  
+
   return MockModalMultipleSelection;
 });
 
 jest.mock('@/src/components/ModalSingleSelection', () => {
   const { View, Text } = require('react-native');
   const React = require('react');
-  
+
   function MockModalSingleSelection({ selectedValue, onSelectionChange }: any) {
     return (
       <View>
@@ -43,27 +46,29 @@ jest.mock('@/src/components/ModalSingleSelection', () => {
       </View>
     );
   }
-  
+
   return MockModalSingleSelection;
 });
 
 jest.mock('@/src/components/ui/button', () => {
   const { TouchableOpacity } = require('react-native');
   const React = require('react');
-  
+
   function Button({ children, onPress }: any) {
-  return <TouchableOpacity testID="button" onPress={onPress}>
-      {children}
-    </TouchableOpacity>
-}
-  
+    return (
+      <TouchableOpacity testID="button" onPress={onPress}>
+        {children}
+      </TouchableOpacity>
+    );
+  }
+
   return { Button };
 });
 
 jest.mock('@/src/components/HapticTab', () => {
   const { TouchableOpacity } = require('react-native');
   const React = require('react');
-  
+
   function MockHapticTab({ children, onPress }: any) {
     return (
       <TouchableOpacity testID="haptic-tab" onPress={onPress}>
@@ -71,7 +76,7 @@ jest.mock('@/src/components/HapticTab', () => {
       </TouchableOpacity>
     );
   }
-  
+
   return MockHapticTab;
 });
 
@@ -83,7 +88,7 @@ jest.mock('@/src/utils/masks', () => ({
 jest.mock('@react-native-community/datetimepicker', () => {
   const { View } = require('react-native');
   const React = require('react');
-  
+
   function MockDateTimePicker({ onChange }: any) {
     React.useEffect(() => {
       // Simula a mudança de data após o componente montar
@@ -95,7 +100,7 @@ jest.mock('@react-native-community/datetimepicker', () => {
 
     return <View testID="date-time-picker" />;
   }
-  
+
   return MockDateTimePicker;
 });
 

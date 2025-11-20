@@ -3,8 +3,6 @@ import { Strings } from '@/src/constants/Strings';
 import { render, fireEvent, screen } from '@testing-library/react-native';
 import type React from 'react';
 
-
-
 // Mock do useColors
 jest.mock('@/src/hooks/useColors', () => ({
   useColors: () => ({
@@ -29,7 +27,11 @@ jest.mock('lucide-react-native', () => ({
 jest.mock('@/src/components/ui/text', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  const TextComponent = React.forwardRef((props: React.JSX.IntrinsicAttributes, ref: any) => <Text ref={ref} {...props} />);
+  const TextComponent = React.forwardRef(
+    (props: React.JSX.IntrinsicAttributes, ref: any) => (
+      <Text ref={ref} {...props} />
+    ),
+  );
   TextComponent.displayName = 'Text';
   return { Text: TextComponent };
 });
@@ -37,7 +39,11 @@ jest.mock('@/src/components/ui/text', () => {
 jest.mock('@/src/components/ui/view', () => {
   const React = require('react');
   const { View } = require('react-native');
-  const ViewComponent = React.forwardRef((props: React.JSX.IntrinsicAttributes, ref: any) => <View ref={ref} {...props} />);
+  const ViewComponent = React.forwardRef(
+    (props: React.JSX.IntrinsicAttributes, ref: any) => (
+      <View ref={ref} {...props} />
+    ),
+  );
   ViewComponent.displayName = 'View';
   return { View: ViewComponent };
 });
@@ -61,16 +67,13 @@ describe('ModalMultipleSelection', () => {
 
   it('renders with placeholder when no items are selected', () => {
     render(<ModalMultipleSelection {...defaultProps} />);
-    
+
     expect(screen.getByText(Strings.common.fields.select)).toBeTruthy();
   });
 
   it('renders with single selected item label', () => {
     render(
-      <ModalMultipleSelection
-        {...defaultProps}
-        selectedValues={['medical']}
-      />
+      <ModalMultipleSelection {...defaultProps} selectedValues={['medical']} />,
     );
 
     expect(screen.getByText('Medical')).toBeTruthy();
@@ -93,7 +96,7 @@ describe('ModalMultipleSelection', () => {
       <ModalMultipleSelection
         {...defaultProps}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     );
 
     // Abre o modal e seleciona um item
@@ -123,7 +126,7 @@ describe('ModalMultipleSelection', () => {
 
     // Fecha o modal
     fireEvent.press(screen.getByText(Strings.common.buttons.cancel));
-    
+
     // Verifica que o modal foi fechado
     expect(screen.queryByText('Medical')).toBeFalsy();
   });
@@ -133,7 +136,7 @@ describe('ModalMultipleSelection', () => {
 
     // Abre o modal
     fireEvent.press(screen.getByText(Strings.common.fields.select));
-    
+
     // Usa o cancel button como proxy para onRequestClose
     fireEvent.press(screen.getByText(Strings.common.buttons.cancel));
 
@@ -145,7 +148,7 @@ describe('ModalMultipleSelection', () => {
       <ModalMultipleSelection
         {...defaultProps}
         placeholderText="Select specialties"
-      />
+      />,
     );
 
     expect(screen.getByText('Select specialties')).toBeTruthy();
@@ -153,10 +156,7 @@ describe('ModalMultipleSelection', () => {
 
   it('renders with correct text color when items are selected', () => {
     render(
-      <ModalMultipleSelection
-        {...defaultProps}
-        selectedValues={['medical']}
-      />
+      <ModalMultipleSelection {...defaultProps} selectedValues={['medical']} />,
     );
 
     const triggerText = screen.getByText('Medical');
@@ -172,10 +172,7 @@ describe('ModalMultipleSelection', () => {
 
   it('handles single selection display text when item is found', () => {
     render(
-      <ModalMultipleSelection
-        {...defaultProps}
-        selectedValues={['medical']}
-      />
+      <ModalMultipleSelection {...defaultProps} selectedValues={['medical']} />,
     );
 
     expect(screen.getByText('Medical')).toBeTruthy();
@@ -188,7 +185,7 @@ describe('ModalMultipleSelection', () => {
         {...defaultProps}
         selectedValues={['medical']}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     );
 
     // Abre o modal e alterna um item
@@ -199,12 +196,7 @@ describe('ModalMultipleSelection', () => {
   });
 
   it('handles empty items array', () => {
-    render(
-      <ModalMultipleSelection
-        {...defaultProps}
-        items={[]}
-      />
-    );
+    render(<ModalMultipleSelection {...defaultProps} items={[]} />);
 
     // Deve renderizar normalmente mesmo sem items
     expect(screen.getByText(Strings.common.fields.select)).toBeTruthy();
