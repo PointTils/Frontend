@@ -11,7 +11,13 @@ import { AppointmentStatus, UserType } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
 import { router, useFocusEffect } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -278,5 +284,3 @@ export default function AppointmentsScreen() {
     </View>
   );
 }
-
-

@@ -19,9 +19,9 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem, toBoolean } from '@/src/utils/helpers';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
@@ -56,13 +56,15 @@ export default function HomeScreen() {
     [user?.type],
   );
 
+  const [reloadKey, setReloadKey] = useState(0);
+
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
       ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
-      ),
+      ) + `&refresh=${reloadKey}`,
     );
 
   const appointments = useMemo<Appointment[]>(
