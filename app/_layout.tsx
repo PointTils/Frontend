@@ -4,19 +4,23 @@ import CustomSplashScreen from '@/app/splash';
 import { View } from '@/src/components/ui/view';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthProvider';
 import { ThemeProvider } from '@/src/contexts/ThemeProvider';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { clearAsyncStorage } from '@/src/utils/helpers';
+import { usePushNotifications } from '@/src/hooks/usePushNotification';
+import messaging from '@react-native-firebase/messaging';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import ToastManager from 'toastify-react-native';
 
 import 'react-native-reanimated';
 
 // Instruct SplashScreen not to hide yet, we want to do this manually
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch((e) => {
+  console.warn(e);
+});
 
 /**
  * Navigation controller that handles route changes based on auth state
@@ -101,7 +105,6 @@ function RootNavigator() {
 function AppContent() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
-
   const { isLoading: authLoading } = useAuth();
 
   const [fontsLoaded] = useFonts({
@@ -112,6 +115,8 @@ function AppContent() {
     'iFoodRC-Bold': require('@/src/assets/fonts/iFoodRCTextos-Bold.ttf'),
     'iFoodRC-ExtraBold': require('@/src/assets/fonts/iFoodRCTextos-ExtraBold.ttf'),
   });
+
+  usePushNotifications();
 
   useEffect(() => {
     async function prepare() {
@@ -132,6 +137,34 @@ function AppContent() {
       prepare();
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    async function createNotificationChannel() {
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'Default Channel',
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      }
+    }
+
+    const unsubscribeForeground = messaging().onMessage(
+      async (remoteMessage) => {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: remoteMessage.notification?.title,
+            body: remoteMessage.notification?.body,
+            priority: Notifications.AndroidNotificationPriority.MAX,
+          },
+          trigger: null,
+        });
+      },
+    );
+
+    createNotificationChannel();
+
+    return () => unsubscribeForeground();
+  }, []);
 
   const hideNativeSplash = useCallback(async () => {
     if (appIsReady && fontsLoaded) {

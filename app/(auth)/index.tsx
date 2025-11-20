@@ -41,7 +41,6 @@ export default function LoginScreen() {
   const { registeredAsInterpreter } = useLocalSearchParams<{
     registeredAsInterpreter?: string;
   }>();
-
   const [showPassword, setShowPassword] = useState(false);
   const [isInterpreterModalVisible, setInterpreterModalVisibility] =
     useState(false);
