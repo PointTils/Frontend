@@ -10,6 +10,7 @@ Aplicativo móvel em React Native + Expo com theming (light/dark), roteamento po
 - Linguagem: TypeScript
 - Navegação: React Navigation + Expo Router
 - UI: NativeWind + Gluestack UI overlay/toast + Lucid icons
+- Testes Unitários: Jest
 
 > [!NOTE]
 > Mais informações a respeito de UI, Theming e padrões de código... podem ser encontradas em nossa Wiki:

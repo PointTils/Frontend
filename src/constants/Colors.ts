@@ -23,7 +23,9 @@ export const Colors = {
     pendingBadgeBackground: '#FCEFE6',
     success: '#348352',
     error: '#E63535',
+    redDelete: '#ef5c5cff',
     faqChevron: '#9CA3AF',
+    sliders: '#999999',
   },
   dark: {
     text: '#fff',
@@ -36,13 +38,15 @@ export const Colors = {
     onPressBlue: '#43A2DB',
     onPressOrange: '#F28D22',
     onPressGray: '#374151',
-    fieldGray: '#374151', // border600 - Gluestack
+    fieldGray: '#D3D3D3', // border600 - Gluestack
     detailsGray: '#a2a6aeff', // typography400 - Gluestack
     modalOverlay: 'rgba(0, 0, 0, 0.6)', // Modal backdrop - slightly darker for dark mode
-    pendingBadge: '#C96A2C',
-    pendingBadgeBackground: '#FCEFE6',
+    pendingBadge: '#FCEFE6',
+    pendingBadgeBackground: '#C96A2C',
     success: '#319758ff',
     error: '#ff3131ff',
+    redDelete: '#ef5c5cff',
     faqChevron: '#9CA3AF',
+    sliders: '#D3D3D3',
   },
 } as const;

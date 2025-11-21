@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 import { CheckIcon } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 
 import HapticTab from './HapticTab';
@@ -39,6 +40,7 @@ import { formatDateTime } from '../utils/masks';
 interface FilterSheetProps {
   onApply: (filters: AppliedFilters) => void;
   onClose: () => void;
+  onClear?: () => void;
   filter: AppliedFilters;
   preSelectedSpecialty?: string[];
   initialFocus?: 'date' | 'modality';
@@ -49,6 +51,7 @@ interface FilterSheetProps {
  *
  * @param onApply - Callback function called with applied filters
  * @param onClose - Callback function to close the modal
+ * @param onClear - Optional callback function called when filters are cleared
  * @param filter - Initial filter values to populate the form
  * @param initialFocus - Optional parameter to set initial focus on 'date' or 'modality' section
  *
@@ -68,6 +71,7 @@ interface FilterSheetProps {
 export default function FilterSheet({
   onApply,
   onClose,
+  onClear,
   filter,
   preSelectedSpecialty,
   initialFocus,
@@ -88,6 +92,7 @@ export default function FilterSheet({
     { label: string; value: string }[]
   >([]);
 
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
 
   const { data: statesData, error: statesError } =
@@ -194,6 +199,8 @@ export default function FilterSheet({
     onApply(cleanedFilters);
   };
 
+  const bottomInset = Math.max(Math.ceil(insets.bottom), 20);
+
   return (
     <Modal transparent animationType="slide">
       <TouchableOpacity
@@ -201,7 +208,10 @@ export default function FilterSheet({
         activeOpacity={1}
         onPress={onClose}
       />
-      <View className="p-4 bg-white py-8">
+      <View
+        className="p-4 bg-white pt-8"
+        style={{ paddingBottom: bottomInset }}
+      >
         <FormControl className="mb-4 mt-4">
           <FormControlLabel>
             <FormControlLabelText className="font-ifood-medium text-text-light dark:text-text-dark">
@@ -404,6 +414,7 @@ export default function FilterSheet({
               setDate(null);
               setGender(null);
               onApply({});
+              onClear?.();
             }}
             className="flex-row justify-center py-2"
           >

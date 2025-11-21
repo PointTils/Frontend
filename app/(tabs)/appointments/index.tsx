@@ -9,9 +9,15 @@ import { useColors } from '@/src/hooks/useColors';
 import type { Appointment, AppointmentsResponse } from '@/src/types/api';
 import { AppointmentStatus, UserType } from '@/src/types/api';
 import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { PackageSearchIcon } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -36,6 +42,15 @@ export default function AppointmentsScreen() {
       }),
     [user?.type],
   );
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setTab('active');
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
 
   const {
     data: apptActive,
@@ -46,7 +61,9 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.ACCEPTED,
-    ),
+    ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -58,7 +75,9 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
-    ),
+    ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -70,7 +89,9 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.CANCELED,
-    ),
+    ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -82,7 +103,9 @@ export default function AppointmentsScreen() {
       user?.id || '',
       user?.type || UserType.PERSON,
       AppointmentStatus.PENDING,
-    ),
+    ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   // Ensure stable refs for dependencies
@@ -103,6 +126,60 @@ export default function AppointmentsScreen() {
   const pending = useMemo<Appointment[]>(() => {
     return Array.isArray(apptPending?.data) ? apptPending.data : empty;
   }, [apptPending?.data, empty]);
+
+  // Handle errors
+  const allLoaded =
+    !loadCompleted && !loadCanceled && !loadActive && !loadPending;
+
+  const hasError = useMemo(() => {
+    if (!allLoaded) return false;
+    return (
+      !!errorCompleted ||
+      !!errorCanceled ||
+      !!errorActive ||
+      !!errorPending ||
+      (apptCompleted &&
+        (!apptCompleted.success || !Array.isArray(apptCompleted.data))) ||
+      (apptCanceled &&
+        (!apptCanceled.success || !Array.isArray(apptCanceled.data))) ||
+      (apptActive &&
+        (!apptActive.success || !Array.isArray(apptActive.data))) ||
+      (apptPending &&
+        (!apptPending.success || !Array.isArray(apptPending.data)))
+    );
+  }, [
+    allLoaded,
+    errorCompleted,
+    errorCanceled,
+    errorActive,
+    errorPending,
+    apptCompleted,
+    apptCanceled,
+    apptActive,
+    apptPending,
+  ]);
+
+  const handledErrorRef = useRef(false);
+
+  useEffect(() => {
+    if (!allLoaded) return;
+    if (hasError && !handledErrorRef.current) {
+      handledErrorRef.current = true;
+      router.replace('/');
+      Toast.show({
+        type: 'error',
+        text1: Strings.profile.toast.errorTitle,
+        text2: Strings.profile.toast.errorDescription,
+        position: 'top',
+        visibilityTime: 2000,
+        autoHide: true,
+        closeIconSize: 1,
+      });
+    }
+    if (!hasError) {
+      handledErrorRef.current = false;
+    }
+  }, [allLoaded, hasError]);
 
   // Combine and sort appointments based on selected tab
   // Sorted by date descending, then by start_time descending
@@ -126,7 +203,10 @@ export default function AppointmentsScreen() {
     const selected = tab === k;
     return (
       <Pressable
-        onPress={() => setTab(k)}
+        onPress={() => {
+          setReloadKey((k) => k + 1);
+          setTab(k);
+        }}
         className={`px-4 py-2 rounded-full border ${selected ? 'bg-primary-blue-light/10 border-primary-blue-light' : 'bg-transparent border-gray-200'}`}
         accessibilityRole="button"
         accessibilityState={{ selected }}
@@ -143,42 +223,7 @@ export default function AppointmentsScreen() {
   // Early return if not authenticated or user not loaded
   if (!isAuthenticated || !user) return null;
 
-  if (loadCompleted || loadCanceled || loadActive || loadPending) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
-
-  // Handle errors
-  if (
-    errorCompleted ||
-    errorCanceled ||
-    errorActive ||
-    errorPending ||
-    !apptCompleted?.success ||
-    !apptCompleted.data ||
-    !apptCanceled?.success ||
-    !apptCanceled.data ||
-    !apptActive?.success ||
-    !apptActive.data ||
-    !apptPending?.success ||
-    !apptPending.data
-  ) {
-    router.replace('/');
-    Toast.show({
-      type: 'error',
-      text1: Strings.profile.toast.errorTitle,
-      text2: Strings.profile.toast.errorDescription,
-      position: 'top',
-      visibilityTime: 2000,
-      autoHide: true,
-      closeIconSize: 1,
-    });
+  if (hasError) {
     return null;
   }
 
@@ -216,27 +261,36 @@ export default function AppointmentsScreen() {
         </ScrollView>
       </View>
 
-      <View className="flex-1 mt-2">
-        {/* No data state */}
-        {current.length === 0 ? (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="font-ifood-regular text-typography-400 text-md">
-              {Strings.common.noResults}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={current}
-            keyExtractor={(item) => item.id || Math.random().toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerClassName="flex-1 mt-2 pb-4"
-            ItemSeparatorComponent={() => <View className="h-3" />}
-          />
-        )}
-      </View>
+      {loadActive || loadCompleted || loadCanceled || loadPending ? (
+        <View className="flex-1 mt-2 justify-center items-center">
+          <ActivityIndicator color={colors.primaryBlue} size="small" />
+          <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+            {Strings.common.loading}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1 mt-2">
+          {/* No data state */}
+          {current.length === 0 ? (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.common.noResults}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={current}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerClassName="mt-2"
+              ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+          )}
+        </View>
+      )}
     </View>
   );
 }

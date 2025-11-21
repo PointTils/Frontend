@@ -1,6 +1,7 @@
 import DarkBlueLogo from '@/src/assets/svgs/DarkBlueLogo';
 import FeedbackModal from '@/src/components/FeedbackModal';
 import ModalBannerHome from '@/src/components/ModalBannerHome';
+import ModalWarning from '@/src/components/ModalWarning';
 import SearchFilterBar from '@/src/components/SearchFilterBar';
 import { Text } from '@/src/components/ui/text';
 import { View } from '@/src/components/ui/view';
@@ -8,23 +9,23 @@ import { ApiRoutes } from '@/src/constants/ApiRoutes';
 import { Strings } from '@/src/constants/Strings';
 import { useAuth } from '@/src/contexts/AuthProvider';
 import { useApiGet } from '@/src/hooks/useApi';
+import { useCheckFeedback } from '@/src/hooks/useCheckFeedback';
 import { useColors } from '@/src/hooks/useColors';
 import { useProfileCompletion } from '@/src/hooks/useProfileCompletion';
-import { useCheckFeedback } from '@/src/hooks/userCheckFeedback';
 import {
   type AppointmentsResponse,
   type Appointment,
   UserType,
   AppointmentStatus,
 } from '@/src/types/api';
-import { renderApptItem } from '@/src/utils/helpers';
-import { router } from 'expo-router';
+import { renderApptItem, toBoolean } from '@/src/utils/helpers';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const colors = useColors();
   const {
     showFeedbackModal,
@@ -33,6 +34,18 @@ export default function HomeScreen() {
     interpreterName,
   } = useCheckFeedback(user);
   const { showBanner } = useProfileCompletion(user?.id);
+  const { apptScheduled } = useLocalSearchParams<{
+    apptScheduled?: string;
+  }>();
+
+  const [showApptScheduleModal, setShowApptScheduleModal] = useState(false);
+
+  useEffect(() => {
+    // Show modal if the user just scheduled an appointment
+    if (toBoolean(apptScheduled)) {
+      setShowApptScheduleModal(true);
+    }
+  }, [apptScheduled]);
 
   const renderItem = useMemo(
     () =>
@@ -43,13 +56,17 @@ export default function HomeScreen() {
     [user?.type],
   );
 
+  const [reloadKey, setReloadKey] = useState(0);
+
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
       ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
-      ),
+      ) + `&refresh=${reloadKey}`,
+      undefined,
+      { enabled: isAuthenticated && !!user?.id },
     );
 
   const appointments = useMemo<Appointment[]>(
@@ -57,16 +74,12 @@ export default function HomeScreen() {
     [appointmentsData?.data],
   );
 
-  if (appointmentsLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
 
   const welcomeMessage = user
     ? Strings.home.welcome.replace('{User}', user.name)
@@ -77,7 +90,7 @@ export default function HomeScreen() {
       <View className="pt-16">
         <View className="flex-row px-4 pb-6 items-center gap-2">
           <DarkBlueLogo width={85} height={50} />
-          <Text className="text-left text-2xl font-ifood-medium text-text max-w-[65%]">
+          <Text className="text-left text-2xl font-ifood-medium text-text-light dark:text-text-dark max-w-[65%]">
             {welcomeMessage}
           </Text>
         </View>
@@ -105,7 +118,7 @@ export default function HomeScreen() {
         )}
         <View className="flex-row items-center gap-3 px-4">
           <CalendarDays color={colors.primaryBlue} />
-          <Text className="text-text-light font-ifood-medium">
+          <Text className="text-text-light dark:text-text-dark font-ifood-medium">
             {Strings.home.nextAppointments}
           </Text>
         </View>
@@ -113,31 +126,48 @@ export default function HomeScreen() {
         <View className="w-full h-px bg-gray-200 mt-4" />
       </View>
 
-      <View className="flex-1">
-        {appointments.length > 0 ? (
-          <FlatList
-            data={appointments}
-            keyExtractor={(item) => item.id || Math.random().toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ItemSeparatorComponent={() => <View className="h-3" />}
-          />
-        ) : (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="font-ifood-regular text-typography-400 text-md">
-              {Strings.common.noResults}
-            </Text>
-          </View>
-        )}
-      </View>
+      {appointmentsLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator color={colors.primaryBlue} size="small" />
+          <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+            {Strings.common.loading}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1">
+          {appointments.length > 0 ? (
+            <FlatList
+              data={appointments}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+          ) : (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.common.noResults}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       <FeedbackModal
-        visible={showFeedbackModal}
+        visible={showFeedbackModal && !showApptScheduleModal}
         onClose={() => setShowFeedbackModal(false)}
         appointmentId={appointmentForFeedback?.id || ''}
         interpreterName={interpreterName ?? ''}
+      />
+
+      <ModalWarning
+        visible={showApptScheduleModal}
+        onClose={() => setShowApptScheduleModal(false)}
+        title={Strings.toSchedule.toast.successTitle}
+        text={Strings.toSchedule.toast.successDescription}
+        buttonTitle={Strings.common.buttons.understood}
       />
     </View>
   );

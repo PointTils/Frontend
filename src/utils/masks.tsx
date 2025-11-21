@@ -26,6 +26,27 @@ import {
  * // Result: 'Masculino'
  */
 
+const applyPhoneMask = (digits: string) => {
+  if (!digits) return '';
+
+  if (digits.length <= 2) return digits;
+
+  const areaCode = digits.slice(0, 2);
+  const subscriber = digits.slice(2);
+  const base = `(${areaCode}) `;
+
+  if (subscriber.length <= 4) {
+    return `${base}${subscriber}`;
+  }
+
+  const isLandline = subscriber.length <= 8;
+  const splitIndex = isLandline ? 4 : 5;
+  const prefix = subscriber.slice(0, splitIndex);
+  const suffix = subscriber.slice(splitIndex);
+
+  return suffix ? `${base}${prefix}-${suffix}` : `${base}${prefix}`;
+};
+
 export const emptyWeekSchedule = (): WeekSchedule => ({
   [Days.MON]: { id: '', from: '', to: '' },
   [Days.TUE]: { id: '', from: '', to: '' },
@@ -39,11 +60,7 @@ export const emptyWeekSchedule = (): WeekSchedule => ({
 // Formatting
 export const handlePhoneChange = (text: string) => {
   const cleaned = text.replace(/\D/g, '').slice(0, 11);
-
-  const formatted = cleaned
-    .replace(/^(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
-  return formatted;
+  return applyPhoneMask(cleaned);
 };
 
 export const handleCnpjChange = (text: string) => {
@@ -144,13 +161,10 @@ export const formatDateToISO = (dateString: string | undefined): string => {
 };
 
 export const formatPhone = (phone?: string | null) => {
-  // Returns "(XX) XXXXX-XXXX"
+  // Returns "(XX) XXXXX-XXXX" or "(XX) XXXX-XXXX"
   if (!phone) return '';
   const cleaned = phone.replace(/\D/g, '').slice(0, 11);
-  const formatted = cleaned
-    .replace(/^(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
-  return formatted;
+  return applyPhoneMask(cleaned);
 };
 
 export const formatCnpj = (cnpj?: string | null) => {
@@ -259,7 +273,8 @@ export const formatWeekSchedule = (
 
 // Validation
 export const validatePhone = (phone: string) => {
-  return phone.replace(/\D/g, '').length === 11;
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 10 || digits.length === 11;
 };
 
 export const validateEmail = (email: string) => {

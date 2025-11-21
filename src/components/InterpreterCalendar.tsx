@@ -86,7 +86,7 @@ export default function InterpreterCalendar({
   if (!days || days.length === 0) {
     return (
       <View className="h-22 justify-center items-center">
-        <Text className="text-gray-500 font-ifood-regular">
+        <Text className="text-typography-400 font-ifood-regular">
           {Strings.toSchedule.noCalendarAvailable}
         </Text>
       </View>

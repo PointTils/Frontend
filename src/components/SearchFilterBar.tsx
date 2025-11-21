@@ -37,6 +37,9 @@ interface SearchFilterBarProps {
  * (date availability, online modality, and advanced filters via modal).
  *
  * @param onData - Callback function called with API response data (UserListResponse)
+ * @param navigateOnSearch - If true, navigates to search results page on search submission
+ * @param initialQuery - Optional initial query string to populate the search input
+ * @param initialFilters - Optional initial filters to apply on the search
  *
  * @returns A search bar with input field, filter controls, and modal integration.
  *
@@ -56,17 +59,20 @@ export default function SearchFilterBar({
   const { user, isAuthenticated } = useAuth();
   const colors = useColors();
 
-  const [preSelectedSpecialty, setPreSelectedSpecialty] = useState<string[]>(
-    [],
-  );
-  const [query, setQuery] = useState(() => initialQuery ?? '');
-  const [filters, setFilters] = useState<AppliedFilters>(
-    () => initialFilters ?? {},
-  );
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [initialFocus, setInitialFocus] = useState<
     'date' | 'modality' | undefined
   >(undefined);
+  const [query, setQuery] = useState(() => initialQuery ?? '');
+  const [filters, setFilters] = useState<AppliedFilters>(
+    () => initialFilters ?? {},
+  );
+  const [preSelectedSpecialty, setPreSelectedSpecialty] = useState<string[]>(
+    [],
+  );
+  const [includeDefaultSpecialties, setIncludeDefaultSpecialties] = useState(
+    () => !initialFilters?.specialty?.length,
+  );
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(
     () => !!initialQuery?.trim(),
   );
@@ -75,6 +81,8 @@ export default function SearchFilterBar({
   const { data: specialtiesData, error: specialtiesError } =
     useApiGet<UserSpecialtyResponse>(
       ApiRoutes.userSpecialties.byUser(user?.id || ''),
+      undefined,
+      { enabled: isAuthenticated && !!user?.id },
     );
 
   useEffect(() => {
@@ -134,8 +142,16 @@ export default function SearchFilterBar({
 
   const handleApplyFilters = (appliedFilters: AppliedFilters) => {
     setFilters(appliedFilters);
+    setIncludeDefaultSpecialties(false);
     setSheetVisible(false);
     maybeNavigate(appliedFilters, query);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setIncludeDefaultSpecialties(false);
+    setSheetVisible(false);
+    maybeNavigate({}, query);
   };
 
   const handlerOnlineButton = (data?: Modality) =>
@@ -146,10 +162,10 @@ export default function SearchFilterBar({
   const handlerOnlineText = (data?: Modality) =>
     data === Modality.ONLINE || data === Modality.ALL
       ? 'text-primary-blue-light'
-      : 'text-gray-700';
+      : 'text-typography-600';
 
   const handlerDateText = (data?: string) =>
-    data ? 'text-primary-blue-light' : 'text-gray-700';
+    data ? 'text-primary-blue-light' : 'text-typography-600';
 
   const handlerFilterCount = () => {
     const count = Object.values(filters).filter(
@@ -165,7 +181,7 @@ export default function SearchFilterBar({
     }
     if (filters.specialty?.length)
       query.append('specialty', filters.specialty.join(','));
-    else if (preSelectedSpecialty.length)
+    else if (includeDefaultSpecialties && preSelectedSpecialty.length)
       query.append('specialty', preSelectedSpecialty.join(','));
     if (filters.availableDates) {
       const date = new Date(filters.availableDates);
@@ -231,7 +247,7 @@ export default function SearchFilterBar({
 
   return (
     <View className="px-4 py-2">
-      <View className="flex-row items-center bg-white rounded-full px-4 shadow-sm border border-gray-200">
+      <View className="flex-row items-center bg-background-0 rounded-full px-4 shadow-sm border border-gray-200 dark:border-background-700">
         {isSearchSubmitted ? (
           <TouchableOpacity
             onPress={handleClearSearch}
@@ -245,7 +261,7 @@ export default function SearchFilterBar({
         )}
         <TextInput
           placeholder={Strings.common.buttons.search}
-          className="ml-2 font-ifood-regular flex-1"
+          className="ml-2 font-ifood-regular flex-1 text-text-light dark:text-text-dark"
           placeholderTextColor={colors.disabled}
           value={query}
           onChangeText={setQuery}
@@ -325,15 +341,11 @@ export default function SearchFilterBar({
             name="sliders"
             size={18}
             color={
-              handlerFilterCount() > '' ? colors.primaryBlue : colors.fieldGray
+              handlerFilterCount() > '' ? colors.primaryBlue : colors.sliders
             }
           />
           <Text
-            className="ml-1 font-ifood-regular"
-            style={{
-              color:
-                handlerFilterCount() > '' ? colors.primaryBlue : colors.text,
-            }}
+            className={`ml-1 ${handlerFilterCount() > '' ? 'text-primary-blue-light' : 'text-typography-600'} font-ifood-regular`}
           >
             {Strings.search.filter} {handlerFilterCount()}
           </Text>
@@ -349,6 +361,7 @@ export default function SearchFilterBar({
           onClose={() => {
             setSheetVisible(false);
           }}
+          onClear={handleClearFilters}
         />
       )}
     </View>

@@ -123,11 +123,11 @@ export default function ModalMultipleSelection({
 
   const getBorderBottomStyle = (idx: number) => ({
     borderBottomWidth: idx < items.length - 1 ? 1 : 0,
-    borderBottomColor: `${colors.disabled}20`,
+    borderBottomColor: `${colors.disabled}40`,
   });
 
   const cancelButtonStyle = {
-    borderTopColor: `${colors.disabled}20`,
+    borderTopColor: `${colors.disabled}40`,
     backgroundColor: colors.background,
   };
 
@@ -156,12 +156,12 @@ export default function ModalMultipleSelection({
         onRequestClose={closeModal}
       >
         <Pressable
-          className="flex-1 justify-end"
+          className="flex-1 justify-end mb-6"
           style={{ backgroundColor: colors.modalOverlay }}
           onPress={closeModal}
         >
           <View
-            className="mx-4 mb-8 rounded-xl overflow-hidden"
+            className="mx-4 mb-8 rounded-xl overflow-hidden border border-primary-50"
             style={{ backgroundColor: colors.background }}
           >
             <ScrollView
