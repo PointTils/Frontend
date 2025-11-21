@@ -135,7 +135,7 @@ export default function UploadInput({
 
   return (
     <View className="p-3">
-      <Pressable onPress={handlePickFile} className="items-center mt-2 mb-8">
+      <Pressable onPress={handlePickFile} className="items-center mt-2 mb-8" testID="upload-button">
         <Upload size={20} color={colors.primaryBlue} />
         <Text className="font-ifood-medium text-primary-blue-light">
           {Strings.common.fields.uploadFile}
@@ -155,7 +155,7 @@ export default function UploadInput({
           >
             {file.name}
           </Text>
-          <Pressable onPress={() => removeExistingFile(index)} className="pl-2">
+          <Pressable onPress={() => removeExistingFile(index)} className="pl-2" testID={`remove-existing-${index}`}>
             <X size={18} color={colors.text} />
           </Pressable>
         </View>
@@ -174,7 +174,7 @@ export default function UploadInput({
           >
             {file.name}
           </Text>
-          <Pressable onPress={() => removeFile(index)} className="pl-2">
+          <Pressable onPress={() => removeFile(index)} className="pl-2"  testID={`remove-file-${index}`}>
             <X size={18} color={colors.text} />
           </Pressable>
         </View>
