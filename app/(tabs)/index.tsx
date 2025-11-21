@@ -79,17 +79,6 @@ export default function HomeScreen() {
     }, []),
   );
 
-  if (appointmentsLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
-
   const welcomeMessage = user
     ? Strings.home.welcome.replace('{User}', user.name)
     : Strings.home.welcome;
@@ -135,25 +124,34 @@ export default function HomeScreen() {
         <View className="w-full h-px bg-gray-200 mt-4" />
       </View>
 
-      <View className="flex-1">
-        {appointments.length > 0 ? (
-          <FlatList
-            data={appointments}
-            keyExtractor={(item) => item.id || Math.random().toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ItemSeparatorComponent={() => <View className="h-3" />}
-          />
-        ) : (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="font-ifood-regular text-typography-400 text-md">
-              {Strings.common.noResults}
-            </Text>
-          </View>
-        )}
-      </View>
+      {appointmentsLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator color={colors.primaryBlue} size="small" />
+          <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+            {Strings.common.loading}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1">
+          {appointments.length > 0 ? (
+            <FlatList
+              data={appointments}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+          ) : (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.common.noResults}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       <FeedbackModal
         visible={showFeedbackModal && !showApptScheduleModal}

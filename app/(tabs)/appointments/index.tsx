@@ -47,6 +47,7 @@ export default function AppointmentsScreen() {
   // Refetch on tab focus
   useFocusEffect(
     useCallback(() => {
+      setTab('active');
       setReloadKey((k) => k + 1);
     }, []),
   );
