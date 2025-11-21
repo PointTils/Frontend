@@ -19,9 +19,9 @@ import {
   AppointmentStatus,
 } from '@/src/types/api';
 import { renderApptItem, toBoolean } from '@/src/utils/helpers';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, PackageSearchIcon } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
@@ -56,13 +56,15 @@ export default function HomeScreen() {
     [user?.type],
   );
 
+  const [reloadKey, setReloadKey] = useState(0);
+
   const { data: appointmentsData, loading: appointmentsLoading } =
     useApiGet<AppointmentsResponse>(
       ApiRoutes.appointments.filters(
         user?.id || '',
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
-      ),
+      ) + `&refresh=${reloadKey}`,
     );
 
   const appointments = useMemo<Appointment[]>(
@@ -70,16 +72,12 @@ export default function HomeScreen() {
     [appointmentsData?.data],
   );
 
-  if (appointmentsLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
+  // Refetch on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      setReloadKey((k) => k + 1);
+    }, []),
+  );
 
   const welcomeMessage = user
     ? Strings.home.welcome.replace('{User}', user.name)
@@ -126,25 +124,34 @@ export default function HomeScreen() {
         <View className="w-full h-px bg-gray-200 mt-4" />
       </View>
 
-      <View className="flex-1">
-        {appointments.length > 0 ? (
-          <FlatList
-            data={appointments}
-            keyExtractor={(item) => item.id || Math.random().toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ItemSeparatorComponent={() => <View className="h-3" />}
-          />
-        ) : (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="font-ifood-regular text-typography-400 text-md">
-              {Strings.common.noResults}
-            </Text>
-          </View>
-        )}
-      </View>
+      {appointmentsLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator color={colors.primaryBlue} size="small" />
+          <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+            {Strings.common.loading}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1">
+          {appointments.length > 0 ? (
+            <FlatList
+              data={appointments}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+          ) : (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.common.noResults}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       <FeedbackModal
         visible={showFeedbackModal && !showApptScheduleModal}
