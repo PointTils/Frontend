@@ -195,7 +195,10 @@ export default function AppointmentsScreen() {
     const selected = tab === k;
     return (
       <Pressable
-        onPress={() => setTab(k)}
+        onPress={() => {
+          setReloadKey((k) => k + 1);
+          setTab(k);
+        }}
         className={`px-4 py-2 rounded-full border ${selected ? 'bg-primary-blue-light/10 border-primary-blue-light' : 'bg-transparent border-gray-200'}`}
         accessibilityRole="button"
         accessibilityState={{ selected }}
@@ -211,17 +214,6 @@ export default function AppointmentsScreen() {
 
   // Early return if not authenticated or user not loaded
   if (!isAuthenticated || !user) return null;
-
-  if (loadCompleted || loadCanceled || loadActive || loadPending) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primaryBlue} size="small" />
-        <Text className="mt-2 font-ifood-regular text-primary-blue-light">
-          {Strings.common.loading}
-        </Text>
-      </View>
-    );
-  }
 
   if (hasError) {
     return null;
@@ -261,27 +253,36 @@ export default function AppointmentsScreen() {
         </ScrollView>
       </View>
 
-      <View className="flex-1 mt-2">
-        {/* No data state */}
-        {current.length === 0 ? (
-          <View className="flex-1 justify-center gap-y-4 items-center">
-            <PackageSearchIcon size={38} color={colors.detailsGray} />
-            <Text className="font-ifood-regular text-typography-400 text-md">
-              {Strings.common.noResults}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={current}
-            keyExtractor={(item) => item.id || Math.random().toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerClassName="mt-2"
-            ItemSeparatorComponent={() => <View className="h-3" />}
-          />
-        )}
-      </View>
+      {loadActive || loadCompleted || loadCanceled || loadPending ? (
+        <View className="flex-1 mt-2 justify-center items-center">
+          <ActivityIndicator color={colors.primaryBlue} size="small" />
+          <Text className="mt-2 font-ifood-regular text-primary-blue-light">
+            {Strings.common.loading}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1 mt-2">
+          {/* No data state */}
+          {current.length === 0 ? (
+            <View className="flex-1 justify-center gap-y-4 items-center">
+              <PackageSearchIcon size={38} color={colors.detailsGray} />
+              <Text className="font-ifood-regular text-typography-400 text-md">
+                {Strings.common.noResults}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={current}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerClassName="mt-2"
+              ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+          )}
+        </View>
+      )}
     </View>
   );
 }
