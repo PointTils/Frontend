@@ -25,7 +25,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const colors = useColors();
   const {
     showFeedbackModal,
@@ -65,6 +65,8 @@ export default function HomeScreen() {
         user?.type || UserType.PERSON,
         AppointmentStatus.ACCEPTED,
       ) + `&refresh=${reloadKey}`,
+      undefined,
+      { enabled: isAuthenticated && !!user?.id },
     );
 
   const appointments = useMemo<Appointment[]>(

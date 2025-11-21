@@ -528,11 +528,12 @@ export default function EditProfileScreen() {
   }
 
   // Fetch cities based on selected state
-  const { data: cities } = useApiGet<StateAndCityResponse>(
-    ApiRoutes.states.cities(selectedState),
-    undefined,
-    { enabled: isInterpreter && !!selectedState },
-  );
+  const { data: cities, loading: loadingCities } =
+    useApiGet<StateAndCityResponse>(
+      ApiRoutes.states.cities(selectedState),
+      undefined,
+      { enabled: isInterpreter && !!selectedState },
+    );
 
   let cityOptions: OptionItem[] = [];
   if (cities?.success && cities?.data) {
@@ -1407,7 +1408,11 @@ export default function EditProfileScreen() {
                             onSelectionChange={(value) => {
                               setValue('city', value);
                             }}
-                            placeholderText={Strings.common.fields.city}
+                            placeholderText={
+                              loadingCities
+                                ? Strings.common.loading
+                                : Strings.common.fields.city
+                            }
                             hasError={!!fields.city.error}
                           />
                           <FormControlError>

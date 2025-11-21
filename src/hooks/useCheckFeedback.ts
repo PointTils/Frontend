@@ -27,7 +27,11 @@ export function useCheckFeedback(user: any) {
     data: apptCompleted,
     loading: loading,
     error: error,
-  } = useApiGet<AppointmentsResponse>(shouldFetch ? completedRoute : '');
+  } = useApiGet<AppointmentsResponse>(
+    shouldFetch ? completedRoute : '',
+    undefined,
+    { enabled: !!user?.id },
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {

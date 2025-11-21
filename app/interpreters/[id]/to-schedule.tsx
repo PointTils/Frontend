@@ -274,14 +274,15 @@ export default function ToScheduleScreen() {
   }
 
   // Fetch cities based on selected state
-  const { data: cities } = useApiGet<StateAndCityResponse>(
-    ApiRoutes.states.cities(selectedState),
-    undefined,
-    {
-      enabled:
-        fields.modality.value[0] === Modality.PERSONALLY && !!selectedState,
-    },
-  );
+  const { data: cities, loading: loadingCities } =
+    useApiGet<StateAndCityResponse>(
+      ApiRoutes.states.cities(selectedState),
+      undefined,
+      {
+        enabled:
+          fields.modality.value[0] === Modality.PERSONALLY && !!selectedState,
+      },
+    );
 
   let cityOptions: OptionItem[] = [];
   if (cities?.success && cities?.data) {
@@ -647,7 +648,11 @@ export default function ToScheduleScreen() {
                           onSelectionChange={(value) => {
                             setValue('city', value);
                           }}
-                          placeholderText={Strings.common.fields.city}
+                          placeholderText={
+                            loadingCities
+                              ? Strings.common.loading
+                              : Strings.common.fields.city
+                          }
                           hasError={!!fields.city.error}
                         />
                         <FormControlError>

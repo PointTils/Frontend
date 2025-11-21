@@ -62,6 +62,8 @@ export default function AppointmentsScreen() {
       user?.type || UserType.PERSON,
       AppointmentStatus.ACCEPTED,
     ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -74,6 +76,8 @@ export default function AppointmentsScreen() {
       user?.type || UserType.PERSON,
       AppointmentStatus.COMPLETED,
     ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -86,6 +90,8 @@ export default function AppointmentsScreen() {
       user?.type || UserType.PERSON,
       AppointmentStatus.CANCELED,
     ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   const {
@@ -98,6 +104,8 @@ export default function AppointmentsScreen() {
       user?.type || UserType.PERSON,
       AppointmentStatus.PENDING,
     ) + `&refresh=${reloadKey}`,
+    undefined,
+    { enabled: isAuthenticated && !!user?.id },
   );
 
   // Ensure stable refs for dependencies
