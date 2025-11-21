@@ -81,6 +81,8 @@ export default function SearchFilterBar({
   const { data: specialtiesData, error: specialtiesError } =
     useApiGet<UserSpecialtyResponse>(
       ApiRoutes.userSpecialties.byUser(user?.id || ''),
+      undefined,
+      { enabled: isAuthenticated && !!user?.id },
     );
 
   useEffect(() => {
